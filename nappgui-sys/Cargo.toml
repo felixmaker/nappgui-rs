@@ -4,3 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+libc = "0.2"
+
+[build-dependencies]
+cmake = "0.1"
+
+[features]
+default = []
+no-webview = []

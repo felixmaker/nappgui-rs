@@ -14,3 +14,24 @@ index b01a91c..bded125 100644
  
          # For Non-Visual Studio generators
          if (NOT CMAKE_VS_PLATFORM_TOOLSET)
+diff --git a/src/sewer/config.hxx b/src/sewer/config.hxx
+index c58dcee..6adb5ac 100644
+--- a/src/sewer/config.hxx
++++ b/src/sewer/config.hxx
+@@ -81,11 +81,13 @@
+ /*! <Compiler> */
+ #if defined(__GNUC__) || defined(__clang__)
+ 
+-    #if (__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)
+-        #error At least gcc 4.2 is required
++    #if defined(__GNUC__)
++        #if (__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)
++            #error At least gcc 4.2 is required
++        #endif
+     #endif
+ 
+-    #if defined (__DEPRECATED)
++    #if defined(__DEPRECATED)
+         #undef __DEPRECATED
+     #endif
+ 

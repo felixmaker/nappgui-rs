@@ -2,6 +2,12 @@
 name = "nappgui-sys"
 version = "0.1.0"
 edition = "2021"
+authors = ["felixmaker"]
+description = "Rust raw bindings to mininlink49"
+license = "Apache-2.0 OR MIT"
+readme = "README.md"
+repository = "https://github.com/felixmaker/nappgui-rs"
+categories = ["gui"]
 
 [dependencies]
 libc = "0.2"

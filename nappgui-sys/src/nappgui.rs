@@ -48,42 +48,42 @@ pub const SETST: &[u8; 8] = b"SetSt::\0";
 pub const SETPT: &[u8; 8] = b"SetPt::\0";
 pub const GUI_CONTEXT_NUM_COMPONENTS: u32 = 17;
 pub const kTEXTFILTER_SIZE: u32 = 4096;
-pub type va_list = *mut libc::c_char;
+pub type va_list = *mut ::libc::c_char;
 pub type __vcrt_bool = bool;
-pub type wchar_t = libc::c_ushort;
+pub type wchar_t = ::libc::c_ushort;
 unsafe extern "C" {
     pub static mut __security_cookie: usize;
 }
-pub type int_least8_t = libc::c_schar;
-pub type int_least16_t = libc::c_short;
-pub type int_least32_t = libc::c_int;
-pub type int_least64_t = libc::c_longlong;
-pub type uint_least8_t = libc::c_uchar;
-pub type uint_least16_t = libc::c_ushort;
-pub type uint_least32_t = libc::c_uint;
-pub type uint_least64_t = libc::c_ulonglong;
-pub type int_fast8_t = libc::c_schar;
-pub type int_fast16_t = libc::c_int;
-pub type int_fast32_t = libc::c_int;
-pub type int_fast64_t = libc::c_longlong;
-pub type uint_fast8_t = libc::c_uchar;
-pub type uint_fast16_t = libc::c_uint;
-pub type uint_fast32_t = libc::c_uint;
-pub type uint_fast64_t = libc::c_ulonglong;
-pub type intmax_t = libc::c_longlong;
-pub type uintmax_t = libc::c_ulonglong;
+pub type int_least8_t = ::libc::c_schar;
+pub type int_least16_t = ::libc::c_short;
+pub type int_least32_t = ::libc::c_int;
+pub type int_least64_t = ::libc::c_longlong;
+pub type uint_least8_t = ::libc::c_uchar;
+pub type uint_least16_t = ::libc::c_ushort;
+pub type uint_least32_t = ::libc::c_uint;
+pub type uint_least64_t = ::libc::c_ulonglong;
+pub type int_fast8_t = ::libc::c_schar;
+pub type int_fast16_t = ::libc::c_int;
+pub type int_fast32_t = ::libc::c_int;
+pub type int_fast64_t = ::libc::c_longlong;
+pub type uint_fast8_t = ::libc::c_uchar;
+pub type uint_fast16_t = ::libc::c_uint;
+pub type uint_fast32_t = ::libc::c_uint;
+pub type uint_fast64_t = ::libc::c_ulonglong;
+pub type intmax_t = ::libc::c_longlong;
+pub type uintmax_t = ::libc::c_ulonglong;
 pub type __crt_bool = bool;
-pub type errno_t = libc::c_int;
-pub type wint_t = libc::c_ushort;
-pub type wctype_t = libc::c_ushort;
-pub type __time32_t = libc::c_long;
-pub type __time64_t = libc::c_longlong;
+pub type errno_t = ::libc::c_int;
+pub type wint_t = ::libc::c_ushort;
+pub type wctype_t = ::libc::c_ushort;
+pub type __time32_t = ::libc::c_long;
+pub type __time64_t = ::libc::c_longlong;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct __crt_locale_data_public {
-    pub _locale_pctype: *const libc::c_ushort,
-    pub _locale_mb_cur_max: libc::c_int,
-    pub _locale_lc_codepage: libc::c_uint,
+    pub _locale_pctype: *const ::libc::c_ushort,
+    pub _locale_mb_cur_max: ::libc::c_int,
+    pub _locale_lc_codepage: ::libc::c_uint,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -95,16 +95,16 @@ pub type _locale_t = *mut __crt_locale_pointers;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _Mbstatet {
-    pub _Wchar: libc::c_ulong,
-    pub _Byte: libc::c_ushort,
-    pub _State: libc::c_ushort,
+    pub _Wchar: ::libc::c_ulong,
+    pub _Byte: ::libc::c_ushort,
+    pub _State: ::libc::c_ushort,
 }
 pub type mbstate_t = _Mbstatet;
 pub type time_t = __time64_t;
 pub type rsize_t = usize;
-pub type char_t = libc::c_char;
-pub type byte_t = libc::c_uchar;
-pub type bool_t = libc::c_char;
+pub type char_t = ::libc::c_char;
+pub type byte_t = ::libc::c_uchar;
+pub type bool_t = ::libc::c_char;
 pub type real32_t = f32;
 pub type real64_t = f64;
 #[repr(i32)]
@@ -129,24 +129,30 @@ pub struct _renv_t {
     _unused: [u8; 0],
 }
 pub type REnv = _renv_t;
-pub type FPtr_destroy = ::core::option::Option<unsafe extern "C" fn(item: *mut *mut libc::c_void)>;
-pub type FPtr_copy =
-    ::core::option::Option<unsafe extern "C" fn(item: *const libc::c_void) -> *mut libc::c_void>;
-pub type FPtr_scopy =
-    ::core::option::Option<unsafe extern "C" fn(dest: *mut libc::c_void, src: *const libc::c_void)>;
+pub type FPtr_destroy =
+    ::core::option::Option<unsafe extern "C" fn(item: *mut *mut ::libc::c_void)>;
+pub type FPtr_copy = ::core::option::Option<
+    unsafe extern "C" fn(item: *const ::libc::c_void) -> *mut ::libc::c_void,
+>;
+pub type FPtr_scopy = ::core::option::Option<
+    unsafe extern "C" fn(dest: *mut ::libc::c_void, src: *const ::libc::c_void),
+>;
 pub type FPtr_compare = ::core::option::Option<
-    unsafe extern "C" fn(item1: *const libc::c_void, item2: *const libc::c_void) -> libc::c_int,
+    unsafe extern "C" fn(
+        item1: *const ::libc::c_void,
+        item2: *const ::libc::c_void,
+    ) -> ::libc::c_int,
 >;
 pub type FPtr_compare_ex = ::core::option::Option<
     unsafe extern "C" fn(
-        item1: *const libc::c_void,
-        item2: *const libc::c_void,
-        data: *const libc::c_void,
-    ) -> libc::c_int,
+        item1: *const ::libc::c_void,
+        item2: *const ::libc::c_void,
+        data: *const ::libc::c_void,
+    ) -> ::libc::c_int,
 >;
 pub type FPtr_assert = ::core::option::Option<
     unsafe extern "C" fn(
-        item: *mut libc::c_void,
+        item: *mut ::libc::c_void,
         group: u32,
         caption: *const char_t,
         detail: *const char_t,
@@ -344,7 +350,7 @@ pub struct _socket_t {
 }
 pub type Socket = _socket_t;
 pub type FPtr_thread_main =
-    ::core::option::Option<unsafe extern "C" fn(data: *mut libc::c_void) -> u32>;
+    ::core::option::Option<unsafe extern "C" fn(data: *mut ::libc::c_void) -> u32>;
 pub type FPtr_libproc = ::core::option::Option<unsafe extern "C" fn()>;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -628,20 +634,20 @@ pub struct _clock_t {
 }
 pub type Clock = _clock_t;
 pub type Object = _object_t;
-pub type FPtr_remove = ::core::option::Option<unsafe extern "C" fn(obj: *mut libc::c_void)>;
+pub type FPtr_remove = ::core::option::Option<unsafe extern "C" fn(obj: *mut ::libc::c_void)>;
 pub type FPtr_event_handler =
-    ::core::option::Option<unsafe extern "C" fn(obj: *mut libc::c_void, event: *mut Event)>;
+    ::core::option::Option<unsafe extern "C" fn(obj: *mut ::libc::c_void, event: *mut Event)>;
 pub type FPtr_read =
-    ::core::option::Option<unsafe extern "C" fn(stream: *mut Stream) -> *mut libc::c_void>;
+    ::core::option::Option<unsafe extern "C" fn(stream: *mut Stream) -> *mut ::libc::c_void>;
 pub type FPtr_read_init =
-    ::core::option::Option<unsafe extern "C" fn(stream: *mut Stream, obj: *mut libc::c_void)>;
+    ::core::option::Option<unsafe extern "C" fn(stream: *mut Stream, obj: *mut ::libc::c_void)>;
 pub type FPtr_write =
-    ::core::option::Option<unsafe extern "C" fn(stream: *mut Stream, obj: *const libc::c_void)>;
+    ::core::option::Option<unsafe extern "C" fn(stream: *mut Stream, obj: *const ::libc::c_void)>;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _buffer_t {
     pub size: u32,
-    pub data: [libc::c_char; 512usize],
+    pub data: [::libc::c_char; 512usize],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -652,7 +658,7 @@ pub struct _object_t {
 #[derive(Debug, Copy, Clone)]
 pub struct _string_t {
     pub size: u32,
-    pub data: [libc::c_char; 512usize],
+    pub data: [::libc::c_char; 512usize],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -776,7 +782,11 @@ unsafe extern "C" {
     pub fn array_sort(array: *mut Array, func_compare: FPtr_compare);
 }
 unsafe extern "C" {
-    pub fn array_sort_ex(array: *mut Array, func_compare: FPtr_compare_ex, data: *mut libc::c_void);
+    pub fn array_sort_ex(
+        array: *mut Array,
+        func_compare: FPtr_compare_ex,
+        data: *mut ::libc::c_void,
+    );
 }
 unsafe extern "C" {
     pub fn array_sort_ptr(array: *mut Array, func_compare: FPtr_compare);
@@ -785,17 +795,17 @@ unsafe extern "C" {
     pub fn array_sort_ptr_ex(
         array: *mut Array,
         func_compare: FPtr_compare_ex,
-        data: *mut libc::c_void,
+        data: *mut ::libc::c_void,
     );
 }
 unsafe extern "C" {
-    pub fn array_find_ptr(array: *const Array, elem: *const libc::c_void) -> u32;
+    pub fn array_find_ptr(array: *const Array, elem: *const ::libc::c_void) -> u32;
 }
 unsafe extern "C" {
     pub fn array_search(
         array: *const Array,
         func_compare: FPtr_compare,
-        key: *const libc::c_void,
+        key: *const ::libc::c_void,
         pos: *mut u32,
     ) -> *mut byte_t;
 }
@@ -803,7 +813,7 @@ unsafe extern "C" {
     pub fn array_search_ptr(
         array: *const Array,
         func_compare: FPtr_compare,
-        key: *const libc::c_void,
+        key: *const ::libc::c_void,
         pos: *mut u32,
     ) -> *mut byte_t;
 }
@@ -811,7 +821,7 @@ unsafe extern "C" {
     pub fn array_bsearch(
         array: *const Array,
         func_compare: FPtr_compare,
-        key: *const libc::c_void,
+        key: *const ::libc::c_void,
         pos: *mut u32,
     ) -> *mut byte_t;
 }
@@ -819,7 +829,7 @@ unsafe extern "C" {
     pub fn array_bsearch_ptr(
         array: *const Array,
         func_compare: FPtr_compare,
-        key: *const libc::c_void,
+        key: *const ::libc::c_void,
         pos: *mut u32,
     ) -> *mut byte_t;
 }
@@ -854,7 +864,7 @@ unsafe extern "C" {
 unsafe extern "C" {
     pub fn rbtree_get(
         tree: *const RBTree,
-        key: *const libc::c_void,
+        key: *const ::libc::c_void,
         isptr: bool_t,
         ktype: *const char_t,
     ) -> *mut byte_t;
@@ -862,7 +872,7 @@ unsafe extern "C" {
 unsafe extern "C" {
     pub fn rbtree_insert(
         tree: *mut RBTree,
-        key: *const libc::c_void,
+        key: *const ::libc::c_void,
         func_key_copy: FPtr_copy,
         ktype: *const char_t,
     ) -> *mut byte_t;
@@ -870,15 +880,15 @@ unsafe extern "C" {
 unsafe extern "C" {
     pub fn rbtree_insert_ptr(
         tree: *mut RBTree,
-        key: *const libc::c_void,
-        ptr: *mut libc::c_void,
+        key: *const ::libc::c_void,
+        ptr: *mut ::libc::c_void,
         ktype: *const char_t,
     ) -> bool_t;
 }
 unsafe extern "C" {
     pub fn rbtree_delete(
         tree: *mut RBTree,
-        key: *const libc::c_void,
+        key: *const ::libc::c_void,
         func_remove: FPtr_remove,
         func_destroy_key: FPtr_destroy,
         ktype: *const char_t,
@@ -887,7 +897,7 @@ unsafe extern "C" {
 unsafe extern "C" {
     pub fn rbtree_delete_ptr(
         tree: *mut RBTree,
-        key: *const libc::c_void,
+        key: *const ::libc::c_void,
         func_destroy: FPtr_destroy,
         func_destroy_key: FPtr_destroy,
         ktype: *const char_t,
@@ -3219,38 +3229,41 @@ pub type EvTbRect = _evtbrect_t;
 pub type EvTbSel = _evtbsel_t;
 pub type EvTbCell = _evtbcell_t;
 pub type FPtr_gctx_create =
-    ::core::option::Option<unsafe extern "C" fn(flags: u32) -> *mut libc::c_void>;
+    ::core::option::Option<unsafe extern "C" fn(flags: u32) -> *mut ::libc::c_void>;
 pub type FPtr_gctx_create2 =
-    ::core::option::Option<unsafe extern "C" fn(arg1: *mut libc::c_void) -> *mut libc::c_void>;
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::libc::c_void) -> *mut ::libc::c_void>;
 pub type FPtr_gctx_destroy =
-    ::core::option::Option<unsafe extern "C" fn(item: *mut *mut libc::c_void)>;
+    ::core::option::Option<unsafe extern "C" fn(item: *mut *mut ::libc::c_void)>;
 pub type FPtr_gctx_set_text =
-    ::core::option::Option<unsafe extern "C" fn(item: *mut libc::c_void, text: *const char_t)>;
-pub type FPtr_gctx_set_ptr =
-    ::core::option::Option<unsafe extern "C" fn(item: *mut libc::c_void, ptr: *mut libc::c_void)>;
+    ::core::option::Option<unsafe extern "C" fn(item: *mut ::libc::c_void, text: *const char_t)>;
+pub type FPtr_gctx_set_ptr = ::core::option::Option<
+    unsafe extern "C" fn(item: *mut ::libc::c_void, ptr: *mut ::libc::c_void),
+>;
 pub type FPtr_gctx_set_ptr2 = ::core::option::Option<
-    unsafe extern "C" fn(item: *mut libc::c_void, ptr: *mut libc::c_void) -> u32,
+    unsafe extern "C" fn(item: *mut ::libc::c_void, ptr: *mut ::libc::c_void) -> u32,
 >;
 pub type FPtr_gctx_set_ptr3 = ::core::option::Option<
-    unsafe extern "C" fn(item: *mut libc::c_void, ptr: *mut libc::c_void) -> enum_t,
+    unsafe extern "C" fn(item: *mut ::libc::c_void, ptr: *mut ::libc::c_void) -> enum_t,
 >;
-pub type FPtr_gctx_set_cptr =
-    ::core::option::Option<unsafe extern "C" fn(item: *mut libc::c_void, ptr: *const libc::c_void)>;
-pub type FPtr_gctx_set_listener =
-    ::core::option::Option<unsafe extern "C" fn(item: *mut libc::c_void, listener: *mut Listener)>;
+pub type FPtr_gctx_set_cptr = ::core::option::Option<
+    unsafe extern "C" fn(item: *mut ::libc::c_void, ptr: *const ::libc::c_void),
+>;
+pub type FPtr_gctx_set_listener = ::core::option::Option<
+    unsafe extern "C" fn(item: *mut ::libc::c_void, listener: *mut Listener),
+>;
 pub type FPtr_gctx_set_bool =
-    ::core::option::Option<unsafe extern "C" fn(item: *mut libc::c_void, value: bool_t)>;
+    ::core::option::Option<unsafe extern "C" fn(item: *mut ::libc::c_void, value: bool_t)>;
 pub type FPtr_gctx_set_uint32 =
-    ::core::option::Option<unsafe extern "C" fn(item: *mut libc::c_void, value: u32)>;
+    ::core::option::Option<unsafe extern "C" fn(item: *mut ::libc::c_void, value: u32)>;
 pub type FPtr_gctx_set_real32 =
-    ::core::option::Option<unsafe extern "C" fn(item: *mut libc::c_void, value: real32_t)>;
+    ::core::option::Option<unsafe extern "C" fn(item: *mut ::libc::c_void, value: real32_t)>;
 pub type FPtr_gctx_set_enum =
-    ::core::option::Option<unsafe extern "C" fn(item: *mut libc::c_void, value: enum_t)>;
+    ::core::option::Option<unsafe extern "C" fn(item: *mut ::libc::c_void, value: enum_t)>;
 pub type FPtr_gctx_set_enum2 =
-    ::core::option::Option<unsafe extern "C" fn(item: *mut libc::c_void, arg1: bool_t) -> enum_t>;
+    ::core::option::Option<unsafe extern "C" fn(item: *mut ::libc::c_void, arg1: bool_t) -> enum_t>;
 pub type FPtr_gctx_set_elem = ::core::option::Option<
     unsafe extern "C" fn(
-        item: *mut libc::c_void,
+        item: *mut ::libc::c_void,
         op: ctrl_op_t,
         index: u32,
         text: *const char_t,
@@ -3258,18 +3271,18 @@ pub type FPtr_gctx_set_elem = ::core::option::Option<
     ),
 >;
 pub type FPtr_gctx_set_property = ::core::option::Option<
-    unsafe extern "C" fn(item: *mut libc::c_void, prop: enum_t, value: *const libc::c_void),
+    unsafe extern "C" fn(item: *mut ::libc::c_void, prop: enum_t, value: *const ::libc::c_void),
 >;
 pub type FPtr_gctx_set_key = ::core::option::Option<
-    unsafe extern "C" fn(item: *mut libc::c_void, key: vkey_t, modifiers: u32),
+    unsafe extern "C" fn(item: *mut ::libc::c_void, key: vkey_t, modifiers: u32),
 >;
 pub type FPtr_gctx_set_hotkey = ::core::option::Option<
-    unsafe extern "C" fn(item: *mut libc::c_void, arg1: vkey_t, arg2: u32, arg3: *mut Listener),
+    unsafe extern "C" fn(item: *mut ::libc::c_void, arg1: vkey_t, arg2: u32, arg3: *mut Listener),
 >;
 pub type FPtr_gctx_set_area = ::core::option::Option<
     unsafe extern "C" fn(
-        item: *mut libc::c_void,
-        obj: *mut libc::c_void,
+        item: *mut ::libc::c_void,
+        obj: *mut ::libc::c_void,
         bgcolor: color_t,
         skcolor: color_t,
         x: real32_t,
@@ -3279,19 +3292,20 @@ pub type FPtr_gctx_set_area = ::core::option::Option<
     ),
 >;
 pub type FPtr_gctx_set2_bool = ::core::option::Option<
-    unsafe extern "C" fn(item: *mut libc::c_void, value1: bool_t, value2: bool_t),
+    unsafe extern "C" fn(item: *mut ::libc::c_void, value1: bool_t, value2: bool_t),
 >;
-pub type FPtr_gctx_set2_int32 =
-    ::core::option::Option<unsafe extern "C" fn(item: *mut libc::c_void, value1: i32, value2: i32)>;
+pub type FPtr_gctx_set2_int32 = ::core::option::Option<
+    unsafe extern "C" fn(item: *mut ::libc::c_void, value1: i32, value2: i32),
+>;
 pub type FPtr_gctx_set2_real32 = ::core::option::Option<
-    unsafe extern "C" fn(item: *mut libc::c_void, value1: real32_t, value2: real32_t),
+    unsafe extern "C" fn(item: *mut ::libc::c_void, value1: real32_t, value2: real32_t),
 >;
 pub type FPtr_gctx_set2_real64 = ::core::option::Option<
-    unsafe extern "C" fn(item: *mut libc::c_void, value1: real64_t, value2: real64_t),
+    unsafe extern "C" fn(item: *mut ::libc::c_void, value1: real64_t, value2: real64_t),
 >;
 pub type FPtr_gctx_set4_real32 = ::core::option::Option<
     unsafe extern "C" fn(
-        item: *mut libc::c_void,
+        item: *mut ::libc::c_void,
         value1: real32_t,
         value2: real32_t,
         value3: real32_t,
@@ -3299,32 +3313,34 @@ pub type FPtr_gctx_set4_real32 = ::core::option::Option<
     ),
 >;
 pub type FPtr_gctx_get_text =
-    ::core::option::Option<unsafe extern "C" fn(item: *const libc::c_void) -> *const char_t>;
-pub type FPtr_gctx_get_ptr =
-    ::core::option::Option<unsafe extern "C" fn(item: *const libc::c_void) -> *mut libc::c_void>;
+    ::core::option::Option<unsafe extern "C" fn(item: *const ::libc::c_void) -> *const char_t>;
+pub type FPtr_gctx_get_ptr = ::core::option::Option<
+    unsafe extern "C" fn(item: *const ::libc::c_void) -> *mut ::libc::c_void,
+>;
 pub type FPtr_gctx_get_uint32 =
-    ::core::option::Option<unsafe extern "C" fn(item: *const libc::c_void) -> u32>;
+    ::core::option::Option<unsafe extern "C" fn(item: *const ::libc::c_void) -> u32>;
 pub type FPtr_gctx_get_real32 =
-    ::core::option::Option<unsafe extern "C" fn(item: *const libc::c_void) -> real32_t>;
+    ::core::option::Option<unsafe extern "C" fn(item: *const ::libc::c_void) -> real32_t>;
 pub type FPtr_gctx_get_enum =
-    ::core::option::Option<unsafe extern "C" fn(item: *const libc::c_void) -> enum_t>;
-pub type FPtr_gctx_get_enum2 =
-    ::core::option::Option<unsafe extern "C" fn(item: *const libc::c_void, arg1: enum_t) -> enum_t>;
+    ::core::option::Option<unsafe extern "C" fn(item: *const ::libc::c_void) -> enum_t>;
+pub type FPtr_gctx_get_enum2 = ::core::option::Option<
+    unsafe extern "C" fn(item: *const ::libc::c_void, arg1: enum_t) -> enum_t,
+>;
 pub type FPtr_gctx_get_enum3 = ::core::option::Option<
-    unsafe extern "C" fn(item: *const libc::c_void, ptr: *mut *mut libc::c_void) -> enum_t,
+    unsafe extern "C" fn(item: *const ::libc::c_void, ptr: *mut *mut ::libc::c_void) -> enum_t,
 >;
 pub type FPtr_gctx_get_real32e = ::core::option::Option<
-    unsafe extern "C" fn(item: *const libc::c_void, value: enum_t) -> real32_t,
+    unsafe extern "C" fn(item: *const ::libc::c_void, value: enum_t) -> real32_t,
 >;
 pub type FPtr_gctx_get2_real32 = ::core::option::Option<
-    unsafe extern "C" fn(item: *const libc::c_void, value1: *mut real32_t, value2: *mut real32_t),
+    unsafe extern "C" fn(item: *const ::libc::c_void, value1: *mut real32_t, value2: *mut real32_t),
 >;
 pub type FPtr_gctx_get_indexed =
-    ::core::option::Option<unsafe extern "C" fn(arg1: u32, arg2: *mut libc::c_void)>;
-pub type FPtr_gctx_call = ::core::option::Option<unsafe extern "C" fn(item: *mut libc::c_void)>;
+    ::core::option::Option<unsafe extern "C" fn(arg1: u32, arg2: *mut ::libc::c_void)>;
+pub type FPtr_gctx_call = ::core::option::Option<unsafe extern "C" fn(item: *mut ::libc::c_void)>;
 pub type FPtr_gctx_bounds1 = ::core::option::Option<
     unsafe extern "C" fn(
-        item: *const libc::c_void,
+        item: *const ::libc::c_void,
         text: *const char_t,
         refwidth: real32_t,
         width: *mut real32_t,
@@ -3333,7 +3349,7 @@ pub type FPtr_gctx_bounds1 = ::core::option::Option<
 >;
 pub type FPtr_gctx_bounds2 = ::core::option::Option<
     unsafe extern "C" fn(
-        item: *const libc::c_void,
+        item: *const ::libc::c_void,
         text: *const char_t,
         refwidth: real32_t,
         refheight: real32_t,
@@ -3343,7 +3359,7 @@ pub type FPtr_gctx_bounds2 = ::core::option::Option<
 >;
 pub type FPtr_gctx_bounds3 = ::core::option::Option<
     unsafe extern "C" fn(
-        item: *const libc::c_void,
+        item: *const ::libc::c_void,
         text: *const char_t,
         width: *mut real32_t,
         height: *mut real32_t,
@@ -3351,7 +3367,7 @@ pub type FPtr_gctx_bounds3 = ::core::option::Option<
 >;
 pub type FPtr_gctx_bounds4 = ::core::option::Option<
     unsafe extern "C" fn(
-        item: *const libc::c_void,
+        item: *const ::libc::c_void,
         refwidth: real32_t,
         lines: u32,
         width: *mut real32_t,
@@ -3360,7 +3376,7 @@ pub type FPtr_gctx_bounds4 = ::core::option::Option<
 >;
 pub type FPtr_gctx_bounds5 = ::core::option::Option<
     unsafe extern "C" fn(
-        item: *const libc::c_void,
+        item: *const ::libc::c_void,
         refwidth: real32_t,
         width: *mut real32_t,
         height: *mut real32_t,
@@ -3368,7 +3384,7 @@ pub type FPtr_gctx_bounds5 = ::core::option::Option<
 >;
 pub type FPtr_gctx_bounds6 = ::core::option::Option<
     unsafe extern "C" fn(
-        item: *const libc::c_void,
+        item: *const ::libc::c_void,
         length: real32_t,
         size: gui_size_t,
         width: *mut real32_t,
@@ -3377,22 +3393,22 @@ pub type FPtr_gctx_bounds6 = ::core::option::Option<
 >;
 pub type FPtr_gctx_tickmarks = ::core::option::Option<
     unsafe extern "C" fn(
-        item: *mut libc::c_void,
+        item: *mut ::libc::c_void,
         num_tickmarks: u32,
         tickmarks_at_left_top: bool_t,
     ),
 >;
 pub type FPtr_gctx_menu = ::core::option::Option<
     unsafe extern "C" fn(
-        item: *mut libc::c_void,
-        window: *mut libc::c_void,
+        item: *mut ::libc::c_void,
+        window: *mut ::libc::c_void,
         x: real32_t,
         y: real32_t,
     ),
 >;
 pub type FPtr_gctx_win_file = ::core::option::Option<
     unsafe extern "C" fn(
-        parent: *mut libc::c_void,
+        parent: *mut ::libc::c_void,
         ftypes: *mut *const char_t,
         size: u32,
         start_dir: *const char_t,
@@ -3401,7 +3417,7 @@ pub type FPtr_gctx_win_file = ::core::option::Option<
 >;
 pub type FPtr_gctx_win_color = ::core::option::Option<
     unsafe extern "C" fn(
-        parent: *mut libc::c_void,
+        parent: *mut ::libc::c_void,
         title: *const char_t,
         x: real32_t,
         y: real32_t,
@@ -3423,7 +3439,7 @@ pub type FPtr_gctx_cursor = ::core::option::Option<
 >;
 pub type FPtr_gctx_draw_rect = ::core::option::Option<
     unsafe extern "C" fn(
-        arg1: *mut libc::c_void,
+        arg1: *mut ::libc::c_void,
         arg2: i32,
         arg3: i32,
         arg4: u32,
@@ -3432,11 +3448,11 @@ pub type FPtr_gctx_draw_rect = ::core::option::Option<
     ),
 >;
 pub type FPtr_gctx_draw_line = ::core::option::Option<
-    unsafe extern "C" fn(arg1: *mut libc::c_void, arg2: i32, arg3: i32, arg4: i32, arg5: i32),
+    unsafe extern "C" fn(arg1: *mut ::libc::c_void, arg2: i32, arg3: i32, arg4: i32, arg5: i32),
 >;
 pub type FPtr_gctx_draw_text = ::core::option::Option<
     unsafe extern "C" fn(
-        arg1: *mut libc::c_void,
+        arg1: *mut ::libc::c_void,
         arg2: *const char_t,
         arg3: i32,
         arg4: i32,
@@ -3445,7 +3461,7 @@ pub type FPtr_gctx_draw_text = ::core::option::Option<
 >;
 pub type FPtr_gctx_draw_image = ::core::option::Option<
     unsafe extern "C" fn(
-        arg1: *mut libc::c_void,
+        arg1: *mut ::libc::c_void,
         arg2: *const Image,
         arg3: i32,
         arg4: i32,
@@ -3453,13 +3469,13 @@ pub type FPtr_gctx_draw_image = ::core::option::Option<
     ),
 >;
 pub type FPtr_gctx_clipboard =
-    ::core::option::Option<unsafe extern "C" fn(arg1: *mut libc::c_void, arg2: clipboard_t)>;
+    ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::libc::c_void, arg2: clipboard_t)>;
 pub type FPtr_gctx_command = ::core::option::Option<
     unsafe extern "C" fn(
-        arg1: *mut libc::c_void,
+        arg1: *mut ::libc::c_void,
         arg2: enum_t,
-        arg3: *const libc::c_void,
-        arg4: *mut libc::c_void,
+        arg3: *const ::libc::c_void,
+        arg4: *mut ::libc::c_void,
     ),
 >;
 #[repr(C)]
@@ -4012,10 +4028,10 @@ pub struct _setstendFPtr_respack_t {
 }
 pub type setstendFPtr_respack = _setstendFPtr_respack_t;
 pub type FPtr_task_main =
-    ::core::option::Option<unsafe extern "C" fn(data: *mut libc::c_void) -> u32>;
-pub type FPtr_task_update = ::core::option::Option<unsafe extern "C" fn(data: *mut libc::c_void)>;
+    ::core::option::Option<unsafe extern "C" fn(data: *mut ::libc::c_void) -> u32>;
+pub type FPtr_task_update = ::core::option::Option<unsafe extern "C" fn(data: *mut ::libc::c_void)>;
 pub type FPtr_task_end =
-    ::core::option::Option<unsafe extern "C" fn(data: *mut libc::c_void, rvalue: u32)>;
+    ::core::option::Option<unsafe extern "C" fn(data: *mut ::libc::c_void, rvalue: u32)>;
 unsafe extern "C" {
     pub fn osapp_finish();
 }
@@ -4027,7 +4043,7 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn osapp_task_imp(
-        data: *mut libc::c_void,
+        data: *mut ::libc::c_void,
         updtime: real32_t,
         func_task_main: FPtr_task_main,
         func_task_update: FPtr_task_update,
@@ -4433,7 +4449,7 @@ unsafe extern "C" {
     ) -> u32;
 }
 unsafe extern "C" {
-    pub fn evbind_object_imp(e: *mut Event, type_: *const char_t) -> *mut libc::c_void;
+    pub fn evbind_object_imp(e: *mut Event, type_: *const char_t) -> *mut ::libc::c_void;
 }
 unsafe extern "C" {
     pub fn evbind_modify_imp(
@@ -4781,7 +4797,11 @@ unsafe extern "C" {
     );
 }
 unsafe extern "C" {
-    pub fn layout_dbind_obj_imp(layout: *mut Layout, obj: *mut libc::c_void, type_: *const char_t);
+    pub fn layout_dbind_obj_imp(
+        layout: *mut Layout,
+        obj: *mut ::libc::c_void,
+        type_: *const char_t,
+    );
 }
 unsafe extern "C" {
     pub fn layout_dbind_update_imp(
@@ -4878,7 +4898,7 @@ unsafe extern "C" {
     pub fn menu_size(menu: *const Menu) -> u32;
 }
 unsafe extern "C" {
-    pub fn menu_imp(menu: *const Menu) -> *mut libc::c_void;
+    pub fn menu_imp(menu: *const Menu) -> *mut ::libc::c_void;
 }
 unsafe extern "C" {
     pub fn menuitem_create() -> *mut MenuItem;
@@ -4922,12 +4942,12 @@ unsafe extern "C" {
 unsafe extern "C" {
     pub fn panel_data_imp(
         panel: *mut Panel,
-        data: *mut *mut libc::c_void,
+        data: *mut *mut ::libc::c_void,
         func_destroy_data: FPtr_destroy,
     );
 }
 unsafe extern "C" {
-    pub fn panel_get_data_imp(panel: *const Panel) -> *mut libc::c_void;
+    pub fn panel_get_data_imp(panel: *const Panel) -> *mut ::libc::c_void;
 }
 unsafe extern "C" {
     pub fn panel_size(panel: *mut Panel, size: S2Df);
@@ -5267,12 +5287,12 @@ unsafe extern "C" {
 unsafe extern "C" {
     pub fn view_data_imp(
         view: *mut View,
-        data: *mut *mut libc::c_void,
+        data: *mut *mut ::libc::c_void,
         func_destroy_data: FPtr_destroy,
     );
 }
 unsafe extern "C" {
-    pub fn view_get_data_imp(view: *const View) -> *mut libc::c_void;
+    pub fn view_get_data_imp(view: *const View) -> *mut ::libc::c_void;
 }
 unsafe extern "C" {
     pub fn view_size(view: *mut View, size: S2Df);
@@ -5362,7 +5382,7 @@ unsafe extern "C" {
     pub fn view_update(view: *mut View);
 }
 unsafe extern "C" {
-    pub fn view_native(view: *mut View) -> *mut libc::c_void;
+    pub fn view_native(view: *mut View) -> *mut ::libc::c_void;
 }
 unsafe extern "C" {
     pub fn window_create(flags: u32) -> *mut Window;
@@ -5464,7 +5484,7 @@ unsafe extern "C" {
     );
 }
 unsafe extern "C" {
-    pub fn window_imp(window: *const Window) -> *mut libc::c_void;
+    pub fn window_imp(window: *const Window) -> *mut ::libc::c_void;
 }
 unsafe extern "C" {
     pub fn color_rgb(r: u8, g: u8, b: u8) -> color_t;
@@ -5892,7 +5912,7 @@ unsafe extern "C" {
     pub fn font_installed_monospace() -> *mut ArrPtString;
 }
 unsafe extern "C" {
-    pub fn font_native(font: *const Font) -> *const libc::c_void;
+    pub fn font_native(font: *const Font) -> *const ::libc::c_void;
 }
 unsafe extern "C" {
     pub fn image_from_pixels(
@@ -5977,15 +5997,15 @@ unsafe extern "C" {
 unsafe extern "C" {
     pub fn image_data_imp(
         image: *mut Image,
-        data: *mut *mut libc::c_void,
+        data: *mut *mut ::libc::c_void,
         func_destroy_data: FPtr_destroy,
     );
 }
 unsafe extern "C" {
-    pub fn image_get_data_imp(image: *const Image) -> *mut libc::c_void;
+    pub fn image_get_data_imp(image: *const Image) -> *mut ::libc::c_void;
 }
 unsafe extern "C" {
-    pub fn image_native(image: *const Image) -> *const libc::c_void;
+    pub fn image_native(image: *const Image) -> *const ::libc::c_void;
 }
 unsafe extern "C" {
     pub fn palette_create(size: u32) -> *mut Palette;
@@ -7074,7 +7094,7 @@ unsafe extern "C" {
     pub fn date_year() -> i16;
 }
 unsafe extern "C" {
-    pub fn date_cmp(date1: *const Date, date2: *const Date) -> libc::c_int;
+    pub fn date_cmp(date1: *const Date, date2: *const Date) -> ::libc::c_int;
 }
 unsafe extern "C" {
     pub fn date_ellapsed_seconds(from: *const Date, to: *const Date) -> i64;
@@ -7158,7 +7178,7 @@ unsafe extern "C" {
         obj1: *const byte_t,
         obj2: *const byte_t,
         type_: *const char_t,
-    ) -> libc::c_int;
+    ) -> ::libc::c_int;
 }
 unsafe extern "C" {
     pub fn dbind_equ_imp(obj1: *const byte_t, obj2: *const byte_t, type_: *const char_t) -> bool_t;
@@ -7167,7 +7187,7 @@ unsafe extern "C" {
     pub fn dbind_read_imp(stm: *mut Stream, type_: *const char_t) -> *mut byte_t;
 }
 unsafe extern "C" {
-    pub fn dbind_write_imp(stm: *mut Stream, obj: *const libc::c_void, type_: *const char_t);
+    pub fn dbind_write_imp(stm: *mut Stream, obj: *const ::libc::c_void, type_: *const char_t);
 }
 unsafe extern "C" {
     pub fn dbind_default_imp(type_: *const char_t, mname: *const char_t, value: *const byte_t);
@@ -7191,7 +7211,7 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn listener_imp(
-        object: *mut libc::c_void,
+        object: *mut ::libc::c_void,
         func_event_handler: FPtr_event_handler,
     ) -> *mut Listener;
 }
@@ -7205,9 +7225,9 @@ unsafe extern "C" {
     pub fn listener_event_imp(
         listener: *mut Listener,
         type_: u32,
-        sender: *mut libc::c_void,
-        params: *mut libc::c_void,
-        result: *mut libc::c_void,
+        sender: *mut ::libc::c_void,
+        params: *mut ::libc::c_void,
+        result: *mut ::libc::c_void,
         sender_type: *const char_t,
         params_type: *const char_t,
         result_type: *const char_t,
@@ -7217,7 +7237,7 @@ unsafe extern "C" {
     pub fn listener_pass_event_imp(
         listener: *mut Listener,
         event: *mut Event,
-        sender: *mut libc::c_void,
+        sender: *mut ::libc::c_void,
         sender_type: *const char_t,
     );
 }
@@ -7225,13 +7245,13 @@ unsafe extern "C" {
     pub fn event_type(event: *const Event) -> u32;
 }
 unsafe extern "C" {
-    pub fn event_sender_imp(event: *mut Event, type_: *const char_t) -> *mut libc::c_void;
+    pub fn event_sender_imp(event: *mut Event, type_: *const char_t) -> *mut ::libc::c_void;
 }
 unsafe extern "C" {
-    pub fn event_params_imp(event: *mut Event, type_: *const char_t) -> *mut libc::c_void;
+    pub fn event_params_imp(event: *mut Event, type_: *const char_t) -> *mut ::libc::c_void;
 }
 unsafe extern "C" {
-    pub fn event_result_imp(event: *mut Event, type_: *const char_t) -> *mut libc::c_void;
+    pub fn event_result_imp(event: *mut Event, type_: *const char_t) -> *mut ::libc::c_void;
 }
 unsafe extern "C" {
     pub fn heap_start_mt();
@@ -7772,16 +7792,16 @@ unsafe extern "C" {
     pub fn str_is_sufix(str_: *const char_t, sufix: *const char_t) -> bool_t;
 }
 unsafe extern "C" {
-    pub fn str_scmp(str1: *const String, str2: *const String) -> libc::c_int;
+    pub fn str_scmp(str1: *const String, str2: *const String) -> ::libc::c_int;
 }
 unsafe extern "C" {
-    pub fn str_cmp(str1: *const String, str2: *const char_t) -> libc::c_int;
+    pub fn str_cmp(str1: *const String, str2: *const char_t) -> ::libc::c_int;
 }
 unsafe extern "C" {
-    pub fn str_cmp_c(str1: *const char_t, str2: *const char_t) -> libc::c_int;
+    pub fn str_cmp_c(str1: *const char_t, str2: *const char_t) -> ::libc::c_int;
 }
 unsafe extern "C" {
-    pub fn str_cmp_cn(str1: *const char_t, str2: *const char_t, n: u32) -> libc::c_int;
+    pub fn str_cmp_cn(str1: *const char_t, str2: *const char_t, n: u32) -> ::libc::c_int;
 }
 unsafe extern "C" {
     pub fn str_empty(str_: *const String) -> bool_t;
@@ -8197,10 +8217,10 @@ unsafe extern "C" {
     pub fn bsocket_ntoh8(dest: *mut byte_t, src: *const byte_t);
 }
 unsafe extern "C" {
-    pub fn bthread_create_imp(thmain: FPtr_thread_main, data: *mut libc::c_void) -> *mut Thread;
+    pub fn bthread_create_imp(thmain: FPtr_thread_main, data: *mut ::libc::c_void) -> *mut Thread;
 }
 unsafe extern "C" {
-    pub fn bthread_current_id() -> libc::c_int;
+    pub fn bthread_current_id() -> ::libc::c_int;
 }
 unsafe extern "C" {
     pub fn bthread_close(thread: *mut *mut Thread);
@@ -8239,7 +8259,7 @@ unsafe extern "C" {
     pub fn dlib_proc_imp(dlib: *mut DLib, procname: *const char_t) -> FPtr_libproc;
 }
 unsafe extern "C" {
-    pub fn dlib_var_imp(dlib: *mut DLib, varname: *const char_t) -> *mut libc::c_void;
+    pub fn dlib_var_imp(dlib: *mut DLib, varname: *const char_t) -> *mut ::libc::c_void;
 }
 unsafe extern "C" {
     pub fn log_printf(format: *const char_t, ...) -> u32;
@@ -8290,10 +8310,10 @@ unsafe extern "C" {
     pub fn blib_strcat(dest: *mut char_t, size: u32, src: *const char_t);
 }
 unsafe extern "C" {
-    pub fn blib_strcmp(str1: *const char_t, str2: *const char_t) -> libc::c_int;
+    pub fn blib_strcmp(str1: *const char_t, str2: *const char_t) -> ::libc::c_int;
 }
 unsafe extern "C" {
-    pub fn blib_strncmp(str1: *const char_t, str2: *const char_t, n: u32) -> libc::c_int;
+    pub fn blib_strncmp(str1: *const char_t, str2: *const char_t, n: u32) -> ::libc::c_int;
 }
 unsafe extern "C" {
     pub fn blib_strftime(
@@ -8379,7 +8399,7 @@ unsafe extern "C" {
     pub fn blib_abort();
 }
 unsafe extern "C" {
-    pub fn blib_exit(code: libc::c_int);
+    pub fn blib_exit(code: ::libc::c_int);
 }
 unsafe extern "C" {
     pub fn blib_debug_break();
@@ -8636,7 +8656,7 @@ unsafe extern "C" {
     pub fn bmem_set16(dest: *mut byte_t, size: u32, mask: *const byte_t);
 }
 unsafe extern "C" {
-    pub fn bmem_cmp(mem1: *const byte_t, mem2: *const byte_t, size: u32) -> libc::c_int;
+    pub fn bmem_cmp(mem1: *const byte_t, mem2: *const byte_t, size: u32) -> ::libc::c_int;
 }
 unsafe extern "C" {
     pub fn bmem_is_zero(mem: *const byte_t, size: u32) -> bool_t;
@@ -8711,7 +8731,7 @@ unsafe extern "C" {
     pub fn bstd_ewrite(data: *const byte_t, size: u32, wsize: *mut u32) -> bool_t;
 }
 unsafe extern "C" {
-    pub fn cassert_set_func(data: *mut libc::c_void, func_assert: FPtr_assert);
+    pub fn cassert_set_func(data: *mut ::libc::c_void, func_assert: FPtr_assert);
 }
 unsafe extern "C" {
     pub fn cassert_imp(cond: bool_t, detail: *const char_t, file: *const char_t, line: u32);
@@ -8721,7 +8741,7 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn cassert_no_null_imp(
-        ptr: *mut libc::c_void,
+        ptr: *mut ::libc::c_void,
         detail: *const char_t,
         file: *const char_t,
         line: u32,
@@ -8739,16 +8759,16 @@ unsafe extern "C" {
     pub fn cassert_default_imp(file: *const char_t, line: u32);
 }
 unsafe extern "C" {
-    pub fn ptr_dget_imp(dptr: *mut *mut libc::c_void) -> *mut libc::c_void;
+    pub fn ptr_dget_imp(dptr: *mut *mut ::libc::c_void) -> *mut ::libc::c_void;
 }
 unsafe extern "C" {
-    pub fn ptr_dget_no_null_imp(dptr: *mut *mut libc::c_void) -> *mut libc::c_void;
+    pub fn ptr_dget_no_null_imp(dptr: *mut *mut ::libc::c_void) -> *mut ::libc::c_void;
 }
 unsafe extern "C" {
-    pub fn ptr_destopt_imp(dptr: *mut *mut libc::c_void, func_destroy: FPtr_destroy);
+    pub fn ptr_destopt_imp(dptr: *mut *mut ::libc::c_void, func_destroy: FPtr_destroy);
 }
 unsafe extern "C" {
-    pub fn ptr_copyopt_imp(ptr: *mut libc::c_void, func_copy: FPtr_copy) -> *mut libc::c_void;
+    pub fn ptr_copyopt_imp(ptr: *mut ::libc::c_void, func_copy: FPtr_copy) -> *mut ::libc::c_void;
 }
 unsafe extern "C" {
     pub fn min_u32(v1: u32, v2: u32) -> u32;

@@ -1,12 +1,15 @@
 use std::ffi::CString;
 
-use crate::{core::event::Event, draw_2d::{font::Font, image::Image}};
+use crate::{
+    callback,
+    draw_2d::{font::Font, image::Image},
+};
 
 use nappgui_sys::{
     button_OnClick, button_check, button_check3, button_flat, button_flatgle, button_font,
     button_get_height, button_get_state, button_get_tag, button_image, button_image_alt,
     button_push, button_radio, button_state, button_tag, button_text, button_text_alt,
-    button_tooltip, button_vpadding, gui_state_t, listener_imp
+    button_tooltip, button_vpadding, gui_state_t,
 };
 
 pub struct Button {
@@ -57,35 +60,9 @@ impl Button {
         Self::new(button)
     }
 
-    /// Set a function for pressing the button.
-    pub fn on_click<F>(&self, handler: F)
-    where
-        F: FnMut(&mut Button, &Event) + 'static,
-    {
-        unsafe extern "C" fn shim(data: *mut std::ffi::c_void, event: *mut nappgui_sys::Event) {
-            let data = data as *mut (
-                Box<dyn FnMut(&mut Button, &Event)>,
-                *mut nappgui_sys::Button,
-            );
-            let f = &mut *(*data).0;
-            let mut button = Button { inner: (*data).1 };
-            let ev = Event::new(event);
-            let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut button, &ev)));
-        }
-
-        let cb: Box<dyn FnMut(&mut Button, &Event)> = Box::new(handler);
-
-        let data: *mut (
-            Box<dyn FnMut(&mut Button, &Event)>,
-            *mut nappgui_sys::Button,
-        ) = Box::into_raw(Box::new((cb, self.inner)));
-
-        unsafe {
-            button_OnClick(
-                self.inner,
-                listener_imp(data as *mut std::ffi::c_void, Some(shim)),
-            );
-        }
+    callback! {
+        /// Set a function for pressing the button.
+        pub on_click(Button) => button_OnClick;
     }
 
     /// Set the text that the button will display.

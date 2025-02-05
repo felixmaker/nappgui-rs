@@ -1,4 +1,4 @@
-use crate::draw_2d::Font;
+use crate::{callback, draw_2d::Font};
 
 use nappgui_sys::{
     align_t, tableview_OnData, tableview_OnHeaderClick, tableview_OnRowClick, tableview_OnSelect,
@@ -6,7 +6,7 @@ use nappgui_sys::{
     tableview_column_width, tableview_create, tableview_deselect, tableview_deselect_all,
     tableview_focus_row, tableview_font, tableview_get_focus_row, tableview_grid,
     tableview_header_align, tableview_header_clickable, tableview_header_height,
-    tableview_header_indicator, tableview_header_resizable, tableview_header_title,
+    tableview_header_resizable, tableview_header_title,
     tableview_header_visible, tableview_hkey_scroll, tableview_multisel, tableview_new_column_text,
     tableview_row_height, tableview_scroll_visible, tableview_select, tableview_selected,
     tableview_size, tableview_update, S2Df,
@@ -26,40 +26,22 @@ impl TableView {
 
     /// Create an table view control.
     pub fn create() -> Self {
-        let table = unsafe { nappgui_sys::tableview_create() };
+        let table = unsafe { tableview_create() };
         Self::new(table)
     }
 
-    /// Sets up a handler to read data from the application.
-    pub fn on_data<F>(&self, handler: F)
-    where
-        F: FnMut(&mut TableView) -> String + 'static,
-    {
-        todo!();
-    }
+    callback! {
+        /// Sets up a handler to read data from the application.
+        pub on_data(TableView) => tableview_OnData;
 
-    /// Notifies that the selection has changed.
-    pub fn on_select<F>(&self, handler: F)
-    where
-        F: FnMut(&mut TableView) + 'static,
-    {
-        todo!();
-    }
+        /// Notifies that the selection has changed.
+        pub on_select(TableView) => tableview_OnSelect;
 
-    /// Notify each time a row is clicked.
-    pub fn on_row_click<F>(&self, handler: F)
-    where
-        F: FnMut(&mut TableView, u32) + 'static,
-    {
-        todo!();
-    }
+        /// Notify each time a row is clicked.
+        pub on_row_click(TableView) => tableview_OnRowClick;
 
-    /// Notifies each time a header is clicked.
-    pub fn on_header_click<F>(&self, handler: F)
-    where
-        F: FnMut(&mut TableView, u32) + 'static,
-    {
-        todo!();
+        /// Notifies each time a header is clicked.
+        pub on_header_click(TableView)  => tableview_OnHeaderClick;
     }
 
     /// Sets the general font for the entire table.

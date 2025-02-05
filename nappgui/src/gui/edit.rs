@@ -3,10 +3,10 @@ use nappgui_sys::{
     edit_bgcolor_focus, edit_color, edit_color_focus, edit_copy, edit_create, edit_cut,
     edit_editable, edit_font, edit_get_height, edit_get_text, edit_multiline, edit_passmode,
     edit_paste, edit_phcolor, edit_phstyle, edit_phtext, edit_select, edit_text, edit_tooltip,
-    edit_vpadding, listener_imp,
+    edit_vpadding,
 };
 
-use crate::{core::event::Event, draw_2d::font::Font};
+use crate::{callback, draw_2d::font::Font};
 
 pub struct Edit {
     pub(crate) inner: *mut nappgui_sys::Edit,
@@ -32,81 +32,15 @@ impl Edit {
         Self::new(edit)
     }
 
-    /// Set a function to filter the text while editing.
-    pub fn on_filter<F>(&self, handler: F)
-    where
-        F: FnMut(&mut Edit, &Event) + 'static,
-    {
-        unsafe extern "C" fn shim(data: *mut std::ffi::c_void, event: *mut nappgui_sys::Event) {
-            let data = data as *mut (Box<dyn FnMut(&mut Edit, &Event)>, *mut nappgui_sys::Edit);
-            let f = &mut *(*data).0;
-            let mut obj = Edit::new((*data).1);
-            let ev = Event::new(event as _);
-            let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut obj, &ev)));
-        }
+    callback! {
+        /// Set a function to filter the text while editing.
+        pub on_filter(Edit) => edit_OnFilter;
 
-        let cb: Box<dyn FnMut(&mut Edit, &Event)> = Box::new(handler);
+        /// Set a function to detect when the text has changed.
+        pub on_change(Edit) => edit_OnChange;
 
-        let data: *mut (Box<dyn FnMut(&mut Edit, &Event)>, *mut nappgui_sys::Edit) =
-            Box::into_raw(Box::new((cb, self.inner)));
-
-        unsafe {
-            edit_OnFilter(
-                self.inner,
-                listener_imp(data as *mut std::ffi::c_void, Some(shim)),
-            );
-        }
-    }
-
-    pub fn on_change<F>(&self, handler: F)
-    where
-        F: FnMut(&mut Edit, &Event) + 'static,
-    {
-        unsafe extern "C" fn shim(data: *mut std::ffi::c_void, event: *mut nappgui_sys::Event) {
-            let data = data as *mut (Box<dyn FnMut(&mut Edit, &Event)>, *mut nappgui_sys::Edit);
-            let f = &mut *(*data).0;
-            let mut obj = Edit::new((*data).1);
-            let ev = Event::new(event as _);
-            let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut obj, &ev)));
-        }
-
-        let cb: Box<dyn FnMut(&mut Edit, &Event)> = Box::new(handler);
-
-        let data: *mut (Box<dyn FnMut(&mut Edit, &Event)>, *mut nappgui_sys::Edit) =
-            Box::into_raw(Box::new((cb, self.inner)));
-
-        unsafe {
-            edit_OnChange(
-                self.inner,
-                listener_imp(data as *mut std::ffi::c_void, Some(shim)),
-            );
-        }
-    }
-
-    pub fn on_focus<F>(&self, handler: F)
-    where
-        F: FnMut(&mut Edit, bool) + 'static,
-    {
-        unsafe extern "C" fn shim(data: *mut std::ffi::c_void, event: *mut nappgui_sys::Event) {
-            let data = data as *mut (Box<dyn FnMut(&mut Edit, bool)>, *mut nappgui_sys::Edit);
-            let f = &mut *(*data).0;
-            let mut obj = Edit::new((*data).1);
-            let ev = event as *mut bool;
-            let ev = unsafe { *ev };
-            let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut obj, ev)));
-        }
-
-        let cb: Box<dyn FnMut(&mut Edit, bool)> = Box::new(handler);
-
-        let data: *mut (Box<dyn FnMut(&mut Edit, bool)>, *mut nappgui_sys::Edit) =
-            Box::into_raw(Box::new((cb, self.inner)));
-
-        unsafe {
-            edit_OnChange(
-                self.inner,
-                listener_imp(data as *mut std::ffi::c_void, Some(shim)),
-            );
-        }
+        /// Sets a handler for keyboard focus.
+        pub on_focus(Edit) => edit_OnFocus;
     }
 
     /// Set the edit control text.

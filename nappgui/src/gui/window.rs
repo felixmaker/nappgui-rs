@@ -1,16 +1,21 @@
 use nappgui_sys::{
-    gui_focus_t, listener_imp, window_OnClose, window_OnMoved, window_OnResize,
+    gui_cursor_t, gui_focus_t, window_OnClose, window_OnMoved, window_OnResize,
     window_clear_hotkeys, window_client_to_screen, window_control_frame, window_create,
     window_cursor, window_cycle_tabstop, window_defbutton, window_destroy, window_flag_t,
-    window_focus, window_focus_info, window_get_client_size, window_get_focus, window_get_origin,
-    window_get_size, window_hide, window_hotkey, window_imp, window_is_visible, window_modal,
-    window_next_tabstop, window_origin, window_overlay, window_panel, window_previous_tabstop,
-    window_show, window_size, window_stop_modal, window_title, window_update,
+    window_focus, window_get_client_size, window_get_focus, window_get_origin, window_get_size,
+    window_hide, window_hotkey, window_is_visible, window_modal, window_next_tabstop,
+    window_origin, window_overlay, window_panel, window_previous_tabstop, window_show, window_size,
+    window_stop_modal, window_title, window_update, R2Df, S2Df, V2Df,
 };
-use std::ffi::{c_void, CString};
+use std::ffi::CString;
+
+use crate::core::event::Event;
+use crate::draw_2d::Image;
+use crate::{callback, listener};
 
 use super::control::Control;
 use super::panel::Panel;
+use super::Button;
 
 /// Window objects are the highest-level containers within the user interface
 pub struct Window {
@@ -50,69 +55,15 @@ impl Window {
         unsafe { window_panel(self.inner, panel.inner) }
     }
 
-    pub fn on_close<F>(&self, handler: F)
-    where
-        F: FnMut(&mut Window) + 'static,
-    {
-        unsafe extern "C" fn shim(data: *mut c_void, event: *mut nappgui_sys::Event) {
-            let data = data as *mut (Box<dyn FnMut(&mut Window)>, *mut nappgui_sys::Window);
-            let f = &mut *(*data).0;
-            let mut window = Window { inner: (*data).1 };
-            let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut window)));
-        }
+    callback! {
+        /// Set an event handler for the window closing.
+        pub on_close(Window) => window_OnClose;
 
-        let cb: Box<dyn FnMut(&mut Window)> = Box::new(handler);
+        /// Set an event handler for moving the window on the desktop.
+        pub on_moved(Window) => window_OnMoved;
 
-        let data: *mut (Box<dyn FnMut(&mut Window)>, *mut nappgui_sys::Window) =
-            Box::into_raw(Box::new((cb, self.inner)));
-
-        unsafe {
-            window_OnClose(self.inner, listener_imp(data as *mut c_void, Some(shim)));
-        }
-    }
-
-    /// Set an event handler for moving the window on the desktop.
-    pub fn on_moved<F>(&self, handler: F)
-    where
-        F: FnMut(&mut Window) + 'static,
-    {
-        unsafe extern "C" fn shim(data: *mut c_void, event: *mut nappgui_sys::Event) {
-            let data = data as *mut (Box<dyn FnMut(&mut Window)>, *mut nappgui_sys::Window);
-            let f = &mut *(*data).0;
-            let mut window = Window { inner: (*data).1 };
-            let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut window)));
-        }
-
-        let cb: Box<dyn FnMut(&mut Window)> = Box::new(handler);
-
-        let data: *mut (Box<dyn FnMut(&mut Window)>, *mut nappgui_sys::Window) =
-            Box::into_raw(Box::new((cb, self.inner)));
-
-        unsafe {
-            window_OnMoved(self.inner, listener_imp(data as *mut c_void, Some(shim)));
-        }
-    }
-
-    /// Set an event handler for window resizing.
-    pub fn on_resize<F>(&self, handler: F)
-    where
-        F: FnMut(&mut Window) + 'static,
-    {
-        unsafe extern "C" fn shim(data: *mut c_void, event: *mut nappgui_sys::Event) {
-            let data = data as *mut (Box<dyn FnMut(&mut Window)>, *mut nappgui_sys::Window);
-            let f = &mut *(*data).0;
-            let mut window = Window { inner: (*data).1 };
-            let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut window)));
-        }
-
-        let cb: Box<dyn FnMut(&mut Window)> = Box::new(handler);
-
-        let data: *mut (Box<dyn FnMut(&mut Window)>, *mut nappgui_sys::Window) =
-            Box::into_raw(Box::new((cb, self.inner)));
-
-        unsafe {
-            window_OnResize(self.inner, listener_imp(data as *mut c_void, Some(shim)));
-        }
+        /// Set an event handler for window resizing.
+        pub on_resize(Window) => window_OnResize;
     }
 
     /// Set the text that will display the window in the title bar.
@@ -158,23 +109,14 @@ impl Window {
     }
 
     /// Sets an action associated with pressing a key.
-    pub fn hotkey<F>(&self, key: i32, modifiers: u32)
+    pub fn hotkey<F>(&self, key: nappgui_sys::_key_t, modifiers: u32, handler: F)
     where
-        F: FnMut(&mut Window) + 'static,
+        F: FnMut(&mut Window, &Event) + 'static,
     {
-        // unsafe extern "C" fn shim(data: *mut c_void, event: *mut nappgui_sys::Event) {
-        //     let data = data as *mut (Box<dyn FnMut(&mut Window)>, *mut nappgui_sys::Window);
-        //     let f = &mut *(*data).0;
-        //     let mut window = Window { inner: (*data).1 };
-        //     let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut window)));
-        // }
-
-        // let cb: Box<dyn FnMut(&mut Window)> = Box::new(handler);
-
-        // let data: *mut (Box<dyn FnMut(&mut Window)>, *mut nappgui_sys::Window) =
-        //     Box::into_raw(Box::new((cb, self.inner)));
-        todo!()
-        // unsafe { window_hotkey(data, key, modifiers, Some(shim)) }
+        let listener = listener!(self.inner, handler, Window);
+        unsafe {
+            window_hotkey(self.inner, key, modifiers, listener);
+        }
     }
 
     /// Removes all keyboard shortcuts associated with the window.
@@ -216,7 +158,7 @@ impl Window {
     /// For example, what action caused the change (press [TAB], click on another control) or
     /// what control will receive the focus.
     pub fn focus_info(&self) {
-        todo!()
+        unimplemented!()
     }
 
     /// Recalculate the position and size of the controls after modifying any Layout.
@@ -225,31 +167,35 @@ impl Window {
     }
 
     /// Move the window to specific desktop coordinates.
-    pub fn origin(&self, x: i32, y: i32) {
-        todo!()
+    pub fn origin(&self, origin: V2Df) {
+        unsafe {
+            window_origin(self.inner, origin);
+        }
     }
 
     /// Set the size of the client area of the window.
     ///
     /// # Remarks
     /// The final size will depend on the window frame and desktop theme settings. This measure only refers to the interior area.
-    pub fn size(&self, width: u32, height: u32) {
-        todo!()
+    pub fn size(&self, size: S2Df) {
+        unsafe {
+            window_size(self.inner, size);
+        }
     }
 
     /// Get the window position.
-    pub fn get_origin(&self) -> (i32, i32) {
-        todo!()
+    pub fn get_origin(&self) -> V2Df {
+        unsafe { window_get_origin(self.inner) }
     }
 
     /// Get the total dimensions of the window.
-    pub fn get_size(&self) -> (u32, u32) {
-        todo!()
+    pub fn get_size(&self) -> S2Df {
+        unsafe { window_get_size(self.inner) }
     }
 
     /// Get the dimensions of the client area of the window.
-    pub fn get_client_size(&self) -> (u32, u32) {
-        todo!()
+    pub fn get_client_size(&self) -> S2Df {
+        unsafe { window_get_client_size(self.inner) }
     }
 
     /// Gets the position and size of a control in window coordinates.
@@ -257,13 +203,13 @@ impl Window {
     /// # Remarks
     ///
     /// control must belong to the window, be active and visible. The point (0,0) corresponds to the upper left vertex of the client area of the window.
-    pub fn control_frame(&self) -> (i32, i32, u32, u32) {
-        todo!()
+    pub fn control_frame(&self, control: &Control) -> R2Df {
+        unsafe { window_control_frame(self.inner, control.inner) }
     }
 
     /// Transforms a point expressed in window coordinates to screen coordinates.
-    pub fn client_to_screen(&self, x: i32, y: i32) -> (i32, i32) {
-        todo!()
+    pub fn client_to_screen(&self, point: V2Df) -> V2Df {
+        unsafe { window_client_to_screen(self.inner, point) }
     }
 
     /// Set the default window button. It will be activated when pressed [Intro].
@@ -272,8 +218,10 @@ impl Window {
     ///
     /// This function disables the possible previous default button. For the new button to be set,
     /// it must exist in the active layout, which requires this function to be called after window_panel
-    pub fn defbutton(&self) {
-        todo!()
+    pub fn defbutton(&self, button: &Button) {
+        unsafe {
+            window_defbutton(self.inner, button.inner);
+        }
     }
 
     /// Change the mouse cursor.
@@ -281,7 +229,7 @@ impl Window {
     /// # Remarks
     ///
     /// hot_x, hot_y indicate the "sensitive" point within the image, which will indicate the exact position of the mouse.
-    pub fn cursor(&self) {
-        todo!()
+    pub fn cursor(&self, cursor: gui_cursor_t, image: &Image, hot_x: f32, hot_y: f32) {
+        unsafe { window_cursor(self.inner, cursor, image.inner, hot_x, hot_y) }
     }
 }

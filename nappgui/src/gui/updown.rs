@@ -1,5 +1,7 @@
 use nappgui_sys::{updown_OnClick, updown_create, updown_tooltip};
 
+use crate::callback;
+
 pub struct UpDown {
     pub(crate) inner: *mut nappgui_sys::UpDown,
 }
@@ -18,12 +20,9 @@ impl UpDown {
         Self::new(updown)
     }
 
-    /// Set an event handler for pressing the button.
-    pub fn on_click<F>(&self, handler: F)
-    where
-        F: FnMut(&mut UpDown) + 'static,
-    {
-        todo!();
+    callback! {
+        /// Set an event handler for pressing the button.
+        pub on_click(UpDown) => updown_OnClick;
     }
 
     /// Set a tooltip for the button. It is a small explanatory text that will appear when the mouse is over the control.

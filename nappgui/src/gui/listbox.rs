@@ -1,9 +1,12 @@
-use crate::{core::event::Event, draw_2d::{color::Color, font::Font, image::Image}};
+use crate::{
+    callback,
+    draw_2d::{color::Color, font::Font, image::Image},
+};
 use nappgui_sys::{
     listbox_OnDown, listbox_OnSelect, listbox_add_elem, listbox_check, listbox_checkbox,
     listbox_checked, listbox_clear, listbox_color, listbox_count, listbox_create, listbox_del_elem,
     listbox_font, listbox_multisel, listbox_select, listbox_selected, listbox_set_elem,
-    listbox_size, listbox_text, listener_imp, S2Df,
+    listbox_size, listbox_text, S2Df,
 };
 
 pub struct ListBox {
@@ -20,76 +23,22 @@ impl ListBox {
 
     /// Create a new list control.
     pub fn create() -> Self {
-        let listbox = unsafe { nappgui_sys::listbox_create() };
+        let listbox = unsafe { listbox_create() };
         Self::new(listbox)
     }
 
-    /// Sets a handler for a mouse button press.
-    ///
-    /// # Remarks
-    /// This event is processed before listbox_OnSelect. In the tag field of Event the number of the
-    /// element clicked will be received or UINT32_MAX if it corresponds to an empty area of the ListBox.
-    /// If the event returns FALSE on event_result, the element will be prevented from being selected
-    /// (TRUE by default). See GUI Events.
-    pub fn on_down<F>(&self, handler: F)
-    where
-        F: FnMut(&mut ListBox, &Event) + 'static,
-    {
-        unsafe extern "C" fn shim(data: *mut std::ffi::c_void, event: *mut nappgui_sys::Event) {
-            let data = data as *mut (
-                Box<dyn FnMut(&mut ListBox, &Event)>,
-                *mut nappgui_sys::ListBox,
-            );
-            let f = &mut *(*data).0;
-            let mut obj = ListBox::new((*data).1);
-            let ev = Event::new(event as _);
-            let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut obj, &ev)));
-        }
+    callback! {
+        /// Sets a handler for a mouse button press.
+        ///
+        /// # Remarks
+        /// This event is processed before listbox_OnSelect. In the tag field of Event the number of the
+        /// element clicked will be received or UINT32_MAX if it corresponds to an empty area of the ListBox.
+        /// If the event returns FALSE on event_result, the element will be prevented from being selected
+        /// (TRUE by default). See GUI Events.
+        pub on_down(ListBox) => listbox_OnDown;
 
-        let cb: Box<dyn FnMut(&mut ListBox, &Event)> = Box::new(handler);
-
-        let data: *mut (
-            Box<dyn FnMut(&mut ListBox, &Event)>,
-            *mut nappgui_sys::ListBox,
-        ) = Box::into_raw(Box::new((cb, self.inner)));
-
-        unsafe {
-            listbox_OnDown(
-                self.inner,
-                listener_imp(data as *mut std::ffi::c_void, Some(shim)),
-            );
-        }
-    }
-
-    /// Set an event handler for the selection of a new item.
-    pub fn on_select<F>(&self, handler: F)
-    where
-        F: FnMut(&mut ListBox, &Event) + 'static,
-    {
-        unsafe extern "C" fn shim(data: *mut std::ffi::c_void, event: *mut nappgui_sys::Event) {
-            let data = data as *mut (
-                Box<dyn FnMut(&mut ListBox, &Event)>,
-                *mut nappgui_sys::ListBox,
-            );
-            let f = &mut *(*data).0;
-            let mut obj = ListBox::new((*data).1);
-            let ev = Event::new(event as _);
-            let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut obj, &ev)));
-        }
-
-        let cb: Box<dyn FnMut(&mut ListBox, &Event)> = Box::new(handler);
-
-        let data: *mut (
-            Box<dyn FnMut(&mut ListBox, &Event)>,
-            *mut nappgui_sys::ListBox,
-        ) = Box::into_raw(Box::new((cb, self.inner)));
-
-        unsafe {
-            listbox_OnSelect(
-                self.inner,
-                listener_imp(data as *mut std::ffi::c_void, Some(shim)),
-            );
-        }
+        /// Set an event handler for the selection of a new item.
+        pub on_select(ListBox) => listbox_OnSelect;
     }
 
     /// Set the default size of the list.

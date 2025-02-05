@@ -20,7 +20,7 @@ impl ImageView {
 
     /// Create a image view.
     pub fn create() -> Self {
-        let imageview = unsafe { nappgui_sys::imageview_create() };
+        let imageview = unsafe { imageview_create() };
         Self::new(imageview)
     }
 

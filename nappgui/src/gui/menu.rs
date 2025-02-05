@@ -1,6 +1,6 @@
 use nappgui_sys::{
-    menu_create, menu_destroy, menu_get_item, menu_hide, menu_imp, menu_item, menu_launch,
-    menu_off_items, menu_size, V2Df,
+    menu_create, menu_destroy, menu_get_item, menu_hide, menu_item, menu_launch, menu_off_items,
+    menu_size, V2Df,
 };
 
 use super::MenuItem;
@@ -19,39 +19,39 @@ impl Menu {
 
     /// Create a new menu.
     pub fn create() -> Self {
-        let menu = unsafe { nappgui_sys::menu_create() };
+        let menu = unsafe { menu_create() };
         Self::new(menu)
     }
 
     /// Destroy a menu and its entire hierarchy.
     pub fn destroy(mut self) {
-        unsafe { nappgui_sys::menu_destroy(&mut self.inner) };
+        unsafe { menu_destroy(&mut self.inner) };
     }
 
     /// Launch a menu as secondary or PopUp.
     pub fn launch(&self, x: f32, y: f32) {
         let position = V2Df { x, y };
-        unsafe { nappgui_sys::menu_launch(self.inner, position) };
+        unsafe { menu_launch(self.inner, position) };
     }
 
     /// Hides a secondary PopUp menu.
     pub fn hide(&self) {
-        unsafe { nappgui_sys::menu_hide(self.inner) };
+        unsafe { menu_hide(self.inner) };
     }
 
     /// Add an item to the menu.
     pub fn item(&self, item: &MenuItem) {
-        unsafe { nappgui_sys::menu_item(self.inner, item.inner) };
+        unsafe { menu_item(self.inner, item.inner) };
     }
 
     /// Set status ekGUI_OFF for all menu items.
     pub fn off_items(&self) {
-        unsafe { nappgui_sys::menu_off_items(self.inner) };
+        unsafe { menu_off_items(self.inner) };
     }
 
     /// Get an item from the menu.
     pub fn get_item(&self, index: u32) -> Option<MenuItem> {
-        let item = unsafe { nappgui_sys::menu_get_item(self.inner, index) };
+        let item = unsafe { menu_get_item(self.inner, index) };
         if item.is_null() {
             None
         } else {
@@ -61,6 +61,6 @@ impl Menu {
 
     /// Gets the number of items.
     pub fn size(&self) -> u32 {
-        unsafe { nappgui_sys::menu_size(self.inner) }
+        unsafe { menu_size(self.inner) }
     }
 }

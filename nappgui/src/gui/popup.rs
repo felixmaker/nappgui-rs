@@ -1,9 +1,8 @@
-use crate::{core::event::Event, draw_2d::image::Image};
+use crate::{callback, draw_2d::image::Image};
 
 use nappgui_sys::{
-    listener_imp, popup_OnSelect, popup_add_elem, popup_clear, popup_count, popup_create,
-    popup_get_selected, popup_get_text, popup_list_height, popup_selected, popup_set_elem,
-    popup_tooltip,
+    popup_OnSelect, popup_add_elem, popup_clear, popup_count, popup_create, popup_get_selected,
+    popup_get_text, popup_list_height, popup_selected, popup_set_elem, popup_tooltip,
 };
 
 /// PopUps are buttons that have a drop-down menu associated with them (Figure 1). Apparently they
@@ -23,34 +22,13 @@ impl PopUp {
 
     /// Create a new popup control (PopUp button).
     pub fn create() -> Self {
-        let popup = unsafe { nappgui_sys::popup_create() };
+        let popup = unsafe { popup_create() };
         Self::new(popup)
     }
 
-    /// Set an event handler for the selection of a new item.
-    pub fn on_select<F>(&self, handler: F)
-    where
-        F: FnMut(&mut PopUp, &Event) + 'static,
-    {
-        unsafe extern "C" fn shim(data: *mut std::ffi::c_void, event: *mut nappgui_sys::Event) {
-            let data = data as *mut (Box<dyn FnMut(&mut PopUp, &Event)>, *mut nappgui_sys::PopUp);
-            let f = &mut *(*data).0;
-            let mut obj = PopUp { inner: (*data).1 };
-            let ev = Event::new(event as _);
-            let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut obj, &ev)));
-        }
-
-        let cb: Box<dyn FnMut(&mut PopUp, &Event)> = Box::new(handler);
-
-        let data: *mut (Box<dyn FnMut(&mut PopUp, &Event)>, *mut nappgui_sys::PopUp) =
-            Box::into_raw(Box::new((cb, self.inner)));
-
-        unsafe {
-            popup_OnSelect(
-                self.inner,
-                listener_imp(data as *mut std::ffi::c_void, Some(shim)),
-            );
-        }
+    callback! {
+        /// Set an event handler for the selection of a new item.
+        pub on_select(PopUp) => popup_OnSelect;
     }
 
     /// Assign a tooltip to the popup control.

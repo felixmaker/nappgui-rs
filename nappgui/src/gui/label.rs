@@ -1,11 +1,14 @@
 use std::ffi::CString;
 
-use crate::{core::event::Event, draw_2d::{Color, Font}};
+use crate::{
+    callback,
+    draw_2d::{Color, Font},
+};
 
 use nappgui_sys::{
     align_t, fstyle_t, label_OnClick, label_align, label_bgcolor, label_bgcolor_over, label_color,
     label_color_over, label_create, label_font, label_multiline, label_size_text, label_style_over,
-    label_text, listener_imp,
+    label_text,
 };
 
 pub struct Label {
@@ -32,30 +35,9 @@ impl Label {
         Self::new(label)
     }
 
-    /// Set the OnClick event handler.
-    pub fn on_click<F>(&self, handler: F)
-    where
-        F: FnMut(&mut Label, &Event) + 'static,
-    {
-        unsafe extern "C" fn shim(data: *mut std::ffi::c_void, event: *mut nappgui_sys::Event) {
-            let data = data as *mut (Box<dyn FnMut(&mut Label, &Event)>, *mut nappgui_sys::Label);
-            let f = &mut *(*data).0;
-            let mut label = Label { inner: (*data).1 };
-            // let ev = Event::new(event);
-            // let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut label, &ev)));
-        }
-
-        let cb: Box<dyn FnMut(&mut Label, &Event)> = Box::new(handler);
-
-        let data: *mut (Box<dyn FnMut(&mut Label, &Event)>, *mut nappgui_sys::Label) =
-            Box::into_raw(Box::new((cb, self.inner)));
-
-        unsafe {
-            label_OnClick(
-                self.inner,
-                listener_imp(data as *mut std::ffi::c_void, Some(shim)),
-            );
-        }
+    callback! {
+        /// Set the OnClick event handler.
+        pub on_click(Label) => label_OnClick;
     }
 
     /// Set the text that the label will display.

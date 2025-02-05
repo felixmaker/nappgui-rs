@@ -3,7 +3,7 @@ use crate::{core::event::Event, draw_2d::Image};
 use nappgui_sys::{
     gui_state_t, listener_imp, menuitem_OnClick, menuitem_create, menuitem_enabled, menuitem_image,
     menuitem_key, menuitem_separator, menuitem_state, menuitem_submenu, menuitem_text,
-    menuitem_visible, sstate_t, vkey_t,
+    menuitem_visible, vkey_t,
 };
 
 use super::Menu;
@@ -22,13 +22,13 @@ impl MenuItem {
 
     /// Create a new item for a menu.
     pub fn create() -> Self {
-        let menu_item = unsafe { nappgui_sys::menuitem_create() };
+        let menu_item = unsafe { menuitem_create() };
         Self::new(menu_item)
     }
 
     /// Create a new separator for a menu.
     pub fn separator() -> Self {
-        let menu_item = unsafe { nappgui_sys::menuitem_separator() };
+        let menu_item = unsafe { menuitem_separator() };
         Self::new(menu_item)
     }
 

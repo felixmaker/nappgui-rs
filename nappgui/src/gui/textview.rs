@@ -1,7 +1,13 @@
-use crate::draw_2d::Color;
+use crate::{callback, draw_2d::Color};
 
 use nappgui_sys::{
-    align_t, textview_OnFilter, textview_OnFocus, textview_afspace, textview_apply_all, textview_apply_sel, textview_bfspace, textview_bgcolor, textview_clear, textview_color, textview_copy, textview_create, textview_cut, textview_editable, textview_family, textview_fsize, textview_fstyle, textview_get_text, textview_halign, textview_lspacing, textview_paste, textview_pgcolor, textview_printf, textview_rtf, textview_scroll_caret, textview_scroll_visible, textview_select, textview_show_select, textview_size, textview_units, textview_wrap, textview_writef, S2Df
+    align_t, textview_OnFilter, textview_OnFocus, textview_afspace, textview_apply_all,
+    textview_apply_sel, textview_bfspace, textview_bgcolor, textview_clear, textview_color,
+    textview_copy, textview_create, textview_cut, textview_editable, textview_family,
+    textview_fsize, textview_fstyle, textview_get_text, textview_halign, textview_lspacing,
+    textview_paste, textview_pgcolor, textview_scroll_caret, textview_scroll_visible,
+    textview_select, textview_show_select, textview_size, textview_units, textview_wrap,
+    textview_writef, S2Df,
 };
 
 pub struct TextView {
@@ -18,27 +24,19 @@ impl TextView {
 
     /// Create a text view.
     pub fn create() -> Self {
-        let textview = unsafe { nappgui_sys::textview_create() };
+        let textview = unsafe { textview_create() };
         Self::new(textview)
     }
 
-    /// Set a handler to filter text while editing.
-    ///
-    /// # Remarks
-    /// It works the same way as in Edit controls. See Filter texts and GUI Events.
-    pub fn on_filter<F>(&self, handler: F)
-    where
-        F: FnMut(&mut TextView) + 'static,
-    {
-        todo!();
-    }
+    callback! {
+        /// Set a handler to filter text while editing.
+        ///
+        /// # Remarks
+        /// It works the same way as in Edit controls. See Filter texts and GUI Events.
+        pub on_filter(TextView) => textview_OnFilter;
 
-    /// Set a handler for keyboard focus.
-    pub fn on_focus<F>(&self, handler: F)
-    where
-        F: FnMut(&mut TextView, bool) + 'static,
-    {
-        todo!();
+        /// Set a handler for keyboard focus.
+        pub on_focus(TextView) => textview_OnFocus;
     }
 
     /// Sets the default size of the view.
@@ -53,18 +51,11 @@ impl TextView {
     }
 
     /// Writes text to the view, using the format of the printf.
-    pub fn writef(&self, format: &str) {
-        todo!();
-    }
-
-    /// Write a C UTF8 string to the view.
-    pub fn write(&self, text: &str) {
-        todo!();
-    }
-
-    /// Insert text in Microsoft RTF format.
-    pub fn rtf(&self, text: &str) {
-        todo!();
+    pub fn writef(&self, text: &str) {
+        let text = std::ffi::CString::new(text).unwrap();
+        unsafe {
+            textview_writef(self.inner, text.as_ptr());
+        }
     }
 
     /// Sets the text units.

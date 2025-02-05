@@ -2,6 +2,8 @@ use nappgui_sys::{
     webview_OnFocus, webview_back, webview_create, webview_forward, webview_navigate, webview_size,
 };
 
+use crate::callback;
+
 pub struct WebView {
     pub(crate) inner: *mut nappgui_sys::WebView,
 }
@@ -20,12 +22,9 @@ impl WebView {
         Self::new(webview)
     }
 
-    /// Sets a handler for keyboard focus.
-    pub fn on_focus<F>(&self, handler: F)
-    where
-        F: FnMut(&mut WebView, bool) + 'static,
-    {
-        todo!();
+    callback! {
+        /// Sets a handler for keyboard focus.
+        pub on_focus(WebView) => webview_OnFocus;
     }
 
     /// Sets the default size of the view.

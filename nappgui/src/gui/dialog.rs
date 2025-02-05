@@ -1,8 +1,8 @@
 use std::ffi::CString;
 
-use nappgui_sys::{align_t, comwin_color, comwin_open_file, comwin_save_file, listener_imp};
+use nappgui_sys::{align_t, comwin_color, comwin_open_file, comwin_save_file};
 
-use crate::{core::event::Event, draw_2d::Color};
+use crate::{core::event::Event, draw_2d::Color, listener};
 
 use super::window::Window;
 
@@ -49,23 +49,7 @@ pub fn color<F>(
 ) where
     F: FnMut(&mut Window, &Event) + 'static,
 {
-    unsafe extern "C" fn shim(data: *mut std::ffi::c_void, event: *mut nappgui_sys::Event) {
-        let data = data as *mut (
-            Box<dyn FnMut(&mut Window, &Event)>,
-            *mut nappgui_sys::Window,
-        );
-        let f = &mut *(*data).0;
-        let mut window = Window { inner: (*data).1 };
-        let ev = Event::new(event);
-        let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut window, &ev)));
-    }
-
-    let cb: Box<dyn FnMut(&mut Window, &Event)> = Box::new(on_change);
-
-    let data: *mut (
-        Box<dyn FnMut(&mut Window, &Event)>,
-        *mut nappgui_sys::Window,
-    ) = Box::into_raw(Box::new((cb, window.inner)));
+    let listener = listener!(window.inner, on_change, Window);
 
     let title = CString::new(title).unwrap();
     let mut colors: Vec<u32> = colors.iter().map(|color| color.inner).collect();
@@ -81,7 +65,7 @@ pub fn color<F>(
             current.inner,
             colors.as_mut_ptr(),
             n,
-            listener_imp(data as *mut std::ffi::c_void, Some(shim)),
+            listener,
         );
     }
 }

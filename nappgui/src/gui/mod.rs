@@ -2,7 +2,6 @@ pub(crate) mod button;
 pub(crate) mod cell;
 pub(crate) mod combo;
 pub(crate) mod control;
-pub mod dialog;
 pub(crate) mod edit;
 pub(crate) mod imageview;
 pub(crate) mod label;
@@ -21,6 +20,9 @@ pub(crate) mod updown;
 pub(crate) mod view;
 pub(crate) mod webview;
 pub(crate) mod window;
+
+pub mod dialog;
+pub mod event;
 
 pub use {
     button::Button, cell::Cell, combo::Combo, control::Control, edit::Edit, imageview::ImageView,

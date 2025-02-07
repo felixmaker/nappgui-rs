@@ -16,9 +16,9 @@ impl Event {
     }
 
     /// Get the event parameters, encapsulated in a structure, which will be different depending on the event type.
-    pub fn params<T>(&self) -> T
+    pub fn params<T>(&self) -> Option<T>
     where
-        T: NappGUIEvent,
+        T: NappGUIEventParams,
     {
         let tp = T::type_();
         let tp = std::ffi::CString::new(tp).unwrap();
@@ -26,9 +26,32 @@ impl Event {
 
         T::from_ptr(params)
     }
+
+    /// Gets an object to write the results of the event. Some events require the return of data by the receiver.
+    /// The type of result object will depend on the type of event.
+    pub fn result<T>(&self) -> Option<T>
+    where
+        T: NappGUIEventResult,
+    {
+        let tp = T::type_();
+        let tp = std::ffi::CString::new(tp).unwrap();
+        let result = unsafe { nappgui_sys::event_result_imp(self.inner, tp.as_ptr()) };
+
+        T::from_ptr(result)
+    }
 }
 
-pub trait NappGUIEvent {
+pub trait NappGUIEventParams {
     fn type_() -> &'static str;
-    fn from_ptr(ptr: *mut std::ffi::c_void) -> Self;
+    fn from_ptr(ptr: *mut std::ffi::c_void) -> Option<Self>
+    where
+        Self: Sized;
+}
+
+
+pub trait NappGUIEventResult {
+    fn type_() -> &'static str;
+    fn from_ptr(ptr: *mut std::ffi::c_void) -> Option<Self>
+    where
+        Self: Sized; 
 }

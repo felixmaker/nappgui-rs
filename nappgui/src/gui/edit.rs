@@ -1,13 +1,15 @@
 use nappgui_sys::{
-    align_t, edit_OnChange, edit_OnFilter, edit_OnFocus, edit_align, edit_autoselect, edit_bgcolor,
+    edit_OnChange, edit_OnFilter, edit_OnFocus, edit_align, edit_autoselect, edit_bgcolor,
     edit_bgcolor_focus, edit_color, edit_color_focus, edit_copy, edit_create, edit_cut,
     edit_editable, edit_font, edit_get_height, edit_get_text, edit_multiline, edit_passmode,
     edit_paste, edit_phcolor, edit_phstyle, edit_phtext, edit_select, edit_text, edit_tooltip,
     edit_vpadding,
 };
 
-use crate::{callback, draw_2d::font::Font};
+use crate::{callback, draw_2d::font::Font, prelude::Align};
 
+/// EditBox are small text boxes with editing capabilities. Like the Label they are of uniform format:
+/// The typeface and colors will affect the entire text
 pub struct Edit {
     pub(crate) inner: *mut nappgui_sys::Edit,
 }
@@ -59,7 +61,7 @@ impl Edit {
     }
 
     /// Set text alignment.
-    pub fn align(&self, align: align_t) {
+    pub fn align(&self, align: Align) {
         unsafe {
             edit_align(self.inner, align);
         }

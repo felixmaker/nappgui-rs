@@ -4,6 +4,9 @@ use nappgui_sys::{
 
 use crate::callback;
 
+/// A WebView control will allow us to embed Web content in our application. It will behave in the same way 
+/// as other view controls such as View or TextView in terms of layout or resizing, displaying a fully 
+/// functional browser in its client area.
 pub struct WebView {
     pub(crate) inner: *mut nappgui_sys::WebView,
 }

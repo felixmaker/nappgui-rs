@@ -3,14 +3,19 @@ use std::ffi::CString;
 use crate::{
     callback,
     draw_2d::{Color, Font},
+    prelude::FStyle,
 };
 
 use nappgui_sys::{
-    align_t, fstyle_t, label_OnClick, label_align, label_bgcolor, label_bgcolor_over, label_color,
+    align_t, label_OnClick, label_align, label_bgcolor, label_bgcolor_over, label_color,
     label_color_over, label_create, label_font, label_multiline, label_size_text, label_style_over,
     label_text,
 };
 
+/// Label controls are used to insert small blocks of text into windows and forms. They are of uniform format,
+/// that is, the font and color attributes will be applied to the entire text. In most cases the content will
+/// be limited to a single line, although it is possible to show blocks that extend in several lines. The control
+/// size will be adjusted to the text it contains
 pub struct Label {
     pub(crate) inner: *mut nappgui_sys::Label,
 }
@@ -68,7 +73,7 @@ impl Label {
     }
 
     /// Set the font modifiers, when the mouse is over the control.
-    pub fn style_over(&self, style: fstyle_t) {
+    pub fn style_over(&self, style: FStyle) {
         unsafe {
             label_style_over(self.inner, (style as i32).try_into().unwrap());
         }

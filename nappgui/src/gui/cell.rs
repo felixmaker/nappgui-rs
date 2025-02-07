@@ -7,6 +7,7 @@ use nappgui_sys::{
 
 use super::*;
 
+/// Cells are the inner elements of a Layout and will house a control or a sublayout.
 pub struct Cell {
     pub(crate) inner: *mut nappgui_sys::Cell,
 }

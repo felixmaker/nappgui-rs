@@ -4,8 +4,10 @@ use nappgui_sys::{
 };
 
 use super::Layout;
-
-/// A Panel is a control within a window that groups other controls.
+/// A Panel is a control within a window that groups other controls. It defines its own reference system, 
+/// that is, if we move a panel all its descendants will move in unison since their locations will be 
+/// relative to its origin. It will support other (sub)-panels as descendants, which allows to form a 
+/// Window Hierarchy (Figure 1).A Panel is a control within a window that groups other controls.
 pub struct Panel {
     pub(crate) inner: *mut nappgui_sys::Panel,
 }

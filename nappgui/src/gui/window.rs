@@ -1,23 +1,24 @@
 use nappgui_sys::{
-    gui_cursor_t, gui_focus_t, window_OnClose, window_OnMoved, window_OnResize,
-    window_clear_hotkeys, window_client_to_screen, window_control_frame, window_create,
-    window_cursor, window_cycle_tabstop, window_defbutton, window_destroy, window_flag_t,
-    window_focus, window_get_client_size, window_get_focus, window_get_origin, window_get_size,
-    window_hide, window_hotkey, window_is_visible, window_modal, window_next_tabstop,
-    window_origin, window_overlay, window_panel, window_previous_tabstop, window_show, window_size,
-    window_stop_modal, window_title, window_update, R2Df, S2Df, V2Df,
+    window_OnClose, window_OnMoved, window_OnResize, window_clear_hotkeys, window_client_to_screen,
+    window_control_frame, window_create, window_cursor, window_cycle_tabstop, window_defbutton,
+    window_destroy, window_flag_t, window_focus, window_get_client_size, window_get_focus,
+    window_get_origin, window_get_size, window_hide, window_hotkey, window_is_visible,
+    window_modal, window_next_tabstop, window_origin, window_overlay, window_panel,
+    window_previous_tabstop, window_show, window_size, window_stop_modal, window_title,
+    window_update, R2Df, S2Df, V2Df,
 };
 use std::ffi::CString;
 
 use crate::core::event::Event;
 use crate::draw_2d::Image;
+use crate::prelude::{GuiCursor, GuiFocus};
 use crate::{callback, listener};
 
 use super::control::Control;
 use super::panel::Panel;
 use super::Button;
 
-/// Window objects are the highest-level containers within the user interface
+/// Window objects are the highest-level containers within the user interface.
 pub struct Window {
     pub(crate) inner: *mut nappgui_sys::Window,
 }
@@ -131,17 +132,17 @@ impl Window {
     }
 
     /// Moves keyboard focus to the next control in the tab-list. It has the same effect as pressing [TAB].
-    pub fn next_tabstop(&self) -> gui_focus_t {
+    pub fn next_tabstop(&self) -> GuiFocus {
         unsafe { window_next_tabstop(self.inner) }
     }
 
     /// Moves the keyboard focus to the previous control in the tab-list. This has the same effect as pressing [SHIFT]+[TAB].
-    pub fn previous_tabstop(&self) -> gui_focus_t {
+    pub fn previous_tabstop(&self) -> GuiFocus {
         unsafe { window_previous_tabstop(self.inner) }
     }
 
     /// Set keyboard focus to a specific control.
-    pub fn focus(&self, control: &Control) -> gui_focus_t {
+    pub fn focus(&self, control: &Control) -> GuiFocus {
         unsafe { window_focus(self.inner, control.inner) }
     }
 
@@ -229,7 +230,7 @@ impl Window {
     /// # Remarks
     ///
     /// hot_x, hot_y indicate the "sensitive" point within the image, which will indicate the exact position of the mouse.
-    pub fn cursor(&self, cursor: gui_cursor_t, image: &Image, hot_x: f32, hot_y: f32) {
+    pub fn cursor(&self, cursor: GuiCursor, image: &Image, hot_x: f32, hot_y: f32) {
         unsafe { window_cursor(self.inner, cursor, image.inner, hot_x, hot_y) }
     }
 }

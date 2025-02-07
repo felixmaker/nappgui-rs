@@ -9,6 +9,8 @@ use nappgui_sys::{
 
 use crate::callback;
 
+/// The View controls or custom views are blank areas within the window that allow us 
+/// to implement our own components. 
 pub struct View {
     pub(crate) inner: *mut nappgui_sys::View,
 }

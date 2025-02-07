@@ -1,7 +1,7 @@
-use crate::{callback, draw_2d::Font};
+use crate::{callback, draw_2d::Font, prelude::Align};
 
 use nappgui_sys::{
-    align_t, tableview_OnData, tableview_OnHeaderClick, tableview_OnRowClick, tableview_OnSelect,
+    tableview_OnData, tableview_OnHeaderClick, tableview_OnRowClick, tableview_OnSelect,
     tableview_column_freeze, tableview_column_limits, tableview_column_resizable,
     tableview_column_width, tableview_create, tableview_deselect, tableview_deselect_all,
     tableview_focus_row, tableview_font, tableview_get_focus_row, tableview_grid,
@@ -12,6 +12,7 @@ use nappgui_sys::{
     tableview_update, S2Df,
 };
 
+/// TableViews are data views that display tabulated information arranged in rows and columns.
 pub struct TableView {
     pub(crate) inner: *mut nappgui_sys::TableView,
 }
@@ -90,7 +91,7 @@ impl TableView {
     }
 
     /// Sets the alignment of the header text.
-    pub fn header_align(&self, index: u32, align: align_t) {
+    pub fn header_align(&self, index: u32, align: Align) {
         unsafe { tableview_header_align(self.inner, index, align) }
     }
 
@@ -195,7 +196,7 @@ impl TableView {
     /// Setting keyboard focus to a row only has effects on navigation, but does not involve
     /// selecting the row. The table is automatically scrolled so that the row is visible.
     /// In this case, align indicates where the vertical scroll is adjusted (up, down or centered).
-    pub fn focus_row(&self, row: u32, align: align_t) {
+    pub fn focus_row(&self, row: u32, align: Align) {
         unsafe { tableview_focus_row(self.inner, row, align) }
     }
 

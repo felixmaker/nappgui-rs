@@ -1,12 +1,13 @@
-use crate::{callback, draw_2d::image::Image};
+use crate::{callback, draw_2d::Image, prelude::Align};
 
 use nappgui_sys::{
-    align_t, combo_OnChange, combo_OnFilter, combo_add_elem, combo_align, combo_bgcolor,
+    combo_OnChange, combo_OnFilter, combo_add_elem, combo_align, combo_bgcolor,
     combo_bgcolor_focus, combo_color, combo_color_focus, combo_count, combo_create, combo_del_elem,
     combo_duplicates, combo_get_text, combo_ins_elem, combo_phcolor, combo_phstyle, combo_phtext,
     combo_set_elem, combo_text, combo_tooltip,
 };
 
+/// ComboBox are text editing boxes with drop-down list.
 pub struct Combo {
     pub(crate) inner: *mut nappgui_sys::Combo,
 }
@@ -46,7 +47,7 @@ impl Combo {
     }
 
     /// Set text alignment.
-    pub fn align(&self, align: align_t) {
+    pub fn align(&self, align: Align) {
         unsafe {
             combo_align(self.inner, align);
         }

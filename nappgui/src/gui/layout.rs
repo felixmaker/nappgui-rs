@@ -1,45 +1,28 @@
 use nappgui_sys::{
-    align_t, gui_orient_t, layout_bgcolor, layout_button, layout_cell, layout_combo,
-    layout_control, layout_create, layout_edit, layout_get_button, layout_get_combo,
-    layout_get_edit, layout_get_imageview, layout_get_label, layout_get_layout, layout_get_listbox,
-    layout_get_panel, layout_get_popup, layout_get_progress, layout_get_slider,
-    layout_get_splitview, layout_get_tableview, layout_get_textview, layout_get_updown,
-    layout_get_view, layout_get_webview, layout_halign, layout_hexpand, layout_hexpand2,
-    layout_hexpand3, layout_hmargin, layout_hsize, layout_imageview, layout_insert_col,
-    layout_insert_row, layout_label, layout_layout, layout_listbox, layout_margin, layout_margin2,
-    layout_margin4, layout_ncols, layout_nrows, layout_panel, layout_panel_replace, layout_popup,
-    layout_progress, layout_remove_col, layout_remove_row, layout_show_col, layout_show_row,
-    layout_skcolor, layout_slider, layout_splitview, layout_tableview, layout_taborder,
-    layout_tabstop, layout_textview, layout_update, layout_updown, layout_valign, layout_vexpand,
-    layout_vexpand2, layout_vexpand3, layout_view, layout_vmargin, layout_vsize, layout_webview,
+    layout_bgcolor, layout_button, layout_cell, layout_combo, layout_control, layout_create,
+    layout_edit, layout_get_button, layout_get_combo, layout_get_edit, layout_get_imageview,
+    layout_get_label, layout_get_layout, layout_get_listbox, layout_get_panel, layout_get_popup,
+    layout_get_progress, layout_get_slider, layout_get_splitview, layout_get_tableview,
+    layout_get_textview, layout_get_updown, layout_get_view, layout_get_webview, layout_halign,
+    layout_hexpand, layout_hexpand2, layout_hexpand3, layout_hmargin, layout_hsize,
+    layout_imageview, layout_insert_col, layout_insert_row, layout_label, layout_layout,
+    layout_listbox, layout_margin, layout_margin2, layout_margin4, layout_ncols, layout_nrows,
+    layout_panel, layout_panel_replace, layout_popup, layout_progress, layout_remove_col,
+    layout_remove_row, layout_show_col, layout_show_row, layout_skcolor, layout_slider,
+    layout_splitview, layout_tableview, layout_taborder, layout_tabstop, layout_textview,
+    layout_update, layout_updown, layout_valign, layout_vexpand, layout_vexpand2, layout_vexpand3,
+    layout_view, layout_vmargin, layout_vsize, layout_webview,
 };
 
-use crate::draw_2d::Color;
+use crate::{
+    draw_2d::Color,
+    prelude::{Align, GuiOrient},
+};
 
-use super::button::Button;
-use super::cell::Cell;
-use super::combo::Combo;
-use super::control::Control;
-use super::edit::Edit;
-use super::imageview::ImageView;
-use super::label::Label;
-use super::listbox::ListBox;
-use super::panel::Panel;
-use super::popup::PopUp;
-use super::progress::Progress;
-use super::slider::Slider;
-use super::splitview::SplitView;
-use super::tableview::TableView;
-use super::textview::TextView;
-use super::updown::UpDown;
-use super::view::View;
-use super::webview::WebView;
+use super::*;
 
 /// A Layout is a virtual and transparent grid always linked with a Panel which serves to locate the different
-/// interface elements (Figure 1). Its inner cells have the ability to be automatically sized according to their
-/// content, which results in great portability because it is not necessary to indicate specific coordinates or
-/// sizes for the controls. To illustrate the concept, we will slightly simplify the code of Hello Edit and
-/// UpDown! (Listing 1), whose result we can see in (Figure 2).
+/// interface elements.
 pub struct Layout {
     pub(crate) inner: *mut nappgui_sys::Layout,
 }
@@ -382,7 +365,7 @@ impl Layout {
     }
 
     /// Set how the keyboard focus will move when you press [TAB].
-    pub fn taborder(&self, taborder: gui_orient_t) {
+    pub fn taborder(&self, taborder: GuiOrient) {
         unsafe { layout_taborder(self.inner, taborder) };
     }
 
@@ -457,13 +440,13 @@ impl Layout {
 
     /// Sets the horizontal alignment of a cell. It will take effect when the column is
     /// wider than the cell.
-    pub fn halign(&self, col: u32, row: u32, align: align_t) {
+    pub fn halign(&self, col: u32, row: u32, align: Align) {
         unsafe { layout_halign(self.inner, col, row, align) };
     }
 
     /// Sets the vertical alignment of a cell. It will take effect when the row is
     /// taller than the cell.
-    pub fn valign(&self, col: u32, row: u32, align: align_t) {
+    pub fn valign(&self, col: u32, row: u32, align: Align) {
         unsafe { layout_valign(self.inner, col, row, align) };
     }
 

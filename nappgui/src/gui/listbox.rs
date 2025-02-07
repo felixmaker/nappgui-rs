@@ -1,6 +1,6 @@
 use crate::{
     callback,
-    draw_2d::{color::Color, font::Font, image::Image},
+    draw_2d::{Color, Font, Image},
 };
 use nappgui_sys::{
     listbox_OnDown, listbox_OnSelect, listbox_add_elem, listbox_check, listbox_checkbox,
@@ -9,6 +9,7 @@ use nappgui_sys::{
     listbox_size, listbox_text, S2Df,
 };
 
+/// The ListBox are controls that display a series of elements as a list.
 pub struct ListBox {
     pub(crate) inner: *mut nappgui_sys::ListBox,
 }

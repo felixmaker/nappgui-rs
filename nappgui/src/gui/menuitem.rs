@@ -1,13 +1,18 @@
-use crate::{core::event::Event, draw_2d::Image};
+use crate::{
+    core::event::Event,
+    draw_2d::Image,
+    prelude::{GuiState, Vkey},
+};
 
 use nappgui_sys::{
-    gui_state_t, listener_imp, menuitem_OnClick, menuitem_create, menuitem_enabled, menuitem_image,
+    listener_imp, menuitem_OnClick, menuitem_create, menuitem_enabled, menuitem_image,
     menuitem_key, menuitem_separator, menuitem_state, menuitem_submenu, menuitem_text,
-    menuitem_visible, vkey_t,
+    menuitem_visible,
 };
 
 use super::Menu;
 
+/// Represents an option within a Menu. They will always have an associated action that will be executed when activated.
 pub struct MenuItem {
     pub(crate) inner: *mut nappgui_sys::MenuItem,
 }
@@ -85,7 +90,7 @@ impl MenuItem {
     }
 
     /// Set a keyboard shortcut to select the menu item.
-    pub fn key(&self, key: vkey_t, modifiers: u32) {
+    pub fn key(&self, key: Vkey, modifiers: u32) {
         unsafe { menuitem_key(self.inner, key, modifiers) };
     }
 
@@ -95,7 +100,7 @@ impl MenuItem {
     }
 
     /// Set the status of the item, which will be reflected with a mark next to the text.
-    pub fn state(&self, state: gui_state_t) {
+    pub fn state(&self, state: GuiState) {
         unsafe { menuitem_state(self.inner, state) };
     }
 }

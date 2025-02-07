@@ -7,6 +7,8 @@ use nappgui_sys::{
 
 use super::*;
 
+/// GuiControl is the virtual base class where common functionality is defined for all the controls 
+/// and views that we use to create the user interfaces
 pub struct Control {
     pub(crate) inner: *mut nappgui_sys::GuiControl,
 }

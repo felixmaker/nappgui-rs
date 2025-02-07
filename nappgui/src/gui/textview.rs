@@ -1,7 +1,7 @@
-use crate::{callback, draw_2d::Color};
+use crate::{callback, draw_2d::Color, prelude::Align};
 
 use nappgui_sys::{
-    align_t, textview_OnFilter, textview_OnFocus, textview_afspace, textview_apply_all,
+    textview_OnFilter, textview_OnFocus, textview_afspace, textview_apply_all,
     textview_apply_sel, textview_bfspace, textview_bgcolor, textview_clear, textview_color,
     textview_copy, textview_create, textview_cut, textview_editable, textview_family,
     textview_fsize, textview_fstyle, textview_get_text, textview_halign, textview_lspacing,
@@ -10,6 +10,7 @@ use nappgui_sys::{
     textview_writef, S2Df,
 };
 
+/// TextView are views designed to work with rich text blocks, where fonts, sizes and colors can be combined. 
 pub struct TextView {
     pub(crate) inner: *mut nappgui_sys::TextView,
 }
@@ -111,7 +112,7 @@ impl TextView {
     }
 
     /// Sets the alignment of text in a paragraph.
-    pub fn halign(&self, align: align_t) {
+    pub fn halign(&self, align: Align) {
         unsafe {
             textview_halign(self.inner, align);
         }

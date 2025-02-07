@@ -1,8 +1,8 @@
 use std::ffi::CString;
 
-use nappgui_sys::{align_t, comwin_color, comwin_open_file, comwin_save_file};
+use nappgui_sys::{ comwin_color, comwin_open_file, comwin_save_file};
 
-use crate::{core::event::Event, draw_2d::Color, listener};
+use crate::{core::event::Event, draw_2d::Color, listener, prelude::Align};
 
 use super::window::Window;
 
@@ -40,8 +40,8 @@ pub fn color<F>(
     title: &str,
     x: f32,
     y: f32,
-    halign: align_t,
-    valign: align_t,
+    halign: Align,
+    valign: Align,
     current: Color,
     colors: &[Color],
     n: u32,

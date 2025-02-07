@@ -2,16 +2,20 @@ use std::ffi::CString;
 
 use crate::{
     callback,
-    draw_2d::{font::Font, image::Image},
+    draw_2d::{Font, Image},
 };
 
 use nappgui_sys::{
     button_OnClick, button_check, button_check3, button_flat, button_flatgle, button_font,
     button_get_height, button_get_state, button_get_tag, button_image, button_image_alt,
     button_push, button_radio, button_state, button_tag, button_text, button_text_alt,
-    button_tooltip, button_vpadding, gui_state_t,
+    button_tooltip, button_vpadding,
 };
 
+use crate::prelude::*;
+
+/// The buttons are another classic element in graphic interfaces, where we distinguish four types:
+/// the push button, checkbox, radiobutton and flat button typical of toolbars
 pub struct Button {
     pub(crate) inner: *mut nappgui_sys::Button,
 }
@@ -114,7 +118,7 @@ impl Button {
     ///
     /// # Remarks
     /// Not applicable on push buttons button_push.
-    pub fn state(&self, state: gui_state_t) {
+    pub fn state(&self, state: GuiState) {
         unsafe { button_state(self.inner, state) }
     }
 
@@ -132,7 +136,7 @@ impl Button {
     ///
     /// # Remarks
     /// Not applicable on push buttons button_push.
-    pub fn get_state(&self) -> gui_state_t {
+    pub fn get_state(&self) -> GuiState {
         unsafe { button_get_state(self.inner) }
     }
 

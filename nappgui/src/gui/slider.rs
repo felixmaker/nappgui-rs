@@ -5,6 +5,7 @@ use nappgui_sys::{
 
 use crate::callback;
 
+/// Sliders are normally used to edit continuous and bounded numerical values.
 pub struct Slider {
     pub(crate) inner: *mut nappgui_sys::Slider,
 }

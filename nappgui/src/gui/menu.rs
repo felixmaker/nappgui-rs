@@ -5,6 +5,11 @@ use nappgui_sys::{
 
 use super::MenuItem;
 
+/// A Menu is a type of control that integrates a series of options, also called items or MenuItems. 
+/// Each of them consists of a short text, optionally an icon and optionally also a keyboard shortcut, 
+/// such as the classic Ctrl+C/Ctrl+V for copy and paste. Additionally, an item can host a submenu, 
+/// forming a hierarchy with different levels of depth. In Products you have an example application 
+/// that uses menus.
 pub struct Menu {
     pub(crate) inner: *mut nappgui_sys::Menu,
 }

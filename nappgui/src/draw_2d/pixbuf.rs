@@ -1,10 +1,11 @@
 use nappgui_sys::{
     pixbuf_cdata, pixbuf_convert, pixbuf_copy, pixbuf_create, pixbuf_data, pixbuf_destroy,
     pixbuf_dsize, pixbuf_format, pixbuf_format_bpp, pixbuf_get, pixbuf_height, pixbuf_set,
-    pixbuf_size, pixbuf_trim, pixbuf_width, pixformat_t,
+    pixbuf_size, pixbuf_trim, pixbuf_width
 };
 
-use super::palette::Palette;
+use crate::prelude::*;
+use super::Palette;
 
 pub struct Pixbuf {
     pub(crate) inner: *mut nappgui_sys::Pixbuf,
@@ -19,7 +20,7 @@ impl Pixbuf {
     }
 
     /// Create a new pixel buffer.
-    pub fn create(width: u32, height: u32, format: pixformat_t) -> Self {
+    pub fn create(width: u32, height: u32, format: PixFormat) -> Self {
         let pixbuf = unsafe { pixbuf_create(width, height, format) };
         Self::new(pixbuf)
     }
@@ -34,7 +35,7 @@ impl Pixbuf {
     }
 
     /// Change the format of a buffer pixel.
-    pub fn convert(&self, palette: &Palette, oformat: pixformat_t) -> Self {
+    pub fn convert(&self, palette: &Palette, oformat: PixFormat) -> Self {
         let pixbuf = unsafe { pixbuf_convert(self.inner, palette.inner, oformat) };
         Self::new(pixbuf)
     }
@@ -45,7 +46,7 @@ impl Pixbuf {
     }
 
     /// Get the pixel format.
-    pub fn format(&self) -> pixformat_t {
+    pub fn format(&self) -> PixFormat {
         unsafe { pixbuf_format(self.inner) }
     }
 
@@ -88,7 +89,7 @@ impl Pixbuf {
     }
 
     /// Gets bits per pixel based on format.
-    pub fn format_bpp(format: pixformat_t) -> u32 {
+    pub fn format_bpp(format: PixFormat) -> u32 {
         unsafe { pixbuf_format_bpp(format) }
     }
 

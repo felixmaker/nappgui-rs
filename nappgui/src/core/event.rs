@@ -28,7 +28,7 @@ impl Event {
     }
 }
 
-pub(crate) trait NappGUIEvent {
+pub trait NappGUIEvent {
     fn type_() -> &'static str;
     fn from_ptr(ptr: *mut std::ffi::c_void) -> Self;
 }

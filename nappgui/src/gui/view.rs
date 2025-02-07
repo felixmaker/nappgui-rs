@@ -2,9 +2,9 @@ use nappgui_sys::{
     view_OnAcceptFocus, view_OnClick, view_OnDown, view_OnDrag, view_OnDraw, view_OnEnter,
     view_OnExit, view_OnFocus, view_OnKeyDown, view_OnKeyUp, view_OnMove, view_OnOverlay,
     view_OnResignFocus, view_OnScroll, view_OnSize, view_OnUp, view_OnWheel, view_allow_tab,
-    view_content_size, view_create, view_custom, view_get_size, view_keybuf, view_native,
-    view_point_scale, view_scroll, view_scroll_size, view_scroll_visible, view_scroll_x,
-    view_scroll_y, view_size, view_update, view_viewport, S2Df, V2Df,
+    view_content_size, view_create, view_custom, view_get_size, view_native, view_point_scale,
+    view_scroll, view_scroll_size, view_scroll_visible, view_scroll_x, view_scroll_y, view_size,
+    view_update, view_viewport, S2Df, V2Df,
 };
 
 use crate::callback;
@@ -106,16 +106,6 @@ impl View {
     /// if there is no associated OnKeyDown handler. In general, you should not use this function.
     pub fn allow_tab(&self, allow: bool) {
         unsafe { view_allow_tab(self.inner, allow as i8) }
-    }
-
-    /// Sets a keyboard buffer for synchronous or asynchronous query of key state.
-    ///
-    /// # Remarks
-    /// It just keeps a reference to the buffer, which will need to be destroyed by the object that created it.
-    /// See Keyboard buffer. The application will still be able to receive keyboard events through
-    /// view_OnKeyDown and view_OnKeyUp.
-    pub fn keybuf(&self) {
-        unimplemented!()
     }
 
     /// Gets the current size of the view.

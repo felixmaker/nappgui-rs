@@ -1,5 +1,3 @@
-use nappgui_sys::*;
-
 pub use nappgui_sys::platform_t as Platform;
 
 // /// Operating systems supported by NAppGUI.

@@ -6,10 +6,10 @@ use nappgui_sys::{
     tableview_column_width, tableview_create, tableview_deselect, tableview_deselect_all,
     tableview_focus_row, tableview_font, tableview_get_focus_row, tableview_grid,
     tableview_header_align, tableview_header_clickable, tableview_header_height,
-    tableview_header_resizable, tableview_header_title,
-    tableview_header_visible, tableview_hkey_scroll, tableview_multisel, tableview_new_column_text,
-    tableview_row_height, tableview_scroll_visible, tableview_select, tableview_selected,
-    tableview_size, tableview_update, S2Df,
+    tableview_header_resizable, tableview_header_title, tableview_header_visible,
+    tableview_hkey_scroll, tableview_multisel, tableview_new_column_text, tableview_row_height,
+    tableview_scroll_visible, tableview_select, tableview_selected, tableview_size,
+    tableview_update, S2Df,
 };
 
 pub struct TableView {
@@ -169,8 +169,24 @@ impl TableView {
     }
 
     /// Returns the currently selected rows.
-    pub fn selected(&self) -> Vec<u32> {
-        todo!();
+    pub fn selected(&self) -> Option<Vec<u32>> {
+        let result = unsafe { tableview_selected(self.inner) };
+
+        if result.is_null() {
+            return None;
+        }
+
+        let result = unsafe { *result };
+
+        if result.content.is_null() {
+            return None;
+        }
+
+        let content = unsafe { *result.content };
+
+        let elem = &content.elem;
+
+        Some(elem.to_vec())
     }
 
     /// Set keyboard focus to a specific row.

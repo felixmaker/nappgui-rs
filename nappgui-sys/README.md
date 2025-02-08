@@ -2,7 +2,7 @@
 
 rust raw bindings to nappgui library.
 
-## build
+## generate bindings
 
 ```
 cmd /c .\bind.bat

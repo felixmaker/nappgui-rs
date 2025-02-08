@@ -1,6 +1,3 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-
 use nappgui::gui::*;
 use nappgui::osapp::*;
 use nappgui::prelude::*;
@@ -9,7 +6,7 @@ struct App {}
 
 impl AppHandler for App {
     fn create() -> Self {
-        let clicks = Rc::new(RefCell::new(0));
+        let clicks = std::rc::Rc::new(std::cell::RefCell::new(0));
 
         let panel = Panel::create();
         let layout = Layout::create(1, 3);

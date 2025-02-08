@@ -6,6 +6,7 @@ NAppGUI is a professional SDK to build cross-platform desktop applications using
 
 See [frang75/nappgui_src](https://github.com/frang75/nappgui_src) and its [home page](https://nappgui.com/) for more information.
 
+**This crate is under development and is not ready for production use.**
 
 ## example
 

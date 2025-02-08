@@ -17,4 +17,4 @@ cmake = "0.1"
 
 [features]
 default = []
-no-webview = []
+webview = []

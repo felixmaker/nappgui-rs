@@ -1,17 +1,16 @@
 use nappgui_sys::{
     window_OnClose, window_OnMoved, window_OnResize, window_clear_hotkeys, window_client_to_screen,
     window_control_frame, window_create, window_cursor, window_cycle_tabstop, window_defbutton,
-    window_destroy, window_flag_t, window_focus, window_get_client_size, window_get_focus,
-    window_get_origin, window_get_size, window_hide, window_hotkey, window_is_visible,
-    window_modal, window_next_tabstop, window_origin, window_overlay, window_panel,
-    window_previous_tabstop, window_show, window_size, window_stop_modal, window_title,
-    window_update, R2Df, S2Df, V2Df,
+    window_destroy, window_focus, window_get_client_size, window_get_focus, window_get_origin,
+    window_get_size, window_hide, window_hotkey, window_is_visible, window_modal,
+    window_next_tabstop, window_origin, window_overlay, window_panel, window_previous_tabstop,
+    window_show, window_size, window_stop_modal, window_title, window_update, R2Df, S2Df, V2Df,
 };
 use std::ffi::CString;
 
 use crate::core::event::Event;
 use crate::draw_2d::Image;
-use crate::prelude::{GuiCursor, GuiFocus};
+use crate::prelude::{GuiCursor, GuiFocus, WindowFlag};
 use crate::{callback, listener};
 
 use super::control::Control;
@@ -32,7 +31,7 @@ impl Window {
     }
 
     /// Create a new window.
-    pub fn create(flags: window_flag_t) -> Self {
+    pub fn create(flags: WindowFlag) -> Self {
         let window = unsafe { window_create(flags as u32) };
         Self::new(window)
     }

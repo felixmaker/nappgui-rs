@@ -11,9 +11,10 @@ fn build() -> PathBuf {
 
     let mut dst = cmake::Config::new("nappgui_src");
     dst.define("NAPPGUI_DEMO", "NO");
+    dst.define("NAPPGUI_WEB", "NO");
 
-    if cfg!(feature = "no-webview") {
-        dst.define("NAPPGUI_WEB", "NO");
+    if cfg!(feature = "webview") {
+        dst.define("NAPPGUI_WEB", "YES");
     }
 
     dst.profile("Release");

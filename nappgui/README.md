@@ -8,7 +8,7 @@ See [frang75/nappgui_src](https://github.com/frang75/nappgui_src) and its [home 
 
 **This crate is under development and is not ready for production use.**
 
-## example
+## Example
 
 ```rust
 use nappgui::gui::*;
@@ -64,7 +64,7 @@ fn main() {
 ```
 
 
-## requirements
+## Requirements
 
  - Git: for some patches on Windows build
  - CMake: for building the NAppGui static library

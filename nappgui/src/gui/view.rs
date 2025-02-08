@@ -100,10 +100,10 @@ impl View {
         pub on_scroll(View) => view_OnScroll;
     }
 
-    /// Allows to capture the press of the [TAB] key.
+    /// Allows to capture the press of the \[TAB\] key.
     ///
     /// # Remarks
-    /// If TRUE the pressing of [TAB] with the keyboard focus in the view will be captured as a KeyDown
+    /// If TRUE the pressing of \[TAB\] with the keyboard focus in the view will be captured as a KeyDown
     /// event and not as navigation between the controls. The call to this function will have no effect
     /// if there is no associated OnKeyDown handler. In general, you should not use this function.
     pub fn allow_tab(&self, allow: bool) {

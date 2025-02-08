@@ -28,7 +28,7 @@ impl Button {
         Self { inner: ptr }
     }
 
-    /// Create a push button, the typical [Accept], [Cancel], etc.
+    /// Create a push button, the typical \[Accept\], \[Cancel\], etc.
     pub fn push() -> Self {
         let button = unsafe { button_push() };
         Self::new(button)

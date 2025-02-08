@@ -364,13 +364,13 @@ impl Layout {
         unsafe { layout_remove_row(self.inner, row) };
     }
 
-    /// Set how the keyboard focus will move when you press [TAB].
+    /// Set how the keyboard focus will move when you press \[TAB\].
     pub fn taborder(&self, taborder: GuiOrient) {
         unsafe { layout_taborder(self.inner, taborder) };
     }
 
     /// Sets whether or not a cell in the layout will receive keyboard focus when navigating
-    /// with [TAB]-[SHIFT][TAB].
+    /// with \[TAB\]-\[SHIFT\]\[TAB\].
     pub fn tabstop(&self, col: u32, row: u32, tabstop: bool) {
         unsafe { layout_tabstop(self.inner, col, row, tabstop as i8) };
     }

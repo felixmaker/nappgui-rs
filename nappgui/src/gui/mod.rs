@@ -18,8 +18,8 @@ pub(crate) mod tableview;
 pub(crate) mod textview;
 pub(crate) mod updown;
 pub(crate) mod view;
-pub(crate) mod webview;
 pub(crate) mod window;
+pub(crate) mod webview;
 
 pub mod dialog;
 pub mod event;

@@ -130,7 +130,7 @@ impl TableView {
         unsafe { tableview_row_height(self.inner, height) }
     }
 
-    /// Sets the horizontal scrolling when pressing the [LEFT] and [RIGHT] keys.
+    /// Sets the horizontal scrolling when pressing the \[LEFT\] and \[RIGHT\] keys.
     pub fn hkey_scroll(&self, force_column: bool, scoll: f32) {
         unsafe { tableview_hkey_scroll(self.inner, force_column as i8, scoll) }
     }

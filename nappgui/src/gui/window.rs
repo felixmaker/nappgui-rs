@@ -130,12 +130,12 @@ impl Window {
         unsafe { window_cycle_tabstop(self.inner, cycle) }
     }
 
-    /// Moves keyboard focus to the next control in the tab-list. It has the same effect as pressing [TAB].
+    /// Moves keyboard focus to the next control in the tab-list. It has the same effect as pressing \[TAB\].
     pub fn next_tabstop(&self) -> GuiFocus {
         unsafe { window_next_tabstop(self.inner) }
     }
 
-    /// Moves the keyboard focus to the previous control in the tab-list. This has the same effect as pressing [SHIFT]+[TAB].
+    /// Moves the keyboard focus to the previous control in the tab-list. This has the same effect as pressing \[SHIFT\]+\[TAB\].
     pub fn previous_tabstop(&self) -> GuiFocus {
         unsafe { window_previous_tabstop(self.inner) }
     }
@@ -155,7 +155,7 @@ impl Window {
     ///
     /// # Remarks
     /// Sometimes the decision to release keyboard focus for a control requires context information.
-    /// For example, what action caused the change (press [TAB], click on another control) or
+    /// For example, what action caused the change (press \[TAB\], click on another control) or
     /// what control will receive the focus.
     pub fn focus_info(&self) {
         unimplemented!()
@@ -212,7 +212,7 @@ impl Window {
         unsafe { window_client_to_screen(self.inner, point) }
     }
 
-    /// Set the default window button. It will be activated when pressed [Intro].
+    /// Set the default window button. It will be activated when pressed \[Intro\].
     ///
     /// # Remarks
     ///

@@ -16,7 +16,5 @@ See [frang75/nappgui_src](https://github.com/frang75/nappgui_src) and its [home 
 
 ## Generate bindings
 
-```
 cmd /c .\bind.bat
-```
 

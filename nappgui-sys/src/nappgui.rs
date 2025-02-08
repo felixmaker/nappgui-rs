@@ -3482,7 +3482,6 @@ pub type FPtr_gctx_command = ::core::option::Option<
 #[derive(Debug, Copy, Clone)]
 pub struct _guictx_t {
     pub retain_count: u32,
-    #[doc = " <Commons>"]
     pub func_create: [FPtr_gctx_create; 17usize],
     pub func_destroy: [FPtr_gctx_destroy; 17usize],
     pub func_set_tooltip: [FPtr_gctx_set_text; 17usize],
@@ -3493,7 +3492,6 @@ pub struct _guictx_t {
     pub func_get_size: [FPtr_gctx_get2_real32; 17usize],
     pub func_get_origin: [FPtr_gctx_get2_real32; 17usize],
     pub func_set_frame: [FPtr_gctx_set4_real32; 17usize],
-    #[doc = " <Label>"]
     pub func_label_OnClick: FPtr_gctx_set_listener,
     pub func_label_OnMouseEnter: FPtr_gctx_set_listener,
     pub func_label_OnMouseExit: FPtr_gctx_set_listener,
@@ -3504,7 +3502,6 @@ pub struct _guictx_t {
     pub func_label_set_text_color: FPtr_gctx_set_uint32,
     pub func_label_set_bg_color: FPtr_gctx_set_uint32,
     pub func_label_bounds: FPtr_gctx_bounds1,
-    #[doc = " <Button>"]
     pub func_button_OnClick: FPtr_gctx_set_listener,
     pub func_button_set_text: FPtr_gctx_set_text,
     pub func_button_set_font: FPtr_gctx_set_cptr,
@@ -3514,7 +3511,6 @@ pub struct _guictx_t {
     pub func_button_get_state: FPtr_gctx_get_enum,
     pub func_button_set_vpadding: FPtr_gctx_set_real32,
     pub func_button_bounds: FPtr_gctx_bounds2,
-    #[doc = " <PopUp>"]
     pub func_popup_OnChange: FPtr_gctx_set_listener,
     pub func_popup_set_elem: FPtr_gctx_set_elem,
     pub func_popup_set_font: FPtr_gctx_set_cptr,
@@ -3522,7 +3518,6 @@ pub struct _guictx_t {
     pub func_popup_set_selected: FPtr_gctx_set_uint32,
     pub func_popup_get_selected: FPtr_gctx_get_uint32,
     pub func_popup_bounds: FPtr_gctx_bounds3,
-    #[doc = " <Edit>"]
     pub func_edit_OnFilter: FPtr_gctx_set_listener,
     pub func_edit_OnChange: FPtr_gctx_set_listener,
     pub func_edit_OnFocus: FPtr_gctx_set_listener,
@@ -3538,7 +3533,6 @@ pub struct _guictx_t {
     pub func_edit_set_vpadding: FPtr_gctx_set_real32,
     pub func_edit_bounds: FPtr_gctx_bounds4,
     pub func_edit_clipboard: FPtr_gctx_clipboard,
-    #[doc = " <Combo>"]
     pub func_combo_OnFilter: FPtr_gctx_set_listener,
     pub func_combo_OnChange: FPtr_gctx_set_listener,
     pub func_combo_OnFocus: FPtr_gctx_set_listener,
@@ -3553,17 +3547,14 @@ pub struct _guictx_t {
     pub func_combo_set_selected: FPtr_gctx_set_uint32,
     pub func_combo_get_selected: FPtr_gctx_get_uint32,
     pub func_combo_bounds: FPtr_gctx_bounds5,
-    #[doc = " <Slider>"]
     pub func_slider_OnMoved: FPtr_gctx_set_listener,
     pub func_slider_set_tickmarks: FPtr_gctx_tickmarks,
     pub func_slider_get_position: FPtr_gctx_get_real32,
     pub func_slider_set_position: FPtr_gctx_set_real32,
     pub func_slider_bounds: FPtr_gctx_bounds6,
     pub func_updown_OnClick: FPtr_gctx_set_listener,
-    #[doc = " <Progress>"]
     pub func_progress_set_position: FPtr_gctx_set_real32,
     pub func_progress_get_thickness: FPtr_gctx_get_real32e,
-    #[doc = " <Text view>"]
     pub func_text_OnFilter: FPtr_gctx_set_listener,
     pub func_text_OnFocus: FPtr_gctx_set_listener,
     pub func_text_insert_text: FPtr_gctx_set_text,
@@ -3575,18 +3566,15 @@ pub struct _guictx_t {
     pub func_text_scroller_visible: FPtr_gctx_set2_bool,
     pub func_text_set_need_display: FPtr_gctx_call,
     pub func_text_clipboard: FPtr_gctx_clipboard,
-    #[doc = " <Web view>"]
     pub func_web_OnFocus: FPtr_gctx_set_listener,
     pub func_web_command: FPtr_gctx_command,
     pub func_web_scroller_visible: FPtr_gctx_set2_bool,
     pub func_web_set_need_display: FPtr_gctx_call,
     pub func_web_clipboard: FPtr_gctx_clipboard,
-    #[doc = " <Split view>"]
     pub func_split_attach_control: FPtr_gctx_set_ptr,
     pub func_split_detach_control: FPtr_gctx_set_ptr,
     pub func_split_OnDrag: FPtr_gctx_set_listener,
     pub func_split_track_area: FPtr_gctx_set4_real32,
-    #[doc = " <View>"]
     pub func_view_OnDraw: FPtr_gctx_set_listener,
     pub func_view_OnOverlay: FPtr_gctx_set_listener,
     pub func_view_OnEnter: FPtr_gctx_set_listener,
@@ -3620,19 +3608,16 @@ pub struct _guictx_t {
     pub func_view_set_need_display: FPtr_gctx_call,
     pub func_view_set_drawable: FPtr_gctx_set_bool,
     pub func_view_get_native_view: FPtr_gctx_get_ptr,
-    #[doc = " <Panels>"]
     pub func_panel_area: FPtr_gctx_set_area,
     pub func_panel_scroller_size: FPtr_gctx_get2_real32,
     pub func_panel_content_size: FPtr_gctx_set4_real32,
     pub func_panel_set_need_display: FPtr_gctx_call,
-    #[doc = " <Menus>"]
     pub func_menu_create: FPtr_gctx_create,
     pub func_menu_destroy: FPtr_gctx_destroy,
     pub func_attach_menuitem_to_menu: FPtr_gctx_set_ptr,
     pub func_detach_menuitem_from_menu: FPtr_gctx_set_ptr,
     pub func_menu_launch_popup: FPtr_gctx_menu,
     pub func_menu_hide_popup: FPtr_gctx_call,
-    #[doc = " <MenuItems>"]
     pub func_menuitem_create: FPtr_gctx_create,
     pub func_menuitem_destroy: FPtr_gctx_destroy,
     pub func_menuitem_OnClick: FPtr_gctx_set_listener,
@@ -3644,7 +3629,6 @@ pub struct _guictx_t {
     pub func_menuitem_set_state: FPtr_gctx_set_enum,
     pub func_attach_menu_to_menu_item: FPtr_gctx_set_ptr,
     pub func_detach_menu_from_menu_item: FPtr_gctx_set_ptr,
-    #[doc = " <Windows>"]
     pub func_window_create: FPtr_gctx_create,
     pub func_window_managed: FPtr_gctx_create2,
     pub func_window_destroy: FPtr_gctx_destroy,
@@ -3679,10 +3663,8 @@ pub struct _guictx_t {
     pub func_window_set_default_pushbutton: FPtr_gctx_set_ptr,
     pub func_window_set_cursor: FPtr_gctx_set_ptr,
     pub func_window_set_property: FPtr_gctx_set_property,
-    #[doc = " <Common Windows>"]
     pub func_comwin_file: FPtr_gctx_win_file,
     pub func_comwin_color: FPtr_gctx_win_color,
-    #[doc = " <Globals>"]
     pub func_globals_device: FPtr_gctx_get_enum,
     pub func_globals_color: FPtr_gctx_get_enum,
     pub func_globals_resolution: FPtr_gctx_get2_real32,
@@ -3692,7 +3674,6 @@ pub struct _guictx_t {
     pub func_globals_value: FPtr_gctx_get_indexed,
     pub func_globals_transitions: FPtr_gctx_set2_real64,
     pub func_globals_OnIdle: FPtr_gctx_set_listener,
-    #[doc = " <Draw Custom Controls>"]
     pub func_drawctrl_font: FPtr_gctx_get_ptr,
     pub func_drawctrl_row_padding: FPtr_gctx_get_uint32,
     pub func_drawctrl_check_width: FPtr_gctx_get_uint32,

@@ -1,0 +1,13 @@
+[package]
+name = "nappgui"
+version = "0.1.0"
+edition = "2021"
+authors = ["felixmaker"]
+description = "Rust bindings to mininlink49"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/felixmaker/nappgui-rs"
+categories = ["gui"]
+
+[dependencies]
+nappgui-sys = { path = "../nappgui-sys", version = "=0.1" }

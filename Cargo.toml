@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "nappgui-sys",
+    "nappgui",	
+]
+resolver = "2"

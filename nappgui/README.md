@@ -6,8 +6,17 @@ NAppGUI is a professional SDK to build cross-platform desktop applications using
 
 See [frang75/nappgui_src](https://github.com/frang75/nappgui_src) and its [home page](https://nappgui.com/) for more information.
 
+**This crate is under development and is not ready for production use.**
 
-## example
+
+## Requirements
+
+ - Git: for some patches on Windows build
+ - CMake: for building the NAppGui static library
+ - Windows SDK: only needed when using MSVC
+
+
+## Example
 
 ```rust
 use nappgui::gui::*;
@@ -61,11 +70,4 @@ fn main() {
     osmain::<App>();
 }
 ```
-
-
-## requirements
-
- - Git: for some patches on Windows build
- - CMake: for building the NAppGui static library
- - Windows SDK: only needed when using MSVC
 

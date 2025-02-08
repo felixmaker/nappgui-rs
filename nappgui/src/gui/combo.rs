@@ -1,4 +1,4 @@
-use crate::{callback, draw_2d::Image, prelude::Align};
+use crate::{draw_2d::Image, prelude::Align, util::macros::callback};
 
 use nappgui_sys::{
     combo_OnChange, combo_OnFilter, combo_add_elem, combo_align, combo_bgcolor,

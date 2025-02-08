@@ -1,3 +1,5 @@
+/// An event is an action that occurs during the program execution, usually asynchronously or unpredictably and 
+/// on which a given object must be notified.
 pub struct Event {
     pub(crate) inner: *mut nappgui_sys::Event,
 }
@@ -41,16 +43,21 @@ impl Event {
     }
 }
 
+/// The event parameters.
 pub trait NappGUIEventParams {
+    /// The event type.
     fn type_() -> &'static str;
+    /// Get the event parameters from the pointer.
     fn from_ptr(ptr: *mut std::ffi::c_void) -> Option<Self>
     where
         Self: Sized;
 }
 
-
+/// The event result.
 pub trait NappGUIEventResult {
+    /// The event type.
     fn type_() -> &'static str;
+    /// Get the event result from the pointer.
     fn from_ptr(ptr: *mut std::ffi::c_void) -> Option<Self>
     where
         Self: Sized; 

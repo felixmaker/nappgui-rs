@@ -6,7 +6,7 @@ use nappgui_sys::{
 
 use super::Color;
 
-/// A palette is nothing more than an indexed list of colors (Figure 1), usually related to Pixel Buffer.
+/// A palette is nothing more than an indexed list of colors, usually related to Pixel Buffer.
 /// Its main utility is to save space in the images representation, since each pixel is encoded by an index
 /// of 1, 2, 4 or 8 bits instead of the real color where 24 or 32 bits are necessary. For this reason, it is
 /// usual to have palettes of 2, 4, 16 or 256 colors.

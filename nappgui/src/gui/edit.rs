@@ -6,7 +6,7 @@ use nappgui_sys::{
     edit_vpadding,
 };
 
-use crate::{callback, draw_2d::font::Font, prelude::Align};
+use crate::{draw_2d::font::Font, prelude::Align, util::macros::callback};
 
 /// EditBox are small text boxes with editing capabilities. Like the Label they are of uniform format:
 /// The typeface and colors will affect the entire text

@@ -11,7 +11,7 @@ use std::ffi::CString;
 use crate::core::event::Event;
 use crate::draw_2d::Image;
 use crate::prelude::{GuiCursor, GuiFocus, WindowFlag};
-use crate::{callback, listener};
+use crate::util::macros::{callback, listener};
 
 use super::control::Control;
 use super::panel::Panel;

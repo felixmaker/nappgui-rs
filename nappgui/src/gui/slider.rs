@@ -3,7 +3,7 @@ use nappgui_sys::{
     slider_vertical,
 };
 
-use crate::callback;
+use crate::util::macros::callback;
 
 /// Sliders are normally used to edit continuous and bounded numerical values.
 pub struct Slider {

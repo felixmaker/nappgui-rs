@@ -1,4 +1,4 @@
-use crate::{callback, draw_2d::Font, prelude::Align};
+use crate::{draw_2d::Font, prelude::Align, util::macros::callback};
 
 use nappgui_sys::{
     tableview_OnData, tableview_OnHeaderClick, tableview_OnRowClick, tableview_OnSelect,

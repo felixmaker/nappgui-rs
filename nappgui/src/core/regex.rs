@@ -1,5 +1,6 @@
 use nappgui_sys::{regex_create, regex_destroy, regex_match};
 
+/// Regular expressions define a text pattern that can be used to find or compare strings.
 pub struct RegEx {
     pub(crate) inner: *mut nappgui_sys::RegEx,
 }

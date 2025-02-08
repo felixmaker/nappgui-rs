@@ -1,8 +1,8 @@
 use std::ffi::CString;
 
-use nappgui_sys::{ comwin_color, comwin_open_file, comwin_save_file};
+use nappgui_sys::{comwin_color, comwin_open_file, comwin_save_file};
 
-use crate::{core::event::Event, draw_2d::Color, listener, prelude::Align};
+use crate::{core::event::Event, draw_2d::Color, prelude::Align, util::macros::listener};
 
 use super::window::Window;
 

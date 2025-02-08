@@ -1,4 +1,3 @@
-#[macro_export]
 macro_rules! listener {
     ($target:expr, $handler:ident, $obj:ty) => {{
         use crate::core::event::Event;
@@ -20,7 +19,6 @@ macro_rules! listener {
     }};
 }
 
-#[macro_export]
 macro_rules! callback {
     (
         $(#[$meta:meta])*
@@ -31,7 +29,7 @@ macro_rules! callback {
         where
             F: FnMut(&mut $obj, &crate::core::event::Event) + 'static,
         {
-            let listener = crate::listener!(self.inner, handler, $obj);
+            let listener = crate::util::macros::listener!(self.inner, handler, $obj);
             unsafe {
                 $c_func(self.inner, listener);
             }
@@ -51,3 +49,6 @@ macro_rules! callback {
         )*
     }
 }
+
+pub(crate) use callback;
+pub(crate) use listener;

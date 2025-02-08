@@ -6,7 +6,9 @@ use crate::gui::{Menu, Window};
 
 /// Application handler.
 pub trait AppHandler {
+    /// Create the application. Controls should be created in this function.
     fn create() -> Self;
+    /// Destroy the application.
     fn destory(&self) {}
 }
 

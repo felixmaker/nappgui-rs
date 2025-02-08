@@ -1,6 +1,6 @@
 use crate::{
-    callback,
     draw_2d::{Color, Font, Image},
+    util::macros::callback,
 };
 use nappgui_sys::{
     listbox_OnDown, listbox_OnSelect, listbox_add_elem, listbox_check, listbox_checkbox,

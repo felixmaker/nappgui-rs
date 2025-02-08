@@ -7,6 +7,7 @@ use nappgui_sys::{
 
 use super::{color::Color, palette::Palette, pixbuf::Pixbuf};
 
+/// Image
 pub struct Image {
     pub(crate) inner: *mut nappgui_sys::Image,
 }

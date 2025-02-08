@@ -1,11 +1,11 @@
-use crate::{callback, draw_2d::image::Image};
+use crate::{draw_2d::image::Image, util::macros::callback};
 
 use nappgui_sys::{
     popup_OnSelect, popup_add_elem, popup_clear, popup_count, popup_create, popup_get_selected,
     popup_get_text, popup_list_height, popup_selected, popup_set_elem, popup_tooltip,
 };
 
-/// PopUps are buttons that have a drop-down menu associated with them (Figure 1). Apparently they
+/// PopUps are buttons that have a drop-down menu associated with them. Apparently they
 /// look like pushbuttons that when pressed show a list of options. In Hello PopUp and PopUp!
 /// you have an example of use.
 pub struct PopUp {

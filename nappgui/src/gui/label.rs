@@ -1,9 +1,9 @@
 use std::ffi::CString;
 
 use crate::{
-    callback,
     draw_2d::{Color, Font},
     prelude::FStyle,
+    util::macros::callback,
 };
 
 use nappgui_sys::{

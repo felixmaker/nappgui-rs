@@ -207,7 +207,9 @@ impl EvWheel {
 
 /// Keyboard event parameters.
 pub struct EvKey {
+    /// Referenced key.
     pub key: vkey_t,
+    /// Combination of values mkey_t. todo!
     pub modifiers: u32,
 }
 
@@ -407,6 +409,7 @@ impl EvTbRect {
 
 /// Selection in a table.
 pub struct EvTbSel {
+    /// Row indices.
     pub sel: Vec<u32>,
 }
 

@@ -6,6 +6,8 @@ use nappgui_sys::{
 
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+/// The colors in Draw2D are encoded using a 32-bit integer with the four RGBA channels in Little-Endian: 
+/// Red in byte 0, green in 1, blue in 2 and alpha (or transparency) in 3 
 pub struct Color {
     pub(crate) inner: nappgui_sys::color_t,
 }

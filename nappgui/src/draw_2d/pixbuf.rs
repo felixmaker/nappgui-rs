@@ -7,6 +7,7 @@ use nappgui_sys::{
 use crate::prelude::*;
 use super::Palette;
 
+/// Pixbuf
 pub struct Pixbuf {
     pub(crate) inner: *mut nappgui_sys::Pixbuf,
 }

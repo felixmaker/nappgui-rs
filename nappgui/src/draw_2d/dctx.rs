@@ -4,6 +4,7 @@ use nappgui_sys::{
 
 use super::{Color, Image};
 
+/// Drawing context.
 pub struct DCtx {
     pub(crate) inner: *mut nappgui_sys::DCtx,
 }

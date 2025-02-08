@@ -7,10 +7,10 @@ use nappgui_sys::{
     view_update, view_viewport, S2Df, V2Df,
 };
 
-use crate::callback;
+use crate::util::macros::callback;
 
-/// The View controls or custom views are blank areas within the window that allow us 
-/// to implement our own components. 
+/// The View controls or custom views are blank areas within the window that allow us
+/// to implement our own components.
 pub struct View {
     pub(crate) inner: *mut nappgui_sys::View,
 }

@@ -1,6 +1,6 @@
 use nappgui_sys::{updown_OnClick, updown_create, updown_tooltip};
 
-use crate::callback;
+use crate::util::macros::callback;
 
 /// UpDown are two-part horizontally divided button controls.
 pub struct UpDown {

@@ -1,4 +1,6 @@
-use crate::{draw_2d::Image, prelude::Align, util::macros::callback};
+use std::rc::Rc;
+
+use crate::{draw_2d::Image, prelude::Align, util::macros::{callback, impl_ptr}};
 
 use nappgui_sys::{
     combo_OnChange, combo_OnFilter, combo_add_elem, combo_align, combo_bgcolor,
@@ -9,16 +11,11 @@ use nappgui_sys::{
 
 /// ComboBox are text editing boxes with drop-down list.
 pub struct Combo {
-    pub(crate) inner: *mut nappgui_sys::Combo,
+    pub(crate) inner: Rc<*mut nappgui_sys::Combo>,
 }
 
 impl Combo {
-    pub(crate) fn new(ptr: *mut nappgui_sys::Combo) -> Self {
-        if ptr.is_null() {
-            panic!("ptr is null");
-        }
-        Self { inner: ptr }
-    }
+    impl_ptr!(nappgui_sys::Combo);
 
     /// Create a combo control.
     pub fn create() -> Self {
@@ -42,14 +39,14 @@ impl Combo {
     pub fn text(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
-            combo_text(self.inner, text.as_ptr());
+            combo_text(self.as_ptr(), text.as_ptr());
         }
     }
 
     /// Set text alignment.
     pub fn align(&self, align: Align) {
         unsafe {
-            combo_align(self.inner, align);
+            combo_align(self.as_ptr(), align);
         }
     }
 
@@ -57,35 +54,35 @@ impl Combo {
     pub fn tooltip(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
-            combo_tooltip(self.inner, text.as_ptr());
+            combo_tooltip(self.as_ptr(), text.as_ptr());
         }
     }
 
     /// Set the color of the combo text.
     pub fn color(&self, color: u32) {
         unsafe {
-            combo_color(self.inner, color);
+            combo_color(self.as_ptr(), color);
         }
     }
 
     /// Sets the color of the text, when the control has the keyboard focus.
     pub fn color_focus(&self, color: u32) {
         unsafe {
-            combo_color_focus(self.inner, color);
+            combo_color_focus(self.as_ptr(), color);
         }
     }
 
     /// Set the background color.
     pub fn bgcolor(&self, color: u32) {
         unsafe {
-            combo_bgcolor(self.inner, color);
+            combo_bgcolor(self.as_ptr(), color);
         }
     }
 
     /// Sets the background color when the control has keyboard focus.
     pub fn bgcolor_focus(&self, color: u32) {
         unsafe {
-            combo_bgcolor_focus(self.inner, color);
+            combo_bgcolor_focus(self.as_ptr(), color);
         }
     }
 
@@ -93,41 +90,41 @@ impl Combo {
     pub fn phtext(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
-            combo_phtext(self.inner, text.as_ptr());
+            combo_phtext(self.as_ptr(), text.as_ptr());
         }
     }
 
     /// Set the color of the placeholder text.
     pub fn phcolor(&self, color: u32) {
         unsafe {
-            combo_phcolor(self.inner, color);
+            combo_phcolor(self.as_ptr(), color);
         }
     }
 
     /// Set the font style for the placeholder.
     pub fn phstyle(&self, style: u32) {
         unsafe {
-            combo_phstyle(self.inner, style);
+            combo_phstyle(self.as_ptr(), style);
         }
     }
 
     /// Get control text.
     pub fn get_text(&self, index: u32) -> String {
-        let text = unsafe { combo_get_text(self.inner, index) };
+        let text = unsafe { combo_get_text(self.as_ptr(), index) };
         let text = unsafe { std::ffi::CStr::from_ptr(text) };
         text.to_string_lossy().into_owned()
     }
 
     /// Gets the number of items in the dropdown list.
     pub fn count(&self) -> u32 {
-        unsafe { combo_count(self.inner) }
+        unsafe { combo_count(self.as_ptr()) }
     }
 
     /// Add a new item to the drop-down list.
     pub fn add_elem(&self, text: &str, image: &Image) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
-            combo_add_elem(self.inner, text.as_ptr(), image.inner);
+            combo_add_elem(self.as_ptr(), text.as_ptr(), image.as_ptr());
         }
     }
 
@@ -135,7 +132,7 @@ impl Combo {
     pub fn set_elem(&self, index: u32, text: &str, image: &Image) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
-            combo_set_elem(self.inner, index, text.as_ptr(), image.inner);
+            combo_set_elem(self.as_ptr(), index, text.as_ptr(), image.as_ptr());
         }
     }
 
@@ -143,21 +140,21 @@ impl Combo {
     pub fn ins_elem(&self, index: u32, text: &str, image: &Image) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
-            combo_ins_elem(self.inner, index, text.as_ptr(), image.inner);
+            combo_ins_elem(self.as_ptr(), index, text.as_ptr(), image.as_ptr());
         }
     }
 
     /// Remove an item from the drop-down list.
     pub fn del_elem(&self, index: u32) {
         unsafe {
-            combo_del_elem(self.inner, index);
+            combo_del_elem(self.as_ptr(), index);
         }
     }
 
     /// Prevents duplicate texts from the drop-down list.
     pub fn duplicates(&self, duplicates: bool) {
         unsafe {
-            combo_duplicates(self.inner, duplicates as i8);
+            combo_duplicates(self.as_ptr(), duplicates as i8);
         }
     }
 }

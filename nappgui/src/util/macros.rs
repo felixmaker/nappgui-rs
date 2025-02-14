@@ -29,9 +29,9 @@ macro_rules! callback {
         where
             F: FnMut(&mut $obj, &crate::core::event::Event) + 'static,
         {
-            let listener = crate::util::macros::listener!(self.inner, handler, $obj);
+            let listener = crate::util::macros::listener!(self.as_ptr(), handler, $obj);
             unsafe {
-                $c_func(self.inner, listener);
+                $c_func(self.as_ptr(), listener);
             }
         }
     };
@@ -50,5 +50,21 @@ macro_rules! callback {
     }
 }
 
+macro_rules! impl_ptr {
+    ($obj:ty) => {
+        pub(crate) fn new(ptr: *mut $obj) -> Self {
+            if ptr.is_null() {
+                panic!("pointer is null");
+            }
+            Self { inner: std::rc::Rc::new(ptr) }
+        }
+    
+        pub(crate) fn as_ptr(&self) -> *mut $obj {
+            *self.inner 
+        }
+    };
+}
+
 pub(crate) use callback;
 pub(crate) use listener;
+pub(crate) use impl_ptr;

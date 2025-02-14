@@ -1,8 +1,12 @@
+use std::rc::Rc;
+
 use nappgui_sys::{
     palette_binary, palette_ccolors, palette_cga2, palette_colors, palette_create, palette_destroy,
     palette_ega4, palette_gray1, palette_gray2, palette_gray4, palette_gray8, palette_rgb8,
     palette_size,
 };
+
+use crate::util::macros::impl_ptr;
 
 use super::Color;
 
@@ -11,16 +15,11 @@ use super::Color;
 /// of 1, 2, 4 or 8 bits instead of the real color where 24 or 32 bits are necessary. For this reason, it is
 /// usual to have palettes of 2, 4, 16 or 256 colors.
 pub struct Palette {
-    pub(crate) inner: *mut nappgui_sys::Palette,
+    pub(crate) inner: Rc<*mut nappgui_sys::Palette>,
 }
 
 impl Palette {
-    pub(crate) fn new(ptr: *mut nappgui_sys::Palette) -> Self {
-        if ptr.is_null() {
-            panic!("Palette is null");
-        }
-        Self { inner: ptr }
-    }
+    impl_ptr!(nappgui_sys::Palette);
 
     /// Create a palette.
     pub fn create(size: u32) -> Self {
@@ -68,28 +67,28 @@ impl Palette {
     }
 
     /// Destroy the palette.
-    pub fn destroy(mut self) {
+    pub fn destroy(self) {
         unsafe {
-            palette_destroy(&mut self.inner);
+            palette_destroy(&mut self.as_ptr());
         }
     }
 
     /// Returns the number of colors in the palette.
     pub fn size(&self) -> u32 {
-        unsafe { palette_size(self.inner) }
+        unsafe { palette_size(self.as_ptr()) }
     }
 
     /// Get the color list.
     pub fn colors(&self) -> &mut [Color] {
         let size = self.size();
-        let ptr = unsafe { palette_colors(self.inner) };
+        let ptr = unsafe { palette_colors(self.as_ptr()) };
         unsafe { std::slice::from_raw_parts_mut(ptr as _, size as usize) }
     }
 
     /// Get the color list.
     pub fn ccolors(&self) -> &[Color] {
         let size = self.size();
-        let ptr = unsafe { palette_ccolors(self.inner) };
+        let ptr = unsafe { palette_ccolors(self.as_ptr()) };
         unsafe { std::slice::from_raw_parts(ptr as _, size as usize) }
     }
 }

@@ -1,4 +1,6 @@
-use crate::{draw_2d::image::Image, util::macros::callback};
+use std::rc::Rc;
+
+use crate::{draw_2d::image::Image, util::macros::{callback, impl_ptr}};
 
 use nappgui_sys::{
     popup_OnSelect, popup_add_elem, popup_clear, popup_count, popup_create, popup_get_selected,
@@ -9,16 +11,11 @@ use nappgui_sys::{
 /// look like pushbuttons that when pressed show a list of options. In Hello PopUp and PopUp!
 /// you have an example of use.
 pub struct PopUp {
-    pub(crate) inner: *mut nappgui_sys::PopUp,
+    pub(crate) inner: Rc<*mut nappgui_sys::PopUp>,
 }
 
 impl PopUp {
-    pub(crate) fn new(ptr: *mut nappgui_sys::PopUp) -> Self {
-        if ptr.is_null() {
-            panic!("ptr is null");
-        }
-        Self { inner: ptr }
-    }
+    impl_ptr!(nappgui_sys::PopUp);
 
     /// Create a new popup control (PopUp button).
     pub fn create() -> Self {
@@ -35,7 +32,7 @@ impl PopUp {
     pub fn tooltip(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
-            popup_tooltip(self.inner, text.as_ptr());
+            popup_tooltip(self.as_ptr(), text.as_ptr());
         }
     }
 
@@ -43,7 +40,7 @@ impl PopUp {
     pub fn add_elem(&self, text: &str, image: &Image) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
-            popup_add_elem(self.inner, text.as_ptr(), image.inner);
+            popup_add_elem(self.as_ptr(), text.as_ptr(), image.as_ptr());
         }
     }
 
@@ -51,44 +48,44 @@ impl PopUp {
     pub fn set_elem(&self, index: u32, text: &str, image: &Image) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
-            popup_set_elem(self.inner, index, text.as_ptr(), image.inner);
+            popup_set_elem(self.as_ptr(), index, text.as_ptr(), image.as_ptr());
         }
     }
 
     /// Remove all items from the dropdown list.
     pub fn clear(&self) {
         unsafe {
-            popup_clear(self.inner);
+            popup_clear(self.as_ptr());
         }
     }
 
     /// Gets the number of items in the list.
     pub fn count(&self) -> u32 {
-        unsafe { popup_count(self.inner) }
+        unsafe { popup_count(self.as_ptr()) }
     }
 
     /// Set the size of the drop-down list.
     pub fn list_height(&self, elems: u32) {
         unsafe {
-            popup_list_height(self.inner, elems);
+            popup_list_height(self.as_ptr(), elems);
         }
     }
 
     /// Set the selected popup element.
     pub fn selected(&self, index: u32) {
         unsafe {
-            popup_selected(self.inner, index);
+            popup_selected(self.as_ptr(), index);
         }
     }
 
     /// Get the selected popup item.
     pub fn get_selected(&self) -> u32 {
-        unsafe { popup_get_selected(self.inner) }
+        unsafe { popup_get_selected(self.as_ptr()) }
     }
 
     /// Gets the text of a popup element.
     pub fn get_text(&self, index: u32) -> String {
-        let text = unsafe { popup_get_text(self.inner, index) };
+        let text = unsafe { popup_get_text(self.as_ptr(), index) };
         let text = unsafe { std::ffi::CStr::from_ptr(text) };
         text.to_string_lossy().into_owned()
     }

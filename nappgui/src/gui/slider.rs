@@ -1,23 +1,20 @@
+use std::rc::Rc;
+
 use nappgui_sys::{
     slider_OnMoved, slider_create, slider_get_value, slider_steps, slider_tooltip, slider_value,
     slider_vertical,
 };
 
-use crate::util::macros::callback;
+use crate::util::macros::{callback, impl_ptr};
 
 /// Sliders are normally used to edit continuous and bounded numerical values.
 pub struct Slider {
-    pub(crate) inner: *mut nappgui_sys::Slider,
+    pub(crate) inner: Rc<*mut nappgui_sys::Slider>,
 }
 
 impl Slider {
-    pub(crate) fn new(ptr: *mut nappgui_sys::Slider) -> Self {
-        if ptr.is_null() {
-            panic!("ptr is null");
-        }
-        Self { inner: ptr }
-    }
-
+    impl_ptr!(nappgui_sys::Slider);
+    
     /// Create a new slider control.
     pub fn create() -> Self {
         let updown = unsafe { slider_create() };
@@ -39,26 +36,26 @@ impl Slider {
     pub fn tooltip(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
-            slider_tooltip(self.inner, text.as_ptr());
+            slider_tooltip(self.as_ptr(), text.as_ptr());
         }
     }
 
     /// Changes the slider from continuous range to discrete intervals.
     pub fn steps(&self, steps: u32) {
         unsafe {
-            slider_steps(self.inner, steps);
+            slider_steps(self.as_ptr(), steps);
         }
     }
 
     /// Set the slider position.
     pub fn value(&self, value: f32) {
         unsafe {
-            slider_value(self.inner, value);
+            slider_value(self.as_ptr(), value);
         }
     }
 
     /// Get the slider position.
     pub fn get_value(&self) -> f32 {
-        unsafe { slider_get_value(self.inner) }
+        unsafe { slider_get_value(self.as_ptr()) }
     }
 }

@@ -57,7 +57,7 @@ pub fn finish() {
 /// Set the general menu bar of the application.
 pub fn menubar(menu: &Menu, win: &Window) {
     unsafe {
-        osapp_menubar(menu.inner, win.inner);
+        osapp_menubar(menu.as_ptr(), win.as_ptr());
     }
 }
 

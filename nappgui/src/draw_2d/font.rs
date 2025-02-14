@@ -1,4 +1,4 @@
-use std::ffi::{CStr, CString};
+use std::{ffi::{CStr, CString}, rc::Rc};
 
 use nappgui_sys::{
     font_ascent, font_copy, font_create, font_descent, font_destroy, font_equals,
@@ -8,19 +8,15 @@ use nappgui_sys::{
     font_with_style, font_with_width, font_with_xscale, font_xscale,
 };
 
+use crate::util::macros::impl_ptr;
+
 /// Represents a typographic family, size and style with which the texts will be drawn.
 pub struct Font {
-    pub(crate) inner: *mut nappgui_sys::Font,
+    pub(crate) inner: Rc<*mut nappgui_sys::Font>,
 }
 
 impl Font {
-    pub(crate) fn new(ptr: *mut nappgui_sys::Font) -> Self {
-        if ptr.is_null() {
-            panic!("Font is NULL");
-        }
-
-        Font { inner: ptr }
-    }
+    impl_ptr!(nappgui_sys::Font);
 
     /// Create a font.
     pub fn create(family: &str, size: f32, style: u32) -> Self {
@@ -43,36 +39,36 @@ impl Font {
 
     /// Create a copy of an existing font, changing the style.
     pub fn with_style(&self, style: u32) -> Self {
-        let font = unsafe { font_with_style(self.inner, style) };
+        let font = unsafe { font_with_style(self.as_ptr(), style) };
         Font::new(font)
     }
 
     /// Creates a copy of an existing font, changing the average width of the character.
     pub fn with_width(&self, width: f32) -> Self {
-        let font = unsafe { font_with_width(self.inner, width) };
+        let font = unsafe { font_with_width(self.as_ptr(), width) };
         Font::new(font)
     }
 
     /// Creates a copy of an existing font, changing the x-scaling of the text.
     pub fn with_xscale(&self, xscale: f32) -> Self {
-        let font = unsafe { font_with_xscale(self.inner, xscale) };
+        let font = unsafe { font_with_xscale(self.as_ptr(), xscale) };
         Font::new(font)
     }
 
     /// Creates an exact copy of a typeface.
     pub fn copy(&self) -> Self {
-        let font = unsafe { font_copy(self.inner) };
+        let font = unsafe { font_copy(self.as_ptr()) };
         Font::new(font)
     }
 
     /// Destroy the font.
     pub fn destroy(&mut self) {
-        unsafe { font_destroy(&mut self.inner) };
+        unsafe { font_destroy(&mut self.as_ptr()) };
     }
 
     /// Compare two sources. They are considered equal if they have the same family, size and style.
     pub fn equals(&self, other: &Font) -> bool {
-        unsafe { font_equals(self.inner, other.inner) != 0 }
+        unsafe { font_equals(self.as_ptr(), other.as_ptr()) != 0 }
     }
 
     /// Gets the default font size for interface controls.
@@ -92,54 +88,54 @@ impl Font {
 
     /// Gets the font family.
     pub fn family(&self) -> String {
-        let family = unsafe { font_family(self.inner) };
+        let family = unsafe { font_family(self.as_ptr()) };
         let family = unsafe { std::ffi::CStr::from_ptr(family) };
         family.to_string_lossy().into_owned()
     }
 
     /// Gets the font size.
     pub fn size(&self) -> f32 {
-        unsafe { font_size(self.inner) }
+        unsafe { font_size(self.as_ptr()) }
     }
 
     /// Gets the height of the cell or line of text with this font.
     pub fn height(&self) -> f32 {
-        unsafe { font_height(self.inner) }
+        unsafe { font_height(self.as_ptr()) }
     }
 
     /// Gets the average width of the character.
     pub fn width(&self) -> f32 {
-        unsafe { font_width(self.inner) }
+        unsafe { font_width(self.as_ptr()) }
     }
 
     /// Gets the x scaling of the text.
     pub fn xscale(&self) -> f32 {
-        unsafe { font_xscale(self.inner) }
+        unsafe { font_xscale(self.as_ptr()) }
     }
 
     /// Obtains the measurement of the font above the baseline.
     pub fn ascent(&self) -> f32 {
-        unsafe { font_ascent(self.inner) }
+        unsafe { font_ascent(self.as_ptr()) }
     }
 
     /// Obtains the measurement of the font below the baseline.
     pub fn descent(&self) -> f32 {
-        unsafe { font_descent(self.inner) }
+        unsafe { font_descent(self.as_ptr()) }
     }
 
     /// Gets the margin between the character size and the line height.
     pub fn leading(&self) -> f32 {
-        unsafe { font_leading(self.inner) }
+        unsafe { font_leading(self.as_ptr()) }
     }
 
     /// Checks if a font is monospaced or not.
     pub fn is_monospace(&self) -> bool {
-        unsafe { font_is_monospace(self.inner) != 0 }
+        unsafe { font_is_monospace(self.as_ptr()) != 0 }
     }
 
     /// Gets the style of the font.
     pub fn style(&self) -> u32 {
-        unsafe { font_style(self.inner) }
+        unsafe { font_style(self.as_ptr()) }
     }
 
     /// Gets the size in pixels of a text string, based on the font.
@@ -149,7 +145,7 @@ impl Font {
         let mut height = 0f32;
 
         unsafe {
-            font_extents(self.inner, text.as_ptr(), refwidth, &mut width, &mut height);
+            font_extents(self.as_ptr(), text.as_ptr(), refwidth, &mut width, &mut height);
         };
 
         (width, height)

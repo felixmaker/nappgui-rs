@@ -1,21 +1,20 @@
+use std::rc::Rc;
+
 use nappgui_sys::{
     dctx_bitmap, dctx_image, draw_antialias, draw_clear, draw_matrixf, pixformat_t, T2Df,
 };
+
+use crate::util::macros::impl_ptr;
 
 use super::{Color, Image};
 
 /// Drawing context.
 pub struct DCtx {
-    pub(crate) inner: *mut nappgui_sys::DCtx,
+    pub(crate) inner: Rc<*mut nappgui_sys::DCtx>,
 }
 
 impl DCtx {
-    pub(crate) fn new(ptr: *mut nappgui_sys::DCtx) -> Self {
-        if ptr.is_null() {
-            panic!("DCtx is NULL");
-        }
-        Self { inner: ptr }
-    }
+    impl_ptr!(nappgui_sys::DCtx);
 
     /// Create a memory context, in order to generate an image.
     ///
@@ -27,14 +26,14 @@ impl DCtx {
     }
 
     /// Get the result image after drawing in the context created with dctx_bitmap.
-    pub fn image(mut self) -> Image {
-        let ptr = unsafe { dctx_image(&mut self.inner) };
+    pub fn image(self) -> Image {
+        let ptr = unsafe { dctx_image(&mut self.as_ptr()) };
         Image::new(ptr)
     }
 
     /// Clears the entire context area, using a solid color.
     pub fn clear(&self, color: &Color) {
-        unsafe { draw_clear(self.inner, color.inner) }
+        unsafe { draw_clear(self.as_ptr(), color.inner) }
     }
 
     /// Set the context reference system (affine transformation).
@@ -43,14 +42,14 @@ impl DCtx {
     /// The origin of coordinates is in the upper left corner. The Y axis increases down.
     pub fn matrix(&self, t2d: &[T2Df]) {
         unsafe {
-            draw_matrixf(self.inner, t2d.as_ptr());
+            draw_matrixf(self.as_ptr(), t2d.as_ptr());
         }
     }
 
     /// Set the reference system in Cartesian coordinates.
     pub fn matrix_cartesian(&self, t2d: &[T2Df]) {
         unsafe {
-            draw_matrixf(self.inner, t2d.as_ptr());
+            draw_matrixf(self.as_ptr(), t2d.as_ptr());
         }
     }
 
@@ -61,7 +60,7 @@ impl DCtx {
     /// for the whole drawing. See Antialiasing.
     pub fn antialias(&self, enable: bool) {
         unsafe {
-            draw_antialias(self.inner, enable as i8);
+            draw_antialias(self.as_ptr(), enable as i8);
         }
     }
 }

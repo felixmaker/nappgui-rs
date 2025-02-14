@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use nappgui_sys::{
     view_OnAcceptFocus, view_OnClick, view_OnDown, view_OnDrag, view_OnDraw, view_OnEnter,
     view_OnExit, view_OnFocus, view_OnKeyDown, view_OnKeyUp, view_OnMove, view_OnOverlay,
@@ -7,21 +9,16 @@ use nappgui_sys::{
     view_update, view_viewport, S2Df, V2Df,
 };
 
-use crate::util::macros::callback;
+use crate::util::macros::{callback, impl_ptr};
 
 /// The View controls or custom views are blank areas within the window that allow us
 /// to implement our own components.
 pub struct View {
-    pub(crate) inner: *mut nappgui_sys::View,
+    pub(crate) inner: Rc<*mut nappgui_sys::View>,
 }
 
 impl View {
-    pub(crate) fn new(ptr: *mut nappgui_sys::View) -> Self {
-        if ptr.is_null() {
-            panic!("ptr is null");
-        }
-        Self { inner: ptr }
-    }
+    impl_ptr!(nappgui_sys::View);
 
     /// Create a new custom view.
     pub fn create() -> Self {
@@ -44,7 +41,7 @@ impl View {
     /// Set the default view size.
     pub fn size(&self, width: f32, height: f32) {
         let size = nappgui_sys::S2Df { width, height };
-        unsafe { view_size(self.inner, size) }
+        unsafe { view_size(self.as_ptr(), size) }
     }
 
     callback! {
@@ -107,7 +104,7 @@ impl View {
     /// event and not as navigation between the controls. The call to this function will have no effect
     /// if there is no associated OnKeyDown handler. In general, you should not use this function.
     pub fn allow_tab(&self, allow: bool) {
-        unsafe { view_allow_tab(self.inner, allow as i8) }
+        unsafe { view_allow_tab(self.as_ptr(), allow as i8) }
     }
 
     /// Gets the current size of the view.
@@ -116,7 +113,7 @@ impl View {
             width: 0.0,
             height: 0.0,
         };
-        unsafe { view_get_size(self.inner, &mut size) };
+        unsafe { view_get_size(self.as_ptr(), &mut size) };
         size
     }
 
@@ -127,21 +124,21 @@ impl View {
     /// will use it to size and position the scroll bars.
     pub fn content_size(&self, size: S2Df, line: S2Df) {
         unsafe {
-            view_content_size(self.inner, size, line);
+            view_content_size(self.as_ptr(), size, line);
         }
     }
 
     /// Move the horizontal scroll bar to the indicated position.
     pub fn scroll_x(&self, pos: f32) {
         unsafe {
-            view_scroll_x(self.inner, pos);
+            view_scroll_x(self.as_ptr(), pos);
         }
     }
 
     /// Move the vertical scroll bar to the indicated position.
     pub fn scroll_y(&self, pos: f32) {
         unsafe {
-            view_scroll_y(self.inner, pos);
+            view_scroll_y(self.as_ptr(), pos);
         }
     }
 
@@ -150,7 +147,7 @@ impl View {
         let mut height = 0f32;
         let mut width = 0f32;
         unsafe {
-            view_scroll_size(self.inner, &mut width, &mut height);
+            view_scroll_size(self.as_ptr(), &mut width, &mut height);
         }
         (width, height)
     }
@@ -158,7 +155,7 @@ impl View {
     /// Show or hide the scroll bars.
     pub fn scroll_visible(&self, horizontal: bool, vertical: bool) {
         unsafe {
-            view_scroll_visible(self.inner, horizontal as i8, vertical as i8);
+            view_scroll_visible(self.as_ptr(), horizontal as i8, vertical as i8);
         }
     }
 
@@ -170,7 +167,7 @@ impl View {
             height: 0.0,
         };
         unsafe {
-            view_viewport(self.inner, &mut pos, &mut size);
+            view_viewport(self.as_ptr(), &mut pos, &mut size);
         }
         (pos, size)
     }
@@ -179,7 +176,7 @@ impl View {
     pub fn point_scale(&self) -> f32 {
         let mut scale = 0f32;
         unsafe {
-            view_point_scale(self.inner, &mut scale);
+            view_point_scale(self.as_ptr(), &mut scale);
         }
         scale
     }
@@ -187,7 +184,7 @@ impl View {
     /// Send an order to the operating system that the view should be refreshed.
     pub fn update(&self) {
         unsafe {
-            view_update(self.inner);
+            view_update(self.as_ptr());
         }
     }
 
@@ -196,6 +193,6 @@ impl View {
     /// # Remarks
     /// Do not use this function if you do not know very well what you are doing.
     pub fn native(&self) -> *mut std::ffi::c_void {
-        unsafe { view_native(self.inner) }
+        unsafe { view_native(self.as_ptr()) }
     }
 }

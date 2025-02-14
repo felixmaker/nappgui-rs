@@ -14,9 +14,7 @@ use crate::draw_2d::Image;
 use crate::prelude::{GuiCursor, GuiFocus, WindowFlag};
 use crate::util::macros::{callback, listener};
 
-use super::control::Control;
-use super::panel::Panel;
-use super::Button;
+use super::*;
 
 /// Window objects are the highest-level containers within the user interface.
 pub struct Window {

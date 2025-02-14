@@ -52,6 +52,7 @@ macro_rules! callback {
 
 macro_rules! impl_ptr {
     ($obj:ty) => {
+        #[allow(unused)]
         pub(crate) fn new(ptr: *mut $obj) -> Self {
             if ptr.is_null() {
                 panic!("pointer is null");
@@ -59,8 +60,21 @@ macro_rules! impl_ptr {
             Self { inner: std::rc::Rc::new(ptr) }
         }
     
+        #[allow(unused)]
         pub(crate) fn as_ptr(&self) -> *mut $obj {
             *self.inner 
+        }
+    };
+}
+
+macro_rules! impl_clone {
+    ($obj:ty) => {
+        impl Clone for $obj {
+            fn clone(&self) -> Self {
+                Self {
+                    inner: self.inner.clone(),
+                }
+            } 
         }
     };
 }
@@ -68,3 +82,4 @@ macro_rules! impl_ptr {
 pub(crate) use callback;
 pub(crate) use listener;
 pub(crate) use impl_ptr;
+pub(crate) use impl_clone;

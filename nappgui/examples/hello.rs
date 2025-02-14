@@ -14,7 +14,7 @@ impl AppHandler for App {
         let button = Button::push();
         let text = TextView::create();
 
-        label.text("Hello!, I'm a label");
+        label.text("Hello! I'm a label");
         button.text("Click Me!");
 
         layout.label(&label, 0, 0);

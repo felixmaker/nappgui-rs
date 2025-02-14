@@ -66,13 +66,6 @@ impl Palette {
         Self::new(unsafe { palette_binary(zero.inner, one.inner) })
     }
 
-    /// Destroy the palette.
-    pub fn destroy(self) {
-        unsafe {
-            palette_destroy(&mut self.as_ptr());
-        }
-    }
-
     /// Returns the number of colors in the palette.
     pub fn size(&self) -> u32 {
         unsafe { palette_size(self.as_ptr()) }
@@ -90,5 +83,13 @@ impl Palette {
         let size = self.size();
         let ptr = unsafe { palette_ccolors(self.as_ptr()) };
         unsafe { std::slice::from_raw_parts(ptr as _, size as usize) }
+    }
+}
+
+impl Drop for Palette  {
+    fn drop(&mut self) {
+        unsafe {
+            palette_destroy(&mut self.as_ptr());
+        } 
     }
 }

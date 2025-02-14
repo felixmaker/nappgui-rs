@@ -40,9 +40,7 @@ impl Layout {
 
     /// Get a layout cell.
     pub fn cell(&self, col: u32, row: u32) -> Cell {
-        Cell {
-            inner: Rc::new(unsafe { layout_cell(self.as_ptr(), col, row) }),
-        }
+        Cell::from_ptr(unsafe { layout_cell(self.as_ptr(), col, row) })
     }
 
     /// Gets the control assigned to a cell in the layout.
@@ -51,7 +49,7 @@ impl Layout {
         if control.is_null() {
             None
         } else {
-            Some(Control::new(control))
+            Some(Control::from_ptr(control))
         }
     }
 
@@ -155,7 +153,7 @@ impl Layout {
         if label.is_null() {
             None
         } else {
-            Some(Label::new(label))
+            Some(Label::from_ptr(label))
         }
     }
 
@@ -165,7 +163,7 @@ impl Layout {
         if button.is_null() {
             None
         } else {
-            Some(Button::new(button))
+            Some(Button::from_ptr(button))
         }
     }
 
@@ -175,7 +173,7 @@ impl Layout {
         if popup.is_null() {
             None
         } else {
-            Some(PopUp::new(popup))
+            Some(PopUp::from_ptr(popup))
         }
     }
 
@@ -185,7 +183,7 @@ impl Layout {
         if edit.is_null() {
             None
         } else {
-            Some(Edit::new(edit))
+            Some(Edit::from_ptr(edit))
         }
     }
 
@@ -195,7 +193,7 @@ impl Layout {
         if combo.is_null() {
             None
         } else {
-            Some(Combo::new(combo))
+            Some(Combo::from_ptr(combo))
         }
     }
 
@@ -205,7 +203,7 @@ impl Layout {
         if listbox.is_null() {
             None
         } else {
-            Some(ListBox::new(listbox))
+            Some(ListBox::from_ptr(listbox))
         }
     }
 
@@ -215,7 +213,7 @@ impl Layout {
         if updown.is_null() {
             None
         } else {
-            Some(UpDown::new(updown))
+            Some(UpDown::from_ptr(updown))
         }
     }
 
@@ -225,7 +223,7 @@ impl Layout {
         if slider.is_null() {
             None
         } else {
-            Some(Slider::new(slider))
+            Some(Slider::from_ptr(slider))
         }
     }
 
@@ -235,7 +233,7 @@ impl Layout {
         if progress.is_null() {
             None
         } else {
-            Some(Progress::new(progress))
+            Some(Progress::from_ptr(progress))
         }
     }
 
@@ -245,7 +243,7 @@ impl Layout {
         if view.is_null() {
             None
         } else {
-            Some(View::new(view))
+            Some(View::from_ptr(view))
         }
     }
 
@@ -255,7 +253,7 @@ impl Layout {
         if textview.is_null() {
             None
         } else {
-            Some(TextView::new(textview))
+            Some(TextView::from_ptr(textview))
         }
     }
 
@@ -265,7 +263,7 @@ impl Layout {
         if webview.is_null() {
             None
         } else {
-            Some(WebView::new(webview))
+            Some(WebView::from_ptr(webview))
         }
     }
 
@@ -275,7 +273,7 @@ impl Layout {
         if imageview.is_null() {
             None
         } else {
-            Some(ImageView::new(imageview))
+            Some(ImageView::from_ptr(imageview))
         }
     }
 
@@ -285,7 +283,7 @@ impl Layout {
         if tableview.is_null() {
             None
         } else {
-            Some(TableView::new(tableview))
+            Some(TableView::from_ptr(tableview))
         }
     }
 
@@ -295,7 +293,7 @@ impl Layout {
         if splitview.is_null() {
             None
         } else {
-            Some(SplitView::new(splitview))
+            Some(SplitView::from_ptr(splitview))
         }
     }
 
@@ -305,7 +303,7 @@ impl Layout {
         if panel.is_null() {
             None
         } else {
-            Some(Panel::new(panel))
+            Some(Panel::from_ptr(panel))
         }
     }
 
@@ -315,7 +313,7 @@ impl Layout {
         if layout.is_null() {
             None
         } else {
-            Some(Layout::new(layout))
+            Some(Layout::from_ptr(layout))
         }
     }
 

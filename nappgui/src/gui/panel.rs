@@ -58,7 +58,7 @@ impl Panel {
         if layout.is_null() {
             None
         } else {
-            Some(Layout::new(layout))
+            Some(Layout::from_ptr(layout))
         }
     }
 

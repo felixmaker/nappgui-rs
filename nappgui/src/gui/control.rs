@@ -26,7 +26,7 @@ impl Control {
         if label.is_null() {
             None
         } else {
-            Some(Label::new(label))
+            Some(Label::from_ptr(label))
         }
     }
 
@@ -36,7 +36,7 @@ impl Control {
         if button.is_null() {
             None
         } else {
-            Some(Button::new(button))
+            Some(Button::from_ptr(button))
         }
     }
 
@@ -46,7 +46,7 @@ impl Control {
         if popup.is_null() {
             None
         } else {
-            Some(PopUp::new(popup))
+            Some(PopUp::from_ptr(popup))
         }
     }
 
@@ -56,7 +56,7 @@ impl Control {
         if edit.is_null() {
             None
         } else {
-            Some(Edit::new(edit))
+            Some(Edit::from_ptr(edit))
         }
     }
 
@@ -66,7 +66,7 @@ impl Control {
         if combo.is_null() {
             None
         } else {
-            Some(Combo::new(combo))
+            Some(Combo::from_ptr(combo))
         }
     }
 
@@ -76,7 +76,7 @@ impl Control {
         if listbox.is_null() {
             None
         } else {
-            Some(ListBox::new(listbox))
+            Some(ListBox::from_ptr(listbox))
         }
     }
 
@@ -86,7 +86,7 @@ impl Control {
         if updown.is_null() {
             None
         } else {
-            Some(UpDown::new(updown))
+            Some(UpDown::from_ptr(updown))
         }
     }
 
@@ -96,7 +96,7 @@ impl Control {
         if slider.is_null() {
             None
         } else {
-            Some(Slider::new(slider))
+            Some(Slider::from_ptr(slider))
         }
     }
 
@@ -106,7 +106,7 @@ impl Control {
         if progress.is_null() {
             None
         } else {
-            Some(Progress::new(progress))
+            Some(Progress::from_ptr(progress))
         }
     }
 
@@ -116,7 +116,7 @@ impl Control {
         if view.is_null() {
             None
         } else {
-            Some(View::new(view))
+            Some(View::from_ptr(view))
         }
     }
 
@@ -126,7 +126,7 @@ impl Control {
         if textview.is_null() {
             None
         } else {
-            Some(TextView::new(textview))
+            Some(TextView::from_ptr(textview))
         }
     }
 
@@ -136,7 +136,7 @@ impl Control {
         if webview.is_null() {
             None
         } else {
-            Some(WebView::new(webview))
+            Some(WebView::from_ptr(webview))
         }
     }
 
@@ -146,7 +146,7 @@ impl Control {
         if imageview.is_null() {
             None
         } else {
-            Some(ImageView::new(imageview))
+            Some(ImageView::from_ptr(imageview))
         }
     }
 
@@ -156,7 +156,7 @@ impl Control {
         if tableview.is_null() {
             None
         } else {
-            Some(TableView::new(tableview))
+            Some(TableView::from_ptr(tableview))
         }
     }
 
@@ -166,7 +166,7 @@ impl Control {
         if splitview.is_null() {
             None
         } else {
-            Some(SplitView::new(splitview))
+            Some(SplitView::from_ptr(splitview))
         }
     }
 
@@ -176,7 +176,7 @@ impl Control {
         if panel.is_null() {
             None
         } else {
-            Some(Panel::new(panel))
+            Some(Panel::from_ptr(panel))
         }
     }
 

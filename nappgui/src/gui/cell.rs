@@ -29,8 +29,8 @@ impl Cell {
         let ptr = unsafe { cell_control(self.as_ptr()) };
         if ptr.is_null() {
             None
-        } else {
-            Some(Control::new(ptr))
+        } else {        
+            Some(Control::from_ptr(ptr))
         }
     }
 
@@ -40,7 +40,7 @@ impl Cell {
         if ptr.is_null() {
             None
         } else {
-            Some(Label::new(ptr))
+            Some(Label::from_ptr(ptr))
         }
     }
 
@@ -50,7 +50,7 @@ impl Cell {
         if ptr.is_null() {
             None
         } else {
-            Some(Button::new(ptr))
+            Some(Button::from_ptr(ptr))
         }
     }
 
@@ -60,7 +60,7 @@ impl Cell {
         if ptr.is_null() {
             None
         } else {
-            Some(PopUp::new(ptr))
+            Some(PopUp::from_ptr(ptr))
         }
     }
 
@@ -70,7 +70,7 @@ impl Cell {
         if ptr.is_null() {
             None
         } else {
-            Some(Edit::new(ptr))
+            Some(Edit::from_ptr(ptr))
         }
     }
 
@@ -80,7 +80,7 @@ impl Cell {
         if ptr.is_null() {
             None
         } else {
-            Some(Combo::new(ptr))
+            Some(Combo::from_ptr(ptr))
         }
     }
 
@@ -90,7 +90,7 @@ impl Cell {
         if ptr.is_null() {
             None
         } else {
-            Some(ListBox::new(ptr))
+            Some(ListBox::from_ptr(ptr))
         }
     }
 
@@ -100,7 +100,7 @@ impl Cell {
         if ptr.is_null() {
             None
         } else {
-            Some(UpDown::new(ptr))
+            Some(UpDown::from_ptr(ptr))
         }
     }
 
@@ -110,7 +110,7 @@ impl Cell {
         if ptr.is_null() {
             None
         } else {
-            Some(Slider::new(ptr))
+            Some(Slider::from_ptr(ptr))
         }
     }
 
@@ -120,7 +120,7 @@ impl Cell {
         if ptr.is_null() {
             None
         } else {
-            Some(Progress::new(ptr))
+            Some(Progress::from_ptr(ptr))
         }
     }
 
@@ -130,7 +130,7 @@ impl Cell {
         if ptr.is_null() {
             None
         } else {
-            Some(View::new(ptr))
+            Some(View::from_ptr(ptr))
         }
     }
 
@@ -140,7 +140,7 @@ impl Cell {
         if ptr.is_null() {
             None
         } else {
-            Some(TextView::new(ptr))
+            Some(TextView::from_ptr(ptr))
         }
     }
 
@@ -150,7 +150,7 @@ impl Cell {
         if ptr.is_null() {
             None
         } else {
-            Some(WebView::new(ptr))
+            Some(WebView::from_ptr(ptr))
         }
     }
 
@@ -160,7 +160,7 @@ impl Cell {
         if ptr.is_null() {
             None
         } else {
-            Some(ImageView::new(ptr))
+            Some(ImageView::from_ptr(ptr))
         }
     }
 
@@ -170,7 +170,7 @@ impl Cell {
         if ptr.is_null() {
             None
         } else {
-            Some(TableView::new(ptr))
+            Some(TableView::from_ptr(ptr))
         }
     }
 
@@ -180,7 +180,7 @@ impl Cell {
         if ptr.is_null() {
             None
         } else {
-            Some(SplitView::new(ptr))
+            Some(SplitView::from_ptr(ptr))
         }
     }
 
@@ -190,7 +190,7 @@ impl Cell {
         if ptr.is_null() {
             None
         } else {
-            Some(Panel::new(ptr))
+            Some(Panel::from_ptr(ptr))
         }
     }
 
@@ -200,7 +200,7 @@ impl Cell {
         if ptr.is_null() {
             None
         } else {
-            Some(Layout::new(ptr))
+            Some(Layout::from_ptr(ptr))
         }
     }
 

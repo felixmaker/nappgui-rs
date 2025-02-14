@@ -61,11 +61,6 @@ impl Font {
         Font::new(font)
     }
 
-    /// Destroy the font.
-    pub fn destroy(&mut self) {
-        unsafe { font_destroy(&mut self.as_ptr()) };
-    }
-
     /// Compare two sources. They are considered equal if they have the same family, size and style.
     pub fn equals(&self, other: &Font) -> bool {
         unsafe { font_equals(self.as_ptr(), other.as_ptr()) != 0 }
@@ -199,5 +194,11 @@ impl Font {
         }
 
         families
+    }
+}
+
+impl Drop for Font {
+    fn drop(&mut self) {
+        unsafe { font_destroy(&mut self.as_ptr()) };
     }
 }

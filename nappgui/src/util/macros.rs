@@ -6,7 +6,7 @@ macro_rules! listener {
         unsafe extern "C" fn shim(data: *mut c_void, event: *mut nappgui_sys::Event) {
             let data = data as *mut (Box<dyn FnMut(&mut $obj, &Event)>, *mut c_void);
             let f = &mut *(*data).0;
-            let mut obj = <$obj>::new((*data).1 as _);
+            let mut obj = <$obj>::from_ptr((*data).1 as _);
             let event = Event::new(event);
             let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut obj, &event)));
         }
@@ -59,11 +59,24 @@ macro_rules! impl_ptr {
             }
             Self { inner: std::rc::Rc::new(ptr) }
         }
+
+        #[allow(unused)]
+        pub(crate) fn from_ptr(ptr: *mut $obj) -> Self {
+            if ptr.is_null() {
+                panic!("pointer is null");
+            }
+            let control = Rc::new(ptr);
+            let control = Rc::into_raw(control);
+            
+            let control = 
+            unsafe { Rc::increment_strong_count(control); Rc::from_raw(control)};
+            Self { inner: control }
+        }
     
         #[allow(unused)]
         pub(crate) fn as_ptr(&self) -> *mut $obj {
             *self.inner 
-        }
+        }       
     };
 }
 

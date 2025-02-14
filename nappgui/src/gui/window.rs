@@ -12,7 +12,7 @@ use std::rc::Rc;
 use crate::core::event::Event;
 use crate::draw_2d::Image;
 use crate::prelude::{GuiCursor, GuiFocus, WindowFlag};
-use crate::util::macros::{callback, listener};
+use crate::util::macros::{callback, impl_ptr, listener};
 
 use super::*;
 
@@ -22,16 +22,7 @@ pub struct Window {
 }
 
 impl Window {
-    pub(crate) fn new(ptr: *mut nappgui_sys::Window) -> Self {
-        if ptr.is_null() {
-            panic!("ptr is null");
-        }
-        Self { inner: Rc::new(ptr) }
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Window {
-        *self.inner
-    }
+    impl_ptr!(nappgui_sys::Window);
 
     /// Create a new window.
     pub fn create(flags: WindowFlag) -> Self {
@@ -43,7 +34,7 @@ impl Window {
     ///
     /// # Remarks
     /// Panels, layouts and components will be recursively destroyed.
-    pub fn destroy(self) {
+    pub unsafe fn destroy(self) {
         unsafe {
             let window = self.as_ptr().cast();
             window_destroy(window);

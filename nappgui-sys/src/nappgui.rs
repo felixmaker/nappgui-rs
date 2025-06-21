@@ -1521,6 +1521,48 @@ pub struct _setptendResPack_t {
     _unused: [u8; 0],
 }
 pub type setptendResPack = _setptendResPack_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct RegExPtData {
+    pub elem: [*mut RegEx; 1024usize],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ArrPtRegEx {
+    pub reserved: u32,
+    pub size: u32,
+    pub elem_sizeof: u16,
+    pub content: *mut RegExPtData,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodePtRegEx {
+    pub rb: u32,
+    pub left: *mut NodePtRegEx,
+    pub right: *mut NodePtRegEx,
+    pub data: *mut RegEx,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct SetPtRegEx {
+    pub elems: u32,
+    pub esize: u16,
+    pub ksize: u16,
+    pub root: *mut NodePtRegEx,
+    pub func_compare: FPtr_compare,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrptendRegEx_t {
+    _unused: [u8; 0],
+}
+pub type arrptendRegEx = _arrptendRegEx_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setptendRegEx_t {
+    _unused: [u8; 0],
+}
+pub type setptendRegEx = _setptendRegEx_t;
 pub type V2Df = _v2df_t;
 pub type V2Dd = _v2dd_t;
 pub type S2Df = _s2df_t;
@@ -2800,10 +2842,11 @@ pub use self::_gui_close_t as gui_close_t;
 #[non_exhaustive]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub enum _gui_scale_t {
-    ekGUI_SCALE_AUTO = 1,
-    ekGUI_SCALE_NONE = 2,
+    ekGUI_SCALE_NONE = 1,
+    ekGUI_SCALE_AUTO = 2,
     ekGUI_SCALE_ASPECT = 3,
     ekGUI_SCALE_ASPECTDW = 4,
+    ekGUI_SCALE_ADJUST = 5,
 }
 pub use self::_gui_scale_t as gui_scale_t;
 #[repr(i32)]
@@ -2937,8 +2980,7 @@ pub use self::_gui_role_t as gui_role_t;
 #[non_exhaustive]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub enum _gui_prop_t {
-    ekGUI_PROP_RESIZE = 0,
-    ekGUI_PROP_CHILDREN = 1,
+    ekGUI_PROP_CHILDREN = 0,
 }
 pub use self::_gui_prop_t as gui_prop_t;
 #[repr(i32)]
@@ -2956,12 +2998,12 @@ pub enum _gui_text_t {
     ekGUI_TEXT_LSPACING = 8,
     ekGUI_TEXT_BFPARSPACE = 9,
     ekGUI_TEXT_AFPARSPACE = 10,
-    ekGUI_TEXT_SELECT = 11,
-    ekGUI_TEXT_SHOW_SELECT = 12,
-    ekGUI_TEXT_SCROLL = 13,
-    ekGUI_TEXT_WRAP_MODE = 14,
-    ekGUI_TEXT_APPLY_ALL = 15,
-    ekGUI_TEXT_APPLY_SEL = 16,
+    ekGUI_TEXT_APPLY_ALL = 11,
+    ekGUI_TEXT_APPLY_SEL = 12,
+    ekGUI_TEXT_SELECT = 13,
+    ekGUI_TEXT_SHOW_SELECT = 14,
+    ekGUI_TEXT_SCROLL = 15,
+    ekGUI_TEXT_WRAP_MODE = 16,
 }
 pub use self::_gui_text_t as gui_text_t;
 #[repr(i32)]
@@ -3009,7 +3051,6 @@ pub enum _button_flag_t {
     ekBUTTON_RADIO = 3,
     ekBUTTON_FLAT = 4,
     ekBUTTON_FLATGLE = 5,
-    ekBUTTON_HEADER = 6,
     ekBUTTON_TYPE = 7,
 }
 pub use self::_button_flag_t as button_flag_t;
@@ -3126,11 +3167,17 @@ impl _split_flag_t {
 pub enum _split_flag_t {
     ekSPLIT_FLAG = 0,
     ekSPLIT_HORZ = 1,
-    ekSPLIT_PROP = 2,
-    ekSPLIT_LEFT = 3,
-    ekSPLIT_RIGHT = 4,
 }
 pub use self::_split_flag_t as split_flag_t;
+#[repr(i32)]
+#[non_exhaustive]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum _split_mode_t {
+    ekSPLIT_NORMAL = 1,
+    ekSPLIT_FIXED0 = 2,
+    ekSPLIT_FIXED1 = 3,
+}
+pub use self::_split_mode_t as split_mode_t;
 #[repr(i32)]
 #[non_exhaustive]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -3317,6 +3364,8 @@ pub type FPtr_gctx_get_text =
 pub type FPtr_gctx_get_ptr = ::core::option::Option<
     unsafe extern "C" fn(item: *const ::libc::c_void) -> *mut ::libc::c_void,
 >;
+pub type FPtr_gctx_get_bool =
+    ::core::option::Option<unsafe extern "C" fn(item: *const ::libc::c_void) -> bool_t>;
 pub type FPtr_gctx_get_uint32 =
     ::core::option::Option<unsafe extern "C" fn(item: *const ::libc::c_void) -> u32>;
 pub type FPtr_gctx_get_real32 =
@@ -3397,6 +3446,9 @@ pub type FPtr_gctx_tickmarks = ::core::option::Option<
         num_tickmarks: u32,
         tickmarks_at_left_top: bool_t,
     ),
+>;
+pub type FPtr_gctx_insert = ::core::option::Option<
+    unsafe extern "C" fn(item: *mut ::libc::c_void, pos: u32, child: *mut ::libc::c_void),
 >;
 pub type FPtr_gctx_menu = ::core::option::Option<
     unsafe extern "C" fn(
@@ -3497,6 +3549,7 @@ pub struct _guictx_t {
     pub func_label_OnMouseExit: FPtr_gctx_set_listener,
     pub func_label_set_text: FPtr_gctx_set_text,
     pub func_label_set_font: FPtr_gctx_set_cptr,
+    pub func_label_set_flags: FPtr_gctx_set_uint32,
     pub func_label_set_align: FPtr_gctx_set_enum,
     pub func_label_set_ellipsis: FPtr_gctx_set_enum,
     pub func_label_set_text_color: FPtr_gctx_set_uint32,
@@ -3511,7 +3564,7 @@ pub struct _guictx_t {
     pub func_button_get_state: FPtr_gctx_get_enum,
     pub func_button_set_vpadding: FPtr_gctx_set_real32,
     pub func_button_bounds: FPtr_gctx_bounds2,
-    pub func_popup_OnChange: FPtr_gctx_set_listener,
+    pub func_popup_OnSelect: FPtr_gctx_set_listener,
     pub func_popup_set_elem: FPtr_gctx_set_elem,
     pub func_popup_set_font: FPtr_gctx_set_cptr,
     pub func_popup_list_height: FPtr_gctx_set_uint32,
@@ -3557,8 +3610,9 @@ pub struct _guictx_t {
     pub func_progress_get_thickness: FPtr_gctx_get_real32e,
     pub func_text_OnFilter: FPtr_gctx_set_listener,
     pub func_text_OnFocus: FPtr_gctx_set_listener,
-    pub func_text_insert_text: FPtr_gctx_set_text,
     pub func_text_set_text: FPtr_gctx_set_text,
+    pub func_text_add_text: FPtr_gctx_set_text,
+    pub func_text_ins_text: FPtr_gctx_set_text,
     pub func_text_set_rtf: FPtr_gctx_set_ptr,
     pub func_text_set_prop: FPtr_gctx_set_property,
     pub func_text_set_editable: FPtr_gctx_set_bool,
@@ -3614,10 +3668,11 @@ pub struct _guictx_t {
     pub func_panel_set_need_display: FPtr_gctx_call,
     pub func_menu_create: FPtr_gctx_create,
     pub func_menu_destroy: FPtr_gctx_destroy,
-    pub func_attach_menuitem_to_menu: FPtr_gctx_set_ptr,
-    pub func_detach_menuitem_from_menu: FPtr_gctx_set_ptr,
+    pub func_menu_insert_item: FPtr_gctx_insert,
+    pub func_menu_delete_item: FPtr_gctx_set_ptr,
     pub func_menu_launch_popup: FPtr_gctx_menu,
     pub func_menu_hide_popup: FPtr_gctx_call,
+    pub func_menu_is_menubar: FPtr_gctx_get_bool,
     pub func_menuitem_create: FPtr_gctx_create,
     pub func_menuitem_destroy: FPtr_gctx_destroy,
     pub func_menuitem_OnClick: FPtr_gctx_set_listener,
@@ -4059,6 +4114,9 @@ unsafe extern "C" {
     pub fn button_OnClick(button: *mut Button, listener: *mut Listener);
 }
 unsafe extern "C" {
+    pub fn button_min_width(button: *mut Button, width: real32_t);
+}
+unsafe extern "C" {
     pub fn button_text(button: *mut Button, text: *const char_t);
 }
 unsafe extern "C" {
@@ -4069,6 +4127,9 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn button_font(button: *mut Button, font: *const Font);
+}
+unsafe extern "C" {
+    pub fn button_get_font(button: *const Button) -> *const Font;
 }
 unsafe extern "C" {
     pub fn button_image(button: *mut Button, image: *const Image);
@@ -4281,6 +4342,12 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn edit_OnFocus(edit: *mut Edit, listener: *mut Listener);
+}
+unsafe extern "C" {
+    pub fn edit_min_width(edit: *mut Edit, width: real32_t);
+}
+unsafe extern "C" {
+    pub fn edit_min_height(edit: *mut Edit, height: real32_t);
 }
 unsafe extern "C" {
     pub fn edit_text(edit: *mut Edit, text: *const char_t);
@@ -4519,10 +4586,10 @@ unsafe extern "C" {
     pub fn label_create() -> *mut Label;
 }
 unsafe extern "C" {
-    pub fn label_multiline() -> *mut Label;
+    pub fn label_OnClick(label: *mut Label, listener: *mut Listener);
 }
 unsafe extern "C" {
-    pub fn label_OnClick(label: *mut Label, listener: *mut Listener);
+    pub fn label_min_width(label: *mut Label, width: real32_t);
 }
 unsafe extern "C" {
     pub fn label_text(label: *mut Label, text: *const char_t);
@@ -4534,7 +4601,13 @@ unsafe extern "C" {
     pub fn label_font(label: *mut Label, font: *const Font);
 }
 unsafe extern "C" {
+    pub fn label_get_font(label: *const Label) -> *const Font;
+}
+unsafe extern "C" {
     pub fn label_style_over(label: *mut Label, fstyle: u32);
+}
+unsafe extern "C" {
+    pub fn label_multiline(label: *mut Label, multiline: bool_t);
 }
 unsafe extern "C" {
     pub fn label_align(label: *mut Label, align: align_t);
@@ -4785,6 +4858,12 @@ unsafe extern "C" {
     );
 }
 unsafe extern "C" {
+    pub fn layout_dbind_get_obj_imp(
+        layout: *mut Layout,
+        type_: *const char_t,
+    ) -> *mut ::libc::c_void;
+}
+unsafe extern "C" {
     pub fn layout_dbind_update_imp(
         layout: *mut Layout,
         type_: *const char_t,
@@ -4855,28 +4934,43 @@ unsafe extern "C" {
     pub fn listbox_checked(listbox: *const ListBox, index: u32) -> bool_t;
 }
 unsafe extern "C" {
+    pub fn listbox_get_selected(listbox: *const ListBox) -> u32;
+}
+unsafe extern "C" {
+    pub fn listbox_get_row_height(listbox: *const ListBox) -> real32_t;
+}
+unsafe extern "C" {
     pub fn menu_create() -> *mut Menu;
 }
 unsafe extern "C" {
     pub fn menu_destroy(menu: *mut *mut Menu);
 }
 unsafe extern "C" {
-    pub fn menu_item(menu: *mut Menu, item: *mut MenuItem);
+    pub fn menu_add_item(menu: *mut Menu, item: *mut MenuItem);
 }
 unsafe extern "C" {
-    pub fn menu_launch(menu: *mut Menu, position: V2Df);
+    pub fn menu_ins_item(menu: *mut Menu, pos: u32, item: *mut MenuItem);
 }
 unsafe extern "C" {
-    pub fn menu_hide(menu: *mut Menu);
+    pub fn menu_del_item(menu: *mut Menu, pos: u32);
+}
+unsafe extern "C" {
+    pub fn menu_launch(menu: *mut Menu, window: *mut Window, position: V2Df);
 }
 unsafe extern "C" {
     pub fn menu_off_items(menu: *mut Menu);
 }
 unsafe extern "C" {
+    pub fn menu_count(menu: *const Menu) -> u32;
+}
+unsafe extern "C" {
     pub fn menu_get_item(menu: *mut Menu, index: u32) -> *mut MenuItem;
 }
 unsafe extern "C" {
-    pub fn menu_size(menu: *const Menu) -> u32;
+    pub fn menu_get_citem(menu: *const Menu, index: u32) -> *const MenuItem;
+}
+unsafe extern "C" {
+    pub fn menu_is_menubar(menu: *const Menu) -> bool_t;
 }
 unsafe extern "C" {
     pub fn menu_imp(menu: *const Menu) -> *mut ::libc::c_void;
@@ -4897,6 +4991,9 @@ unsafe extern "C" {
     pub fn menuitem_visible(item: *mut MenuItem, visible: bool_t);
 }
 unsafe extern "C" {
+    pub fn menuitem_state(item: *mut MenuItem, state: gui_state_t);
+}
+unsafe extern "C" {
     pub fn menuitem_text(item: *mut MenuItem, text: *const char_t);
 }
 unsafe extern "C" {
@@ -4909,7 +5006,25 @@ unsafe extern "C" {
     pub fn menuitem_submenu(item: *mut MenuItem, submenu: *mut *mut Menu);
 }
 unsafe extern "C" {
-    pub fn menuitem_state(item: *mut MenuItem, state: gui_state_t);
+    pub fn menuitem_get_text(item: *const MenuItem) -> *const char_t;
+}
+unsafe extern "C" {
+    pub fn menuitem_get_image(item: *const MenuItem) -> *const Image;
+}
+unsafe extern "C" {
+    pub fn menuitem_get_separator(item: *const MenuItem) -> bool_t;
+}
+unsafe extern "C" {
+    pub fn menuitem_get_enabled(item: *const MenuItem) -> bool_t;
+}
+unsafe extern "C" {
+    pub fn menuitem_get_visible(item: *const MenuItem) -> bool_t;
+}
+unsafe extern "C" {
+    pub fn menuitem_get_state(item: *const MenuItem) -> gui_state_t;
+}
+unsafe extern "C" {
+    pub fn menuitem_get_submenu(item: *const MenuItem) -> *mut Menu;
 }
 unsafe extern "C" {
     pub fn panel_create() -> *mut Panel;
@@ -4988,6 +5103,9 @@ unsafe extern "C" {
     pub fn progress_create() -> *mut Progress;
 }
 unsafe extern "C" {
+    pub fn progress_min_width(progress: *mut Progress, width: real32_t);
+}
+unsafe extern "C" {
     pub fn progress_undefined(progress: *mut Progress, running: bool_t);
 }
 unsafe extern "C" {
@@ -5001,6 +5119,9 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn slider_OnMoved(slider: *mut Slider, listener: *mut Listener);
+}
+unsafe extern "C" {
+    pub fn slider_min_width(slider: *mut Slider, width: real32_t);
 }
 unsafe extern "C" {
     pub fn slider_tooltip(slider: *mut Slider, text: *const char_t);
@@ -5021,22 +5142,40 @@ unsafe extern "C" {
     pub fn splitview_vertical() -> *mut SplitView;
 }
 unsafe extern "C" {
-    pub fn splitview_size(split: *mut SplitView, size: S2Df);
-}
-unsafe extern "C" {
     pub fn splitview_view(split: *mut SplitView, view: *mut View, tabstop: bool_t);
 }
 unsafe extern "C" {
-    pub fn splitview_text(split: *mut SplitView, view: *mut TextView, tabstop: bool_t);
+    pub fn splitview_textview(split: *mut SplitView, view: *mut TextView, tabstop: bool_t);
 }
 unsafe extern "C" {
-    pub fn splitview_split(split: *mut SplitView, child: *mut SplitView);
+    pub fn splitview_webview(split: *mut SplitView, view: *mut WebView, tabstop: bool_t);
+}
+unsafe extern "C" {
+    pub fn splitview_tableview(split: *mut SplitView, view: *mut TableView, tabstop: bool_t);
+}
+unsafe extern "C" {
+    pub fn splitview_splitview(split: *mut SplitView, view: *mut SplitView);
 }
 unsafe extern "C" {
     pub fn splitview_panel(split: *mut SplitView, panel: *mut Panel);
 }
 unsafe extern "C" {
-    pub fn splitview_pos(split: *mut SplitView, pos: real32_t);
+    pub fn splitview_pos(split: *mut SplitView, mode: split_mode_t, pos: real32_t);
+}
+unsafe extern "C" {
+    pub fn splitview_get_pos(split: *const SplitView, mode: split_mode_t) -> real32_t;
+}
+unsafe extern "C" {
+    pub fn splitview_visible0(split: *mut SplitView, visible: bool_t);
+}
+unsafe extern "C" {
+    pub fn splitview_visible1(split: *mut SplitView, visible: bool_t);
+}
+unsafe extern "C" {
+    pub fn splitview_minsize0(split: *mut SplitView, size: real32_t);
+}
+unsafe extern "C" {
+    pub fn splitview_minsize1(split: *mut SplitView, size: real32_t);
 }
 unsafe extern "C" {
     pub fn tableview_create() -> *mut TableView;
@@ -5072,6 +5211,9 @@ unsafe extern "C" {
         min: real32_t,
         max: real32_t,
     );
+}
+unsafe extern "C" {
+    pub fn tableview_column_align(view: *mut TableView, column_id: u32, align: align_t);
 }
 unsafe extern "C" {
     pub fn tableview_column_resizable(view: *mut TableView, column_id: u32, resizable: bool_t);
@@ -5158,6 +5300,12 @@ unsafe extern "C" {
     pub fn textview_writef(view: *mut TextView, text: *const char_t);
 }
 unsafe extern "C" {
+    pub fn textview_cpos_printf(view: *mut TextView, format: *const char_t, ...) -> u32;
+}
+unsafe extern "C" {
+    pub fn textview_cpos_writef(view: *mut TextView, text: *const char_t);
+}
+unsafe extern "C" {
     pub fn textview_rtf(view: *mut TextView, rtf_in: *mut Stream);
 }
 unsafe extern "C" {
@@ -5197,7 +5345,7 @@ unsafe extern "C" {
     pub fn textview_apply_all(view: *mut TextView);
 }
 unsafe extern "C" {
-    pub fn textview_apply_sel(view: *mut TextView);
+    pub fn textview_apply_select(view: *mut TextView);
 }
 unsafe extern "C" {
     pub fn textview_scroll_visible(view: *mut TextView, horizontal: bool_t, vertical: bool_t);
@@ -5210,6 +5358,9 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn textview_show_select(view: *mut TextView, show: bool_t);
+}
+unsafe extern "C" {
+    pub fn textview_del_select(view: *mut TextView);
 }
 unsafe extern "C" {
     pub fn textview_scroll_caret(view: *mut TextView);

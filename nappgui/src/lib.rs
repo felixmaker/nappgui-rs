@@ -44,4 +44,6 @@ pub mod prelude {
     pub type S2Df = nappgui_sys::S2Df;
     /// Represents a 2d vector or point.
     pub type V2Df = nappgui_sys::V2Df;
+    /// Behavior of the divider in a SplitView.
+    pub type SplitMode = nappgui_sys::split_mode_t;
 }

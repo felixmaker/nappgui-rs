@@ -28,15 +28,9 @@ impl Label {
         Self { inner: ptr }
     }
 
-    /// Create a text control.
+    /// Activate or deactivate the multiline attribute.
     pub fn create() -> Label {
         let label = unsafe { label_create() };
-        Self::new(label)
-    }
-
-    /// Create a multi-line text control.
-    pub fn multiline() -> Label {
-        let label = unsafe { label_multiline() };
         Self::new(label)
     }
 
@@ -77,6 +71,11 @@ impl Label {
         unsafe {
             label_style_over(self.inner, (style as i32).try_into().unwrap());
         }
+    }
+
+    /// Create a multi-line text control.
+    pub fn multiline(&self, multiline: bool) {
+        unsafe { label_multiline(self.inner, multiline as i8) };
     }
 
     /// Sets the horizontal alignment of the text with respect to the size of the control.

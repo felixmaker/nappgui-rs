@@ -1,12 +1,13 @@
 use crate::{draw_2d::Color, prelude::Align, util::macros::callback};
 
 use nappgui_sys::{
-    textview_OnFilter, textview_OnFocus, textview_afspace, textview_apply_all, textview_apply_sel,
-    textview_bfspace, textview_bgcolor, textview_clear, textview_color, textview_copy,
-    textview_create, textview_cut, textview_editable, textview_family, textview_fsize,
-    textview_fstyle, textview_get_text, textview_halign, textview_lspacing, textview_paste,
-    textview_pgcolor, textview_scroll_caret, textview_scroll_visible, textview_select,
-    textview_show_select, textview_size, textview_units, textview_wrap, textview_writef, S2Df,
+    textview_OnFilter, textview_OnFocus, textview_afspace, textview_apply_all,
+    textview_apply_select, textview_bfspace, textview_bgcolor, textview_clear, textview_color,
+    textview_copy, textview_cpos_writef, textview_create, textview_cut, textview_del_select,
+    textview_editable, textview_family, textview_fsize, textview_fstyle, textview_get_text,
+    textview_halign, textview_lspacing, textview_paste, textview_pgcolor, textview_scroll_caret,
+    textview_scroll_visible, textview_select, textview_show_select, textview_size, textview_units,
+    textview_wrap, textview_writef, S2Df,
 };
 
 /// TextView are views designed to work with rich text blocks, where fonts, sizes and colors can be combined.
@@ -55,6 +56,14 @@ impl TextView {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
             textview_writef(self.inner, text.as_ptr());
+        }
+    }
+
+    /// Insert text into the cursor position.
+    pub fn cpos_writef(&self, text: &str) {
+        let text = std::ffi::CString::new(text).unwrap();
+        unsafe {
+            textview_cpos_writef(self.inner, text.as_ptr());
         }
     }
 
@@ -147,9 +156,9 @@ impl TextView {
     }
 
     /// Applies character and paragraph attributes to selected text.
-    pub fn apply_sel(&self) {
+    pub fn apply_select(&self) {
         unsafe {
-            textview_apply_sel(self.inner);
+            textview_apply_select(self.inner);
         }
     }
 
@@ -185,6 +194,16 @@ impl TextView {
     pub fn show_select(&self, show: bool) {
         unsafe {
             textview_show_select(self.inner, show as i8);
+        }
+    }
+
+    /// Delete the selected text.
+    /// # Remarks
+    /// It has an effect similar to textview_cut, but without copying the eliminated text on the
+    /// clipboard. See Select text.
+    pub fn del_select(&self) {
+        unsafe {
+            textview_del_select(self.inner);
         }
     }
 

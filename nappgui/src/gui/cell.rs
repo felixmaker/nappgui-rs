@@ -1,8 +1,10 @@
+use std::ffi::CString;
+
 use nappgui_sys::{
-    cell_button, cell_combo, cell_control, cell_edit, cell_empty, cell_enabled, cell_imageview,
-    cell_label, cell_layout, cell_listbox, cell_padding, cell_padding2, cell_padding4, cell_panel,
-    cell_popup, cell_progress, cell_slider, cell_splitview, cell_tableview, cell_textview,
-    cell_updown, cell_view, cell_visible, cell_webview,
+    cell_button, cell_combo, cell_control, cell_dbind_imp, cell_edit, cell_empty, cell_enabled,
+    cell_imageview, cell_label, cell_layout, cell_listbox, cell_padding, cell_padding2,
+    cell_padding4, cell_panel, cell_popup, cell_progress, cell_slider, cell_splitview,
+    cell_tableview, cell_textview, cell_updown, cell_view, cell_visible, cell_webview,
 };
 
 use super::*;
@@ -239,4 +241,47 @@ impl Cell {
             cell_padding4(self.inner, pleft, ptop, pright, pbottom);
         }
     }
+
+    /// Associates a cell with the field of a struct.
+    pub fn dbind_imp(
+        &self,
+        type_: &str,
+        size: u16,
+        mname: &str,
+        mtype: &str,
+        moffset: u16,
+        msize: u16,
+    ) {
+        let type_ = CString::new(type_).unwrap();
+        let mname = CString::new(mname).unwrap();
+        let mtype = CString::new(mtype).unwrap();
+        unsafe {
+            cell_dbind_imp(
+                self.inner,
+                type_.as_ptr(),
+                size,
+                mname.as_ptr(),
+                mtype.as_ptr(),
+                moffset,
+                msize,
+            );
+        }
+    }
+}
+
+
+/// Associates a cell with the field of a struct.
+#[macro_export]
+macro_rules! cell_dbind {
+    ($cell: expr, $struct: ty, $field: ident, $field_type: ty, $bind_type: literal) => {
+        nappgui::gui::Cell::dbind_imp(
+            $cell,
+            stringify!($struct),
+            size_of::<$struct>() as _,
+            stringify!($field),
+            $bind_type,
+            offset_of!($struct, $field) as _,
+            size_of::<$field_type>() as _,
+        )
+    };
 }

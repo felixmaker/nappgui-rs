@@ -1,17 +1,20 @@
+use std::ffi::{c_void, CString};
+
 use nappgui_sys::{
     layout_bgcolor, layout_button, layout_cell, layout_combo, layout_control, layout_create,
-    layout_edit, layout_get_button, layout_get_combo, layout_get_edit, layout_get_imageview,
-    layout_get_label, layout_get_layout, layout_get_listbox, layout_get_panel, layout_get_popup,
-    layout_get_progress, layout_get_slider, layout_get_splitview, layout_get_tableview,
-    layout_get_textview, layout_get_updown, layout_get_view, layout_get_webview, layout_halign,
-    layout_hexpand, layout_hexpand2, layout_hexpand3, layout_hmargin, layout_hsize,
-    layout_imageview, layout_insert_col, layout_insert_row, layout_label, layout_layout,
-    layout_listbox, layout_margin, layout_margin2, layout_margin4, layout_ncols, layout_nrows,
-    layout_panel, layout_panel_replace, layout_popup, layout_progress, layout_remove_col,
-    layout_remove_row, layout_show_col, layout_show_row, layout_skcolor, layout_slider,
-    layout_splitview, layout_tableview, layout_taborder, layout_tabstop, layout_textview,
-    layout_update, layout_updown, layout_valign, layout_vexpand, layout_vexpand2, layout_vexpand3,
-    layout_view, layout_vmargin, layout_vsize, layout_webview,
+    layout_dbind_get_obj_imp, layout_dbind_imp, layout_dbind_obj_imp, layout_edit,
+    layout_get_button, layout_get_combo, layout_get_edit, layout_get_imageview, layout_get_label,
+    layout_get_layout, layout_get_listbox, layout_get_panel, layout_get_popup, layout_get_progress,
+    layout_get_slider, layout_get_splitview, layout_get_tableview, layout_get_textview,
+    layout_get_updown, layout_get_view, layout_get_webview, layout_halign, layout_hexpand,
+    layout_hexpand2, layout_hexpand3, layout_hmargin, layout_hsize, layout_imageview,
+    layout_insert_col, layout_insert_row, layout_label, layout_layout, layout_listbox,
+    layout_margin, layout_margin2, layout_margin4, layout_ncols, layout_nrows, layout_panel,
+    layout_panel_replace, layout_popup, layout_progress, layout_remove_col, layout_remove_row,
+    layout_show_col, layout_show_row, layout_skcolor, layout_slider, layout_splitview,
+    layout_tableview, layout_taborder, layout_tabstop, layout_textview, layout_update,
+    layout_updown, layout_valign, layout_vexpand, layout_vexpand2, layout_vexpand3, layout_view,
+    layout_vmargin, layout_vsize, layout_webview,
 };
 
 use crate::{
@@ -489,4 +492,43 @@ impl Layout {
     pub fn update(&self) {
         unsafe { layout_update(self.inner) };
     }
+
+    /// Associate a type struct with a layout.
+    pub fn dbind_imp(&self, type_: &str, size: u16) {
+        let type_ = CString::new(type_).unwrap();
+        unsafe {
+            layout_dbind_imp(self.inner, std::ptr::null_mut(), type_.as_ptr(), size);
+        }
+    }
+
+    /// Associate an object with a layout to view and edit it.
+    pub fn dbind_obj_imp(&self, obj: *mut c_void, type_: &str) {
+        let type_ = CString::new(type_).unwrap();
+
+        unsafe {
+            layout_dbind_obj_imp(self.inner, obj, type_.as_ptr());
+        }
+    }
+
+    /// Gets the object associated with a layout.
+    pub fn dbind_get_obj_imp(&self, type_: &str) -> *mut c_void {
+        let type_ = CString::new(type_).unwrap();
+        unsafe { layout_dbind_get_obj_imp(self.inner, type_.as_ptr()) }
+    }
+}
+
+/// Associates a cell with the field of a struct.
+#[macro_export]
+macro_rules! layout_dbind {
+    ($layout: expr, $struct: ty) => {
+        nappgui::gui::Layout::dbind_imp($layout, stringify!($struct), size_of::<$struct>() as _)
+    };
+}
+
+/// Associate an object with a layout to view and edit it.
+#[macro_export]
+macro_rules! layout_dbind_obj {
+    ($layout: expr, $obj: expr, $type: ty) => {
+        nappgui::gui::Layout::dbind_obj_imp($layout, $obj, stringify!($type))
+    };
 }

@@ -7263,7 +7263,7 @@ unsafe extern "C" {
     pub fn dbind_enum_imp(
         type_: *const char_t,
         name: *const char_t,
-        value: enum_t,
+        value: i32,
         alias: *const char_t,
     ) -> dbindst_t;
 }

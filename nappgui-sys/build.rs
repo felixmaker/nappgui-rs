@@ -1,4 +1,4 @@
-use std::{env, path::PathBuf, process::Command};
+use std::path::PathBuf;
 
 fn main() {
     let out = build();
@@ -7,8 +7,6 @@ fn main() {
 
 /// Build the nappgui library
 fn build() -> PathBuf {
-    patch();
-
     let mut dst = cmake::Config::new("nappgui_src");
     dst.define("NAPPGUI_DEMO", "NO");
     dst.define("NAPPGUI_WEB", "NO");
@@ -19,27 +17,6 @@ fn build() -> PathBuf {
 
     dst.profile("Release");
     dst.build()
-}
-
-/// Apply some patches for windows
-fn patch() {
-    if cfg!(target_os = "windows") {
-        match Command::new("git").arg("--version").output() {
-            Ok(output) => !output.stdout.is_empty(),
-            Err(_) => {
-                println!("cargo:warning=Could not find invokable git. It's needed to apply some patches on Windows!");
-                return;
-            }
-        };
-
-        let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
-
-        Command::new("git")
-            .args(["apply", "../nappgui.patch"])
-            .current_dir(manifest_dir.join("nappgui_src"))
-            .status()
-            .ok();
-    }
 }
 
 /// Link the nappgui library

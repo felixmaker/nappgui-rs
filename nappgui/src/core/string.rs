@@ -21,11 +21,40 @@ impl NappguiString {
         unsafe { CStr::from_ptr(cstr) }
     }
 
-    /// Returns the rust String.
+    /// Returns the Rust String.
     pub fn to_string(&self) -> String {
         self.as_cstr().to_string_lossy().into_owned()
     }
+
+    /// Returns the size in bytes of a string.
+    ///
+    /// # Remarks
+    /// In UTF-8 strings the number of bytes is not the same as the characters. str_nchars.
+    pub fn len(&self) -> u32 {
+        unsafe { nappgui_sys::str_len(self.inner) }
+    }
+
+    /// Returns the number of characters of a string object.
+    ///
+    /// # Remarks
+    /// In UTF-8 strings the number of bytes is not the same as the characters.
+    pub fn nchars(&self) -> u32 {
+        unsafe { nappgui_sys::str_nchars(self.inner) }
+    }
+
+    /// Check if a string is empty (str->data[0] == '\0').
+    pub fn is_empty(&self) -> bool {
+        unsafe { nappgui_sys::str_empty(self.inner) != 0 }
+    }
 }
+
+impl PartialEq for NappguiString {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe { nappgui_sys::str_scmp(self.inner, other.inner) == 0 }
+    }
+}
+
+impl Eq for NappguiString {}
 
 impl Clone for NappguiString {
     fn clone(&self) -> Self {

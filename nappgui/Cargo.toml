@@ -10,4 +10,5 @@ repository = "https://github.com/felixmaker/nappgui-rs"
 categories = ["gui"]
 
 [dependencies]
+libc = "0.2"
 nappgui-sys = { path = "../nappgui-sys", version = "=0.1" }

@@ -1,7 +1,9 @@
+pub(crate) mod heap;
 pub(crate) mod event;
 pub(crate) mod regex;
 pub(crate) mod stream;
 pub(crate) mod string;
+pub(crate) mod array;
 
 /// In high-level languages, such as .NET or Javascript, data binding is a technique that allows establishing an automatic 
 /// connection between the data of an application and its user interface elements. The NAppGUI DBind module implements and 
@@ -20,4 +22,6 @@ pub use {
     regex::RegEx,
     stream::Stream,
     string::NappguiString,
+    array::NappguiArray,
+    heap::NappguiHeap
 };

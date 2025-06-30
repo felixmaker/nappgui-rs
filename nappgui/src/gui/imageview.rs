@@ -1,4 +1,6 @@
-use crate::{core::event::Event, draw_2d::Image};
+use std::rc::Rc;
+
+use crate::{core::event::Event, draw_2d::Image, util::macros::pub_crate_ptr_ops};
 
 use nappgui_sys::{
     gui_scale_t, imageview_OnClick, imageview_OnOverDraw, imageview_create, imageview_image,
@@ -7,16 +9,11 @@ use nappgui_sys::{
 
 /// ImageView are specialized views in visualizing images and GIF animations.
 pub struct ImageView {
-    pub(crate) inner: *mut nappgui_sys::ImageView,
+    pub(crate) inner: Rc<*mut nappgui_sys::ImageView>,
 }
 
 impl ImageView {
-    pub(crate) fn new(ptr: *mut nappgui_sys::ImageView) -> Self {
-        if ptr.is_null() {
-            panic!("ptr is null");
-        }
-        Self { inner: ptr }
-    }
+    pub_crate_ptr_ops!(*mut nappgui_sys::ImageView, Rc<*mut nappgui_sys::ImageView>);
 
     /// Create a image view.
     pub fn create() -> Self {
@@ -28,21 +25,21 @@ impl ImageView {
     pub fn size(&self, width: f32, height: f32) {
         let size = nappgui_sys::S2Df { width, height };
         unsafe {
-            imageview_size(self.inner, size);
+            imageview_size(self.as_ptr(), size);
         }
     }
 
     /// Set the scaling to apply to the image.
     pub fn scale(&self, scale: gui_scale_t) {
         unsafe {
-            imageview_scale(self.inner, scale);
+            imageview_scale(self.as_ptr(), scale);
         }
     }
 
     /// Set the image to be displayed in the control.
     pub fn image(&self, image: &Image) {
         unsafe {
-            imageview_image(self.inner, image.inner);
+            imageview_image(self.as_ptr(), image.inner);
         }
     }
 
@@ -67,11 +64,11 @@ impl ImageView {
         let data: *mut (
             Box<dyn FnMut(&mut ImageView, &Event)>,
             *mut nappgui_sys::ImageView,
-        ) = Box::into_raw(Box::new((cb, self.inner)));
+        ) = Box::into_raw(Box::new((cb, self.as_ptr())));
 
         unsafe {
             imageview_OnClick(
-                self.inner,
+                self.as_ptr(),
                 listener_imp(data as *mut std::ffi::c_void, Some(shim)),
             );
         }
@@ -98,11 +95,11 @@ impl ImageView {
         let data: *mut (
             Box<dyn FnMut(&mut ImageView, &Event)>,
             *mut nappgui_sys::ImageView,
-        ) = Box::into_raw(Box::new((cb, self.inner)));
+        ) = Box::into_raw(Box::new((cb, self.as_ptr())));
 
         unsafe {
             imageview_OnOverDraw(
-                self.inner,
+                self.as_ptr(),
                 listener_imp(data as *mut std::ffi::c_void, Some(shim)),
             );
         }

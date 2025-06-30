@@ -186,7 +186,9 @@ fn i_layout() -> Layout {
     layout
 }
 
-struct App {}
+struct App {
+    _window: Window,
+}
 
 impl AppHandler for App {
     fn create() -> Self {
@@ -220,7 +222,9 @@ impl AppHandler for App {
 
         window.show();
 
-        App {}
+        App {
+            _window: window,
+        }
     }
 }
 

@@ -9,7 +9,7 @@ pub trait AppHandler {
     /// Create the application. Controls should be created in this function.
     fn create() -> Self;
     /// Destroy the application.
-    fn destory(&self) {}
+    fn destroy(&mut self) {}
 }
 
 /// Start a desktop application.
@@ -29,8 +29,8 @@ where
     where
         T: AppHandler,
     {
-        let app = Box::from_raw(*_obj as *mut T);
-        app.destory();
+        let mut app = Box::from_raw(*_obj as *mut T);
+        app.destroy();
     }
 
     unsafe {
@@ -57,7 +57,7 @@ pub fn finish() {
 /// Set the general menu bar of the application.
 pub fn menubar(menu: &Menu, win: &Window) {
     unsafe {
-        osapp_menubar(menu.inner, win.inner);
+        osapp_menubar(menu.as_ptr(), win.as_ptr());
     }
 }
 

@@ -1,23 +1,20 @@
+use std::rc::Rc;
+
 use nappgui_sys::{
     webview_OnFocus, webview_back, webview_create, webview_forward, webview_navigate, webview_size,
 };
 
-use crate::util::macros::callback;
+use crate::util::macros::{callback, pub_crate_ptr_ops};
 
 /// A WebView control will allow us to embed Web content in our application. It will behave in the same way
 /// as other view controls such as View or TextView in terms of layout or resizing, displaying a fully
 /// functional browser in its client area.
 pub struct WebView {
-    pub(crate) inner: *mut nappgui_sys::WebView,
+    pub(crate) inner: Rc<*mut nappgui_sys::WebView>,
 }
 
 impl WebView {
-    pub(crate) fn new(ptr: *mut nappgui_sys::WebView) -> Self {
-        if ptr.is_null() {
-            panic!("ptr is null");
-        }
-        Self { inner: ptr }
-    }
+    pub_crate_ptr_ops!(*mut nappgui_sys::WebView, Rc<*mut nappgui_sys::WebView>);
 
     /// Create a Web View.
     pub fn create() -> Self {
@@ -33,22 +30,22 @@ impl WebView {
     /// Sets the default size of the view.
     pub fn size(&self, width: f32, height: f32) {
         let size = nappgui_sys::S2Df { width, height };
-        unsafe { webview_size(self.inner, size) }
+        unsafe { webview_size(self.as_ptr(), size) }
     }
 
     /// Loads a URL in the web view.
     pub fn navigate(&self, url: &str) {
         let url = std::ffi::CString::new(url).unwrap();
-        unsafe { webview_navigate(self.inner, url.as_ptr()) }
+        unsafe { webview_navigate(self.as_ptr(), url.as_ptr()) }
     }
 
     /// Go back to the previous page in the browser stack.
     pub fn back(&self) {
-        unsafe { webview_back(self.inner) }
+        unsafe { webview_back(self.as_ptr()) }
     }
 
     /// Moves to the next page in the browser stack.
     pub fn forward(&self) {
-        unsafe { webview_forward(self.inner) }
+        unsafe { webview_forward(self.as_ptr()) }
     }
 }

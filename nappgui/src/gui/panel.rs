@@ -1,7 +1,11 @@
+use std::rc::Rc;
+
 use nappgui_sys::{
     panel_create, panel_custom, panel_get_layout, panel_layout, panel_scroll, panel_scroll_height,
     panel_scroll_width, panel_size, panel_update, panel_visible_layout,
 };
+
+use crate::util::macros::pub_crate_ptr_ops;
 
 use super::Layout;
 /// A Panel is a control within a window that groups other controls. It defines its own reference system, 
@@ -9,16 +13,11 @@ use super::Layout;
 /// relative to its origin. It will support other (sub)-panels as descendants, which allows to form a 
 /// Window Hierarchy. A Panel is a control within a window that groups other controls.
 pub struct Panel {
-    pub(crate) inner: *mut nappgui_sys::Panel,
+    pub(crate) inner: Rc<*mut nappgui_sys::Panel>,
 }
 
 impl Panel {
-    pub(crate) fn new(ptr: *mut nappgui_sys::Panel) -> Self {
-        if ptr.is_null() {
-            panic!("ptr is null");
-        }
-        Self { inner: ptr }
-    }
+    pub_crate_ptr_ops!(*mut nappgui_sys::Panel, Rc<*mut nappgui_sys::Panel>);
 
     /// Create a panel.
     pub fn create() -> Self {
@@ -42,20 +41,20 @@ impl Panel {
     pub fn size(&self, width: f32, height: f32) {
         let size = nappgui_sys::S2Df { width, height };
         unsafe {
-            panel_size(self.inner, size);
+            panel_size(self.as_ptr(), size);
         }
     }
 
     /// Add a layout to a panel.
     pub fn layout(&self, layout: &Layout) {
         unsafe {
-            panel_layout(self.inner, layout.inner);
+            panel_layout(self.as_ptr(), layout.as_ptr());
         }
     }
 
     /// Get a layout of a panel.
     pub fn get_layout(&self, index: u32) -> Option<Layout> {
-        let layout = unsafe { panel_get_layout(self.inner, index) };
+        let layout = unsafe { panel_get_layout(self.as_ptr(), index) };
         if layout.is_null() {
             None
         } else {
@@ -69,7 +68,7 @@ impl Panel {
     /// To make the change effective, you have to call panel_update.
     pub fn visible_layout(&self, index: u32) {
         unsafe {
-            panel_visible_layout(self.inner, index);
+            panel_visible_layout(self.as_ptr(), index);
         }
     }
 
@@ -79,7 +78,7 @@ impl Panel {
     /// It is equivalent to calling window_update.
     pub fn update(&self) {
         unsafe {
-            panel_update(self.inner);
+            panel_update(self.as_ptr());
         }
     }
 
@@ -89,11 +88,11 @@ impl Panel {
     /// Only valid if the panel has been created with panel_scroll. Useful if we want to take into
     /// account the size of the scroll bars when setting the margins of the Layout.
     pub fn scroll_width(&self) -> f32 {
-        unsafe { panel_scroll_width(self.inner) }
+        unsafe { panel_scroll_width(self.as_ptr()) }
     }
 
     /// Gets the height of the scroll bar.
     pub fn scroll_height(&self) -> f32 {
-        unsafe { panel_scroll_height(self.inner) }
+        unsafe { panel_scroll_height(self.as_ptr()) }
     }
 }

@@ -1,4 +1,10 @@
-use crate::{draw_2d::Color, prelude::Align, util::macros::callback};
+use std::rc::Rc;
+
+use crate::{
+    draw_2d::Color,
+    prelude::Align,
+    util::macros::{callback, pub_crate_ptr_ops},
+};
 
 use nappgui_sys::{
     textview_OnFilter, textview_OnFocus, textview_afspace, textview_apply_all,
@@ -12,16 +18,11 @@ use nappgui_sys::{
 
 /// TextView are views designed to work with rich text blocks, where fonts, sizes and colors can be combined.
 pub struct TextView {
-    pub(crate) inner: *mut nappgui_sys::TextView,
+    pub(crate) inner: Rc<*mut nappgui_sys::TextView>,
 }
 
 impl TextView {
-    pub(crate) fn new(ptr: *mut nappgui_sys::TextView) -> Self {
-        if ptr.is_null() {
-            panic!("ptr is null");
-        }
-        Self { inner: ptr }
-    }
+    pub_crate_ptr_ops!(*mut nappgui_sys::TextView, Rc<*mut nappgui_sys::TextView>);
 
     /// Create a text view.
     pub fn create() -> Self {
@@ -43,19 +44,19 @@ impl TextView {
     /// Sets the default size of the view.
     pub fn size(&self, width: f32, height: f32) {
         let size = S2Df { width, height };
-        unsafe { textview_size(self.inner, size) }
+        unsafe { textview_size(self.as_ptr(), size) }
     }
 
     /// Clears all content from view.
     pub fn clear(&self) {
-        unsafe { textview_clear(self.inner) }
+        unsafe { textview_clear(self.as_ptr()) }
     }
 
     /// Writes text to the view, using the format of the printf.
     pub fn writef(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
-            textview_writef(self.inner, text.as_ptr());
+            textview_writef(self.as_ptr(), text.as_ptr());
         }
     }
 
@@ -63,13 +64,13 @@ impl TextView {
     pub fn cpos_writef(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
-            textview_cpos_writef(self.inner, text.as_ptr());
+            textview_cpos_writef(self.as_ptr(), text.as_ptr());
         }
     }
 
     /// Sets the text units.
     pub fn units(&self, units: u32) {
-        unsafe { textview_units(self.inner, units) }
+        unsafe { textview_units(self.as_ptr(), units) }
     }
 
     /// Sets the font family of the text ("Arial", "Times New Roman", "Helvetica", etc).
@@ -79,7 +80,7 @@ impl TextView {
     pub fn family(&self, family: &str) {
         let family = std::ffi::CString::new(family).unwrap();
         unsafe {
-            textview_family(self.inner, family.as_ptr());
+            textview_family(self.as_ptr(), family.as_ptr());
         }
     }
 
@@ -88,62 +89,62 @@ impl TextView {
     /// # Remarks
     /// The value is conditional on the units established in textview_units.
     pub fn fsize(&self, size: f32) {
-        unsafe { textview_fsize(self.inner, size) }
+        unsafe { textview_fsize(self.as_ptr(), size) }
     }
 
     /// Sets the text style.
     pub fn fstyle(&self, style: u32) {
         unsafe {
-            textview_fstyle(self.inner, style);
+            textview_fstyle(self.as_ptr(), style);
         }
     }
 
     /// Sets the text color.
     pub fn color(&self, color: Color) {
         unsafe {
-            textview_color(self.inner, color.inner);
+            textview_color(self.as_ptr(), color.inner);
         }
     }
 
     /// Sets the background color of the text.
     pub fn bgcolor(&self, color: Color) {
         unsafe {
-            textview_bgcolor(self.inner, color.inner);
+            textview_bgcolor(self.as_ptr(), color.inner);
         }
     }
 
     /// Sets the background color of the control.
     pub fn pgcolor(&self, color: Color) {
         unsafe {
-            textview_pgcolor(self.inner, color.inner);
+            textview_pgcolor(self.as_ptr(), color.inner);
         }
     }
 
     /// Sets the alignment of text in a paragraph.
     pub fn halign(&self, align: Align) {
         unsafe {
-            textview_halign(self.inner, align);
+            textview_halign(self.as_ptr(), align);
         }
     }
 
     /// Sets the line spacing of the paragraph.
     pub fn lspacing(&self, spacing: f32) {
         unsafe {
-            textview_lspacing(self.inner, spacing);
+            textview_lspacing(self.as_ptr(), spacing);
         }
     }
 
     /// Sets a vertical space before the paragraph.
     pub fn bfspace(&self, space: f32) {
         unsafe {
-            textview_bfspace(self.inner, space);
+            textview_bfspace(self.as_ptr(), space);
         }
     }
 
     /// Sets a vertical space after the paragraph.
     pub fn afspace(&self, space: f32) {
         unsafe {
-            textview_afspace(self.inner, space);
+            textview_afspace(self.as_ptr(), space);
         }
     }
 
@@ -151,28 +152,28 @@ impl TextView {
     /// text, they will be taken as the default attributes of the text added using the keyboard.
     pub fn apply_all(&self) {
         unsafe {
-            textview_apply_all(self.inner);
+            textview_apply_all(self.as_ptr());
         }
     }
 
     /// Applies character and paragraph attributes to selected text.
     pub fn apply_select(&self) {
         unsafe {
-            textview_apply_select(self.inner);
+            textview_apply_select(self.as_ptr());
         }
     }
 
     /// Show or hide scroll bars.
     pub fn scroll_visible(&self, horizontal: bool, vertical: bool) {
         unsafe {
-            textview_scroll_visible(self.inner, horizontal as i8, vertical as i8);
+            textview_scroll_visible(self.as_ptr(), horizontal as i8, vertical as i8);
         }
     }
 
     /// Sets whether or not the control text is editable.
     pub fn editable(&self, editable: bool) {
         unsafe {
-            textview_editable(self.inner, editable as i8);
+            textview_editable(self.as_ptr(), editable as i8);
         }
     }
 
@@ -182,7 +183,7 @@ impl TextView {
     /// It works the same way as in Edit controls. See Text selection.
     pub fn select(&self, start: i32, end: i32) {
         unsafe {
-            textview_select(self.inner, start, end);
+            textview_select(self.as_ptr(), start, end);
         }
     }
 
@@ -193,7 +194,7 @@ impl TextView {
     /// affects the visibility of the selection.
     pub fn show_select(&self, show: bool) {
         unsafe {
-            textview_show_select(self.inner, show as i8);
+            textview_show_select(self.as_ptr(), show as i8);
         }
     }
 
@@ -203,20 +204,20 @@ impl TextView {
     /// clipboard. See Select text.
     pub fn del_select(&self) {
         unsafe {
-            textview_del_select(self.inner);
+            textview_del_select(self.as_ptr());
         }
     }
 
     /// In texts that exceed the visible part, it scrolls to the position of the caret.
     pub fn scroll_caret(&self) {
         unsafe {
-            textview_scroll_caret(self.inner);
+            textview_scroll_caret(self.as_ptr());
         }
     }
 
     /// Gets the text of the control.
     pub fn get_text(&self) -> String {
-        let text = unsafe { textview_get_text(self.inner) };
+        let text = unsafe { textview_get_text(self.as_ptr()) };
         let text = unsafe { std::ffi::CStr::from_ptr(text) };
         text.to_string_lossy().into_owned()
     }
@@ -224,28 +225,28 @@ impl TextView {
     /// Copies the selected text to the clipboard.
     pub fn copy(&self) {
         unsafe {
-            textview_copy(self.inner);
+            textview_copy(self.as_ptr());
         }
     }
 
     /// Cuts the selected text, copying it to the clipboard.
     pub fn cut(&self) {
         unsafe {
-            textview_cut(self.inner);
+            textview_cut(self.as_ptr());
         }
     }
 
     /// Pastes the text from the clipboard into the caret position.
     pub fn paste(&self) {
         unsafe {
-            textview_paste(self.inner);
+            textview_paste(self.as_ptr());
         }
     }
 
     /// Turn automatic text wrapping on or off.
     pub fn wrap(&self, wrap: bool) {
         unsafe {
-            textview_wrap(self.inner, wrap as i8);
+            textview_wrap(self.as_ptr(), wrap as i8);
         }
     }
 }

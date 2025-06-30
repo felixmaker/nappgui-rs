@@ -2,7 +2,9 @@ use nappgui::gui::*;
 use nappgui::osapp::*;
 use nappgui::prelude::*;
 
-struct App {}
+struct App {
+    _window: Window,
+}
 
 impl AppHandler for App {
     fn create() -> Self {
@@ -41,7 +43,9 @@ impl AppHandler for App {
 
         window.show();
 
-        App {}
+        Self {
+            _window: window,
+        }
     }
 }
 

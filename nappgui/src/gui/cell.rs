@@ -1,4 +1,4 @@
-use std::ffi::CString;
+use std::{ffi::CString, rc::Rc};
 
 use nappgui_sys::{
     cell_button, cell_combo, cell_control, cell_dbind_imp, cell_edit, cell_empty, cell_enabled,
@@ -7,30 +7,26 @@ use nappgui_sys::{
     cell_tableview, cell_textview, cell_updown, cell_view, cell_visible, cell_webview,
 };
 
+use crate::util::macros::pub_crate_ptr_ops;
+
 use super::*;
 
 /// Cells are the inner elements of a Layout and will house a control or a sublayout.
 pub struct Cell {
-    pub(crate) inner: *mut nappgui_sys::Cell,
+    pub(crate) inner: Rc<*mut nappgui_sys::Cell>,
 }
 
 impl Cell {
-    #[allow(unused)]
-    pub(crate) fn new(ptr: *mut nappgui_sys::Cell) -> Self {
-        if ptr.is_null() {
-            panic!("ptr is null");
-        }
-        Self { inner: ptr }
-    }
+    pub_crate_ptr_ops!(*mut nappgui_sys::Cell, Rc<*mut nappgui_sys::Cell>);
 
     /// Check if the cell is empty.
     pub fn empty(&self) -> bool {
-        unsafe { cell_empty(self.inner) != 0 }
+        unsafe { cell_empty(self.as_ptr()) != 0 }
     }
 
     /// Get control of the inside of the cell.
     pub fn control(&self) -> Option<Control> {
-        let ptr = unsafe { cell_control(self.inner) };
+        let ptr = unsafe { cell_control(self.as_ptr()) };
         if ptr.is_null() {
             None
         } else {
@@ -40,7 +36,7 @@ impl Cell {
 
     /// Get the label inside the cell.
     pub fn label(&self) -> Option<Label> {
-        let ptr = unsafe { cell_label(self.inner) };
+        let ptr = unsafe { cell_label(self.as_ptr()) };
         if ptr.is_null() {
             None
         } else {
@@ -50,7 +46,7 @@ impl Cell {
 
     /// Get the button inside the cell.
     pub fn button(&self) -> Option<Button> {
-        let ptr = unsafe { cell_button(self.inner) };
+        let ptr = unsafe { cell_button(self.as_ptr()) };
         if ptr.is_null() {
             None
         } else {
@@ -60,7 +56,7 @@ impl Cell {
 
     /// Get the popup inside the cell.
     pub fn popup(&self) -> Option<PopUp> {
-        let ptr = unsafe { cell_popup(self.inner) };
+        let ptr = unsafe { cell_popup(self.as_ptr()) };
         if ptr.is_null() {
             None
         } else {
@@ -70,7 +66,7 @@ impl Cell {
 
     /// Get the edit inside the cell.
     pub fn edit(&self) -> Option<Edit> {
-        let ptr = unsafe { cell_edit(self.inner) };
+        let ptr = unsafe { cell_edit(self.as_ptr()) };
         if ptr.is_null() {
             None
         } else {
@@ -80,7 +76,7 @@ impl Cell {
 
     /// Get the combo inside the cell.
     pub fn combo(&self) -> Option<Combo> {
-        let ptr = unsafe { cell_combo(self.inner) };
+        let ptr = unsafe { cell_combo(self.as_ptr()) };
         if ptr.is_null() {
             None
         } else {
@@ -90,7 +86,7 @@ impl Cell {
 
     /// Get the listbox inside the cell.
     pub fn listbox(&self) -> Option<ListBox> {
-        let ptr = unsafe { cell_listbox(self.inner) };
+        let ptr = unsafe { cell_listbox(self.as_ptr()) };
         if ptr.is_null() {
             None
         } else {
@@ -100,7 +96,7 @@ impl Cell {
 
     /// Get the updown inside the cell.
     pub fn updown(&self) -> Option<UpDown> {
-        let ptr = unsafe { cell_updown(self.inner) };
+        let ptr = unsafe { cell_updown(self.as_ptr()) };
         if ptr.is_null() {
             None
         } else {
@@ -110,7 +106,7 @@ impl Cell {
 
     /// Get the slider inside the cell.
     pub fn slider(&self) -> Option<Slider> {
-        let ptr = unsafe { cell_slider(self.inner) };
+        let ptr = unsafe { cell_slider(self.as_ptr()) };
         if ptr.is_null() {
             None
         } else {
@@ -120,7 +116,7 @@ impl Cell {
 
     /// Get the progress inside the cell.
     pub fn progress(&self) -> Option<Progress> {
-        let ptr = unsafe { cell_progress(self.inner) };
+        let ptr = unsafe { cell_progress(self.as_ptr()) };
         if ptr.is_null() {
             None
         } else {
@@ -130,7 +126,7 @@ impl Cell {
 
     /// Get the view inside the cell.
     pub fn view(&self) -> Option<View> {
-        let ptr = unsafe { cell_view(self.inner) };
+        let ptr = unsafe { cell_view(self.as_ptr()) };
         if ptr.is_null() {
             None
         } else {
@@ -140,7 +136,7 @@ impl Cell {
 
     /// Get the textview inside the cell.
     pub fn textview(&self) -> Option<TextView> {
-        let ptr = unsafe { cell_textview(self.inner) };
+        let ptr = unsafe { cell_textview(self.as_ptr()) };
         if ptr.is_null() {
             None
         } else {
@@ -150,7 +146,7 @@ impl Cell {
 
     /// Get the webview inside the cell.
     pub fn webview(&self) -> Option<WebView> {
-        let ptr = unsafe { cell_webview(self.inner) };
+        let ptr = unsafe { cell_webview(self.as_ptr()) };
         if ptr.is_null() {
             None
         } else {
@@ -160,7 +156,7 @@ impl Cell {
 
     /// Get the imageview inside the cell.
     pub fn imageview(&self) -> Option<ImageView> {
-        let ptr = unsafe { cell_imageview(self.inner) };
+        let ptr = unsafe { cell_imageview(self.as_ptr()) };
         if ptr.is_null() {
             None
         } else {
@@ -170,7 +166,7 @@ impl Cell {
 
     /// Get the tableview inside the cell.
     pub fn tableview(&self) -> Option<TableView> {
-        let ptr = unsafe { cell_tableview(self.inner) };
+        let ptr = unsafe { cell_tableview(self.as_ptr()) };
         if ptr.is_null() {
             None
         } else {
@@ -180,7 +176,7 @@ impl Cell {
 
     /// Get the splitview inside the cell.
     pub fn splitview(&self) -> Option<SplitView> {
-        let ptr = unsafe { cell_splitview(self.inner) };
+        let ptr = unsafe { cell_splitview(self.as_ptr()) };
         if ptr.is_null() {
             None
         } else {
@@ -190,7 +186,7 @@ impl Cell {
 
     /// Get the panel inside the cell.
     pub fn panel(&self) -> Option<Panel> {
-        let ptr = unsafe { cell_panel(self.inner) };
+        let ptr = unsafe { cell_panel(self.as_ptr()) };
         if ptr.is_null() {
             None
         } else {
@@ -200,7 +196,7 @@ impl Cell {
 
     /// Get the layout inside the cell.
     pub fn layout(&self) -> Option<Layout> {
-        let ptr = unsafe { cell_layout(self.inner) };
+        let ptr = unsafe { cell_layout(self.as_ptr()) };
         if ptr.is_null() {
             None
         } else {
@@ -210,7 +206,7 @@ impl Cell {
 
     /// Activate or deactivate a cell.
     pub fn enabled(&self, enabled: bool) {
-        unsafe { cell_enabled(self.inner, enabled as i8) }
+        unsafe { cell_enabled(self.as_ptr(), enabled as i8) }
     }
 
     /// Show or hide a cell.
@@ -218,27 +214,27 @@ impl Cell {
     /// # Remarks
     /// If the cell contains a sublayout, the command will affect all controls recursively.
     pub fn visible(&self, visible: bool) {
-        unsafe { cell_visible(self.inner, visible as i8) }
+        unsafe { cell_visible(self.as_ptr(), visible as i8) }
     }
 
     /// Set an inner margin.
     pub fn padding(&self, pall: f32) {
         unsafe {
-            cell_padding(self.inner, pall);
+            cell_padding(self.as_ptr(), pall);
         }
     }
 
     /// Set an inner margin.
     pub fn padding2(&self, pleft: f32, pright: f32) {
         unsafe {
-            cell_padding2(self.inner, pleft, pright);
+            cell_padding2(self.as_ptr(), pleft, pright);
         }
     }
 
     /// Set an inner margin.
     pub fn padding4(&self, pleft: f32, ptop: f32, pright: f32, pbottom: f32) {
         unsafe {
-            cell_padding4(self.inner, pleft, ptop, pright, pbottom);
+            cell_padding4(self.as_ptr(), pleft, ptop, pright, pbottom);
         }
     }
 
@@ -257,7 +253,7 @@ impl Cell {
         let mtype = CString::new(mtype).unwrap();
         unsafe {
             cell_dbind_imp(
-                self.inner,
+                self.as_ptr(),
                 type_.as_ptr(),
                 size,
                 mname.as_ptr(),
@@ -268,7 +264,6 @@ impl Cell {
         }
     }
 }
-
 
 /// Associates a cell with the field of a struct.
 #[macro_export]

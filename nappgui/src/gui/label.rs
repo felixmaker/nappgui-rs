@@ -1,9 +1,9 @@
-use std::ffi::CString;
+use std::{ffi::CString, rc::Rc};
 
 use crate::{
     draw_2d::{Color, Font},
     prelude::FStyle,
-    util::macros::callback,
+    util::macros::{callback, pub_crate_ptr_ops},
 };
 
 use nappgui_sys::{
@@ -17,16 +17,11 @@ use nappgui_sys::{
 /// be limited to a single line, although it is possible to show blocks that extend in several lines. The control
 /// size will be adjusted to the text it contains
 pub struct Label {
-    pub(crate) inner: *mut nappgui_sys::Label,
+    pub(crate) inner: Rc<*mut nappgui_sys::Label>,
 }
 
 impl Label {
-    pub(crate) fn new(ptr: *mut nappgui_sys::Label) -> Self {
-        if ptr.is_null() {
-            panic!("ptr is null");
-        }
-        Self { inner: ptr }
-    }
+    pub_crate_ptr_ops!(*mut nappgui_sys::Label, Rc<*mut nappgui_sys::Label>);
 
     /// Activate or deactivate the multiline attribute.
     pub fn create() -> Label {
@@ -43,7 +38,7 @@ impl Label {
     pub fn text(&self, text: &str) {
         let text = CString::new(text).unwrap();
         unsafe {
-            label_text(self.inner, text.as_ptr());
+            label_text(self.as_ptr(), text.as_ptr());
         }
     }
 
@@ -55,33 +50,33 @@ impl Label {
     pub fn size_text(&self, text: &str) {
         let text = CString::new(text).unwrap();
         unsafe {
-            label_size_text(self.inner, text.as_ptr());
+            label_size_text(self.as_ptr(), text.as_ptr());
         }
     }
 
     /// Set the text font.
     pub fn font(&self, font: &Font) {
         unsafe {
-            label_font(self.inner, font.inner);
+            label_font(self.as_ptr(), font.inner);
         }
     }
 
     /// Set the font modifiers, when the mouse is over the control.
     pub fn style_over(&self, style: FStyle) {
         unsafe {
-            label_style_over(self.inner, (style as i32).try_into().unwrap());
+            label_style_over(self.as_ptr(), (style as i32).try_into().unwrap());
         }
     }
 
     /// Create a multi-line text control.
     pub fn multiline(&self, multiline: bool) {
-        unsafe { label_multiline(self.inner, multiline as i8) };
+        unsafe { label_multiline(self.as_ptr(), multiline as i8) };
     }
 
     /// Sets the horizontal alignment of the text with respect to the size of the control.
     pub fn align(&self, align: align_t) {
         unsafe {
-            label_align(self.inner, align);
+            label_align(self.as_ptr(), align);
         }
     }
 
@@ -91,7 +86,7 @@ impl Label {
     /// RGB values may not be fully portable.
     pub fn color(&self, color: Color) {
         unsafe {
-            label_color(self.inner, color.inner);
+            label_color(self.as_ptr(), color.inner);
         }
     }
 
@@ -101,7 +96,7 @@ impl Label {
     /// RGB values may not be fully portable.
     pub fn color_over(&self, color: Color) {
         unsafe {
-            label_color_over(self.inner, color.inner);
+            label_color_over(self.as_ptr(), color.inner);
         }
     }
 
@@ -111,7 +106,7 @@ impl Label {
     /// RGB values may not be fully portable.
     pub fn bgcolor(&self, color: Color) {
         unsafe {
-            label_bgcolor(self.inner, color.inner);
+            label_bgcolor(self.as_ptr(), color.inner);
         }
     }
 
@@ -121,7 +116,7 @@ impl Label {
     /// RGB values may not be fully portable.
     pub fn bgcolor_over(&self, color: Color) {
         unsafe {
-            label_bgcolor_over(self.inner, color.inner);
+            label_bgcolor_over(self.as_ptr(), color.inner);
         }
     }
 }

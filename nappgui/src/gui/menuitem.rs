@@ -1,7 +1,10 @@
+use std::rc::Rc;
+
 use crate::{
     core::event::Event,
     draw_2d::Image,
     prelude::{GuiState, Vkey},
+    util::macros::pub_crate_ptr_ops,
 };
 
 use nappgui_sys::{
@@ -14,16 +17,11 @@ use super::Menu;
 
 /// Represents an option within a Menu. They will always have an associated action that will be executed when activated.
 pub struct MenuItem {
-    pub(crate) inner: *mut nappgui_sys::MenuItem,
+    pub(crate) inner: Rc<*mut nappgui_sys::MenuItem>,
 }
 
 impl MenuItem {
-    pub(crate) fn new(ptr: *mut nappgui_sys::MenuItem) -> Self {
-        if ptr.is_null() {
-            panic!("ptr is null");
-        }
-        Self { inner: ptr }
-    }
+    pub_crate_ptr_ops!(*mut nappgui_sys::MenuItem, Rc<*mut nappgui_sys::MenuItem>);
 
     /// Create a new item for a menu.
     pub fn create() -> Self {
@@ -58,11 +56,11 @@ impl MenuItem {
         let data: *mut (
             Box<dyn FnMut(&mut MenuItem, &Event)>,
             *mut nappgui_sys::MenuItem,
-        ) = Box::into_raw(Box::new((cb, self.inner)));
+        ) = Box::into_raw(Box::new((cb, self.as_ptr())));
 
         unsafe {
             menuitem_OnClick(
-                self.inner,
+                self.as_ptr(),
                 listener_imp(data as *mut std::ffi::c_void, Some(shim)),
             );
         }
@@ -70,37 +68,37 @@ impl MenuItem {
 
     /// Enables or disables a menu item.
     pub fn enabled(&self, enabled: bool) {
-        unsafe { menuitem_enabled(self.inner, enabled as i8) };
+        unsafe { menuitem_enabled(self.as_ptr(), enabled as i8) };
     }
 
     /// Show or hide a menu item.
     pub fn visible(&self, visible: bool) {
-        unsafe { menuitem_visible(self.inner, visible as i8) };
+        unsafe { menuitem_visible(self.as_ptr(), visible as i8) };
     }
 
     /// Set the item text.
     pub fn text(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
-        unsafe { menuitem_text(self.inner, text.as_ptr()) };
+        unsafe { menuitem_text(self.as_ptr(), text.as_ptr()) };
     }
 
     /// Set the icon that will display the item.
     pub fn image(&self, image: &Image) {
-        unsafe { menuitem_image(self.inner, image.inner) };
+        unsafe { menuitem_image(self.as_ptr(), image.inner) };
     }
 
     /// Set a keyboard shortcut to select the menu item.
     pub fn key(&self, key: Vkey, modifiers: u32) {
-        unsafe { menuitem_key(self.inner, key, modifiers) };
+        unsafe { menuitem_key(self.as_ptr(), key, modifiers) };
     }
 
     /// Assign a drop-down submenu when selecting the item.
     pub fn submenu(&self, menu: &mut Menu) {
-        unsafe { menuitem_submenu(self.inner, &mut menu.inner) };
+        unsafe { menuitem_submenu(self.as_ptr(), &mut menu.as_ptr()) };
     }
 
     /// Set the status of the item, which will be reflected with a mark next to the text.
     pub fn state(&self, state: GuiState) {
-        unsafe { menuitem_state(self.inner, state) };
+        unsafe { menuitem_state(self.as_ptr(), state) };
     }
 }

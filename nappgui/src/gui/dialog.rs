@@ -14,8 +14,14 @@ pub fn open_file(window: &Window, ftypes: &[&str], size: u32, start_dir: &str) -
         types.push(cstr.as_ptr());
     }
     let start_dir = CString::new(start_dir).unwrap();
-    let file =
-        unsafe { comwin_open_file(window.inner, types.as_mut_ptr(), size, start_dir.as_ptr()) };
+    let file = unsafe {
+        comwin_open_file(
+            window.as_ptr(),
+            types.as_mut_ptr(),
+            size,
+            start_dir.as_ptr(),
+        )
+    };
     let file = unsafe { std::ffi::CStr::from_ptr(file) };
     file.to_string_lossy().into_owned()
 }
@@ -28,8 +34,14 @@ pub fn save_file(window: &Window, ftypes: &[&str], size: u32, start_dir: &str) -
         types.push(cstr.as_ptr());
     }
     let start_dir = CString::new(start_dir).unwrap();
-    let file =
-        unsafe { comwin_save_file(window.inner, types.as_mut_ptr(), size, start_dir.as_ptr()) };
+    let file = unsafe {
+        comwin_save_file(
+            window.as_ptr(),
+            types.as_mut_ptr(),
+            size,
+            start_dir.as_ptr(),
+        )
+    };
     let file = unsafe { std::ffi::CStr::from_ptr(file) };
     file.to_string_lossy().into_owned()
 }
@@ -49,14 +61,14 @@ pub fn color<F>(
 ) where
     F: FnMut(&mut Window, &Event) + 'static,
 {
-    let listener = listener!(window.inner, on_change, Window);
+    let listener = listener!(window.as_ptr(), on_change, Window);
 
     let title = CString::new(title).unwrap();
     let mut colors: Vec<u32> = colors.iter().map(|color| color.inner).collect();
 
     unsafe {
         comwin_color(
-            window.inner,
+            window.as_ptr(),
             title.as_ptr(),
             x,
             y,

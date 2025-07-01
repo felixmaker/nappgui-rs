@@ -35,7 +35,7 @@ pub struct Layout {
 }
 
 impl Layout {
-    pub_crate_ptr_ops!(*mut nappgui_sys::Layout, Rc<*mut nappgui_sys::Layout>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::Layout);
 
     /// Create a new layout specifying the number of columns and rows.
     pub fn create(rows: u32, cols: u32) -> Self {

@@ -18,7 +18,7 @@ pub struct View {
 }
 
 impl View {
-    pub_crate_ptr_ops!(*mut nappgui_sys::View, Rc<*mut nappgui_sys::View>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::View);
 
     /// Create a new custom view.
     pub fn create() -> Self {

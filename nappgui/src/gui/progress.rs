@@ -10,7 +10,7 @@ pub struct Progress {
 }
 
 impl Progress {
-    pub_crate_ptr_ops!(*mut nappgui_sys::Progress, Rc<*mut nappgui_sys::Progress>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::Progress);
 
     /// Create a progress bar.
     pub fn create() -> Self {

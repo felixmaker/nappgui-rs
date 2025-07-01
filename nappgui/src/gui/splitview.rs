@@ -18,7 +18,7 @@ pub struct SplitView {
 }
 
 impl SplitView {
-    pub_crate_ptr_ops!(*mut nappgui_sys::SplitView, Rc<*mut nappgui_sys::SplitView>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::SplitView);
 
     /// Create a splitview with horizontal split.
     pub fn horizontal() -> Self {

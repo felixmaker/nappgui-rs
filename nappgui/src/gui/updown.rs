@@ -10,7 +10,7 @@ pub struct UpDown {
 }
 
 impl UpDown {
-    pub_crate_ptr_ops!(*mut nappgui_sys::UpDown, Rc<*mut nappgui_sys::UpDown>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::UpDown);
 
     /// Create an updown control.
     pub fn create() -> Self {

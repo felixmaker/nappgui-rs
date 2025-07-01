@@ -13,7 +13,7 @@ pub struct ImageView {
 }
 
 impl ImageView {
-    pub_crate_ptr_ops!(*mut nappgui_sys::ImageView, Rc<*mut nappgui_sys::ImageView>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::ImageView);
 
     /// Create a image view.
     pub fn create() -> Self {

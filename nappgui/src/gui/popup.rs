@@ -18,7 +18,7 @@ pub struct PopUp {
 }
 
 impl PopUp {
-    pub_crate_ptr_ops!(*mut nappgui_sys::PopUp, Rc<*mut nappgui_sys::PopUp>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::PopUp);
 
     /// Create a new popup control (PopUp button).
     pub fn create() -> Self {

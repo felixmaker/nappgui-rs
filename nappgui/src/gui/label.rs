@@ -21,7 +21,7 @@ pub struct Label {
 }
 
 impl Label {
-    pub_crate_ptr_ops!(*mut nappgui_sys::Label, Rc<*mut nappgui_sys::Label>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::Label);
 
     /// Activate or deactivate the multiline attribute.
     pub fn create() -> Label {

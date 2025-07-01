@@ -21,7 +21,7 @@ pub struct Button {
 }
 
 impl Button {
-    pub_crate_ptr_ops!(*mut nappgui_sys::Button, Rc<*mut nappgui_sys::Button>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::Button);
 
     /// Create a push button, the typical \[Accept\], \[Cancel\], etc.
     pub fn push() -> Self {

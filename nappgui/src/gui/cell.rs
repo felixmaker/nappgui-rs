@@ -17,7 +17,7 @@ pub struct Cell {
 }
 
 impl Cell {
-    pub_crate_ptr_ops!(*mut nappgui_sys::Cell, Rc<*mut nappgui_sys::Cell>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::Cell);
 
     /// Check if the cell is empty.
     pub fn empty(&self) -> bool {

@@ -14,7 +14,7 @@ pub struct WebView {
 }
 
 impl WebView {
-    pub_crate_ptr_ops!(*mut nappgui_sys::WebView, Rc<*mut nappgui_sys::WebView>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::WebView);
 
     /// Create a Web View.
     pub fn create() -> Self {

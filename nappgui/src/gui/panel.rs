@@ -17,7 +17,7 @@ pub struct Panel {
 }
 
 impl Panel {
-    pub_crate_ptr_ops!(*mut nappgui_sys::Panel, Rc<*mut nappgui_sys::Panel>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::Panel);
 
     /// Create a panel.
     pub fn create() -> Self {

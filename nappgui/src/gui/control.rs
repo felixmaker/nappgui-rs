@@ -18,7 +18,7 @@ pub struct Control {
 }
 
 impl Control {
-    pub_crate_ptr_ops!(*mut nappgui_sys::GuiControl, Rc<*mut nappgui_sys::GuiControl>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::GuiControl);
 
     /// Convert a control to a label.
     pub fn label(&self) -> Option<Label> {

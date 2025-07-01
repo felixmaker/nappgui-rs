@@ -22,7 +22,7 @@ pub struct TextView {
 }
 
 impl TextView {
-    pub_crate_ptr_ops!(*mut nappgui_sys::TextView, Rc<*mut nappgui_sys::TextView>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::TextView);
 
     /// Create a text view.
     pub fn create() -> Self {

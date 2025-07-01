@@ -25,7 +25,7 @@ pub struct Window {
 }
 
 impl Window {
-    pub_crate_ptr_ops!(*mut nappgui_sys::Window, Rc<*mut nappgui_sys::Window>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::Window);
 
     /// Create a new window.
     pub fn create(flags: WindowFlag) -> Self {

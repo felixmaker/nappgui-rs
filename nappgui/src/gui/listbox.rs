@@ -17,7 +17,7 @@ pub struct ListBox {
 }
 
 impl ListBox {
-    pub_crate_ptr_ops!(*mut nappgui_sys::ListBox, Rc<*mut nappgui_sys::ListBox>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::ListBox);
 
     /// Create a new list control.
     pub fn create() -> Self {

@@ -6,7 +6,7 @@ macro_rules! listener {
         unsafe extern "C" fn shim(data: *mut c_void, event: *mut nappgui_sys::Event) {
             let data = data as *mut (Box<dyn FnMut(&mut $obj, &Event)>, *mut c_void);
             let f = &mut *(*data).0;
-            let mut obj = <$obj>::new_increment((*data).1 as _);
+            let mut obj = <$obj>::new_no_drop((*data).1 as _);
             let event = Event::new(event);
             let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut obj, &event)));
         }
@@ -51,13 +51,13 @@ macro_rules! callback {
 }
 
 macro_rules! pub_crate_ptr_ops {
-    ($pointer: ty, $wrapper: ty) => {
+    ($pointer: ty) => {
         pub(crate) fn new(ptr: $pointer) -> Self {
             if ptr.is_null() {
                 panic!("pointer `{}` is null", std::any::type_name::<$pointer>());
             }
             Self {
-                inner: <$wrapper>::new(ptr),
+                inner: std::rc::Rc::<$pointer>::new(ptr),
             }
         }
 
@@ -66,28 +66,16 @@ macro_rules! pub_crate_ptr_ops {
         }
 
         #[allow(unused)]
-        pub(crate) unsafe fn new_increment(ptr: $pointer) -> Self {
+        pub(crate) unsafe fn new_no_drop(ptr: $pointer) -> Self {
             if ptr.is_null() {
                 panic!("pointer `{}` is null", std::any::type_name::<$pointer>());
             }
 
-            let inner = <$wrapper>::new(ptr);
-            let inner = <$wrapper>::into_raw(inner);
-            Rc::increment_strong_count(inner);
-            let inner = Rc::from_raw(inner);
+            let inner = std::rc::Rc::<$pointer>::new(ptr);
+            let inner = std::rc::Rc::<$pointer>::into_raw(inner);
+            std::rc::Rc::increment_strong_count(inner);
+            let inner = std::rc::Rc::from_raw(inner);
             Self { inner }
-        }
-    };
-}
-
-macro_rules! impl_clone {
-    ($type: ty) => {
-        impl Clone for $type {
-            fn clone(&self) -> Self {
-                Self {
-                    inner: self.inner.clone(),
-                }
-            }
         }
     };
 }

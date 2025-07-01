@@ -15,7 +15,7 @@ pub struct Combo {
 }
 
 impl Combo {
-    pub_crate_ptr_ops!(*mut nappgui_sys::Combo, Rc<*mut nappgui_sys::Combo>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::Combo);
 
     /// Create a combo control.
     pub fn create() -> Self {

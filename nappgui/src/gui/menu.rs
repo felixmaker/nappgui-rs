@@ -19,7 +19,7 @@ pub struct Menu {
 }
 
 impl Menu {
-    pub_crate_ptr_ops!(*mut nappgui_sys::Menu, Rc<*mut nappgui_sys::Menu>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::Menu);
 
     /// Create a new menu.
     pub fn create() -> Self {

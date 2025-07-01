@@ -20,7 +20,7 @@ pub struct TableView {
 }
 
 impl TableView {
-    pub_crate_ptr_ops!(*mut nappgui_sys::TableView, Rc<*mut nappgui_sys::TableView>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::TableView);
 
     /// Create an table view control.
     pub fn create() -> Self {

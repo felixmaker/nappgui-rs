@@ -21,7 +21,7 @@ pub struct Edit {
 }
 
 impl Edit {
-    pub_crate_ptr_ops!(*mut nappgui_sys::Edit, Rc<*mut nappgui_sys::Edit>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::Edit);
 
     /// Create a text edit control.
     pub fn create() -> Self {

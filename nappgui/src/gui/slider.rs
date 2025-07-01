@@ -13,7 +13,7 @@ pub struct Slider {
 }
 
 impl Slider {
-    pub_crate_ptr_ops!(*mut nappgui_sys::Slider, Rc<*mut nappgui_sys::Slider>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::Slider);
 
     /// Create a new slider control.
     pub fn create() -> Self {

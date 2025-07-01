@@ -21,7 +21,7 @@ pub struct MenuItem {
 }
 
 impl MenuItem {
-    pub_crate_ptr_ops!(*mut nappgui_sys::MenuItem, Rc<*mut nappgui_sys::MenuItem>);
+    pub_crate_ptr_ops!(*mut nappgui_sys::MenuItem);
 
     /// Create a new item for a menu.
     pub fn create() -> Self {

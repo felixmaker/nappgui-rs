@@ -145,7 +145,7 @@ impl Window {
     /// Gets the control that keyboard focus has.
     pub fn get_focus(&self) -> Control {
         let control = unsafe { window_get_focus(self.as_ptr()) };
-        Control::new(control)
+        unsafe { Control::new_no_drop(control) }
     }
 
     /// Gets additional information about a keyboard focus change operation.
@@ -164,9 +164,9 @@ impl Window {
     }
 
     /// Move the window to specific desktop coordinates.
-    pub fn origin(&self, origin: V2Df) {
+    pub fn origin(&self, x: f32, y: f32) {
         unsafe {
-            window_origin(self.as_ptr(), origin);
+            window_origin(self.as_ptr(), V2Df { x, y });
         }
     }
 
@@ -174,9 +174,9 @@ impl Window {
     ///
     /// # Remarks
     /// The final size will depend on the window frame and desktop theme settings. This measure only refers to the interior area.
-    pub fn size(&self, size: S2Df) {
+    pub fn size(&self, width: f32, height: f32) {
         unsafe {
-            window_size(self.as_ptr(), size);
+            window_size(self.as_ptr(), S2Df { width, height });
         }
     }
 
@@ -205,8 +205,8 @@ impl Window {
     }
 
     /// Transforms a point expressed in window coordinates to screen coordinates.
-    pub fn client_to_screen(&self, point: V2Df) -> V2Df {
-        unsafe { window_client_to_screen(self.as_ptr(), point) }
+    pub fn client_to_screen(&self, x: f32, y: f32) -> V2Df {
+        unsafe { window_client_to_screen(self.as_ptr(), V2Df { x, y }) }
     }
 
     /// Set the default window button. It will be activated when pressed \[Intro\].

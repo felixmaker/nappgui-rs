@@ -38,14 +38,12 @@ impl AppHandler for App {
         let window = Window::create(WindowFlag::ekWINDOW_STD);
         window.panel(&panel);
         window.title("Hello, World!");
-        window.origin(V2Df { x: 500.0, y: 200.0 });
+        window.origin(500.0, 200.0);
         window.on_close(|_window, _event| finish());
 
         window.show();
 
-        Self {
-            _window: window,
-        }
+        Self { _window: window }
     }
 }
 

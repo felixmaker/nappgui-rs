@@ -1,6 +1,10 @@
 use std::rc::Rc;
 
-use crate::{draw_2d::Font, prelude::Align, util::macros::{callback, pub_crate_ptr_ops}};
+use crate::{
+    draw_2d::Font,
+    types::Align,
+    util::macros::{callback, pub_crate_ptr_ops},
+};
 
 use nappgui_sys::{
     tableview_OnData, tableview_OnHeaderClick, tableview_OnRowClick, tableview_OnSelect,
@@ -89,7 +93,7 @@ impl TableView {
 
     /// Sets the alignment of the header text.
     pub fn header_align(&self, index: u32, align: Align) {
-        unsafe { tableview_header_align(self.as_ptr(), index, align) }
+        unsafe { tableview_header_align(self.as_ptr(), index, align as _) }
     }
 
     /// Sets whether the table header is visible or not.
@@ -194,7 +198,7 @@ impl TableView {
     /// selecting the row. The table is automatically scrolled so that the row is visible.
     /// In this case, align indicates where the vertical scroll is adjusted (up, down or centered).
     pub fn focus_row(&self, row: u32, align: Align) {
-        unsafe { tableview_focus_row(self.as_ptr(), row, align) }
+        unsafe { tableview_focus_row(self.as_ptr(), row, align as _) }
     }
 
     /// Gets the row that has keyboard focus.

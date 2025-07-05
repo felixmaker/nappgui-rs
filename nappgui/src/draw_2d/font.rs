@@ -8,6 +8,8 @@ use nappgui_sys::{
     font_with_style, font_with_width, font_with_xscale, font_xscale,
 };
 
+use crate::types::FontStyle;
+
 /// Represents a typographic family, size and style with which the texts will be drawn.
 pub struct Font {
     pub(crate) inner: *mut nappgui_sys::Font,
@@ -23,27 +25,27 @@ impl Font {
     }
 
     /// Create a font.
-    pub fn create(family: &str, size: f32, style: u32) -> Self {
+    pub fn create(family: &str, size: f32, style: FontStyle) -> Self {
         let family = CString::new(family).unwrap();
-        let font = unsafe { font_create(family.as_ptr(), size, style) };
+        let font = unsafe { font_create(family.as_ptr(), size, style.to_fstyle_t() as _) };
         Font::new(font)
     }
 
     /// Create a font, with the system's default family.
-    pub fn system(size: f32, style: u32) -> Self {
-        let font = unsafe { font_system(size, style) };
+    pub fn system(size: f32, style: FontStyle) -> Self {
+        let font = unsafe { font_system(size, style.to_fstyle_t() as _) };
         Font::new(font)
     }
 
     /// Create a font, with the system's default monospace family.
-    pub fn monospace(size: f32, style: u32) -> Self {
-        let font = unsafe { font_monospace(size, style) };
+    pub fn monospace(size: f32, style: FontStyle) -> Self {
+        let font = unsafe { font_monospace(size, style.to_fstyle_t() as _) };
         Font::new(font)
     }
 
     /// Create a copy of an existing font, changing the style.
-    pub fn with_style(&self, style: u32) -> Self {
-        let font = unsafe { font_with_style(self.inner, style) };
+    pub fn with_style(&self, style: FontStyle) -> Self {
+        let font = unsafe { font_with_style(self.inner, style.to_fstyle_t() as _) };
         Font::new(font)
     }
 

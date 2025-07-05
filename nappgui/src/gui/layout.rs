@@ -20,11 +20,7 @@ use nappgui_sys::{
     layout_vmargin, layout_vsize, layout_webview,
 };
 
-use crate::{
-    draw_2d::Color,
-    prelude::{Align, GuiOrient},
-    util::macros::pub_crate_ptr_ops,
-};
+use crate::{draw_2d::Color, types::{Align, GuiOrient}, util::macros::pub_crate_ptr_ops};
 
 use super::*;
 
@@ -371,7 +367,7 @@ impl Layout {
 
     /// Set how the keyboard focus will move when you press \[TAB\].
     pub fn taborder(&self, taborder: GuiOrient) {
-        unsafe { layout_taborder(self.as_ptr(), taborder) };
+        unsafe { layout_taborder(self.as_ptr(), taborder as _) };
     }
 
     /// Sets whether or not a cell in the layout will receive keyboard focus when navigating
@@ -446,13 +442,13 @@ impl Layout {
     /// Sets the horizontal alignment of a cell. It will take effect when the column is
     /// wider than the cell.
     pub fn halign(&self, col: u32, row: u32, align: Align) {
-        unsafe { layout_halign(self.as_ptr(), col, row, align) };
+        unsafe { layout_halign(self.as_ptr(), col, row, align as _) };
     }
 
     /// Sets the vertical alignment of a cell. It will take effect when the row is
     /// taller than the cell.
     pub fn valign(&self, col: u32, row: u32, align: Align) {
-        unsafe { layout_valign(self.as_ptr(), col, row, align) };
+        unsafe { layout_valign(self.as_ptr(), col, row, align as _) };
     }
 
     /// Show or hide a layout column.

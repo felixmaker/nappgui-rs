@@ -1,15 +1,13 @@
 use std::ffi::{c_void, CString};
 
-use nappgui_sys::dbindst_t;
-
-use crate::{core::Stream, prelude::NappguiError};
+use crate::{core::Stream, error::NappguiError};
 
 /// Helper function to convert dbindst_t to Result<(), NappguiError>.
-fn convert_to_nappgui_result(result: dbindst_t) -> Result<(), NappguiError> {
-    if result == dbindst_t::ekDBIND_OK {
+fn convert_dbindst_t_to_nappgui_result(result: i32) -> Result<(), NappguiError> {
+    if result == nappgui_sys::_dbindst_t_ekDBIND_OK {
         Ok(())
     } else {
-        Err(NappguiError::from(result))
+        Err(NappguiError::from_dbindst_t(result))
     }
 }
 
@@ -35,7 +33,7 @@ pub fn dbind_imp(
             msize,
         )
     };
-    convert_to_nappgui_result(result)
+    convert_dbindst_t_to_nappgui_result(result)
 }
 
 /// Registers a value of type enum.
@@ -56,7 +54,7 @@ pub fn dbind_enum_imp(
     let result = unsafe {
         nappgui_sys::dbind_enum_imp(type_.as_ptr(), name.as_ptr(), value, alias.as_ptr())
     };
-    convert_to_nappgui_result(result)
+    convert_dbindst_t_to_nappgui_result(result)
 }
 
 /// Registers an alias for a data type (typedef).
@@ -71,14 +69,14 @@ pub fn dbind_alias_imp(
     let result = unsafe {
         nappgui_sys::dbind_alias_imp(type_.as_ptr(), alias.as_ptr(), type_size, alias_size)
     };
-    convert_to_nappgui_result(result)
+    convert_dbindst_t_to_nappgui_result(result)
 }
 
 /// Removes a data type from the DBind record.
 pub fn dbind_unreg_imp(type_: &str) -> Result<(), NappguiError> {
     let type_ = CString::new(type_).unwrap();
     let result = unsafe { nappgui_sys::dbind_unreg_imp(type_.as_ptr()) };
-    convert_to_nappgui_result(result)
+    convert_dbindst_t_to_nappgui_result(result)
 }
 
 /// Creates an object of registered type, initializing its fields with the default values.
@@ -218,7 +216,6 @@ macro_rules! dbind_range {
         );
     };
 }
-
 
 /// Sets the increment of a numeric value, for example, when clicking an UpDown control.
 #[macro_export]

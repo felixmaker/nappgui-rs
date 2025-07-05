@@ -1,16 +1,14 @@
 use std::rc::Rc;
 
 use crate::{
-    core::event::Event,
     draw_2d::Image,
-    prelude::{GuiState, Vkey},
-    util::macros::pub_crate_ptr_ops,
+    types::{GuiState, KeyCode, Modifiers},
+    util::macros::{callback, pub_crate_ptr_ops},
 };
 
 use nappgui_sys::{
-    listener_imp, menuitem_OnClick, menuitem_create, menuitem_enabled, menuitem_image,
-    menuitem_key, menuitem_separator, menuitem_state, menuitem_submenu, menuitem_text,
-    menuitem_visible,
+    menuitem_OnClick, menuitem_create, menuitem_enabled, menuitem_image, menuitem_key,
+    menuitem_separator, menuitem_state, menuitem_submenu, menuitem_text, menuitem_visible,
 };
 
 use super::Menu;
@@ -35,35 +33,9 @@ impl MenuItem {
         Self::new(menu_item)
     }
 
-    /// Set an event handle for item click.
-    pub fn on_click<F>(&self, handler: F)
-    where
-        F: FnMut(&mut MenuItem, &Event) + 'static,
-    {
-        unsafe extern "C" fn shim(data: *mut std::ffi::c_void, event: *mut nappgui_sys::Event) {
-            let data = data as *mut (
-                Box<dyn FnMut(&mut MenuItem, &Event)>,
-                *mut nappgui_sys::MenuItem,
-            );
-            let f = &mut *(*data).0;
-            let mut obj = MenuItem::new((*data).1);
-            let ev = Event::new(event as _);
-            let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut obj, &ev)));
-        }
-
-        let cb: Box<dyn FnMut(&mut MenuItem, &Event)> = Box::new(handler);
-
-        let data: *mut (
-            Box<dyn FnMut(&mut MenuItem, &Event)>,
-            *mut nappgui_sys::MenuItem,
-        ) = Box::into_raw(Box::new((cb, self.as_ptr())));
-
-        unsafe {
-            menuitem_OnClick(
-                self.as_ptr(),
-                listener_imp(data as *mut std::ffi::c_void, Some(shim)),
-            );
-        }
+    callback! {
+        /// Set an event handle for item click.
+        pub on_click(MenuItem) => menuitem_OnClick
     }
 
     /// Enables or disables a menu item.
@@ -88,8 +60,8 @@ impl MenuItem {
     }
 
     /// Set a keyboard shortcut to select the menu item.
-    pub fn key(&self, key: Vkey, modifiers: u32) {
-        unsafe { menuitem_key(self.as_ptr(), key, modifiers) };
+    pub fn key(&self, key: KeyCode, modifiers: Modifiers) {
+        unsafe { menuitem_key(self.as_ptr(), key as _, modifiers as _) };
     }
 
     /// Assign a drop-down submenu when selecting the item.
@@ -99,6 +71,6 @@ impl MenuItem {
 
     /// Set the status of the item, which will be reflected with a mark next to the text.
     pub fn state(&self, state: GuiState) {
-        unsafe { menuitem_state(self.as_ptr(), state) };
+        unsafe { menuitem_state(self.as_ptr(), state as _) };
     }
 }

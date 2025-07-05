@@ -2,7 +2,7 @@ use std::ffi::CString;
 
 use nappgui_sys::{comwin_color, comwin_open_file, comwin_save_file};
 
-use crate::{core::event::Event, draw_2d::Color, prelude::Align, util::macros::listener};
+use crate::{core::event::Event, draw_2d::Color, types::Align, util::macros::listener};
 
 use super::window::Window;
 
@@ -72,8 +72,8 @@ pub fn color<F>(
             title.as_ptr(),
             x,
             y,
-            halign,
-            valign,
+            halign as _,
+            valign as _,
             current.inner,
             colors.as_mut_ptr(),
             n,

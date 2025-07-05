@@ -3,10 +3,10 @@ use std::rc::Rc;
 use nappgui_sys::{
     splitview_get_pos, splitview_horizontal, splitview_minsize0, splitview_minsize1,
     splitview_panel, splitview_pos, splitview_splitview, splitview_textview, splitview_vertical,
-    splitview_view, splitview_visible0, splitview_visible1, splitview_webview
+    splitview_view, splitview_visible0, splitview_visible1, splitview_webview,
 };
 
-use crate::{gui::WebView, prelude::SplitMode, util::macros::pub_crate_ptr_ops};
+use crate::{gui::WebView, types::SplitMode, util::macros::pub_crate_ptr_ops};
 
 use super::{Panel, TextView, View};
 
@@ -59,12 +59,12 @@ impl SplitView {
 
     /// Sets the position of the view separator.
     pub fn pos(&self, mode: SplitMode, pos: f32) {
-        unsafe { splitview_pos(self.as_ptr(), mode, pos) }
+        unsafe { splitview_pos(self.as_ptr(), mode as _, pos) }
     }
 
     /// Get the current divider position.
     pub fn get_pos(&self, mode: SplitMode) -> f32 {
-        unsafe { splitview_get_pos(self.as_ptr(), mode) }
+        unsafe { splitview_get_pos(self.as_ptr(), mode as _) }
     }
 
     /// Show/hide the left/upper child.

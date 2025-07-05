@@ -9,9 +9,7 @@ use nappgui_sys::{
 };
 
 use crate::{
-    draw_2d::font::Font,
-    prelude::Align,
-    util::macros::{callback, pub_crate_ptr_ops},
+    draw_2d::font::Font, types::Align, util::macros::{callback, pub_crate_ptr_ops}
 };
 
 /// EditBox are small text boxes with editing capabilities. Like the Label they are of uniform format:
@@ -64,7 +62,7 @@ impl Edit {
     /// Set text alignment.
     pub fn align(&self, align: Align) {
         unsafe {
-            edit_align(self.as_ptr(), align);
+            edit_align(self.as_ptr(), align as _);
         }
     }
 

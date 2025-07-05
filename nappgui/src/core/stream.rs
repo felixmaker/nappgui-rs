@@ -2,7 +2,7 @@ use std::ffi::CString;
 
 use nappgui_sys::{stm_from_block, stm_from_file, stm_memory, stm_to_file};
 
-use crate::prelude::NappguiError;
+use crate::error::NappguiError;
 
 /// A stream is a data flow that runs from a source to a destination. Think of a phone call. We have an
 /// origin (the person who speaks), a destination (the person who listens) and a channel (the line itself).
@@ -52,7 +52,7 @@ impl Stream {
         if !ptr.is_null() {
             Ok(Self::new(ptr))
         } else {
-            Err(NappguiError::from(error))
+            Err(NappguiError::from_ferror_t(error))
         }
     }
 
@@ -68,7 +68,7 @@ impl Stream {
         if !ptr.is_null() {
             Ok(Self::new(ptr))
         } else {
-            Err(NappguiError::from(error))
+            Err(NappguiError::from_ferror_t(error))
         }
     }
 
@@ -84,7 +84,7 @@ impl Stream {
         if !ptr.is_null() {
             Ok(Self::new(ptr))
         } else {
-            Err(NappguiError::from(error))
+            Err(NappguiError::from_ferror_t(error))
         }
     }
 }

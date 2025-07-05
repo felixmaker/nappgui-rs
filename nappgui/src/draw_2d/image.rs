@@ -52,7 +52,7 @@ impl Image {
     /// Create an image from a file on disk.
     pub fn from_file(path: &str) -> Option<Self> {
         let path = std::ffi::CString::new(path).unwrap();
-        let mut error = nappgui_sys::ferror_t::ekFUNDEF;
+        let mut error = nappgui_sys::_ferror_t_ekFUNDEF;
         let image = unsafe { image_from_file(path.as_ptr(), &mut error) };
         if image.is_null() {
             None

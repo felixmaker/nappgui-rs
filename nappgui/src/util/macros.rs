@@ -80,6 +80,25 @@ macro_rules! pub_crate_ptr_ops {
     };
 }
 
+macro_rules! impl_i32_to_enum {
+    ($type: ty, $range: expr) => {
+        impl TryFrom<i32> for $type {
+            type Error = crate::error::NappguiError;
+
+            fn try_from(value: i32) -> Result<Self, Self::Error> {
+                if !($range).contains(&value) {
+                    return Err(crate::error::NappguiError::Internal(
+                        crate::error::NappguiErrorKind::UndefinedEnumTransmute,
+                    ));
+                } else {
+                    Ok(unsafe { std::mem::transmute(value) })
+                }
+            }
+        }
+    };
+}
+
 pub(crate) use callback;
+pub(crate) use impl_i32_to_enum;
 pub(crate) use listener;
 pub(crate) use pub_crate_ptr_ops;

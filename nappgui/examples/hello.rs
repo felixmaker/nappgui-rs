@@ -1,6 +1,5 @@
-use nappgui::gui::*;
-use nappgui::osapp::*;
 use nappgui::prelude::*;
+use nappgui::osapp::*;
 
 struct App {
     _window: Window,
@@ -35,7 +34,7 @@ impl AppHandler for App {
 
         panel.layout(&layout);
 
-        let window = Window::create(WindowFlag::ekWINDOW_STD);
+        let window = Window::create(WindowFlags::default());
         window.panel(&panel);
         window.title("Hello, World!");
         window.origin(500.0, 200.0);

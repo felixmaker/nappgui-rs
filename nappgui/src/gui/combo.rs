@@ -1,6 +1,10 @@
 use std::rc::Rc;
 
-use crate::{draw_2d::Image, prelude::Align, util::macros::{callback, pub_crate_ptr_ops}};
+use crate::{
+    draw_2d::Image,
+    types::Align,
+    util::macros::{callback, pub_crate_ptr_ops},
+};
 
 use nappgui_sys::{
     combo_OnChange, combo_OnFilter, combo_add_elem, combo_align, combo_bgcolor,
@@ -46,7 +50,7 @@ impl Combo {
     /// Set text alignment.
     pub fn align(&self, align: Align) {
         unsafe {
-            combo_align(self.as_ptr(), align);
+            combo_align(self.as_ptr(), align as _);
         }
     }
 

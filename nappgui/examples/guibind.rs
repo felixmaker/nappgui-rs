@@ -7,7 +7,6 @@ use nappgui::dbind_enum;
 use nappgui::dbind_increment;
 use nappgui::dbind_range;
 use nappgui::draw_2d::Font;
-use nappgui::gui::*;
 use nappgui::layout_dbind;
 use nappgui::layout_dbind_obj;
 use nappgui::osapp::*;
@@ -38,9 +37,9 @@ struct BasicTypes {
 static I_NUM_CONTROLS: usize = 9;
 
 fn i_data_bind() {
-    let _ = dbind_enum!(GuiState, ekGUI_OFF, "");
-    let _ = dbind_enum!(GuiState, ekGUI_ON, "");
-    let _ = dbind_enum!(GuiState, ekGUI_MIXED, "");
+    let _ = dbind_enum!(GuiState, Off, "");
+    let _ = dbind_enum!(GuiState, On, "");
+    let _ = dbind_enum!(GuiState, Mixed, "");
 
     let _ = dbind_enum!(Color, Red, "Red");
     let _ = dbind_enum!(Color, Blue, "Blue");
@@ -74,7 +73,7 @@ fn i_radio_layout() -> Layout {
 }
 
 fn i_title_labels(layout: &Layout) {
-    let mut font = Font::system(Font::regular_size(), FStyle::ekFBOLD as _);
+    let mut font = Font::system(Font::regular_size(), FontStyle::default());
     let strs = [
         "Label", "EditBox", "Check", "Check3", "Radio", "PopUp", "ListBox", "Slider", "UpDown",
     ];
@@ -92,9 +91,9 @@ fn i_title_labels(layout: &Layout) {
 fn i_value_labels(layout: &Layout) {
     for i in 0..I_NUM_CONTROLS {
         let label = Label::create();
-        label.align(Align::ekCENTER as _);
+        label.align(Align::Center);
         layout.label(&label, 2, i as _);
-        layout.halign(2, i as _, Align::ekJUSTIFY as _);
+        layout.halign(2, i as _, Align::Justify);
     }
 
     layout.hsize(2, 80.0);
@@ -188,6 +187,7 @@ fn i_layout() -> Layout {
 
 struct App {
     _window: Window,
+    data: *mut BasicTypes,
 }
 
 impl AppHandler for App {
@@ -202,7 +202,7 @@ impl AppHandler for App {
             uint16_val: 0,
             real32_val: 0.0,
             enum_val: Color::White,
-            enum3_val: GuiState::ekGUI_MIXED,
+            enum3_val: GuiState::Mixed,
             str_val: NappguiString::new("Text"),
         };
 
@@ -214,15 +214,21 @@ impl AppHandler for App {
         layout_dbind!(&layout, BasicTypes);
         layout_dbind_obj!(&layout, data as _, BasicTypes);
 
-        let window = Window::create(WindowFlag::ekWINDOW_STD);
+        let window = Window::create(WindowFlags::default());
         window.panel(&panel);
         window.title("Hello, World!");
         window.origin(500.0, 200.0);
+        window.size(400.0, 300.0);
         window.on_close(|_window, _event| finish());
 
         window.show();
 
-        App { _window: window }
+        App { _window: window, data }
+    }
+
+    fn destroy(&mut self) {
+        // Release the data
+        unsafe { let _ = Box::from_raw(self.data); };
     }
 }
 

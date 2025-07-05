@@ -11,6 +11,7 @@ pub const _STL_LANG: u32 = 0;
 pub const _HAS_CXX17: u32 = 0;
 pub const _HAS_CXX20: u32 = 0;
 pub const _HAS_CXX23: u32 = 0;
+pub const _HAS_CXX26: u32 = 0;
 pub const _HAS_NODISCARD: u32 = 0;
 pub const WCHAR_MIN: u32 = 0;
 pub const WCHAR_MAX: u32 = 65535;
@@ -107,21 +108,13 @@ pub type byte_t = ::libc::c_uchar;
 pub type bool_t = ::libc::c_char;
 pub type real32_t = f32;
 pub type real64_t = f64;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _enum_t {
-    ekENUM_GENERIC_VALUE = 0,
-}
+pub const _enum_t_ekENUM_GENERIC_VALUE: _enum_t = 0;
+pub type _enum_t = ::libc::c_int;
 pub use self::_enum_t as enum_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _unicode_t {
-    ekUTF8 = 0,
-    ekUTF16 = 1,
-    ekUTF32 = 2,
-}
+pub const _unicode_t_ekUTF8: _unicode_t = 0;
+pub const _unicode_t_ekUTF16: _unicode_t = 1;
+pub const _unicode_t_ekUTF32: _unicode_t = 2;
+pub type _unicode_t = ::libc::c_int;
 pub use self::_unicode_t as unicode_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -160,151 +153,103 @@ pub type FPtr_assert = ::core::option::Option<
         line: u32,
     ),
 >;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _platform_t {
-    ekWINDOWS = 1,
-    ekMACOS = 2,
-    ekLINUX = 3,
-    ekIOS = 4,
-}
+pub const _platform_t_ekWINDOWS: _platform_t = 1;
+pub const _platform_t_ekMACOS: _platform_t = 2;
+pub const _platform_t_ekLINUX: _platform_t = 3;
+pub const _platform_t_ekIOS: _platform_t = 4;
+pub type _platform_t = ::libc::c_int;
 pub use self::_platform_t as platform_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _device_t {
-    ekDESKTOP = 1,
-    ekPHONE = 2,
-    ekTABLET = 3,
-}
+pub const _device_t_ekDESKTOP: _device_t = 1;
+pub const _device_t_ekPHONE: _device_t = 2;
+pub const _device_t_ekTABLET: _device_t = 3;
+pub type _device_t = ::libc::c_int;
 pub use self::_device_t as device_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _win_t {
-    ekWIN_9x = 1,
-    ekWIN_NT4 = 2,
-    ekWIN_2K = 3,
-    ekWIN_XP = 4,
-    ekWIN_XP1 = 5,
-    ekWIN_XP2 = 6,
-    ekWIN_XP3 = 7,
-    ekWIN_VI = 8,
-    ekWIN_VI1 = 9,
-    ekWIN_VI2 = 10,
-    ekWIN_7 = 11,
-    ekWIN_71 = 12,
-    ekWIN_8 = 13,
-    ekWIN_81 = 14,
-    ekWIN_10 = 15,
-    ekWIN_NO = 16,
-}
+pub const _win_t_ekWIN_9x: _win_t = 1;
+pub const _win_t_ekWIN_NT4: _win_t = 2;
+pub const _win_t_ekWIN_2K: _win_t = 3;
+pub const _win_t_ekWIN_XP: _win_t = 4;
+pub const _win_t_ekWIN_XP1: _win_t = 5;
+pub const _win_t_ekWIN_XP2: _win_t = 6;
+pub const _win_t_ekWIN_XP3: _win_t = 7;
+pub const _win_t_ekWIN_VI: _win_t = 8;
+pub const _win_t_ekWIN_VI1: _win_t = 9;
+pub const _win_t_ekWIN_VI2: _win_t = 10;
+pub const _win_t_ekWIN_7: _win_t = 11;
+pub const _win_t_ekWIN_71: _win_t = 12;
+pub const _win_t_ekWIN_8: _win_t = 13;
+pub const _win_t_ekWIN_81: _win_t = 14;
+pub const _win_t_ekWIN_10: _win_t = 15;
+pub const _win_t_ekWIN_NO: _win_t = 16;
+pub type _win_t = ::libc::c_int;
 pub use self::_win_t as win_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _endian_t {
-    ekLITEND = 1,
-    ekBIGEND = 2,
-}
+pub const _endian_t_ekLITEND: _endian_t = 1;
+pub const _endian_t_ekBIGEND: _endian_t = 2;
+pub type _endian_t = ::libc::c_int;
 pub use self::_endian_t as endian_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _week_day_t {
-    ekSUNDAY = 0,
-    ekMONDAY = 1,
-    ekTUESDAY = 2,
-    ekWEDNESDAY = 3,
-    ekTHURSDAY = 4,
-    ekFRIDAY = 5,
-    ekSATURDAY = 6,
-}
+pub const _week_day_t_ekSUNDAY: _week_day_t = 0;
+pub const _week_day_t_ekMONDAY: _week_day_t = 1;
+pub const _week_day_t_ekTUESDAY: _week_day_t = 2;
+pub const _week_day_t_ekWEDNESDAY: _week_day_t = 3;
+pub const _week_day_t_ekTHURSDAY: _week_day_t = 4;
+pub const _week_day_t_ekFRIDAY: _week_day_t = 5;
+pub const _week_day_t_ekSATURDAY: _week_day_t = 6;
+pub type _week_day_t = ::libc::c_int;
 pub use self::_week_day_t as week_day_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _month_t {
-    ekJANUARY = 1,
-    ekFEBRUARY = 2,
-    ekMARCH = 3,
-    ekAPRIL = 4,
-    ekMAY = 5,
-    ekJUNE = 6,
-    ekJULY = 7,
-    ekAUGUST = 8,
-    ekSEPTEMBER = 9,
-    ekOCTOBER = 10,
-    ekNOVEMBER = 11,
-    ekDECEMBER = 12,
-}
+pub const _month_t_ekJANUARY: _month_t = 1;
+pub const _month_t_ekFEBRUARY: _month_t = 2;
+pub const _month_t_ekMARCH: _month_t = 3;
+pub const _month_t_ekAPRIL: _month_t = 4;
+pub const _month_t_ekMAY: _month_t = 5;
+pub const _month_t_ekJUNE: _month_t = 6;
+pub const _month_t_ekJULY: _month_t = 7;
+pub const _month_t_ekAUGUST: _month_t = 8;
+pub const _month_t_ekSEPTEMBER: _month_t = 9;
+pub const _month_t_ekOCTOBER: _month_t = 10;
+pub const _month_t_ekNOVEMBER: _month_t = 11;
+pub const _month_t_ekDECEMBER: _month_t = 12;
+pub type _month_t = ::libc::c_int;
 pub use self::_month_t as month_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _file_type_t {
-    ekARCHIVE = 1,
-    ekDIRECTORY = 2,
-    ekOTHERFILE = 3,
-}
+pub const _file_type_t_ekARCHIVE: _file_type_t = 1;
+pub const _file_type_t_ekDIRECTORY: _file_type_t = 2;
+pub const _file_type_t_ekOTHERFILE: _file_type_t = 3;
+pub type _file_type_t = ::libc::c_int;
 pub use self::_file_type_t as file_type_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _file_mode_t {
-    ekREAD = 1,
-    ekWRITE = 2,
-    ekAPPEND = 3,
-}
+pub const _file_mode_t_ekREAD: _file_mode_t = 1;
+pub const _file_mode_t_ekWRITE: _file_mode_t = 2;
+pub const _file_mode_t_ekAPPEND: _file_mode_t = 3;
+pub type _file_mode_t = ::libc::c_int;
 pub use self::_file_mode_t as file_mode_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _file_seek_t {
-    ekSEEKSET = 1,
-    ekSEEKCUR = 2,
-    ekSEEKEND = 3,
-}
+pub const _file_seek_t_ekSEEKSET: _file_seek_t = 1;
+pub const _file_seek_t_ekSEEKCUR: _file_seek_t = 2;
+pub const _file_seek_t_ekSEEKEND: _file_seek_t = 3;
+pub type _file_seek_t = ::libc::c_int;
 pub use self::_file_seek_t as file_seek_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _ferror_t {
-    ekFEXISTS = 1,
-    ekFNOPATH = 2,
-    ekFNOFILE = 3,
-    ekFBIGNAME = 4,
-    ekFNOFILES = 5,
-    ekFNOEMPTY = 6,
-    ekFNOACCESS = 7,
-    ekFLOCK = 8,
-    ekFBIG = 9,
-    ekFSEEKNEG = 10,
-    ekFUNDEF = 11,
-    ekFOK = 12,
-}
+pub const _ferror_t_ekFEXISTS: _ferror_t = 1;
+pub const _ferror_t_ekFNOPATH: _ferror_t = 2;
+pub const _ferror_t_ekFNOFILE: _ferror_t = 3;
+pub const _ferror_t_ekFBIGNAME: _ferror_t = 4;
+pub const _ferror_t_ekFNOFILES: _ferror_t = 5;
+pub const _ferror_t_ekFNOEMPTY: _ferror_t = 6;
+pub const _ferror_t_ekFNOACCESS: _ferror_t = 7;
+pub const _ferror_t_ekFLOCK: _ferror_t = 8;
+pub const _ferror_t_ekFBIG: _ferror_t = 9;
+pub const _ferror_t_ekFSEEKNEG: _ferror_t = 10;
+pub const _ferror_t_ekFUNDEF: _ferror_t = 11;
+pub const _ferror_t_ekFOK: _ferror_t = 12;
+pub type _ferror_t = ::libc::c_int;
 pub use self::_ferror_t as ferror_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _perror_t {
-    ekPPIPE = 1,
-    ekPEXEC = 2,
-    ekPOK = 3,
-}
+pub const _perror_t_ekPPIPE: _perror_t = 1;
+pub const _perror_t_ekPEXEC: _perror_t = 2;
+pub const _perror_t_ekPOK: _perror_t = 3;
+pub type _perror_t = ::libc::c_int;
 pub use self::_perror_t as perror_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _serror_t {
-    ekSNONET = 1,
-    ekSNOHOST = 2,
-    ekSTIMEOUT = 3,
-    ekSSTREAM = 4,
-    ekSUNDEF = 5,
-    ekSOK = 6,
-}
+pub const _serror_t_ekSNONET: _serror_t = 1;
+pub const _serror_t_ekSNOHOST: _serror_t = 2;
+pub const _serror_t_ekSTIMEOUT: _serror_t = 3;
+pub const _serror_t_ekSSTREAM: _serror_t = 4;
+pub const _serror_t_ekSUNDEF: _serror_t = 5;
+pub const _serror_t_ekSOK: _serror_t = 6;
+pub type _serror_t = ::libc::c_int;
 pub use self::_serror_t as serror_t;
 pub type Date = _date_t;
 #[repr(C)]
@@ -363,216 +308,192 @@ pub struct _date_t {
     pub minute: u8,
     pub second: u8,
 }
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _core_event_t {
-    ekEASSERT = 256,
-    ekEFILE = 257,
-    ekEENTRY = 258,
-    ekEEXIT = 259,
-}
+pub const _core_event_t_ekEASSERT: _core_event_t = 256;
+pub const _core_event_t_ekEFILE: _core_event_t = 257;
+pub const _core_event_t_ekEENTRY: _core_event_t = 258;
+pub const _core_event_t_ekEEXIT: _core_event_t = 259;
+pub type _core_event_t = ::libc::c_int;
 pub use self::_core_event_t as core_event_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _sstate_t {
-    ekSTOK = 0,
-    ekSTEND = 1,
-    ekSTCORRUPT = 2,
-    ekSTBROKEN = 3,
-}
+pub const _sstate_t_ekSTOK: _sstate_t = 0;
+pub const _sstate_t_ekSTEND: _sstate_t = 1;
+pub const _sstate_t_ekSTCORRUPT: _sstate_t = 2;
+pub const _sstate_t_ekSTBROKEN: _sstate_t = 3;
+pub type _sstate_t = ::libc::c_int;
 pub use self::_sstate_t as sstate_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _key_t {
-    ekKEY_UNDEF = 0,
-    ekKEY_A = 1,
-    ekKEY_S = 2,
-    ekKEY_D = 3,
-    ekKEY_F = 4,
-    ekKEY_H = 5,
-    ekKEY_G = 6,
-    ekKEY_Z = 7,
-    ekKEY_X = 8,
-    ekKEY_C = 9,
-    ekKEY_V = 10,
-    ekKEY_BSLASH = 11,
-    ekKEY_B = 12,
-    ekKEY_Q = 13,
-    ekKEY_W = 14,
-    ekKEY_E = 15,
-    ekKEY_R = 16,
-    ekKEY_Y = 17,
-    ekKEY_T = 18,
-    ekKEY_1 = 19,
-    ekKEY_2 = 20,
-    ekKEY_3 = 21,
-    ekKEY_4 = 22,
-    ekKEY_6 = 23,
-    ekKEY_5 = 24,
-    ekKEY_9 = 25,
-    ekKEY_7 = 26,
-    ekKEY_8 = 27,
-    ekKEY_0 = 28,
-    ekKEY_RCURLY = 29,
-    ekKEY_O = 30,
-    ekKEY_U = 31,
-    ekKEY_LCURLY = 32,
-    ekKEY_I = 33,
-    ekKEY_P = 34,
-    ekKEY_RETURN = 35,
-    ekKEY_L = 36,
-    ekKEY_J = 37,
-    ekKEY_SEMICOLON = 38,
-    ekKEY_K = 39,
-    ekKEY_QUEST = 40,
-    ekKEY_COMMA = 41,
-    ekKEY_MINUS = 42,
-    ekKEY_N = 43,
-    ekKEY_M = 44,
-    ekKEY_PERIOD = 45,
-    ekKEY_TAB = 46,
-    ekKEY_SPACE = 47,
-    ekKEY_GTLT = 48,
-    ekKEY_BACK = 49,
-    ekKEY_ESCAPE = 50,
-    ekKEY_F17 = 51,
-    ekKEY_NUMDECIMAL = 52,
-    ekKEY_NUMMULT = 53,
-    ekKEY_NUMADD = 54,
-    ekKEY_NUMLOCK = 55,
-    ekKEY_NUMDIV = 56,
-    ekKEY_NUMRET = 57,
-    ekKEY_NUMMINUS = 58,
-    ekKEY_F18 = 59,
-    ekKEY_F19 = 60,
-    ekKEY_NUMEQUAL = 61,
-    ekKEY_NUM0 = 62,
-    ekKEY_NUM1 = 63,
-    ekKEY_NUM2 = 64,
-    ekKEY_NUM3 = 65,
-    ekKEY_NUM4 = 66,
-    ekKEY_NUM5 = 67,
-    ekKEY_NUM6 = 68,
-    ekKEY_NUM7 = 69,
-    ekKEY_NUM8 = 70,
-    ekKEY_NUM9 = 71,
-    ekKEY_F5 = 72,
-    ekKEY_F6 = 73,
-    ekKEY_F7 = 74,
-    ekKEY_F3 = 75,
-    ekKEY_F8 = 76,
-    ekKEY_F9 = 77,
-    ekKEY_F11 = 78,
-    ekKEY_F13 = 79,
-    ekKEY_F16 = 80,
-    ekKEY_F14 = 81,
-    ekKEY_F10 = 82,
-    ekKEY_F12 = 83,
-    ekKEY_F15 = 84,
-    ekKEY_PAGEUP = 85,
-    ekKEY_HOME = 86,
-    ekKEY_SUPR = 87,
-    ekKEY_F4 = 88,
-    ekKEY_PAGEDOWN = 89,
-    ekKEY_F2 = 90,
-    ekKEY_END = 91,
-    ekKEY_F1 = 92,
-    ekKEY_LEFT = 93,
-    ekKEY_RIGHT = 94,
-    ekKEY_DOWN = 95,
-    ekKEY_UP = 96,
-    ekKEY_LSHIFT = 97,
-    ekKEY_RSHIFT = 98,
-    ekKEY_LCTRL = 99,
-    ekKEY_RCTRL = 100,
-    ekKEY_LALT = 101,
-    ekKEY_RALT = 102,
-    ekKEY_INSERT = 103,
-    ekKEY_EXCLAM = 104,
-    ekKEY_MENU = 105,
-    ekKEY_LWIN = 106,
-    ekKEY_RWIN = 107,
-    ekKEY_CAPS = 108,
-    ekKEY_TILDE = 109,
-    ekKEY_GRAVE = 110,
-    ekKEY_PLUS = 111,
-}
+pub const _key_t_ekKEY_UNDEF: _key_t = 0;
+pub const _key_t_ekKEY_A: _key_t = 1;
+pub const _key_t_ekKEY_S: _key_t = 2;
+pub const _key_t_ekKEY_D: _key_t = 3;
+pub const _key_t_ekKEY_F: _key_t = 4;
+pub const _key_t_ekKEY_H: _key_t = 5;
+pub const _key_t_ekKEY_G: _key_t = 6;
+pub const _key_t_ekKEY_Z: _key_t = 7;
+pub const _key_t_ekKEY_X: _key_t = 8;
+pub const _key_t_ekKEY_C: _key_t = 9;
+pub const _key_t_ekKEY_V: _key_t = 10;
+pub const _key_t_ekKEY_BSLASH: _key_t = 11;
+pub const _key_t_ekKEY_B: _key_t = 12;
+pub const _key_t_ekKEY_Q: _key_t = 13;
+pub const _key_t_ekKEY_W: _key_t = 14;
+pub const _key_t_ekKEY_E: _key_t = 15;
+pub const _key_t_ekKEY_R: _key_t = 16;
+pub const _key_t_ekKEY_Y: _key_t = 17;
+pub const _key_t_ekKEY_T: _key_t = 18;
+pub const _key_t_ekKEY_1: _key_t = 19;
+pub const _key_t_ekKEY_2: _key_t = 20;
+pub const _key_t_ekKEY_3: _key_t = 21;
+pub const _key_t_ekKEY_4: _key_t = 22;
+pub const _key_t_ekKEY_6: _key_t = 23;
+pub const _key_t_ekKEY_5: _key_t = 24;
+pub const _key_t_ekKEY_9: _key_t = 25;
+pub const _key_t_ekKEY_7: _key_t = 26;
+pub const _key_t_ekKEY_8: _key_t = 27;
+pub const _key_t_ekKEY_0: _key_t = 28;
+pub const _key_t_ekKEY_RCURLY: _key_t = 29;
+pub const _key_t_ekKEY_O: _key_t = 30;
+pub const _key_t_ekKEY_U: _key_t = 31;
+pub const _key_t_ekKEY_LCURLY: _key_t = 32;
+pub const _key_t_ekKEY_I: _key_t = 33;
+pub const _key_t_ekKEY_P: _key_t = 34;
+pub const _key_t_ekKEY_RETURN: _key_t = 35;
+pub const _key_t_ekKEY_L: _key_t = 36;
+pub const _key_t_ekKEY_J: _key_t = 37;
+pub const _key_t_ekKEY_SEMICOLON: _key_t = 38;
+pub const _key_t_ekKEY_K: _key_t = 39;
+pub const _key_t_ekKEY_QUEST: _key_t = 40;
+pub const _key_t_ekKEY_COMMA: _key_t = 41;
+pub const _key_t_ekKEY_MINUS: _key_t = 42;
+pub const _key_t_ekKEY_N: _key_t = 43;
+pub const _key_t_ekKEY_M: _key_t = 44;
+pub const _key_t_ekKEY_PERIOD: _key_t = 45;
+pub const _key_t_ekKEY_TAB: _key_t = 46;
+pub const _key_t_ekKEY_SPACE: _key_t = 47;
+pub const _key_t_ekKEY_GTLT: _key_t = 48;
+pub const _key_t_ekKEY_BACK: _key_t = 49;
+pub const _key_t_ekKEY_ESCAPE: _key_t = 50;
+pub const _key_t_ekKEY_F17: _key_t = 51;
+pub const _key_t_ekKEY_NUMDECIMAL: _key_t = 52;
+pub const _key_t_ekKEY_NUMMULT: _key_t = 53;
+pub const _key_t_ekKEY_NUMADD: _key_t = 54;
+pub const _key_t_ekKEY_NUMLOCK: _key_t = 55;
+pub const _key_t_ekKEY_NUMDIV: _key_t = 56;
+pub const _key_t_ekKEY_NUMRET: _key_t = 57;
+pub const _key_t_ekKEY_NUMMINUS: _key_t = 58;
+pub const _key_t_ekKEY_F18: _key_t = 59;
+pub const _key_t_ekKEY_F19: _key_t = 60;
+pub const _key_t_ekKEY_NUMEQUAL: _key_t = 61;
+pub const _key_t_ekKEY_NUM0: _key_t = 62;
+pub const _key_t_ekKEY_NUM1: _key_t = 63;
+pub const _key_t_ekKEY_NUM2: _key_t = 64;
+pub const _key_t_ekKEY_NUM3: _key_t = 65;
+pub const _key_t_ekKEY_NUM4: _key_t = 66;
+pub const _key_t_ekKEY_NUM5: _key_t = 67;
+pub const _key_t_ekKEY_NUM6: _key_t = 68;
+pub const _key_t_ekKEY_NUM7: _key_t = 69;
+pub const _key_t_ekKEY_NUM8: _key_t = 70;
+pub const _key_t_ekKEY_NUM9: _key_t = 71;
+pub const _key_t_ekKEY_F5: _key_t = 72;
+pub const _key_t_ekKEY_F6: _key_t = 73;
+pub const _key_t_ekKEY_F7: _key_t = 74;
+pub const _key_t_ekKEY_F3: _key_t = 75;
+pub const _key_t_ekKEY_F8: _key_t = 76;
+pub const _key_t_ekKEY_F9: _key_t = 77;
+pub const _key_t_ekKEY_F11: _key_t = 78;
+pub const _key_t_ekKEY_F13: _key_t = 79;
+pub const _key_t_ekKEY_F16: _key_t = 80;
+pub const _key_t_ekKEY_F14: _key_t = 81;
+pub const _key_t_ekKEY_F10: _key_t = 82;
+pub const _key_t_ekKEY_F12: _key_t = 83;
+pub const _key_t_ekKEY_F15: _key_t = 84;
+pub const _key_t_ekKEY_PAGEUP: _key_t = 85;
+pub const _key_t_ekKEY_HOME: _key_t = 86;
+pub const _key_t_ekKEY_SUPR: _key_t = 87;
+pub const _key_t_ekKEY_F4: _key_t = 88;
+pub const _key_t_ekKEY_PAGEDOWN: _key_t = 89;
+pub const _key_t_ekKEY_F2: _key_t = 90;
+pub const _key_t_ekKEY_END: _key_t = 91;
+pub const _key_t_ekKEY_F1: _key_t = 92;
+pub const _key_t_ekKEY_LEFT: _key_t = 93;
+pub const _key_t_ekKEY_RIGHT: _key_t = 94;
+pub const _key_t_ekKEY_DOWN: _key_t = 95;
+pub const _key_t_ekKEY_UP: _key_t = 96;
+pub const _key_t_ekKEY_LSHIFT: _key_t = 97;
+pub const _key_t_ekKEY_RSHIFT: _key_t = 98;
+pub const _key_t_ekKEY_LCTRL: _key_t = 99;
+pub const _key_t_ekKEY_RCTRL: _key_t = 100;
+pub const _key_t_ekKEY_LALT: _key_t = 101;
+pub const _key_t_ekKEY_RALT: _key_t = 102;
+pub const _key_t_ekKEY_INSERT: _key_t = 103;
+pub const _key_t_ekKEY_EXCLAM: _key_t = 104;
+pub const _key_t_ekKEY_MENU: _key_t = 105;
+pub const _key_t_ekKEY_LWIN: _key_t = 106;
+pub const _key_t_ekKEY_RWIN: _key_t = 107;
+pub const _key_t_ekKEY_CAPS: _key_t = 108;
+pub const _key_t_ekKEY_TILDE: _key_t = 109;
+pub const _key_t_ekKEY_GRAVE: _key_t = 110;
+pub const _key_t_ekKEY_PLUS: _key_t = 111;
+pub type _key_t = ::libc::c_int;
 pub use self::_key_t as vkey_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _mkey_t {
-    ekMKEY_NONE = 0,
-    ekMKEY_SHIFT = 1,
-    ekMKEY_CONTROL = 2,
-    ekMKEY_ALT = 4,
-    ekMKEY_COMMAND = 8,
-}
+pub const _mkey_t_ekMKEY_NONE: _mkey_t = 0;
+pub const _mkey_t_ekMKEY_SHIFT: _mkey_t = 1;
+pub const _mkey_t_ekMKEY_CONTROL: _mkey_t = 2;
+pub const _mkey_t_ekMKEY_ALT: _mkey_t = 4;
+pub const _mkey_t_ekMKEY_COMMAND: _mkey_t = 8;
+pub type _mkey_t = ::libc::c_int;
 pub use self::_mkey_t as mkey_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _token_t {
-    ekTSLCOM = 1,
-    ekTMLCOM = 2,
-    ekTSPACE = 3,
-    ekTEOL = 4,
-    ekTLESS = 5,
-    ekTGREAT = 6,
-    ekTCOMMA = 7,
-    ekTPERIOD = 8,
-    ekTSCOLON = 9,
-    ekTCOLON = 10,
-    ekTOPENPAR = 11,
-    ekTCLOSPAR = 12,
-    ekTOPENBRAC = 13,
-    ekTCLOSBRAC = 14,
-    ekTOPENCURL = 15,
-    ekTCLOSCURL = 16,
-    ekTPLUS = 17,
-    ekTMINUS = 18,
-    ekTASTERK = 19,
-    ekTEQUALS = 20,
-    ekTDOLLAR = 21,
-    ekTPERCENT = 22,
-    ekTPOUND = 23,
-    ekTAMPER = 24,
-    ekTAPOST = 25,
-    ekTQUOTE = 26,
-    ekTCIRCUM = 27,
-    ekTTILDE = 28,
-    ekTEXCLA = 29,
-    ekTQUEST = 30,
-    ekTVLINE = 31,
-    ekTSLASH = 32,
-    ekTBSLASH = 33,
-    ekTAT = 34,
-    ekTINTEGER = 35,
-    ekTOCTAL = 36,
-    ekTHEX = 37,
-    ekTREAL = 38,
-    ekTSTRING = 39,
-    ekTIDENT = 40,
-    ekTUNDEF = 41,
-    ekTCORRUP = 42,
-    ekTEOF = 43,
-    ekTRESERVED = 44,
-}
+pub const _token_t_ekTSLCOM: _token_t = 1;
+pub const _token_t_ekTMLCOM: _token_t = 2;
+pub const _token_t_ekTSPACE: _token_t = 3;
+pub const _token_t_ekTEOL: _token_t = 4;
+pub const _token_t_ekTLESS: _token_t = 5;
+pub const _token_t_ekTGREAT: _token_t = 6;
+pub const _token_t_ekTCOMMA: _token_t = 7;
+pub const _token_t_ekTPERIOD: _token_t = 8;
+pub const _token_t_ekTSCOLON: _token_t = 9;
+pub const _token_t_ekTCOLON: _token_t = 10;
+pub const _token_t_ekTOPENPAR: _token_t = 11;
+pub const _token_t_ekTCLOSPAR: _token_t = 12;
+pub const _token_t_ekTOPENBRAC: _token_t = 13;
+pub const _token_t_ekTCLOSBRAC: _token_t = 14;
+pub const _token_t_ekTOPENCURL: _token_t = 15;
+pub const _token_t_ekTCLOSCURL: _token_t = 16;
+pub const _token_t_ekTPLUS: _token_t = 17;
+pub const _token_t_ekTMINUS: _token_t = 18;
+pub const _token_t_ekTASTERK: _token_t = 19;
+pub const _token_t_ekTEQUALS: _token_t = 20;
+pub const _token_t_ekTDOLLAR: _token_t = 21;
+pub const _token_t_ekTPERCENT: _token_t = 22;
+pub const _token_t_ekTPOUND: _token_t = 23;
+pub const _token_t_ekTAMPER: _token_t = 24;
+pub const _token_t_ekTAPOST: _token_t = 25;
+pub const _token_t_ekTQUOTE: _token_t = 26;
+pub const _token_t_ekTCIRCUM: _token_t = 27;
+pub const _token_t_ekTTILDE: _token_t = 28;
+pub const _token_t_ekTEXCLA: _token_t = 29;
+pub const _token_t_ekTQUEST: _token_t = 30;
+pub const _token_t_ekTVLINE: _token_t = 31;
+pub const _token_t_ekTSLASH: _token_t = 32;
+pub const _token_t_ekTBSLASH: _token_t = 33;
+pub const _token_t_ekTAT: _token_t = 34;
+pub const _token_t_ekTINTEGER: _token_t = 35;
+pub const _token_t_ekTOCTAL: _token_t = 36;
+pub const _token_t_ekTHEX: _token_t = 37;
+pub const _token_t_ekTREAL: _token_t = 38;
+pub const _token_t_ekTSTRING: _token_t = 39;
+pub const _token_t_ekTIDENT: _token_t = 40;
+pub const _token_t_ekTUNDEF: _token_t = 41;
+pub const _token_t_ekTCORRUP: _token_t = 42;
+pub const _token_t_ekTEOF: _token_t = 43;
+pub const _token_t_ekTRESERVED: _token_t = 44;
+pub type _token_t = ::libc::c_int;
 pub use self::_token_t as ltoken_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _dbindst_t {
-    ekDBIND_OK = 0,
-    ekDBIND_MEMBER_EXISTS = 1,
-    ekDBIND_TYPE_EXISTS = 2,
-    ekDBIND_TYPE_UNKNOWN = 3,
-    ekDBIND_TYPE_USED = 4,
-    ekDBIND_ALIAS_SIZE = 5,
-}
+pub const _dbindst_t_ekDBIND_OK: _dbindst_t = 0;
+pub const _dbindst_t_ekDBIND_MEMBER_EXISTS: _dbindst_t = 1;
+pub const _dbindst_t_ekDBIND_TYPE_EXISTS: _dbindst_t = 2;
+pub const _dbindst_t_ekDBIND_TYPE_UNKNOWN: _dbindst_t = 3;
+pub const _dbindst_t_ekDBIND_TYPE_USED: _dbindst_t = 4;
+pub const _dbindst_t_ekDBIND_ALIAS_SIZE: _dbindst_t = 5;
+pub type _dbindst_t = ::libc::c_int;
 pub use self::_dbindst_t as dbindst_t;
 pub type Buffer = _buffer_t;
 pub type String = _string_t;
@@ -2559,120 +2480,74 @@ pub struct _setstendCol2Dd_t {
     _unused: [u8; 0],
 }
 pub type setstendCol2Dd = _setstendCol2Dd_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _pixformat_t {
-    ekINDEX1 = 0,
-    ekINDEX2 = 1,
-    ekINDEX4 = 2,
-    ekINDEX8 = 3,
-    ekGRAY8 = 4,
-    ekRGB24 = 5,
-    ekRGBA32 = 6,
-    ekFIMAGE = 7,
-}
+pub const _pixformat_t_ekINDEX1: _pixformat_t = 0;
+pub const _pixformat_t_ekINDEX2: _pixformat_t = 1;
+pub const _pixformat_t_ekINDEX4: _pixformat_t = 2;
+pub const _pixformat_t_ekINDEX8: _pixformat_t = 3;
+pub const _pixformat_t_ekGRAY8: _pixformat_t = 4;
+pub const _pixformat_t_ekRGB24: _pixformat_t = 5;
+pub const _pixformat_t_ekRGBA32: _pixformat_t = 6;
+pub const _pixformat_t_ekFIMAGE: _pixformat_t = 7;
+pub type _pixformat_t = ::libc::c_int;
 pub use self::_pixformat_t as pixformat_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _codec_t {
-    ekJPG = 1,
-    ekPNG = 2,
-    ekBMP = 3,
-    ekGIF = 4,
-}
+pub const _codec_t_ekJPG: _codec_t = 1;
+pub const _codec_t_ekPNG: _codec_t = 2;
+pub const _codec_t_ekBMP: _codec_t = 3;
+pub const _codec_t_ekGIF: _codec_t = 4;
+pub type _codec_t = ::libc::c_int;
 pub use self::_codec_t as codec_t;
-impl _fstyle_t {
-    pub const ekFPIXELS: _fstyle_t = _fstyle_t::ekFNORMAL;
-}
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _fstyle_t {
-    ekFNORMAL = 0,
-    ekFBOLD = 1,
-    ekFITALIC = 2,
-    ekFSTRIKEOUT = 4,
-    ekFUNDERLINE = 8,
-    ekFSUBSCRIPT = 16,
-    ekFSUPSCRIPT = 32,
-    ekFPOINTS = 64,
-    ekFCELL = 128,
-}
+pub const _fstyle_t_ekFNORMAL: _fstyle_t = 0;
+pub const _fstyle_t_ekFBOLD: _fstyle_t = 1;
+pub const _fstyle_t_ekFITALIC: _fstyle_t = 2;
+pub const _fstyle_t_ekFSTRIKEOUT: _fstyle_t = 4;
+pub const _fstyle_t_ekFUNDERLINE: _fstyle_t = 8;
+pub const _fstyle_t_ekFSUBSCRIPT: _fstyle_t = 16;
+pub const _fstyle_t_ekFSUPSCRIPT: _fstyle_t = 32;
+pub const _fstyle_t_ekFPIXELS: _fstyle_t = 0;
+pub const _fstyle_t_ekFPOINTS: _fstyle_t = 64;
+pub const _fstyle_t_ekFCELL: _fstyle_t = 128;
+pub type _fstyle_t = ::libc::c_int;
 pub use self::_fstyle_t as fstyle_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _linecap_t {
-    ekLCFLAT = 0,
-    ekLCSQUARE = 1,
-    ekLCROUND = 2,
-}
+pub const _linecap_t_ekLCFLAT: _linecap_t = 0;
+pub const _linecap_t_ekLCSQUARE: _linecap_t = 1;
+pub const _linecap_t_ekLCROUND: _linecap_t = 2;
+pub type _linecap_t = ::libc::c_int;
 pub use self::_linecap_t as linecap_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _linejoin_t {
-    ekLJMITER = 0,
-    ekLJROUND = 1,
-    ekLJBEVEL = 2,
-}
+pub const _linejoin_t_ekLJMITER: _linejoin_t = 0;
+pub const _linejoin_t_ekLJROUND: _linejoin_t = 1;
+pub const _linejoin_t_ekLJBEVEL: _linejoin_t = 2;
+pub type _linejoin_t = ::libc::c_int;
 pub use self::_linejoin_t as linejoin_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _fillwrap_t {
-    ekFCLAMP = 0,
-    ekFTILE = 1,
-    ekFFLIP = 2,
-}
+pub const _fillwrap_t_ekFCLAMP: _fillwrap_t = 0;
+pub const _fillwrap_t_ekFTILE: _fillwrap_t = 1;
+pub const _fillwrap_t_ekFFLIP: _fillwrap_t = 2;
+pub type _fillwrap_t = ::libc::c_int;
 pub use self::_fillwrap_t as fillwrap_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _drawop_t {
-    ekSTROKE = 1,
-    ekFILL = 2,
-    ekSKFILL = 3,
-    ekFILLSK = 4,
-}
+pub const _drawop_t_ekSTROKE: _drawop_t = 1;
+pub const _drawop_t_ekFILL: _drawop_t = 2;
+pub const _drawop_t_ekSKFILL: _drawop_t = 3;
+pub const _drawop_t_ekFILLSK: _drawop_t = 4;
+pub type _drawop_t = ::libc::c_int;
 pub use self::_drawop_t as drawop_t;
-impl _align_t {
-    pub const ekTOP: _align_t = _align_t::ekLEFT;
-}
-impl _align_t {
-    pub const ekBOTTOM: _align_t = _align_t::ekRIGHT;
-}
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _align_t {
-    ekLEFT = 1,
-    ekCENTER = 2,
-    ekRIGHT = 3,
-    ekJUSTIFY = 4,
-}
+pub const _align_t_ekLEFT: _align_t = 1;
+pub const _align_t_ekTOP: _align_t = 1;
+pub const _align_t_ekCENTER: _align_t = 2;
+pub const _align_t_ekRIGHT: _align_t = 3;
+pub const _align_t_ekBOTTOM: _align_t = 3;
+pub const _align_t_ekJUSTIFY: _align_t = 4;
+pub type _align_t = ::libc::c_int;
 pub use self::_align_t as align_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _ellipsis_t {
-    ekELLIPNONE = 1,
-    ekELLIPBEGIN = 2,
-    ekELLIPMIDDLE = 3,
-    ekELLIPEND = 4,
-    ekELLIPMLINE = 5,
-}
+pub const _ellipsis_t_ekELLIPNONE: _ellipsis_t = 1;
+pub const _ellipsis_t_ekELLIPBEGIN: _ellipsis_t = 2;
+pub const _ellipsis_t_ekELLIPMIDDLE: _ellipsis_t = 3;
+pub const _ellipsis_t_ekELLIPEND: _ellipsis_t = 4;
+pub const _ellipsis_t_ekELLIPMLINE: _ellipsis_t = 5;
+pub type _ellipsis_t = ::libc::c_int;
 pub use self::_ellipsis_t as ellipsis_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _indicator_t {
-    ekINDNONE = 0,
-    ekINDUP_ARROW = 1,
-    ekINDDOWN_ARROW = 2,
-}
+pub const _indicator_t_ekINDNONE: _indicator_t = 0;
+pub const _indicator_t_ekINDUP_ARROW: _indicator_t = 1;
+pub const _indicator_t_ekINDDOWN_ARROW: _indicator_t = 2;
+pub type _indicator_t = ::libc::c_int;
 pub use self::_indicator_t as indicator_t;
 pub type color_t = u32;
 #[repr(C)]
@@ -2789,466 +2664,300 @@ pub struct _setptendImage_t {
     _unused: [u8; 0],
 }
 pub type setptendImage = _setptendImage_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _gui_orient_t {
-    ekGUI_HORIZONTAL = 1,
-    ekGUI_VERTICAL = 2,
-}
+pub const _gui_orient_t_ekGUI_HORIZONTAL: _gui_orient_t = 1;
+pub const _gui_orient_t_ekGUI_VERTICAL: _gui_orient_t = 2;
+pub type _gui_orient_t = ::libc::c_int;
 pub use self::_gui_orient_t as gui_orient_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _gui_state_t {
-    ekGUI_OFF = 0,
-    ekGUI_ON = 1,
-    ekGUI_MIXED = 2,
-}
+pub const _gui_state_t_ekGUI_OFF: _gui_state_t = 0;
+pub const _gui_state_t_ekGUI_ON: _gui_state_t = 1;
+pub const _gui_state_t_ekGUI_MIXED: _gui_state_t = 2;
+pub type _gui_state_t = ::libc::c_int;
 pub use self::_gui_state_t as gui_state_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _gui_mouse_t {
-    ekGUI_MOUSE_LEFT = 1,
-    ekGUI_MOUSE_RIGHT = 2,
-    ekGUI_MOUSE_MIDDLE = 3,
-}
+pub const _gui_mouse_t_ekGUI_MOUSE_LEFT: _gui_mouse_t = 1;
+pub const _gui_mouse_t_ekGUI_MOUSE_RIGHT: _gui_mouse_t = 2;
+pub const _gui_mouse_t_ekGUI_MOUSE_MIDDLE: _gui_mouse_t = 3;
+pub type _gui_mouse_t = ::libc::c_int;
 pub use self::_gui_mouse_t as gui_mouse_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _gui_cursor_t {
-    ekGUI_CURSOR_ARROW = 1,
-    ekGUI_CURSOR_HAND = 2,
-    ekGUI_CURSOR_IBEAM = 3,
-    ekGUI_CURSOR_CROSS = 4,
-    ekGUI_CURSOR_SIZEWE = 5,
-    ekGUI_CURSOR_SIZENS = 6,
-    ekGUI_CURSOR_USER = 7,
-}
+pub const _gui_cursor_t_ekGUI_CURSOR_ARROW: _gui_cursor_t = 1;
+pub const _gui_cursor_t_ekGUI_CURSOR_HAND: _gui_cursor_t = 2;
+pub const _gui_cursor_t_ekGUI_CURSOR_IBEAM: _gui_cursor_t = 3;
+pub const _gui_cursor_t_ekGUI_CURSOR_CROSS: _gui_cursor_t = 4;
+pub const _gui_cursor_t_ekGUI_CURSOR_SIZEWE: _gui_cursor_t = 5;
+pub const _gui_cursor_t_ekGUI_CURSOR_SIZENS: _gui_cursor_t = 6;
+pub const _gui_cursor_t_ekGUI_CURSOR_USER: _gui_cursor_t = 7;
+pub type _gui_cursor_t = ::libc::c_int;
 pub use self::_gui_cursor_t as gui_cursor_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _gui_close_t {
-    ekGUI_CLOSE_ESC = 1,
-    ekGUI_CLOSE_INTRO = 2,
-    ekGUI_CLOSE_BUTTON = 3,
-    ekGUI_CLOSE_DEACT = 4,
-}
+pub const _gui_close_t_ekGUI_CLOSE_ESC: _gui_close_t = 1;
+pub const _gui_close_t_ekGUI_CLOSE_INTRO: _gui_close_t = 2;
+pub const _gui_close_t_ekGUI_CLOSE_BUTTON: _gui_close_t = 3;
+pub const _gui_close_t_ekGUI_CLOSE_DEACT: _gui_close_t = 4;
+pub type _gui_close_t = ::libc::c_int;
 pub use self::_gui_close_t as gui_close_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _gui_scale_t {
-    ekGUI_SCALE_NONE = 1,
-    ekGUI_SCALE_AUTO = 2,
-    ekGUI_SCALE_ASPECT = 3,
-    ekGUI_SCALE_ASPECTDW = 4,
-    ekGUI_SCALE_ADJUST = 5,
-}
+pub const _gui_scale_t_ekGUI_SCALE_NONE: _gui_scale_t = 1;
+pub const _gui_scale_t_ekGUI_SCALE_AUTO: _gui_scale_t = 2;
+pub const _gui_scale_t_ekGUI_SCALE_ASPECT: _gui_scale_t = 3;
+pub const _gui_scale_t_ekGUI_SCALE_ASPECTDW: _gui_scale_t = 4;
+pub const _gui_scale_t_ekGUI_SCALE_ADJUST: _gui_scale_t = 5;
+pub type _gui_scale_t = ::libc::c_int;
 pub use self::_gui_scale_t as gui_scale_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _gui_scroll_t {
-    ekGUI_SCROLL_BEGIN = 1,
-    ekGUI_SCROLL_END = 2,
-    ekGUI_SCROLL_STEP_LEFT = 3,
-    ekGUI_SCROLL_STEP_RIGHT = 4,
-    ekGUI_SCROLL_PAGE_LEFT = 5,
-    ekGUI_SCROLL_PAGE_RIGHT = 6,
-    ekGUI_SCROLL_THUMB = 7,
-}
+pub const _gui_scroll_t_ekGUI_SCROLL_BEGIN: _gui_scroll_t = 1;
+pub const _gui_scroll_t_ekGUI_SCROLL_END: _gui_scroll_t = 2;
+pub const _gui_scroll_t_ekGUI_SCROLL_STEP_LEFT: _gui_scroll_t = 3;
+pub const _gui_scroll_t_ekGUI_SCROLL_STEP_RIGHT: _gui_scroll_t = 4;
+pub const _gui_scroll_t_ekGUI_SCROLL_PAGE_LEFT: _gui_scroll_t = 5;
+pub const _gui_scroll_t_ekGUI_SCROLL_PAGE_RIGHT: _gui_scroll_t = 6;
+pub const _gui_scroll_t_ekGUI_SCROLL_THUMB: _gui_scroll_t = 7;
+pub type _gui_scroll_t = ::libc::c_int;
 pub use self::_gui_scroll_t as gui_scroll_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _gui_focus_t {
-    ekGUI_FOCUS_CHANGED = 1,
-    ekGUI_FOCUS_KEEP = 2,
-    ekGUI_FOCUS_NO_NEXT = 3,
-    ekGUI_FOCUS_NO_RESIGN = 4,
-    ekGUI_FOCUS_NO_ACCEPT = 5,
-}
+pub const _gui_focus_t_ekGUI_FOCUS_CHANGED: _gui_focus_t = 1;
+pub const _gui_focus_t_ekGUI_FOCUS_KEEP: _gui_focus_t = 2;
+pub const _gui_focus_t_ekGUI_FOCUS_NO_NEXT: _gui_focus_t = 3;
+pub const _gui_focus_t_ekGUI_FOCUS_NO_RESIGN: _gui_focus_t = 4;
+pub const _gui_focus_t_ekGUI_FOCUS_NO_ACCEPT: _gui_focus_t = 5;
+pub type _gui_focus_t = ::libc::c_int;
 pub use self::_gui_focus_t as gui_focus_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _gui_tab_t {
-    ekGUI_TAB_KEY = 1,
-    ekGUI_TAB_BACKKEY = 2,
-    ekGUI_TAB_NEXT = 3,
-    ekGUI_TAB_PREV = 4,
-    ekGUI_TAB_MOVE = 5,
-    ekGUI_TAB_CLICK = 6,
-}
+pub const _gui_tab_t_ekGUI_TAB_KEY: _gui_tab_t = 1;
+pub const _gui_tab_t_ekGUI_TAB_BACKKEY: _gui_tab_t = 2;
+pub const _gui_tab_t_ekGUI_TAB_NEXT: _gui_tab_t = 3;
+pub const _gui_tab_t_ekGUI_TAB_PREV: _gui_tab_t = 4;
+pub const _gui_tab_t_ekGUI_TAB_MOVE: _gui_tab_t = 5;
+pub const _gui_tab_t_ekGUI_TAB_CLICK: _gui_tab_t = 6;
+pub type _gui_tab_t = ::libc::c_int;
 pub use self::_gui_tab_t as gui_tab_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _gui_event_t {
-    ekGUI_EVENT_LABEL = 1024,
-    ekGUI_EVENT_BUTTON = 1025,
-    ekGUI_EVENT_POPUP = 1026,
-    ekGUI_EVENT_LISTBOX = 1027,
-    ekGUI_EVENT_SLIDER = 1028,
-    ekGUI_EVENT_UPDOWN = 1029,
-    ekGUI_EVENT_TXTFILTER = 1030,
-    ekGUI_EVENT_TXTCHANGE = 1031,
-    ekGUI_EVENT_FOCUS_RESIGN = 1032,
-    ekGUI_EVENT_FOCUS_ACCEPT = 1033,
-    ekGUI_EVENT_FOCUS = 1034,
-    ekGUI_EVENT_MENU = 1035,
-    ekGUI_EVENT_DRAW = 1036,
-    ekGUI_EVENT_OVERLAY = 1037,
-    ekGUI_EVENT_RESIZE = 1038,
-    ekGUI_EVENT_ENTER = 1039,
-    ekGUI_EVENT_EXIT = 1040,
-    ekGUI_EVENT_MOVED = 1041,
-    ekGUI_EVENT_DOWN = 1042,
-    ekGUI_EVENT_UP = 1043,
-    ekGUI_EVENT_CLICK = 1044,
-    ekGUI_EVENT_DRAG = 1045,
-    ekGUI_EVENT_WHEEL = 1046,
-    ekGUI_EVENT_KEYDOWN = 1047,
-    ekGUI_EVENT_KEYUP = 1048,
-    ekGUI_EVENT_SCROLL = 1049,
-    ekGUI_EVENT_WND_MOVED = 1050,
-    ekGUI_EVENT_WND_SIZING = 1051,
-    ekGUI_EVENT_WND_SIZE = 1052,
-    ekGUI_EVENT_WND_CLOSE = 1053,
-    ekGUI_EVENT_COLOR = 1054,
-    ekGUI_EVENT_THEME = 1055,
-    ekGUI_EVENT_OBJCHANGE = 1056,
-    ekGUI_EVENT_TBL_NROWS = 1057,
-    ekGUI_EVENT_TBL_BEGIN = 1058,
-    ekGUI_EVENT_TBL_END = 1059,
-    ekGUI_EVENT_TBL_CELL = 1060,
-    ekGUI_EVENT_TBL_SEL = 1061,
-    ekGUI_EVENT_TBL_HEADCLICK = 1062,
-    ekGUI_EVENT_TBL_ROWCLICK = 1063,
-    ekGUI_EVENT_IDLE = 1064,
-}
+pub const _gui_event_t_ekGUI_EVENT_LABEL: _gui_event_t = 1024;
+pub const _gui_event_t_ekGUI_EVENT_BUTTON: _gui_event_t = 1025;
+pub const _gui_event_t_ekGUI_EVENT_POPUP: _gui_event_t = 1026;
+pub const _gui_event_t_ekGUI_EVENT_LISTBOX: _gui_event_t = 1027;
+pub const _gui_event_t_ekGUI_EVENT_SLIDER: _gui_event_t = 1028;
+pub const _gui_event_t_ekGUI_EVENT_UPDOWN: _gui_event_t = 1029;
+pub const _gui_event_t_ekGUI_EVENT_TXTFILTER: _gui_event_t = 1030;
+pub const _gui_event_t_ekGUI_EVENT_TXTCHANGE: _gui_event_t = 1031;
+pub const _gui_event_t_ekGUI_EVENT_FOCUS_RESIGN: _gui_event_t = 1032;
+pub const _gui_event_t_ekGUI_EVENT_FOCUS_ACCEPT: _gui_event_t = 1033;
+pub const _gui_event_t_ekGUI_EVENT_FOCUS: _gui_event_t = 1034;
+pub const _gui_event_t_ekGUI_EVENT_MENU: _gui_event_t = 1035;
+pub const _gui_event_t_ekGUI_EVENT_DRAW: _gui_event_t = 1036;
+pub const _gui_event_t_ekGUI_EVENT_OVERLAY: _gui_event_t = 1037;
+pub const _gui_event_t_ekGUI_EVENT_RESIZE: _gui_event_t = 1038;
+pub const _gui_event_t_ekGUI_EVENT_ENTER: _gui_event_t = 1039;
+pub const _gui_event_t_ekGUI_EVENT_EXIT: _gui_event_t = 1040;
+pub const _gui_event_t_ekGUI_EVENT_MOVED: _gui_event_t = 1041;
+pub const _gui_event_t_ekGUI_EVENT_DOWN: _gui_event_t = 1042;
+pub const _gui_event_t_ekGUI_EVENT_UP: _gui_event_t = 1043;
+pub const _gui_event_t_ekGUI_EVENT_CLICK: _gui_event_t = 1044;
+pub const _gui_event_t_ekGUI_EVENT_DRAG: _gui_event_t = 1045;
+pub const _gui_event_t_ekGUI_EVENT_WHEEL: _gui_event_t = 1046;
+pub const _gui_event_t_ekGUI_EVENT_KEYDOWN: _gui_event_t = 1047;
+pub const _gui_event_t_ekGUI_EVENT_KEYUP: _gui_event_t = 1048;
+pub const _gui_event_t_ekGUI_EVENT_SCROLL: _gui_event_t = 1049;
+pub const _gui_event_t_ekGUI_EVENT_WND_MOVED: _gui_event_t = 1050;
+pub const _gui_event_t_ekGUI_EVENT_WND_SIZING: _gui_event_t = 1051;
+pub const _gui_event_t_ekGUI_EVENT_WND_SIZE: _gui_event_t = 1052;
+pub const _gui_event_t_ekGUI_EVENT_WND_CLOSE: _gui_event_t = 1053;
+pub const _gui_event_t_ekGUI_EVENT_COLOR: _gui_event_t = 1054;
+pub const _gui_event_t_ekGUI_EVENT_THEME: _gui_event_t = 1055;
+pub const _gui_event_t_ekGUI_EVENT_OBJCHANGE: _gui_event_t = 1056;
+pub const _gui_event_t_ekGUI_EVENT_TBL_NROWS: _gui_event_t = 1057;
+pub const _gui_event_t_ekGUI_EVENT_TBL_BEGIN: _gui_event_t = 1058;
+pub const _gui_event_t_ekGUI_EVENT_TBL_END: _gui_event_t = 1059;
+pub const _gui_event_t_ekGUI_EVENT_TBL_CELL: _gui_event_t = 1060;
+pub const _gui_event_t_ekGUI_EVENT_TBL_SEL: _gui_event_t = 1061;
+pub const _gui_event_t_ekGUI_EVENT_TBL_HEADCLICK: _gui_event_t = 1062;
+pub const _gui_event_t_ekGUI_EVENT_TBL_ROWCLICK: _gui_event_t = 1063;
+pub const _gui_event_t_ekGUI_EVENT_IDLE: _gui_event_t = 1064;
+pub type _gui_event_t = ::libc::c_int;
 pub use self::_gui_event_t as gui_event_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _gui_type_t {
-    ekGUI_TYPE_LABEL = 0,
-    ekGUI_TYPE_BUTTON = 1,
-    ekGUI_TYPE_POPUP = 2,
-    ekGUI_TYPE_EDITBOX = 3,
-    ekGUI_TYPE_COMBOBOX = 4,
-    ekGUI_TYPE_SLIDER = 5,
-    ekGUI_TYPE_UPDOWN = 6,
-    ekGUI_TYPE_PROGRESS = 7,
-    ekGUI_TYPE_TEXTVIEW = 8,
-    ekGUI_TYPE_WEBVIEW = 9,
-    ekGUI_TYPE_TREEVIEW = 10,
-    ekGUI_TYPE_BOXVIEW = 11,
-    ekGUI_TYPE_SPLITVIEW = 12,
-    ekGUI_TYPE_CUSTOMVIEW = 13,
-    ekGUI_TYPE_PANEL = 14,
-    ekGUI_TYPE_LINE = 15,
-    ekGUI_TYPE_HEADER = 16,
-    ekGUI_TYPE_WINDOW = 17,
-    ekGUI_TYPE_TOOLBAR = 18,
-}
+pub const _gui_type_t_ekGUI_TYPE_LABEL: _gui_type_t = 0;
+pub const _gui_type_t_ekGUI_TYPE_BUTTON: _gui_type_t = 1;
+pub const _gui_type_t_ekGUI_TYPE_POPUP: _gui_type_t = 2;
+pub const _gui_type_t_ekGUI_TYPE_EDITBOX: _gui_type_t = 3;
+pub const _gui_type_t_ekGUI_TYPE_COMBOBOX: _gui_type_t = 4;
+pub const _gui_type_t_ekGUI_TYPE_SLIDER: _gui_type_t = 5;
+pub const _gui_type_t_ekGUI_TYPE_UPDOWN: _gui_type_t = 6;
+pub const _gui_type_t_ekGUI_TYPE_PROGRESS: _gui_type_t = 7;
+pub const _gui_type_t_ekGUI_TYPE_TEXTVIEW: _gui_type_t = 8;
+pub const _gui_type_t_ekGUI_TYPE_WEBVIEW: _gui_type_t = 9;
+pub const _gui_type_t_ekGUI_TYPE_TREEVIEW: _gui_type_t = 10;
+pub const _gui_type_t_ekGUI_TYPE_BOXVIEW: _gui_type_t = 11;
+pub const _gui_type_t_ekGUI_TYPE_SPLITVIEW: _gui_type_t = 12;
+pub const _gui_type_t_ekGUI_TYPE_CUSTOMVIEW: _gui_type_t = 13;
+pub const _gui_type_t_ekGUI_TYPE_PANEL: _gui_type_t = 14;
+pub const _gui_type_t_ekGUI_TYPE_LINE: _gui_type_t = 15;
+pub const _gui_type_t_ekGUI_TYPE_HEADER: _gui_type_t = 16;
+pub const _gui_type_t_ekGUI_TYPE_WINDOW: _gui_type_t = 17;
+pub const _gui_type_t_ekGUI_TYPE_TOOLBAR: _gui_type_t = 18;
+pub type _gui_type_t = ::libc::c_int;
 pub use self::_gui_type_t as gui_type_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _gui_size_t {
-    ekGUI_SIZE_MINI = 1,
-    ekGUI_SIZE_SMALL = 2,
-    ekGUI_SIZE_REGULAR = 3,
-}
+pub const _gui_size_t_ekGUI_SIZE_MINI: _gui_size_t = 1;
+pub const _gui_size_t_ekGUI_SIZE_SMALL: _gui_size_t = 2;
+pub const _gui_size_t_ekGUI_SIZE_REGULAR: _gui_size_t = 3;
+pub type _gui_size_t = ::libc::c_int;
 pub use self::_gui_size_t as gui_size_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _gui_role_t {
-    ekGUI_ROLE_MAIN = 0,
-    ekGUI_ROLE_OVERLAY = 1,
-    ekGUI_ROLE_MODAL = 2,
-    ekGUI_ROLE_MANAGED = 3,
-}
+pub const _gui_role_t_ekGUI_ROLE_MAIN: _gui_role_t = 0;
+pub const _gui_role_t_ekGUI_ROLE_OVERLAY: _gui_role_t = 1;
+pub const _gui_role_t_ekGUI_ROLE_MODAL: _gui_role_t = 2;
+pub const _gui_role_t_ekGUI_ROLE_MANAGED: _gui_role_t = 3;
+pub type _gui_role_t = ::libc::c_int;
 pub use self::_gui_role_t as gui_role_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _gui_prop_t {
-    ekGUI_PROP_CHILDREN = 0,
-}
+pub const _gui_prop_t_ekGUI_PROP_CHILDREN: _gui_prop_t = 0;
+pub type _gui_prop_t = ::libc::c_int;
 pub use self::_gui_prop_t as gui_prop_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _gui_text_t {
-    ekGUI_TEXT_FAMILY = 0,
-    ekGUI_TEXT_UNITS = 1,
-    ekGUI_TEXT_SIZE = 2,
-    ekGUI_TEXT_STYLE = 3,
-    ekGUI_TEXT_COLOR = 4,
-    ekGUI_TEXT_BGCOLOR = 5,
-    ekGUI_TEXT_PGCOLOR = 6,
-    ekGUI_TEXT_PARALIGN = 7,
-    ekGUI_TEXT_LSPACING = 8,
-    ekGUI_TEXT_BFPARSPACE = 9,
-    ekGUI_TEXT_AFPARSPACE = 10,
-    ekGUI_TEXT_APPLY_ALL = 11,
-    ekGUI_TEXT_APPLY_SEL = 12,
-    ekGUI_TEXT_SELECT = 13,
-    ekGUI_TEXT_SHOW_SELECT = 14,
-    ekGUI_TEXT_SCROLL = 15,
-    ekGUI_TEXT_WRAP_MODE = 16,
-}
+pub const _gui_text_t_ekGUI_TEXT_FAMILY: _gui_text_t = 0;
+pub const _gui_text_t_ekGUI_TEXT_UNITS: _gui_text_t = 1;
+pub const _gui_text_t_ekGUI_TEXT_SIZE: _gui_text_t = 2;
+pub const _gui_text_t_ekGUI_TEXT_STYLE: _gui_text_t = 3;
+pub const _gui_text_t_ekGUI_TEXT_COLOR: _gui_text_t = 4;
+pub const _gui_text_t_ekGUI_TEXT_BGCOLOR: _gui_text_t = 5;
+pub const _gui_text_t_ekGUI_TEXT_PGCOLOR: _gui_text_t = 6;
+pub const _gui_text_t_ekGUI_TEXT_PARALIGN: _gui_text_t = 7;
+pub const _gui_text_t_ekGUI_TEXT_LSPACING: _gui_text_t = 8;
+pub const _gui_text_t_ekGUI_TEXT_BFPARSPACE: _gui_text_t = 9;
+pub const _gui_text_t_ekGUI_TEXT_AFPARSPACE: _gui_text_t = 10;
+pub const _gui_text_t_ekGUI_TEXT_APPLY_ALL: _gui_text_t = 11;
+pub const _gui_text_t_ekGUI_TEXT_APPLY_SEL: _gui_text_t = 12;
+pub const _gui_text_t_ekGUI_TEXT_SELECT: _gui_text_t = 13;
+pub const _gui_text_t_ekGUI_TEXT_SHOW_SELECT: _gui_text_t = 14;
+pub const _gui_text_t_ekGUI_TEXT_SCROLL: _gui_text_t = 15;
+pub const _gui_text_t_ekGUI_TEXT_WRAP_MODE: _gui_text_t = 16;
+pub type _gui_text_t = ::libc::c_int;
 pub use self::_gui_text_t as gui_text_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _gui_web_t {
-    ekGUI_WEB_NAVIGATE = 1,
-    ekGUI_WEB_BACK = 2,
-    ekGUI_WEB_FORWARD = 3,
-}
+pub const _gui_web_t_ekGUI_WEB_NAVIGATE: _gui_web_t = 1;
+pub const _gui_web_t_ekGUI_WEB_BACK: _gui_web_t = 2;
+pub const _gui_web_t_ekGUI_WEB_FORWARD: _gui_web_t = 3;
+pub type _gui_web_t = ::libc::c_int;
 pub use self::_gui_web_t as gui_web_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _clipboard_t {
-    ekCLIPBOARD_COPY = 0,
-    ekCLIPBOARD_CUT = 1,
-    ekCLIPBOARD_PASTE = 2,
-}
+pub const _clipboard_t_ekCLIPBOARD_COPY: _clipboard_t = 0;
+pub const _clipboard_t_ekCLIPBOARD_CUT: _clipboard_t = 1;
+pub const _clipboard_t_ekCLIPBOARD_PASTE: _clipboard_t = 2;
+pub type _clipboard_t = ::libc::c_int;
 pub use self::_clipboard_t as clipboard_t;
-impl _label_flag_t {
-    pub const ekLABEL_SINGLE: _label_flag_t = _label_flag_t::ekLABEL_FLAG;
-}
-impl _label_flag_t {
-    pub const ekLABEL_TYPE: _label_flag_t = _label_flag_t::ekLABEL_MULTI;
-}
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _label_flag_t {
-    ekLABEL_FLAG = 0,
-    ekLABEL_MULTI = 1,
-}
+pub const _label_flag_t_ekLABEL_FLAG: _label_flag_t = 0;
+pub const _label_flag_t_ekLABEL_SINGLE: _label_flag_t = 0;
+pub const _label_flag_t_ekLABEL_MULTI: _label_flag_t = 1;
+pub const _label_flag_t_ekLABEL_TYPE: _label_flag_t = 1;
+pub type _label_flag_t = ::libc::c_int;
 pub use self::_label_flag_t as label_flag_t;
-impl _button_flag_t {
-    pub const ekBUTTON_PUSH: _button_flag_t = _button_flag_t::ekBUTTON_FLAG;
-}
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _button_flag_t {
-    ekBUTTON_FLAG = 0,
-    ekBUTTON_CHECK2 = 1,
-    ekBUTTON_CHECK3 = 2,
-    ekBUTTON_RADIO = 3,
-    ekBUTTON_FLAT = 4,
-    ekBUTTON_FLATGLE = 5,
-    ekBUTTON_TYPE = 7,
-}
+pub const _button_flag_t_ekBUTTON_FLAG: _button_flag_t = 0;
+pub const _button_flag_t_ekBUTTON_PUSH: _button_flag_t = 0;
+pub const _button_flag_t_ekBUTTON_CHECK2: _button_flag_t = 1;
+pub const _button_flag_t_ekBUTTON_CHECK3: _button_flag_t = 2;
+pub const _button_flag_t_ekBUTTON_RADIO: _button_flag_t = 3;
+pub const _button_flag_t_ekBUTTON_FLAT: _button_flag_t = 4;
+pub const _button_flag_t_ekBUTTON_FLATGLE: _button_flag_t = 5;
+pub const _button_flag_t_ekBUTTON_TYPE: _button_flag_t = 7;
+pub type _button_flag_t = ::libc::c_int;
 pub use self::_button_flag_t as button_flag_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _popup_flag_t {
-    ekPOPUP_FLAG = 0,
-}
+pub const _popup_flag_t_ekPOPUP_FLAG: _popup_flag_t = 0;
+pub type _popup_flag_t = ::libc::c_int;
 pub use self::_popup_flag_t as popup_flag_t;
-impl _edit_flag_t {
-    pub const ekEDIT_SINGLE: _edit_flag_t = _edit_flag_t::ekEDIT_FLAG;
-}
-impl _edit_flag_t {
-    pub const ekEDIT_TYPE: _edit_flag_t = _edit_flag_t::ekEDIT_MULTI;
-}
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _edit_flag_t {
-    ekEDIT_FLAG = 0,
-    ekEDIT_MULTI = 1,
-    ekEDIT_AUTOSEL = 4,
-}
+pub const _edit_flag_t_ekEDIT_FLAG: _edit_flag_t = 0;
+pub const _edit_flag_t_ekEDIT_SINGLE: _edit_flag_t = 0;
+pub const _edit_flag_t_ekEDIT_MULTI: _edit_flag_t = 1;
+pub const _edit_flag_t_ekEDIT_TYPE: _edit_flag_t = 1;
+pub const _edit_flag_t_ekEDIT_AUTOSEL: _edit_flag_t = 4;
+pub type _edit_flag_t = ::libc::c_int;
 pub use self::_edit_flag_t as edit_flag_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _combo_flag_t {
-    ekCOMBO_FLAG = 0,
-}
+pub const _combo_flag_t_ekCOMBO_FLAG: _combo_flag_t = 0;
+pub type _combo_flag_t = ::libc::c_int;
 pub use self::_combo_flag_t as combo_flag_t;
-impl _slider_flag_t {
-    pub const ekSLIDER_HORZ: _slider_flag_t = _slider_flag_t::ekSLIDER_FLAG;
-}
-impl _slider_flag_t {
-    pub const ekSLIDER_TYPE: _slider_flag_t = _slider_flag_t::ekSLIDER_VERT;
-}
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _slider_flag_t {
-    ekSLIDER_FLAG = 0,
-    ekSLIDER_VERT = 1,
-}
+pub const _slider_flag_t_ekSLIDER_FLAG: _slider_flag_t = 0;
+pub const _slider_flag_t_ekSLIDER_HORZ: _slider_flag_t = 0;
+pub const _slider_flag_t_ekSLIDER_VERT: _slider_flag_t = 1;
+pub const _slider_flag_t_ekSLIDER_TYPE: _slider_flag_t = 1;
+pub type _slider_flag_t = ::libc::c_int;
 pub use self::_slider_flag_t as slider_flag_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _updown_flag_t {
-    ekUPDOWN_FLAG = 0,
-}
+pub const _updown_flag_t_ekUPDOWN_FLAG: _updown_flag_t = 0;
+pub type _updown_flag_t = ::libc::c_int;
 pub use self::_updown_flag_t as updown_flag_t;
-impl _progress_flag_t {
-    pub const ekPROGRESS_HORZ: _progress_flag_t = _progress_flag_t::ekPROGRESS_FLAG;
-}
-impl _progress_flag_t {
-    pub const ekPROGRESS_TYPE: _progress_flag_t = _progress_flag_t::ekPROGRESS_VERT;
-}
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _progress_flag_t {
-    ekPROGRESS_FLAG = 0,
-    ekPROGRESS_VERT = 1,
-}
+pub const _progress_flag_t_ekPROGRESS_FLAG: _progress_flag_t = 0;
+pub const _progress_flag_t_ekPROGRESS_HORZ: _progress_flag_t = 0;
+pub const _progress_flag_t_ekPROGRESS_VERT: _progress_flag_t = 1;
+pub const _progress_flag_t_ekPROGRESS_TYPE: _progress_flag_t = 1;
+pub type _progress_flag_t = ::libc::c_int;
 pub use self::_progress_flag_t as progress_flag_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _view_flag_t {
-    ekVIEW_OPENGL = 1,
-    ekVIEW_HSCROLL = 2,
-    ekVIEW_VSCROLL = 4,
-    ekVIEW_BORDER = 8,
-    ekVIEW_NOERASE = 32,
-    ekVIEW_CONTROL = 64,
-}
+pub const _view_flag_t_ekVIEW_OPENGL: _view_flag_t = 1;
+pub const _view_flag_t_ekVIEW_HSCROLL: _view_flag_t = 2;
+pub const _view_flag_t_ekVIEW_VSCROLL: _view_flag_t = 4;
+pub const _view_flag_t_ekVIEW_BORDER: _view_flag_t = 8;
+pub const _view_flag_t_ekVIEW_NOERASE: _view_flag_t = 32;
+pub const _view_flag_t_ekVIEW_CONTROL: _view_flag_t = 64;
+pub type _view_flag_t = ::libc::c_int;
 pub use self::_view_flag_t as view_flag_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _text_flag_t {
-    ekTEXT_FLAG = 0,
-}
+pub const _text_flag_t_ekTEXT_FLAG: _text_flag_t = 0;
+pub type _text_flag_t = ::libc::c_int;
 pub use self::_text_flag_t as text_flag_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _table_flag_t {
-    ekTABLE_FLAG = 0,
-    ekTABLE_TEXT = 1,
-    ekTABLE_ICON16 = 2,
-    ekTABLE_EDIT = 4,
-    ekTABLE_COMBO = 8,
-    ekTABLE_POPUP = 16,
-    ekTABLE_RADIO = 32,
-    ekTABLE_CHECK = 64,
-    ekTABLE_TOOLTIP = 128,
-    ekTABLE_BGCOLOR = 256,
-    ekTABLE_ROWALT = 512,
-    ekTABLE_ROWPRESEL = 1024,
-}
+pub const _table_flag_t_ekTABLE_FLAG: _table_flag_t = 0;
+pub const _table_flag_t_ekTABLE_TEXT: _table_flag_t = 1;
+pub const _table_flag_t_ekTABLE_ICON16: _table_flag_t = 2;
+pub const _table_flag_t_ekTABLE_EDIT: _table_flag_t = 4;
+pub const _table_flag_t_ekTABLE_COMBO: _table_flag_t = 8;
+pub const _table_flag_t_ekTABLE_POPUP: _table_flag_t = 16;
+pub const _table_flag_t_ekTABLE_RADIO: _table_flag_t = 32;
+pub const _table_flag_t_ekTABLE_CHECK: _table_flag_t = 64;
+pub const _table_flag_t_ekTABLE_TOOLTIP: _table_flag_t = 128;
+pub const _table_flag_t_ekTABLE_BGCOLOR: _table_flag_t = 256;
+pub const _table_flag_t_ekTABLE_ROWALT: _table_flag_t = 512;
+pub const _table_flag_t_ekTABLE_ROWPRESEL: _table_flag_t = 1024;
+pub type _table_flag_t = ::libc::c_int;
 pub use self::_table_flag_t as table_flag_t;
-impl _split_flag_t {
-    pub const ekSPLIT_VERT: _split_flag_t = _split_flag_t::ekSPLIT_FLAG;
-}
-impl _split_flag_t {
-    pub const ekSPLIT_TYPE: _split_flag_t = _split_flag_t::ekSPLIT_HORZ;
-}
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _split_flag_t {
-    ekSPLIT_FLAG = 0,
-    ekSPLIT_HORZ = 1,
-}
+pub const _split_flag_t_ekSPLIT_FLAG: _split_flag_t = 0;
+pub const _split_flag_t_ekSPLIT_VERT: _split_flag_t = 0;
+pub const _split_flag_t_ekSPLIT_HORZ: _split_flag_t = 1;
+pub const _split_flag_t_ekSPLIT_TYPE: _split_flag_t = 1;
+pub type _split_flag_t = ::libc::c_int;
 pub use self::_split_flag_t as split_flag_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _split_mode_t {
-    ekSPLIT_NORMAL = 1,
-    ekSPLIT_FIXED0 = 2,
-    ekSPLIT_FIXED1 = 3,
-}
+pub const _split_mode_t_ekSPLIT_NORMAL: _split_mode_t = 1;
+pub const _split_mode_t_ekSPLIT_FIXED0: _split_mode_t = 2;
+pub const _split_mode_t_ekSPLIT_FIXED1: _split_mode_t = 3;
+pub type _split_mode_t = ::libc::c_int;
 pub use self::_split_mode_t as split_mode_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _window_flag_t {
-    ekWINDOW_FLAG = 0,
-    ekWINDOW_EDGE = 1,
-    ekWINDOW_TITLE = 2,
-    ekWINDOW_MAX = 4,
-    ekWINDOW_MIN = 8,
-    ekWINDOW_CLOSE = 16,
-    ekWINDOW_RESIZE = 32,
-    ekWINDOW_RETURN = 64,
-    ekWINDOW_ESC = 128,
-    ekWINDOW_OFFSCREEN = 256,
-    ekWINDOW_MODAL_NOHIDE = 512,
-    ekWINDOW_STD = 26,
-    ekWINDOW_STDRES = 62,
-}
+pub const _window_flag_t_ekWINDOW_FLAG: _window_flag_t = 0;
+pub const _window_flag_t_ekWINDOW_EDGE: _window_flag_t = 1;
+pub const _window_flag_t_ekWINDOW_TITLE: _window_flag_t = 2;
+pub const _window_flag_t_ekWINDOW_MAX: _window_flag_t = 4;
+pub const _window_flag_t_ekWINDOW_MIN: _window_flag_t = 8;
+pub const _window_flag_t_ekWINDOW_CLOSE: _window_flag_t = 16;
+pub const _window_flag_t_ekWINDOW_RESIZE: _window_flag_t = 32;
+pub const _window_flag_t_ekWINDOW_RETURN: _window_flag_t = 64;
+pub const _window_flag_t_ekWINDOW_ESC: _window_flag_t = 128;
+pub const _window_flag_t_ekWINDOW_OFFSCREEN: _window_flag_t = 256;
+pub const _window_flag_t_ekWINDOW_MODAL_NOHIDE: _window_flag_t = 512;
+pub const _window_flag_t_ekWINDOW_STD: _window_flag_t = 26;
+pub const _window_flag_t_ekWINDOW_STDRES: _window_flag_t = 62;
+pub type _window_flag_t = ::libc::c_int;
 pub use self::_window_flag_t as window_flag_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _menu_flag_t {
-    ekMENU_FLAG = 0,
-    ekMENU_ITEM = 1,
-    ekMENU_SEPARATOR = 2,
-}
+pub const _menu_flag_t_ekMENU_FLAG: _menu_flag_t = 0;
+pub const _menu_flag_t_ekMENU_ITEM: _menu_flag_t = 1;
+pub const _menu_flag_t_ekMENU_SEPARATOR: _menu_flag_t = 2;
+pub type _menu_flag_t = ::libc::c_int;
 pub use self::_menu_flag_t as menu_flag_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _ctrl_state_t {
-    ekCTRL_STATE_NORMAL = 0,
-    ekCTRL_STATE_HOT = 1,
-    ekCTRL_STATE_PRESSED = 2,
-    ekCTRL_STATE_BKNORMAL = 3,
-    ekCTRL_STATE_BKHOT = 4,
-    ekCTRL_STATE_BKPRESSED = 5,
-    ekCTRL_STATE_DISABLED = 6,
-}
+pub const _ctrl_state_t_ekCTRL_STATE_NORMAL: _ctrl_state_t = 0;
+pub const _ctrl_state_t_ekCTRL_STATE_HOT: _ctrl_state_t = 1;
+pub const _ctrl_state_t_ekCTRL_STATE_PRESSED: _ctrl_state_t = 2;
+pub const _ctrl_state_t_ekCTRL_STATE_BKNORMAL: _ctrl_state_t = 3;
+pub const _ctrl_state_t_ekCTRL_STATE_BKHOT: _ctrl_state_t = 4;
+pub const _ctrl_state_t_ekCTRL_STATE_BKPRESSED: _ctrl_state_t = 5;
+pub const _ctrl_state_t_ekCTRL_STATE_DISABLED: _ctrl_state_t = 6;
+pub type _ctrl_state_t = ::libc::c_int;
 pub use self::_ctrl_state_t as ctrl_state_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _ctrl_msel_t {
-    ekCTRL_MSEL_NO = 0,
-    ekCTRL_MSEL_SINGLE = 1,
-    ekCTRL_MSEL_BURST = 2,
-}
+pub const _ctrl_msel_t_ekCTRL_MSEL_NO: _ctrl_msel_t = 0;
+pub const _ctrl_msel_t_ekCTRL_MSEL_SINGLE: _ctrl_msel_t = 1;
+pub const _ctrl_msel_t_ekCTRL_MSEL_BURST: _ctrl_msel_t = 2;
+pub type _ctrl_msel_t = ::libc::c_int;
 pub use self::_ctrl_msel_t as ctrl_msel_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _ctrl_op_t {
-    ekCTRL_OP_ADD = 1,
-    ekCTRL_OP_DEL = 2,
-    ekCTRL_OP_INS = 3,
-    ekCTRL_OP_SET = 4,
-}
+pub const _ctrl_op_t_ekCTRL_OP_ADD: _ctrl_op_t = 1;
+pub const _ctrl_op_t_ekCTRL_OP_DEL: _ctrl_op_t = 2;
+pub const _ctrl_op_t_ekCTRL_OP_INS: _ctrl_op_t = 3;
+pub const _ctrl_op_t_ekCTRL_OP_SET: _ctrl_op_t = 4;
+pub type _ctrl_op_t = ::libc::c_int;
 pub use self::_ctrl_op_t as ctrl_op_t;
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _syscolor_t {
-    ekSYSCOLOR_DARKMODE = 0,
-    ekSYSCOLOR_LABEL = 1,
-    ekSYSCOLOR_VIEW = 2,
-    ekSYSCOLOR_LINE = 3,
-    ekSYSCOLOR_LINK = 4,
-    ekSYSCOLOR_BORDER = 5,
-}
+pub const _syscolor_t_ekSYSCOLOR_DARKMODE: _syscolor_t = 0;
+pub const _syscolor_t_ekSYSCOLOR_LABEL: _syscolor_t = 1;
+pub const _syscolor_t_ekSYSCOLOR_VIEW: _syscolor_t = 2;
+pub const _syscolor_t_ekSYSCOLOR_LINE: _syscolor_t = 3;
+pub const _syscolor_t_ekSYSCOLOR_LINK: _syscolor_t = 4;
+pub const _syscolor_t_ekSYSCOLOR_BORDER: _syscolor_t = 5;
+pub type _syscolor_t = ::libc::c_int;
 pub use self::_syscolor_t as syscolor_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -3871,14 +3580,10 @@ pub struct _evtbcell_t {
     pub text: *const char_t,
     pub align: align_t,
 }
-#[repr(i32)]
-#[non_exhaustive]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum _gui_notif_t {
-    ekGUI_NOTIF_LANGUAGE = 1,
-    ekGUI_NOTIF_WIN_DESTROY = 2,
-    ekGUI_NOTIF_MENU_DESTROY = 3,
-}
+pub const _gui_notif_t_ekGUI_NOTIF_LANGUAGE: _gui_notif_t = 1;
+pub const _gui_notif_t_ekGUI_NOTIF_WIN_DESTROY: _gui_notif_t = 2;
+pub const _gui_notif_t_ekGUI_NOTIF_MENU_DESTROY: _gui_notif_t = 3;
+pub type _gui_notif_t = ::libc::c_int;
 pub use self::_gui_notif_t as gui_notif_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -7263,7 +6968,7 @@ unsafe extern "C" {
     pub fn dbind_enum_imp(
         type_: *const char_t,
         name: *const char_t,
-        value: i32,
+        value: enum_t,
         alias: *const char_t,
     ) -> dbindst_t;
 }

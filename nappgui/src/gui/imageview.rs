@@ -1,10 +1,10 @@
 use std::rc::Rc;
 
-use crate::{core::event::Event, draw_2d::Image, util::macros::pub_crate_ptr_ops};
+use crate::{core::event::Event, draw_2d::Image, types::Scale, util::macros::pub_crate_ptr_ops};
 
 use nappgui_sys::{
-    gui_scale_t, imageview_OnClick, imageview_OnOverDraw, imageview_create, imageview_image,
-    imageview_scale, imageview_size, listener_imp,
+    imageview_OnClick, imageview_OnOverDraw, imageview_create, imageview_image, imageview_scale,
+    imageview_size, listener_imp,
 };
 
 /// ImageView are specialized views in visualizing images and GIF animations.
@@ -30,9 +30,9 @@ impl ImageView {
     }
 
     /// Set the scaling to apply to the image.
-    pub fn scale(&self, scale: gui_scale_t) {
+    pub fn scale(&self, scale: Scale) {
         unsafe {
-            imageview_scale(self.as_ptr(), scale);
+            imageview_scale(self.as_ptr(), scale as _);
         }
     }
 

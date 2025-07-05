@@ -1,8 +1,7 @@
 use std::{ffi::CString, rc::Rc};
 
 use crate::{
-    draw_2d::{Font, Image},
-    util::macros::{callback, pub_crate_ptr_ops},
+    draw_2d::{Font, Image}, types::GuiState, util::macros::{callback, pub_crate_ptr_ops}
 };
 
 use nappgui_sys::{
@@ -11,8 +10,6 @@ use nappgui_sys::{
     button_push, button_radio, button_state, button_tag, button_text, button_text_alt,
     button_tooltip, button_vpadding,
 };
-
-use crate::prelude::*;
 
 /// The buttons are another classic element in graphic interfaces, where we distinguish four types:
 /// the push button, checkbox, radiobutton and flat button typical of toolbars
@@ -114,7 +111,7 @@ impl Button {
     /// # Remarks
     /// Not applicable on push buttons button_push.
     pub fn state(&self, state: GuiState) {
-        unsafe { button_state(self.as_ptr(), state) }
+        unsafe { button_state(self.as_ptr(), state as _) }
     }
 
     /// Sets a numeric tag for the button.
@@ -132,7 +129,8 @@ impl Button {
     /// # Remarks
     /// Not applicable on push buttons button_push.
     pub fn get_state(&self) -> GuiState {
-        unsafe { button_get_state(self.as_ptr()) }
+        let state = unsafe { button_get_state(self.as_ptr()) };
+        GuiState::try_from(state).unwrap()
     }
 
     /// Gets the button's tag.

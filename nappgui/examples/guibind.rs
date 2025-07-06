@@ -123,7 +123,7 @@ fn i_value_labels(layout: &Layout) {
         "GuiState"
     );
     cell_dbind!(&layout.cell(2, 4), BasicTypes, uint16_val, u16, "uint16_t");
-    cell_dbind!(&layout.cell(2, 5), BasicTypes, real32_val, f32, "real32_t");
+    cell_dbind!(&layout.cell(2, 5), BasicTypes, enum_val, f32, "Color");
     cell_dbind!(&layout.cell(2, 6), BasicTypes, enum_val, Color, "Color");
     cell_dbind!(&layout.cell(2, 7), BasicTypes, real32_val, f32, "real32_t");
     cell_dbind!(&layout.cell(2, 8), BasicTypes, real32_val, f32, "real32_t");
@@ -174,7 +174,7 @@ fn i_layout() -> Layout {
         "GuiState"
     );
     cell_dbind!(&layout.cell(1, 4), BasicTypes, uint16_val, u16, "uint16_t");
-    cell_dbind!(&layout.cell(1, 5), BasicTypes, real32_val, f32, "real32_t");
+    cell_dbind!(&layout.cell(1, 5), BasicTypes, enum_val, Color, "Color");
     cell_dbind!(&layout.cell(1, 6), BasicTypes, enum_val, Color, "Color");
     cell_dbind!(&layout.cell(1, 7), BasicTypes, real32_val, f32, "real32_t");
     cell_dbind!(&layout.cell(1, 8), BasicTypes, real32_val, f32, "real32_t");

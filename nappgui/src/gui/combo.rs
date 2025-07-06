@@ -3,7 +3,7 @@ use std::rc::Rc;
 use crate::{
     draw_2d::Image,
     types::Align,
-    util::macros::{callback, pub_crate_ptr_ops},
+    util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
 };
 
 use nappgui_sys::{
@@ -162,3 +162,5 @@ impl Combo {
         }
     }
 }
+
+impl_gui_control!(Combo, guicontrol_combo);

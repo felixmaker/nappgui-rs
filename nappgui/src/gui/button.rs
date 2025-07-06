@@ -1,7 +1,9 @@
 use std::{ffi::CString, rc::Rc};
 
 use crate::{
-    draw_2d::{Font, Image}, types::GuiState, util::macros::{callback, pub_crate_ptr_ops}
+    draw_2d::{Font, Image},
+    types::GuiState,
+    util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
 };
 
 use nappgui_sys::{
@@ -143,3 +145,5 @@ impl Button {
         unsafe { button_get_height(self.as_ptr()) }
     }
 }
+
+impl_gui_control!(Button, guicontrol_button);

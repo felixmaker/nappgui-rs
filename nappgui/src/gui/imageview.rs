@@ -1,10 +1,14 @@
 use std::rc::Rc;
 
-use crate::{core::event::Event, draw_2d::Image, types::Scale, util::macros::pub_crate_ptr_ops};
+use crate::{
+    draw_2d::Image,
+    types::Scale,
+    util::macros::{callback, pub_crate_ptr_ops},
+};
 
 use nappgui_sys::{
     imageview_OnClick, imageview_OnOverDraw, imageview_create, imageview_image, imageview_scale,
-    imageview_size, listener_imp,
+    imageview_size,
 };
 
 /// ImageView are specialized views in visualizing images and GIF animations.
@@ -43,65 +47,11 @@ impl ImageView {
         }
     }
 
-    /// Set a handle for the event click on the image.
-    pub fn on_click<F>(&self, handler: F)
-    where
-        F: FnMut(&mut ImageView, &Event) + 'static,
-    {
-        unsafe extern "C" fn shim(data: *mut std::ffi::c_void, event: *mut nappgui_sys::Event) {
-            let data = data as *mut (
-                Box<dyn FnMut(&mut ImageView, &Event)>,
-                *mut nappgui_sys::ImageView,
-            );
-            let f = &mut *(*data).0;
-            let mut obj = ImageView::new((*data).1);
-            let ev = Event::new(event as _);
-            let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut obj, &ev)));
-        }
+    callback! {
+        /// Set a handle for the event click on the image.
+        pub on_click(ImageView) => imageview_OnClick;
 
-        let cb: Box<dyn FnMut(&mut ImageView, &Event)> = Box::new(handler);
-
-        let data: *mut (
-            Box<dyn FnMut(&mut ImageView, &Event)>,
-            *mut nappgui_sys::ImageView,
-        ) = Box::into_raw(Box::new((cb, self.as_ptr())));
-
-        unsafe {
-            imageview_OnClick(
-                self.as_ptr(),
-                listener_imp(data as *mut std::ffi::c_void, Some(shim)),
-            );
-        }
-    }
-
-    /// Allows you to draw an overlay on the image when the mouse is over it.
-    pub fn on_over_draw<F>(&self, handler: F)
-    where
-        F: FnMut(&mut ImageView, &Event) + 'static,
-    {
-        unsafe extern "C" fn shim(data: *mut std::ffi::c_void, event: *mut nappgui_sys::Event) {
-            let data = data as *mut (
-                Box<dyn FnMut(&mut ImageView, &Event)>,
-                *mut nappgui_sys::ImageView,
-            );
-            let f = &mut *(*data).0;
-            let mut obj = ImageView::new((*data).1);
-            let ev = Event::new(event as _);
-            let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut obj, &ev)));
-        }
-
-        let cb: Box<dyn FnMut(&mut ImageView, &Event)> = Box::new(handler);
-
-        let data: *mut (
-            Box<dyn FnMut(&mut ImageView, &Event)>,
-            *mut nappgui_sys::ImageView,
-        ) = Box::into_raw(Box::new((cb, self.as_ptr())));
-
-        unsafe {
-            imageview_OnOverDraw(
-                self.as_ptr(),
-                listener_imp(data as *mut std::ffi::c_void, Some(shim)),
-            );
-        }
+        /// Allows you to draw an overlay on the image when the mouse is over it.
+        pub on_over_draw(ImageView) => imageview_OnOverDraw;
     }
 }

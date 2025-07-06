@@ -118,7 +118,26 @@ macro_rules! impl_i32_to_enum {
     };
 }
 
+macro_rules! impl_gui_control {
+    ($type: ty, $func: ident) => {
+        impl crate::gui::GuiControl for $type {
+            fn as_control_ptr(&self) -> *mut nappgui_sys::GuiControl {
+                *self.inner as _
+            }
+
+            fn from_control_ptr(ptr: *mut nappgui_sys::GuiControl) -> Option<Self> {
+                unsafe {
+                    let combo = nappgui_sys::$func(ptr);
+                    Self::new_option_no_drop(combo)
+                }
+            }
+        }
+    };
+}
+
 pub(crate) use callback;
-pub(crate) use impl_i32_to_enum;
 pub(crate) use listener;
 pub(crate) use pub_crate_ptr_ops;
+
+pub(crate) use impl_gui_control;
+pub(crate) use impl_i32_to_enum;

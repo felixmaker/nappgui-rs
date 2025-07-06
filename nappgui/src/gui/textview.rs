@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::{
-    draw_2d::Color, types::Align, util::macros::{callback, pub_crate_ptr_ops}
+    draw_2d::Color, types::Align, util::macros::{callback, impl_gui_control, pub_crate_ptr_ops}
 };
 
 use nappgui_sys::{
@@ -248,3 +248,5 @@ impl TextView {
         }
     }
 }
+
+impl_gui_control!(TextView, guicontrol_textview);

@@ -9,7 +9,7 @@ use nappgui_sys::{
     view_update, view_viewport, S2Df, V2Df,
 };
 
-use crate::util::macros::{callback, pub_crate_ptr_ops};
+use crate::util::macros::{callback, impl_gui_control, pub_crate_ptr_ops};
 
 /// The View controls or custom views are blank areas within the window that allow us
 /// to implement our own components.
@@ -196,3 +196,5 @@ impl View {
         unsafe { view_native(self.as_ptr()) }
     }
 }
+
+impl_gui_control!(View, guicontrol_view);

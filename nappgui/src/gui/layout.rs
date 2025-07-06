@@ -5,19 +5,15 @@ use std::{
 
 use nappgui_sys::{
     layout_bgcolor, layout_button, layout_cell, layout_combo, layout_control, layout_create,
-    layout_dbind_get_obj_imp, layout_dbind_imp, layout_dbind_obj_imp, layout_edit,
-    layout_get_button, layout_get_combo, layout_get_edit, layout_get_imageview, layout_get_label,
-    layout_get_layout, layout_get_listbox, layout_get_panel, layout_get_popup, layout_get_progress,
-    layout_get_slider, layout_get_splitview, layout_get_tableview, layout_get_textview,
-    layout_get_updown, layout_get_view, layout_get_webview, layout_halign, layout_hexpand,
-    layout_hexpand2, layout_hexpand3, layout_hmargin, layout_hsize, layout_imageview,
-    layout_insert_col, layout_insert_row, layout_label, layout_layout, layout_listbox,
-    layout_margin, layout_margin2, layout_margin4, layout_ncols, layout_nrows, layout_panel,
-    layout_panel_replace, layout_popup, layout_progress, layout_remove_col, layout_remove_row,
-    layout_show_col, layout_show_row, layout_skcolor, layout_slider, layout_splitview,
-    layout_tableview, layout_taborder, layout_tabstop, layout_textview, layout_update,
-    layout_updown, layout_valign, layout_vexpand, layout_vexpand2, layout_vexpand3, layout_view,
-    layout_vmargin, layout_vsize, layout_webview,
+    layout_dbind_get_obj_imp, layout_dbind_imp, layout_dbind_obj_imp, layout_edit, layout_halign,
+    layout_hexpand, layout_hexpand2, layout_hexpand3, layout_hmargin, layout_hsize,
+    layout_imageview, layout_insert_col, layout_insert_row, layout_label, layout_layout,
+    layout_listbox, layout_margin, layout_margin2, layout_margin4, layout_ncols, layout_nrows,
+    layout_panel, layout_panel_replace, layout_popup, layout_progress, layout_remove_col,
+    layout_remove_row, layout_show_col, layout_show_row, layout_skcolor, layout_slider,
+    layout_splitview, layout_tableview, layout_taborder, layout_tabstop, layout_textview,
+    layout_update, layout_updown, layout_valign, layout_vexpand, layout_vexpand2, layout_vexpand3,
+    layout_view, layout_vmargin, layout_vsize, layout_webview,
 };
 
 use crate::{
@@ -49,9 +45,12 @@ impl Layout {
     }
 
     /// Gets the control assigned to a cell in the layout.
-    pub fn control(&self, col: u32, row: u32) -> Option<Control> {
+    pub fn control<T>(&self, col: u32, row: u32) -> Option<T>
+    where
+        T: GuiControl,
+    {
         let control = unsafe { layout_control(self.as_ptr(), col, row) };
-        unsafe { Control::new_option_no_drop(control) }
+        T::from_control_ptr(control)
     }
 
     /// Insert a Label control in a layout.
@@ -146,108 +145,6 @@ impl Layout {
     /// Insert a layout into a cell in another layout.
     pub fn layout(&self, layout: &Layout, col: u32, row: u32) {
         unsafe { layout_layout(self.as_ptr(), layout.as_ptr(), col, row) };
-    }
-
-    /// Gets the Label of a cell.
-    pub fn get_label(&self, col: u32, row: u32) -> Option<Label> {
-        let label = unsafe { layout_get_label(self.as_ptr(), col, row) };
-        unsafe { Label::new_option_no_drop(label) }
-    }
-
-    /// Gets the Button of a cell.
-    pub fn get_button(&self, col: u32, row: u32) -> Option<Button> {
-        let button = unsafe { layout_get_button(self.as_ptr(), col, row) };
-        unsafe { Button::new_option_no_drop(button) }
-    }
-
-    /// Gets the PopUp of a cell.
-    pub fn get_popup(&self, col: u32, row: u32) -> Option<PopUp> {
-        let popup = unsafe { layout_get_popup(self.as_ptr(), col, row) };
-        unsafe { PopUp::new_option_no_drop(popup) }
-    }
-
-    /// Gets the Edit of a cell.
-    pub fn get_edit(&self, col: u32, row: u32) -> Option<Edit> {
-        let edit = unsafe { layout_get_edit(self.as_ptr(), col, row) };
-        unsafe { Edit::new_option_no_drop(edit) }
-    }
-
-    /// Gets the Combo of a cell.
-    pub fn get_combo(&self, col: u32, row: u32) -> Option<Combo> {
-        let combo = unsafe { layout_get_combo(self.as_ptr(), col, row) };
-        unsafe { Combo::new_option_no_drop(combo) }
-    }
-
-    /// Gets the ListBox of a cell.
-    pub fn get_listbox(&self, col: u32, row: u32) -> Option<ListBox> {
-        let listbox = unsafe { layout_get_listbox(self.as_ptr(), col, row) };
-        unsafe { ListBox::new_option_no_drop(listbox) }
-    }
-
-    /// Gets the UpDown of a cell.
-    pub fn get_updown(&self, col: u32, row: u32) -> Option<UpDown> {
-        let updown = unsafe { layout_get_updown(self.as_ptr(), col, row) };
-        unsafe { UpDown::new_option_no_drop(updown) }
-    }
-
-    /// Gets the Slider of a cell.
-    pub fn get_slider(&self, col: u32, row: u32) -> Option<Slider> {
-        let slider = unsafe { layout_get_slider(self.as_ptr(), col, row) };
-        unsafe { Slider::new_option_no_drop(slider) }
-    }
-
-    /// Gets the Progress of a cell.
-    pub fn get_progress(&self, col: u32, row: u32) -> Option<Progress> {
-        let progress = unsafe { layout_get_progress(self.as_ptr(), col, row) };
-        unsafe { Progress::new_option_no_drop(progress) }
-    }
-
-    /// Gets the View of a cell.
-    pub fn get_view(&self, col: u32, row: u32) -> Option<View> {
-        let view = unsafe { layout_get_view(self.as_ptr(), col, row) };
-        unsafe { View::new_option_no_drop(view) }
-    }
-
-    /// Gets the TextView of a cell.
-    pub fn get_textview(&self, col: u32, row: u32) -> Option<TextView> {
-        let textview = unsafe { layout_get_textview(self.as_ptr(), col, row) };
-        unsafe { TextView::new_option_no_drop(textview) }
-    }
-
-    /// Gets the WebView of a cell.
-    pub fn get_webview(&self, col: u32, row: u32) -> Option<WebView> {
-        let webview = unsafe { layout_get_webview(self.as_ptr(), col, row) };
-        unsafe { WebView::new_option_no_drop(webview) }
-    }
-
-    /// Gets the ImageView of a cell.
-    pub fn get_imageview(&self, col: u32, row: u32) -> Option<ImageView> {
-        let imageview = unsafe { layout_get_imageview(self.as_ptr(), col, row) };
-        unsafe { ImageView::new_option_no_drop(imageview) }
-    }
-
-    /// Gets the TableView of a cell.
-    pub fn get_tableview(&self, col: u32, row: u32) -> Option<TableView> {
-        let tableview = unsafe { layout_get_tableview(self.as_ptr(), col, row) };
-        unsafe { TableView::new_option_no_drop(tableview) }
-    }
-
-    /// Gets the SplitView of a cell.
-    pub fn get_splitview(&self, col: u32, row: u32) -> Option<SplitView> {
-        let splitview = unsafe { layout_get_splitview(self.as_ptr(), col, row) };
-        unsafe { SplitView::new_option_no_drop(splitview) }
-    }
-
-    /// Gets the Panel of a cell.
-    pub fn get_panel(&self, col: u32, row: u32) -> Option<Panel> {
-        let panel = unsafe { layout_get_panel(self.as_ptr(), col, row) };
-        unsafe { Panel::new_option_no_drop(panel) }
-    }
-
-    /// Gets the Layout of a cell.
-    pub fn get_layout(&self, col: u32, row: u32) -> Option<Layout> {
-        let layout = unsafe { layout_get_layout(self.as_ptr(), col, row) };
-        unsafe { Layout::new_option_no_drop(layout) }
     }
 
     /// Gets the number of columns in the layout.

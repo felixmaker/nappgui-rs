@@ -6,7 +6,11 @@ use nappgui_sys::{
     splitview_view, splitview_visible0, splitview_visible1, splitview_webview,
 };
 
-use crate::{gui::WebView, types::SplitMode, util::macros::pub_crate_ptr_ops};
+use crate::{
+    gui::WebView,
+    types::SplitMode,
+    util::macros::{impl_gui_control, pub_crate_ptr_ops},
+};
 
 use super::{Panel, TextView, View};
 
@@ -87,3 +91,5 @@ impl SplitView {
         unsafe { splitview_minsize1(self.as_ptr(), size) }
     }
 }
+
+impl_gui_control!(SplitView, guicontrol_splitview);

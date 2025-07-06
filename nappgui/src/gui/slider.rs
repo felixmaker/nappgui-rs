@@ -5,7 +5,7 @@ use nappgui_sys::{
     slider_vertical,
 };
 
-use crate::util::macros::{callback, pub_crate_ptr_ops};
+use crate::util::macros::{callback, impl_gui_control, pub_crate_ptr_ops};
 
 /// Sliders are normally used to edit continuous and bounded numerical values.
 pub struct Slider {
@@ -59,3 +59,5 @@ impl Slider {
         unsafe { slider_get_value(self.as_ptr()) }
     }
 }
+
+impl_gui_control!(Slider, guicontrol_slider);

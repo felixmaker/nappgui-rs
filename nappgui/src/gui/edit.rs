@@ -9,7 +9,9 @@ use nappgui_sys::{
 };
 
 use crate::{
-    draw_2d::font::Font, types::Align, util::macros::{callback, pub_crate_ptr_ops}
+    draw_2d::font::Font,
+    types::Align,
+    util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
 };
 
 /// EditBox are small text boxes with editing capabilities. Like the Label they are of uniform format:
@@ -198,3 +200,5 @@ impl Edit {
         }
     }
 }
+
+impl_gui_control!(Edit, guicontrol_edit);

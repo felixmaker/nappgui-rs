@@ -3,7 +3,7 @@ use std::rc::Rc;
 use crate::{
     draw_2d::Font,
     types::Align,
-    util::macros::{callback, pub_crate_ptr_ops},
+    util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
 };
 
 use nappgui_sys::{
@@ -211,3 +211,5 @@ impl TableView {
         unsafe { tableview_scroll_visible(self.as_ptr(), hscroll as i8, vscroll as i8) }
     }
 }
+
+impl_gui_control!(TableView, guicontrol_tableview);

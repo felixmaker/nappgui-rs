@@ -1,4 +1,4 @@
-use crate::{gui::Control, util::macros::impl_i32_to_enum};
+use crate::{gui::GuiControl, util::macros::impl_i32_to_enum};
 
 /// Alignment values.
 #[repr(i32)]
@@ -170,8 +170,17 @@ impl_i32_to_enum!(GuiTab, 1..=6);
 pub struct FocusInfo {
     /// Action that has motivated the change of keyboard focus.
     pub action: GuiTab,
+    pub(crate) next: *mut nappgui_sys::GuiControl,
+}
+
+impl FocusInfo {
     /// Control that has received the focus.
-    pub next: Option<Control>,
+    pub fn next<T>(&self) -> Option<T>
+    where
+        T: GuiControl,
+    {
+        T::from_control_ptr(self.next)
+    }
 }
 
 /// Window Flag
@@ -204,7 +213,7 @@ impl Default for WindowFlags {
             has_maximize_button: false,
             has_minimize_button: true,
             has_close_button: true,
-            has_resizable_borders: false,
+            has_resizable_borders: true,
             process_return_key: false,
             process_escape_key: false,
             avoid_hiding_modal: false,

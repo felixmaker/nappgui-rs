@@ -5,12 +5,12 @@ use nappgui_sys::{
     panel_scroll_width, panel_size, panel_update, panel_visible_layout,
 };
 
-use crate::util::macros::pub_crate_ptr_ops;
+use crate::util::macros::{impl_gui_control, pub_crate_ptr_ops};
 
 use super::Layout;
-/// A Panel is a control within a window that groups other controls. It defines its own reference system, 
-/// that is, if we move a panel all its descendants will move in unison since their locations will be 
-/// relative to its origin. It will support other (sub)-panels as descendants, which allows to form a 
+/// A Panel is a control within a window that groups other controls. It defines its own reference system,
+/// that is, if we move a panel all its descendants will move in unison since their locations will be
+/// relative to its origin. It will support other (sub)-panels as descendants, which allows to form a
 /// Window Hierarchy. A Panel is a control within a window that groups other controls.
 pub struct Panel {
     pub(crate) inner: Rc<*mut nappgui_sys::Panel>,
@@ -96,3 +96,5 @@ impl Panel {
         unsafe { panel_scroll_height(self.as_ptr()) }
     }
 }
+
+impl_gui_control!(Panel, guicontrol_panel);

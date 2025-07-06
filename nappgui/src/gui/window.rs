@@ -12,13 +12,13 @@ use std::rc::Rc;
 
 use crate::core::event::Event;
 use crate::draw_2d::Image;
+use crate::gui::GuiControl;
 use crate::types::{
     FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, Modifiers, Rect2D, Size2D, Vector2D,
     WindowFlags,
 };
 use crate::util::macros::{callback, listener, pub_crate_ptr_ops};
 
-use super::control::Control;
 use super::panel::Panel;
 use super::Button;
 
@@ -134,15 +134,21 @@ impl Window {
     }
 
     /// Set keyboard focus to a specific control.
-    pub fn focus(&self, control: &Control) -> GuiFocus {
-        let focus = unsafe { window_focus(self.as_ptr(), control.as_ptr()) };
+    pub fn focus<T>(&self, control: &T) -> GuiFocus
+    where
+        T: GuiControl,
+    {
+        let focus = unsafe { window_focus(self.as_ptr(), control.as_control_ptr()) };
         GuiFocus::try_from(focus).unwrap()
     }
 
     /// Gets the control that keyboard focus has.
-    pub fn get_focus(&self) -> Control {
+    pub fn get_focus<T>(&self) -> Option<T>
+    where
+        T: GuiControl,
+    {
         let control = unsafe { window_get_focus(self.as_ptr()) };
-        unsafe { Control::new_no_drop(control) }
+        T::from_control_ptr(control)
     }
 
     /// Gets additional information about a keyboard focus change operation.
@@ -159,15 +165,9 @@ impl Window {
 
         unsafe { window_focus_info(self.as_ptr(), &mut raw_info) };
 
-        let control = if raw_info.next.is_null() {
-            None
-        } else {
-            Some(unsafe { Control::new_no_drop(raw_info.next) })
-        };
-
         FocusInfo {
             action: GuiTab::try_from(raw_info.action).unwrap(),
-            next: control,
+            next: raw_info.next,
         }
     }
 
@@ -222,9 +222,12 @@ impl Window {
     /// # Remarks
     ///
     /// control must belong to the window, be active and visible. The point (0,0) corresponds to the upper left vertex of the client area of the window.
-    pub fn control_frame(&self, control: &Control) -> Rect2D {
+    pub fn control_frame<T>(&self, control: &T) -> Rect2D
+    where
+        T: GuiControl,
+    {
         unsafe {
-            let rect = window_control_frame(self.as_ptr(), control.as_ptr());
+            let rect = window_control_frame(self.as_ptr(), control.as_control_ptr());
             std::mem::transmute(rect)
         }
     }

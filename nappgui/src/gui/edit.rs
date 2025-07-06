@@ -9,8 +9,8 @@ use nappgui_sys::{
 };
 
 use crate::{
-    draw_2d::font::Font,
-    types::Align,
+    draw_2d::{font::Font, Color},
+    types::{Align, FontStyle},
     util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
 };
 
@@ -71,28 +71,28 @@ impl Edit {
     /// Activate the password mode, which will hide the typed characters.
     pub fn password(&self, passmode: bool) {
         unsafe {
-            edit_passmode(self.as_ptr(), passmode as i8);
+            edit_passmode(self.as_ptr(), passmode as _);
         }
     }
 
     /// Enable or disable editing in the control.
     pub fn editable(&self, editable: bool) {
         unsafe {
-            edit_editable(self.as_ptr(), editable as i8);
+            edit_editable(self.as_ptr(), editable as _);
         }
     }
 
     /// Activate or deactivate auto-selection of text.
     pub fn autoselect(&self, autoselect: bool) {
         unsafe {
-            edit_autoselect(self.as_ptr(), autoselect as i8);
+            edit_autoselect(self.as_ptr(), autoselect as _);
         }
     }
 
     /// Select text.
-    pub fn select(&self, start: i32, end: i32) {
+    pub fn select(&self, start: usize, end: usize) {
         unsafe {
-            edit_select(self.as_ptr(), start, end);
+            edit_select(self.as_ptr(), start as _, end as _);
         }
     }
 
@@ -108,9 +108,9 @@ impl Edit {
     ///
     /// # Remarks
     /// RGB values may not be fully portable. See Colors.
-    pub fn color(&self, color: u32) {
+    pub fn color(&self, color: Color) {
         unsafe {
-            edit_color(self.as_ptr(), color);
+            edit_color(self.as_ptr(), color.inner);
         }
     }
 
@@ -118,23 +118,23 @@ impl Edit {
     ///
     /// # Remarks
     /// RGB values may not be fully portable. See Colors.
-    pub fn color_focus(&self, color: u32) {
+    pub fn color_focus(&self, color: Color) {
         unsafe {
-            edit_color_focus(self.as_ptr(), color);
+            edit_color_focus(self.as_ptr(), color.inner);
         }
     }
 
     /// Set the background color.
-    pub fn bgcolor(&self, color: u32) {
+    pub fn bgcolor(&self, color: Color) {
         unsafe {
-            edit_bgcolor(self.as_ptr(), color);
+            edit_bgcolor(self.as_ptr(), color.inner);
         }
     }
 
     /// Sets the background color, when the control has keyboard focus.
-    pub fn bgcolor_focus(&self, color: u32) {
+    pub fn bgcolor_focus(&self, color: Color) {
         unsafe {
-            edit_bgcolor_focus(self.as_ptr(), color);
+            edit_bgcolor_focus(self.as_ptr(), color.inner);
         }
     }
 
@@ -147,16 +147,16 @@ impl Edit {
     }
 
     /// Set the color of the placeholder text.
-    pub fn phcolor(&self, color: u32) {
+    pub fn phcolor(&self, color: Color) {
         unsafe {
-            edit_phcolor(self.as_ptr(), color);
+            edit_phcolor(self.as_ptr(), color.inner);
         }
     }
 
     /// Set the font style for the placeholder.
-    pub fn phstyle(&self, style: u32) {
+    pub fn phstyle(&self, style: FontStyle) {
         unsafe {
-            edit_phstyle(self.as_ptr(), style);
+            edit_phstyle(self.as_ptr(), style.to_fstyle_t());
         }
     }
 

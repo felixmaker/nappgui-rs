@@ -31,7 +31,7 @@ impl Cell {
 
     /// Activate or deactivate a cell.
     pub fn enabled(&self, enabled: bool) {
-        unsafe { cell_enabled(self.as_ptr(), enabled as i8) }
+        unsafe { cell_enabled(self.as_ptr(), enabled as _) }
     }
 
     /// Show or hide a cell.
@@ -39,7 +39,7 @@ impl Cell {
     /// # Remarks
     /// If the cell contains a sublayout, the command will affect all controls recursively.
     pub fn visible(&self, visible: bool) {
-        unsafe { cell_visible(self.as_ptr(), visible as i8) }
+        unsafe { cell_visible(self.as_ptr(), visible as _) }
     }
 
     /// Set an inner margin.

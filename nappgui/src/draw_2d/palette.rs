@@ -29,7 +29,7 @@ impl Palette {
 
     /// Create the 4-color (2-bit) palette of CGA cards.
     pub fn cga2(mode: bool, intense: bool) -> Self {
-        Self::new(unsafe { palette_cga2(mode as i8, intense as i8) })
+        Self::new(unsafe { palette_cga2(mode as _, intense as _) })
     }
 
     /// Create the default palette for EGA cards (16 colors, 4 bits).

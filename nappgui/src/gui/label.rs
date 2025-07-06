@@ -69,7 +69,7 @@ impl Label {
 
     /// Create a multi-line text control.
     pub fn multiline(&self, multiline: bool) {
-        unsafe { label_multiline(self.as_ptr(), multiline as i8) };
+        unsafe { label_multiline(self.as_ptr(), multiline as _) };
     }
 
     /// Sets the horizontal alignment of the text with respect to the size of the control.

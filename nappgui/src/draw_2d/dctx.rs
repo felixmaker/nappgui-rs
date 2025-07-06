@@ -1,6 +1,6 @@
 use nappgui_sys::{dctx_bitmap, dctx_image, draw_antialias, draw_clear, draw_matrixf, pixformat_t};
 
-use crate::types::Transform2D;
+use crate::types::Trans2D;
 
 use super::{Color, Image};
 
@@ -41,14 +41,14 @@ impl DCtx {
     ///
     /// # Remark
     /// The origin of coordinates is in the upper left corner. The Y axis increases down.
-    pub fn matrix(&self, t2d: &[Transform2D]) {
+    pub fn matrix(&self, t2d: &[Trans2D]) {
         unsafe {
             draw_matrixf(self.inner, t2d.as_ptr() as _);
         }
     }
 
     /// Set the reference system in Cartesian coordinates.
-    pub fn matrix_cartesian(&self, t2d: &[Transform2D]) {
+    pub fn matrix_cartesian(&self, t2d: &[Trans2D]) {
         unsafe {
             draw_matrixf(self.inner, t2d.as_ptr() as _);
         }
@@ -61,7 +61,7 @@ impl DCtx {
     /// for the whole drawing. See Antialiasing.
     pub fn antialias(&self, enable: bool) {
         unsafe {
-            draw_antialias(self.inner, enable as i8);
+            draw_antialias(self.inner, enable as _);
         }
     }
 }

@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
 use crate::{
-    draw_2d::Image,
-    types::Align,
+    draw_2d::{Color, Image},
+    types::{Align, FontStyle},
     util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
 };
 
@@ -63,30 +63,30 @@ impl Combo {
     }
 
     /// Set the color of the combo text.
-    pub fn color(&self, color: u32) {
+    pub fn color(&self, color: Color) {
         unsafe {
-            combo_color(self.as_ptr(), color);
+            combo_color(self.as_ptr(), color.inner);
         }
     }
 
     /// Sets the color of the text, when the control has the keyboard focus.
-    pub fn color_focus(&self, color: u32) {
+    pub fn color_focus(&self, color: Color) {
         unsafe {
-            combo_color_focus(self.as_ptr(), color);
+            combo_color_focus(self.as_ptr(), color.inner);
         }
     }
 
     /// Set the background color.
-    pub fn bgcolor(&self, color: u32) {
+    pub fn bgcolor(&self, color: Color) {
         unsafe {
-            combo_bgcolor(self.as_ptr(), color);
+            combo_bgcolor(self.as_ptr(), color.inner);
         }
     }
 
     /// Sets the background color when the control has keyboard focus.
-    pub fn bgcolor_focus(&self, color: u32) {
+    pub fn bgcolor_focus(&self, color: Color) {
         unsafe {
-            combo_bgcolor_focus(self.as_ptr(), color);
+            combo_bgcolor_focus(self.as_ptr(), color.inner);
         }
     }
 
@@ -99,16 +99,16 @@ impl Combo {
     }
 
     /// Set the color of the placeholder text.
-    pub fn phcolor(&self, color: u32) {
+    pub fn phcolor(&self, color: Color) {
         unsafe {
-            combo_phcolor(self.as_ptr(), color);
+            combo_phcolor(self.as_ptr(), color.inner);
         }
     }
 
     /// Set the font style for the placeholder.
-    pub fn phstyle(&self, style: u32) {
+    pub fn phstyle(&self, style: FontStyle) {
         unsafe {
-            combo_phstyle(self.as_ptr(), style);
+            combo_phstyle(self.as_ptr(), style.to_fstyle_t());
         }
     }
 
@@ -158,7 +158,7 @@ impl Combo {
     /// Prevents duplicate texts from the drop-down list.
     pub fn duplicates(&self, duplicates: bool) {
         unsafe {
-            combo_duplicates(self.as_ptr(), duplicates as i8);
+            combo_duplicates(self.as_ptr(), duplicates as _);
         }
     }
 }

@@ -64,7 +64,7 @@ fn i_data_bind() {
 fn i_radio_layout() -> Layout {
     let layout = Layout::create(1, 6);
     for i in 0..6 {
-        let radio = Button::radio();
+        let radio = Button::create(ButtonType::Radio);
         radio.text(&format!("Radio {}", i));
         layout.button(&radio, 0, i);
     }
@@ -134,8 +134,8 @@ fn i_layout() -> Layout {
     let layout = Layout::create(3, 9);
     let label = Label::create();
     let edit = Edit::create();
-    let check = Button::check();
-    let check3 = Button::check3();
+    let check = Button::create(ButtonType::Check);
+    let check3 = Button::create(ButtonType::Check3);
     let radio = i_radio_layout();
     let pop = PopUp::create();
     let list = ListBox::create();

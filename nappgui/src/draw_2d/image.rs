@@ -80,7 +80,7 @@ impl Image {
             image_rotate(
                 self.inner,
                 angle,
-                nsize as i8,
+                nsize as _,
                 background.inner,
                 std::ptr::null_mut(),
             )

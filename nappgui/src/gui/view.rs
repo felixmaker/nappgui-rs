@@ -34,7 +34,7 @@ impl View {
 
     /// Create a new view with all the options.
     pub fn custom(hscroll: bool, vscroll: bool) -> Self {
-        let view = unsafe { view_custom(hscroll as i8, vscroll as i8) };
+        let view = unsafe { view_custom(hscroll as _, vscroll as _) };
         Self::new(view)
     }
 
@@ -104,7 +104,7 @@ impl View {
     /// event and not as navigation between the controls. The call to this function will have no effect
     /// if there is no associated OnKeyDown handler. In general, you should not use this function.
     pub fn allow_tab(&self, allow: bool) {
-        unsafe { view_allow_tab(self.as_ptr(), allow as i8) }
+        unsafe { view_allow_tab(self.as_ptr(), allow as _) }
     }
 
     /// Gets the current size of the view.
@@ -155,7 +155,7 @@ impl View {
     /// Show or hide the scroll bars.
     pub fn scroll_visible(&self, horizontal: bool, vertical: bool) {
         unsafe {
-            view_scroll_visible(self.as_ptr(), horizontal as i8, vertical as i8);
+            view_scroll_visible(self.as_ptr(), horizontal as _, vertical as _);
         }
     }
 

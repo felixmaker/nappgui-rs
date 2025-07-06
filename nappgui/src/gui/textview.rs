@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::{
-    draw_2d::Color, types::Align, util::macros::{callback, impl_gui_control, pub_crate_ptr_ops}
+    draw_2d::Color, types::{Align, FontStyle}, util::macros::{callback, impl_gui_control, pub_crate_ptr_ops}
 };
 
 use nappgui_sys::{
@@ -91,9 +91,9 @@ impl TextView {
     }
 
     /// Sets the text style.
-    pub fn fstyle(&self, style: u32) {
+    pub fn fstyle(&self, style: FontStyle) {
         unsafe {
-            textview_fstyle(self.as_ptr(), style);
+            textview_fstyle(self.as_ptr(), style.to_fstyle_t());
         }
     }
 
@@ -164,14 +164,14 @@ impl TextView {
     /// Show or hide scroll bars.
     pub fn scroll_visible(&self, horizontal: bool, vertical: bool) {
         unsafe {
-            textview_scroll_visible(self.as_ptr(), horizontal as i8, vertical as i8);
+            textview_scroll_visible(self.as_ptr(), horizontal as _, vertical as _);
         }
     }
 
     /// Sets whether or not the control text is editable.
     pub fn editable(&self, editable: bool) {
         unsafe {
-            textview_editable(self.as_ptr(), editable as i8);
+            textview_editable(self.as_ptr(), editable as _);
         }
     }
 
@@ -192,7 +192,7 @@ impl TextView {
     /// affects the visibility of the selection.
     pub fn show_select(&self, show: bool) {
         unsafe {
-            textview_show_select(self.as_ptr(), show as i8);
+            textview_show_select(self.as_ptr(), show as _);
         }
     }
 
@@ -244,7 +244,7 @@ impl TextView {
     /// Turn automatic text wrapping on or off.
     pub fn wrap(&self, wrap: bool) {
         unsafe {
-            textview_wrap(self.as_ptr(), wrap as i8);
+            textview_wrap(self.as_ptr(), wrap as _);
         }
     }
 }

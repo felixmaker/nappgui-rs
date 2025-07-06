@@ -41,9 +41,9 @@ impl Slider {
     }
 
     /// Changes the slider from continuous range to discrete intervals.
-    pub fn steps(&self, steps: u32) {
+    pub fn steps(&self, steps: usize) {
         unsafe {
-            slider_steps(self.as_ptr(), steps);
+            slider_steps(self.as_ptr(), steps as _);
         }
     }
 

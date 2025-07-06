@@ -2,7 +2,7 @@ use std::{ffi::CString, rc::Rc};
 
 use crate::{
     draw_2d::{Font, Image},
-    types::GuiState,
+    types::{ButtonType, GuiState},
     util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
 };
 
@@ -22,39 +22,18 @@ pub struct Button {
 impl Button {
     pub_crate_ptr_ops!(*mut nappgui_sys::Button);
 
-    /// Create a push button, the typical \[Accept\], \[Cancel\], etc.
-    pub fn push() -> Self {
-        let button = unsafe { button_push() };
-        Self::new(button)
-    }
-
-    /// Create a checkbox.
-    pub fn check() -> Self {
-        let button = unsafe { button_check() };
-        Self::new(button)
-    }
-
-    /// Create a checkbox with three states.
-    pub fn check3() -> Self {
-        let button = unsafe { button_check3() };
-        Self::new(button)
-    }
-
-    /// Create a radio button.
-    pub fn radio() -> Self {
-        let button = unsafe { button_radio() };
-        Self::new(button)
-    }
-
-    /// Create a flat button, to which an image can be assigned. It is the typical toolbar button.
-    pub fn flat() -> Self {
-        let button = unsafe { button_flat() };
-        Self::new(button)
-    }
-
-    /// Create a flat button with status. The button will alternate between pressed/released each time you click on it.
-    pub fn flatgle() -> Self {
-        let button = unsafe { button_flatgle() };
+    /// Create a button.
+    pub fn create(button_type: ButtonType) -> Self {
+        let button = unsafe {
+            match button_type {
+                ButtonType::Push => button_push(),
+                ButtonType::Check => button_check(),
+                ButtonType::Check3 => button_check3(),
+                ButtonType::Radio => button_radio(),
+                ButtonType::Flat => button_flat(),
+                ButtonType::FlatGle => button_flatgle(),
+            }
+        };
         Self::new(button)
     }
 

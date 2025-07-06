@@ -38,17 +38,17 @@ impl SplitView {
 
     /// Add a custom view to the splitview.
     pub fn view(&self, view: &View, tabstop: bool) {
-        unsafe { splitview_view(self.as_ptr(), view.as_ptr(), tabstop as i8) }
+        unsafe { splitview_view(self.as_ptr(), view.as_ptr(), tabstop as _) }
     }
 
     /// Add a text view to the splitview.
     pub fn textview(&self, view: &TextView, tabstop: bool) {
-        unsafe { splitview_textview(self.as_ptr(), view.as_ptr(), tabstop as i8) }
+        unsafe { splitview_textview(self.as_ptr(), view.as_ptr(), tabstop as _) }
     }
 
     /// Add a web view to SplitView.
     pub fn webview(&self, view: &WebView, tabstop: bool) {
-        unsafe { splitview_webview(self.as_ptr(), view.as_ptr(), tabstop as i8) }
+        unsafe { splitview_webview(self.as_ptr(), view.as_ptr(), tabstop as _) }
     }
 
     /// Add a splitview (child) to the splitview.
@@ -73,12 +73,12 @@ impl SplitView {
 
     /// Show/hide the left/upper child.
     pub fn visible0(&self, visible: bool) {
-        unsafe { splitview_visible0(self.as_ptr(), visible as i8) }
+        unsafe { splitview_visible0(self.as_ptr(), visible as _) }
     }
 
     /// Show/hide the right/bottom child.
     pub fn visible1(&self, visible: bool) {
-        unsafe { splitview_visible1(self.as_ptr(), visible as i8) }
+        unsafe { splitview_visible1(self.as_ptr(), visible as _) }
     }
 
     /// Set the minimum size of the left/upper child.

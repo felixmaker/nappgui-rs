@@ -27,13 +27,13 @@ impl Panel {
 
     /// Create a panel with scroll bars.
     pub fn scroll(hscroll: bool, vscroll: bool) -> Self {
-        let panel = unsafe { panel_scroll(hscroll as i8, vscroll as i8) };
+        let panel = unsafe { panel_scroll(hscroll as _, vscroll as _) };
         Self::new(panel)
     }
 
     /// Create a fully configurable panel.
     pub fn custom(hscroll: bool, vscroll: bool, border: bool) -> Self {
-        let panel = unsafe { panel_custom(hscroll as i8, vscroll as i8, border as i8) };
+        let panel = unsafe { panel_custom(hscroll as _, vscroll as _, border as _) };
         Self::new(panel)
     }
 
@@ -53,8 +53,8 @@ impl Panel {
     }
 
     /// Get a layout of a panel.
-    pub fn get_layout(&self, index: u32) -> Option<Layout> {
-        let layout = unsafe { panel_get_layout(self.as_ptr(), index) };
+    pub fn get_layout(&self, index: usize) -> Option<Layout> {
+        let layout = unsafe { panel_get_layout(self.as_ptr(), index as _) };
         if layout.is_null() {
             None
         } else {
@@ -66,9 +66,9 @@ impl Panel {
     ///
     /// # Remarks
     /// To make the change effective, you have to call panel_update.
-    pub fn visible_layout(&self, index: u32) {
+    pub fn visible_layout(&self, index: usize) {
         unsafe {
-            panel_visible_layout(self.as_ptr(), index);
+            panel_visible_layout(self.as_ptr(), index as _);
         }
     }
 

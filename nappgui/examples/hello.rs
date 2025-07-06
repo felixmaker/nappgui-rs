@@ -1,5 +1,5 @@
-use nappgui::prelude::*;
 use nappgui::osapp::*;
+use nappgui::prelude::*;
 
 struct App {
     _window: Window,
@@ -12,7 +12,7 @@ impl AppHandler for App {
         let panel = Panel::create();
         let layout = Layout::create(1, 3);
         let label = Label::create();
-        let button = Button::push();
+        let button = Button::create(ButtonType::Push);
         let text = TextView::create();
 
         label.text("Hello!, I'm a label");

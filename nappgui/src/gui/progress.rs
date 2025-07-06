@@ -20,7 +20,7 @@ impl Progress {
 
     /// Set the progress bar as undefined.
     pub fn undefined(&self, running: bool) {
-        unsafe { progress_undefined(self.as_ptr(), running as i8) };
+        unsafe { progress_undefined(self.as_ptr(), running as _) };
     }
 
     /// Set the progress position.

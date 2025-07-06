@@ -33,8 +33,8 @@ impl Menu {
     }
 
     /// Insert an item in an arbitrary position of the menu.
-    pub fn insert_item(&self, index: u32, item: &MenuItem) {
-        unsafe { menu_ins_item(self.as_ptr(), index, item.as_ptr()) };
+    pub fn insert_item(&self, index: usize, item: &MenuItem) {
+        unsafe { menu_ins_item(self.as_ptr(), index as _, item.as_ptr()) };
     }
 
     /// Remove an item from the menu.
@@ -42,8 +42,8 @@ impl Menu {
     /// # Remark
     /// The element will be destroyed and cannot be reused. If has a submenu associated,
     /// it will also be destroyed recursively.
-    pub fn delete_item(&self, index: u32) {
-        unsafe { menu_del_item(self.as_ptr(), index) };
+    pub fn delete_item(&self, index: usize) {
+        unsafe { menu_del_item(self.as_ptr(), index as _) };
     }
 
     /// Launch a menu as secondary or PopUp.
@@ -58,13 +58,13 @@ impl Menu {
     }
 
     /// Get the number of items.
-    pub fn count(&self) -> u32 {
-        unsafe { menu_count(self.as_ptr()) }
+    pub fn count(&self) -> usize {
+        unsafe { menu_count(self.as_ptr()) as _ }
     }
 
     /// Get an item from the menu.
-    pub fn get_item(&self, index: u32) -> Option<MenuItem> {
-        let item = unsafe { menu_get_item(self.as_ptr(), index) };
+    pub fn get_item(&self, index: usize) -> Option<MenuItem> {
+        let item = unsafe { menu_get_item(self.as_ptr(), index as _) };
         if item.is_null() {
             None
         } else {

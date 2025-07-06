@@ -33,6 +33,7 @@ pub enum GuiState {
 impl_i32_to_enum!(GuiState, 1..=3);
 
 /// Style in typographic fonts.
+#[derive(Clone, Copy)]
 pub struct FontStyle {
     /// Normal font, no style. Also called Regular.
     pub is_normal: bool,
@@ -74,7 +75,7 @@ impl Default for FontStyle {
 }
 
 impl FontStyle {
-    pub(crate) fn to_fstyle_t(&self) -> i32 {
+    pub(crate) fn to_fstyle_t(&self) -> u32 {
         let mut style = nappgui_sys::_fstyle_t_ekFNORMAL;
 
         if self.is_bold {
@@ -104,7 +105,7 @@ impl FontStyle {
         if self.is_cell {
             style |= nappgui_sys::_fstyle_t_ekFCELL;
         }
-        style
+        style as _
     }
 }
 
@@ -184,6 +185,7 @@ impl FocusInfo {
 }
 
 /// Window Flag
+#[derive(Clone, Copy)]
 pub struct WindowFlags {
     /// The window draws an outer border.
     pub has_outer_border: bool,
@@ -453,7 +455,7 @@ pub enum GuiCursor {
 
 /// Represents a 2d vector or point.
 #[repr(C)]
-pub struct Vector2D {
+pub struct Point2D {
     /// Coordinate x.
     pub x: f32,
     /// Coordinate y.
@@ -462,13 +464,13 @@ pub struct Vector2D {
 
 /// 2d affine transformation.
 #[repr(C)]
-pub struct Transform2D {
+pub struct Trans2D {
     /// Component i of the linear transformation.
-    pub i: Vector2D,
+    pub i: Point2D,
     /// Component j of the linear transformation.
-    pub j: Vector2D,
+    pub j: Point2D,
     /// Position.
-    pub position: Vector2D,
+    pub position: Point2D,
 }
 
 /// Represents a 2d size.
@@ -484,7 +486,23 @@ pub struct Size2D {
 #[repr(C)]
 pub struct Rect2D {
     /// Position.
-    pub position: Vector2D,
+    pub position: Point2D,
     /// Size.
     pub size: Size2D,
+}
+
+/// The type of button.
+pub enum ButtonType {
+    /// Create a push button, the typical \[Accept\], \[Cancel\], etc.
+    Push,
+    /// Create a checkbox.
+    Check,
+    /// Create a checkbox with three states.
+    Check3,
+    /// Create a radio button.
+    Radio,
+    /// Create a flat button, to which an image can be assigned. It is the typical toolbar button.
+    Flat,
+    /// Create a flat button with status. The button will alternate between pressed/released each time you click on it.
+    FlatGle,
 }

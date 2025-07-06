@@ -48,10 +48,10 @@ impl PopUp {
     }
 
     /// Edit an item from the drop-down list.
-    pub fn set_elem(&self, index: u32, text: &str, image: &Image) {
+    pub fn set_elem(&self, index: usize, text: &str, image: &Image) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
-            popup_set_elem(self.as_ptr(), index, text.as_ptr(), image.inner);
+            popup_set_elem(self.as_ptr(), index as _, text.as_ptr(), image.inner);
         }
     }
 
@@ -63,32 +63,32 @@ impl PopUp {
     }
 
     /// Gets the number of items in the list.
-    pub fn count(&self) -> u32 {
-        unsafe { popup_count(self.as_ptr()) }
+    pub fn count(&self) -> usize {
+        unsafe { popup_count(self.as_ptr()) as _ }
     }
 
     /// Set the size of the drop-down list.
-    pub fn list_height(&self, elems: u32) {
+    pub fn list_height(&self, elems: usize) {
         unsafe {
-            popup_list_height(self.as_ptr(), elems);
+            popup_list_height(self.as_ptr(), elems as _);
         }
     }
 
     /// Set the selected popup element.
-    pub fn selected(&self, index: u32) {
+    pub fn selected(&self, index: usize) {
         unsafe {
-            popup_selected(self.as_ptr(), index);
+            popup_selected(self.as_ptr(), index as _);
         }
     }
 
     /// Get the selected popup item.
-    pub fn get_selected(&self) -> u32 {
-        unsafe { popup_get_selected(self.as_ptr()) }
+    pub fn get_selected(&self) -> usize {
+        unsafe { popup_get_selected(self.as_ptr()) as _ }
     }
 
     /// Gets the text of a popup element.
-    pub fn get_text(&self, index: u32) -> String {
-        let text = unsafe { popup_get_text(self.as_ptr(), index) };
+    pub fn get_text(&self, index: usize) -> String {
+        let text = unsafe { popup_get_text(self.as_ptr(), index as _) };
         let text = unsafe { std::ffi::CStr::from_ptr(text) };
         text.to_string_lossy().into_owned()
     }

@@ -40,12 +40,12 @@ impl MenuItem {
 
     /// Enables or disables a menu item.
     pub fn enabled(&self, enabled: bool) {
-        unsafe { menuitem_enabled(self.as_ptr(), enabled as i8) };
+        unsafe { menuitem_enabled(self.as_ptr(), enabled as _) };
     }
 
     /// Show or hide a menu item.
     pub fn visible(&self, visible: bool) {
-        unsafe { menuitem_visible(self.as_ptr(), visible as i8) };
+        unsafe { menuitem_visible(self.as_ptr(), visible as _) };
     }
 
     /// Set the item text.

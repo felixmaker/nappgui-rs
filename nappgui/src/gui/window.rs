@@ -14,7 +14,7 @@ use crate::core::event::Event;
 use crate::draw_2d::Image;
 use crate::gui::GuiControl;
 use crate::types::{
-    FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, Modifiers, Rect2D, Size2D, Vector2D,
+    FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, Modifiers, Rect2D, Size2D, Point2D,
     WindowFlags,
 };
 use crate::util::macros::{callback, listener, pub_crate_ptr_ops};
@@ -117,7 +117,7 @@ impl Window {
 
     /// Activate or deactivate the cyclic behavior of tabstops.
     pub fn cycle_tabstop(&self, cycle: bool) {
-        let cycle = cycle as i8;
+        let cycle = cycle as _;
         unsafe { window_cycle_tabstop(self.as_ptr(), cycle) }
     }
 
@@ -194,7 +194,7 @@ impl Window {
     }
 
     /// Get the window position.
-    pub fn get_origin(&self) -> Vector2D {
+    pub fn get_origin(&self) -> Point2D {
         unsafe {
             let origin = window_get_origin(self.as_ptr());
             std::mem::transmute(origin)
@@ -233,7 +233,7 @@ impl Window {
     }
 
     /// Transforms a point expressed in window coordinates to screen coordinates.
-    pub fn client_to_screen(&self, x: f32, y: f32) -> Vector2D {
+    pub fn client_to_screen(&self, x: f32, y: f32) -> Point2D {
         unsafe {
             let pos = window_client_to_screen(self.as_ptr(), V2Df { x, y });
             std::mem::transmute(pos)

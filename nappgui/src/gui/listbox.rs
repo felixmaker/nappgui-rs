@@ -53,14 +53,14 @@ impl ListBox {
     /// Show or hide checkboxes to the left of items.
     pub fn checkbox(&self, show: bool) {
         unsafe {
-            listbox_checkbox(self.as_ptr(), show as i8);
+            listbox_checkbox(self.as_ptr(), show as _);
         }
     }
 
     /// Enable multiple selection.
     pub fn multisel(&self, enable: bool) {
         unsafe {
-            listbox_multisel(self.as_ptr(), enable as i8);
+            listbox_multisel(self.as_ptr(), enable as _);
         }
     }
 
@@ -73,17 +73,17 @@ impl ListBox {
     }
 
     /// Edit a list item.
-    pub fn set_elem(&self, index: u32, text: &str, image: &Image) {
+    pub fn set_elem(&self, index: usize, text: &str, image: &Image) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
-            listbox_set_elem(self.as_ptr(), index, text.as_ptr(), image.inner);
+            listbox_set_elem(self.as_ptr(), index as _, text.as_ptr(), image.inner);
         }
     }
 
     /// Delete an item from the list.
-    pub fn del_elem(&self, index: u32) {
+    pub fn del_elem(&self, index: usize) {
         unsafe {
-            listbox_del_elem(self.as_ptr(), index);
+            listbox_del_elem(self.as_ptr(), index as _);
         }
     }
 
@@ -102,9 +102,9 @@ impl ListBox {
     }
 
     /// Sets the text color of an element.
-    pub fn color(&self, index: u32, color: &Color) {
+    pub fn color(&self, index: usize, color: &Color) {
         unsafe {
-            listbox_color(self.as_ptr(), index, color.inner);
+            listbox_color(self.as_ptr(), index as _, color.inner);
         }
     }
 
@@ -112,9 +112,9 @@ impl ListBox {
     ///
     /// # Remarks
     /// If multiple selection is not enabled, selecting one item implies de-selecting all the others.
-    pub fn select(&self, index: u32, select: bool) {
+    pub fn select(&self, index: usize, select: bool) {
         unsafe {
-            listbox_select(self.as_ptr(), index, select as i8);
+            listbox_select(self.as_ptr(), index as _, select as _);
         }
     }
 
@@ -123,9 +123,9 @@ impl ListBox {
     /// # Remarks
     /// Checking an item is independent of selecting it. Items can be marked even if checkboxes are not
     /// visible. See listbox_checkbox.
-    pub fn check(&self, index: u32, check: bool) {
+    pub fn check(&self, index: usize, check: bool) {
         unsafe {
-            listbox_check(self.as_ptr(), index, check as i8);
+            listbox_check(self.as_ptr(), index as _, check as _);
         }
     }
 
@@ -133,14 +133,14 @@ impl ListBox {
     ///
     /// # Remarks
     /// The number of elements.
-    pub fn count(&self) -> u32 {
-        unsafe { listbox_count(self.as_ptr()) }
+    pub fn count(&self) -> usize {
+        unsafe { listbox_count(self.as_ptr()) as _ }
     }
 
     /// Returns the text of an element.
-    pub fn text(&self, index: u32) -> String {
+    pub fn text(&self, index: usize) -> String {
         unsafe {
-            let text = listbox_text(self.as_ptr(), index);
+            let text = listbox_text(self.as_ptr(), index as _);
             std::ffi::CStr::from_ptr(text)
                 .to_string_lossy()
                 .into_owned()
@@ -148,8 +148,8 @@ impl ListBox {
     }
 
     /// Returns whether or not an element is selected.
-    pub fn selected(&self, index: u32) -> bool {
-        unsafe { listbox_selected(self.as_ptr(), index) != 0 }
+    pub fn selected(&self, index: usize) -> bool {
+        unsafe { listbox_selected(self.as_ptr(), index as _) != 0 }
     }
 
     /// Returns whether an element is checked or not.
@@ -157,8 +157,8 @@ impl ListBox {
     /// # Remarks
     /// Checking an item is independent of selecting it. Items can be marked even if checkboxes are not
     /// visible. See listbox_checkbox.
-    pub fn checked(&self, index: u32) -> bool {
-        unsafe { listbox_checked(self.as_ptr(), index) != 0 }
+    pub fn checked(&self, index: usize) -> bool {
+        unsafe { listbox_checked(self.as_ptr(), index as _) != 0 }
     }
 }
 

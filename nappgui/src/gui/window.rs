@@ -12,15 +12,14 @@ use std::rc::Rc;
 
 use crate::core::event::Event;
 use crate::draw_2d::Image;
-use crate::gui::GuiControl;
+use crate::gui::{ControlTrait, ButtonTrait};
 use crate::types::{
-    FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, Modifiers, Rect2D, Size2D, Point2D,
+    FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, Modifiers, Point2D, Rect2D, Size2D,
     WindowFlags,
 };
 use crate::util::macros::{callback, listener, pub_crate_ptr_ops};
 
 use super::panel::Panel;
-use super::Button;
 
 /// Window objects are the highest-level containers within the user interface.
 #[repr(transparent)]
@@ -136,7 +135,7 @@ impl Window {
     /// Set keyboard focus to a specific control.
     pub fn focus<T>(&self, control: &T) -> GuiFocus
     where
-        T: GuiControl,
+        T: ControlTrait,
     {
         let focus = unsafe { window_focus(self.as_ptr(), control.as_control_ptr()) };
         GuiFocus::try_from(focus).unwrap()
@@ -145,7 +144,7 @@ impl Window {
     /// Gets the control that keyboard focus has.
     pub fn get_focus<T>(&self) -> Option<T>
     where
-        T: GuiControl,
+        T: ControlTrait,
     {
         let control = unsafe { window_get_focus(self.as_ptr()) };
         T::from_control_ptr(control)
@@ -224,7 +223,7 @@ impl Window {
     /// control must belong to the window, be active and visible. The point (0,0) corresponds to the upper left vertex of the client area of the window.
     pub fn control_frame<T>(&self, control: &T) -> Rect2D
     where
-        T: GuiControl,
+        T: ControlTrait,
     {
         unsafe {
             let rect = window_control_frame(self.as_ptr(), control.as_control_ptr());
@@ -246,9 +245,9 @@ impl Window {
     ///
     /// This function disables the possible previous default button. For the new button to be set,
     /// it must exist in the active layout, which requires this function to be called after window_panel
-    pub fn defbutton(&self, button: &Button) {
+    pub fn defbutton<T>(&self, button: &T) where T: ButtonTrait {
         unsafe {
-            window_defbutton(self.as_ptr(), button.as_ptr());
+            window_defbutton(self.as_ptr(), button.as_button_ptr());
         }
     }
 

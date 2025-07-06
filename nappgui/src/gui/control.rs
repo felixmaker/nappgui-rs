@@ -1,7 +1,7 @@
 use nappgui_sys::{guicontrol_get_tag, guicontrol_tag};
 
 /// Gets the base object from a derived control.
-pub trait GuiControl {
+pub trait ControlTrait {
     /// Sets a tag for the control.
     fn tag(&self, tag: u32)
     where

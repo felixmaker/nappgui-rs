@@ -1,4 +1,4 @@
-use crate::{gui::GuiControl, util::macros::impl_i32_to_enum};
+use crate::{gui::ControlTrait, util::macros::impl_i32_to_enum};
 
 /// Alignment values.
 #[repr(i32)]
@@ -147,9 +147,9 @@ pub enum SplitMode {
 #[repr(i32)]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub enum GuiTab {
-    /// Pressing the [TAB] key.
+    /// Pressing the \[TAB\] key.
     Key = 1,
-    /// Pressing [SHIFT]+[TAB].
+    /// Pressing \[SHIFT\]+\[TAB\].
     BackKey = 2,
     /// Call to window_next_tabstop.
     Next = 3,
@@ -174,7 +174,7 @@ impl FocusInfo {
     /// Control that has received the focus.
     pub fn next<T>(&self) -> Option<T>
     where
-        T: GuiControl,
+        T: ControlTrait,
     {
         T::from_control_ptr(self.next)
     }
@@ -195,9 +195,9 @@ pub struct WindowFlags {
     pub has_close_button: bool,
     /// The window has resizable borders.
     pub has_resizable_borders: bool,
-    /// The window will process the pressing of the [RETURN] key as a possible closing event, sending the message OnClose.
+    /// The window will process the pressing of the \[RETURN\] key as a possible closing event, sending the message OnClose.
     pub process_return_key: bool,
-    /// The window will process the pressing of the [ESC] key as a possible closing event, sending the message OnClose.
+    /// The window will process the pressing of the \[ESC\] key as a possible closing event, sending the message OnClose.
     pub process_escape_key: bool,
     /// Avoids hiding a modal window when the modal cycle has finished. See Modal windows.
     pub avoid_hiding_modal: bool,
@@ -418,11 +418,11 @@ impl WindowFlags {
 #[repr(u32)]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub enum GuiClose {
-    /// The [ESC] key has been pressed (cancel).
+    /// The \[ESC\] key has been pressed (cancel).
     Cancel = 1,
-    /// The [ENTER] key has been pressed (accept).
+    /// The \[ENTER\] key has been pressed (accept).
     Accept = 2,
-    /// The close button [X] has been pressed in the title bar.
+    /// The close button \[X\] has been pressed in the title bar.
     Close = 3,
     /// The main window has been clicked (only received by overlay windows).
     Deactivate = 4,

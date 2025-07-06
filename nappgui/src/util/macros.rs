@@ -120,7 +120,7 @@ macro_rules! impl_i32_to_enum {
 
 macro_rules! impl_gui_control {
     ($type: ty, $func: ident) => {
-        impl crate::gui::GuiControl for $type {
+        impl crate::gui::ControlTrait for $type {
             fn as_control_ptr(&self) -> *mut nappgui_sys::GuiControl {
                 *self.inner as _
             }

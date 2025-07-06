@@ -47,7 +47,7 @@ impl Layout {
     /// Gets the control assigned to a cell in the layout.
     pub fn control<T>(&self, col: usize, row: usize) -> Option<T>
     where
-        T: GuiControl,
+        T: ControlTrait,
     {
         let control = unsafe { layout_control(self.as_ptr(), col as _, row as _) };
         T::from_control_ptr(control)
@@ -59,8 +59,11 @@ impl Layout {
     }
 
     /// Insert a Button control in a layout.
-    pub fn button(&self, button: &Button, col: usize, row: usize) {
-        unsafe { layout_button(self.as_ptr(), button.as_ptr(), col as _, row as _) };
+    pub fn button<T>(&self, button: &T, col: usize, row: usize)
+    where
+        T: ButtonTrait,
+    {
+        unsafe { layout_button(self.as_ptr(), button.as_button_ptr(), col as _, row as _) };
     }
 
     /// Insert a PopUp control in a layout.

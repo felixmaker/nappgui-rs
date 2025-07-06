@@ -42,7 +42,7 @@ impl NappguiString {
         unsafe { nappgui_sys::str_nchars(self.inner) }
     }
 
-    /// Check if a string is empty (str->data[0] == '\0').
+    /// Check if a string is empty.
     pub fn is_empty(&self) -> bool {
         unsafe { nappgui_sys::str_empty(self.inner) != 0 }
     }

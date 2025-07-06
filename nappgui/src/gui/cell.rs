@@ -5,7 +5,7 @@ use nappgui_sys::{
     cell_padding4, cell_visible,
 };
 
-use crate::{gui::control::GuiControl, util::macros::pub_crate_ptr_ops};
+use crate::{gui::control::ControlTrait, util::macros::pub_crate_ptr_ops};
 
 /// Cells are the inner elements of a Layout and will house a control or a sublayout.
 pub struct Cell {
@@ -23,7 +23,7 @@ impl Cell {
     /// Get control of the inside of the cell.
     pub fn control<T>(&self) -> Option<T>
     where
-        T: GuiControl,
+        T: ControlTrait,
     {
         let ptr = unsafe { cell_control(self.as_ptr()) };
         T::from_control_ptr(ptr)

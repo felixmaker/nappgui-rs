@@ -28,7 +28,7 @@ pub mod dialog;
 pub mod event;
 
 pub use {
-    button::Button, cell::Cell, combo::Combo, control::GuiControl, edit::Edit, imageview::ImageView,
+    button::*, cell::Cell, combo::Combo, control::ControlTrait, edit::Edit, imageview::ImageView,
     label::Label, layout::Layout, listbox::ListBox, menu::Menu, menuitem::MenuItem, panel::Panel,
     popup::PopUp, progress::Progress, slider::Slider, splitview::SplitView, tableview::TableView,
     textview::TextView, updown::UpDown, view::View, webview::WebView, window::Window,

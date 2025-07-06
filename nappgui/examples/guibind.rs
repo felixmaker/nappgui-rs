@@ -64,8 +64,7 @@ fn i_data_bind() {
 fn i_radio_layout() -> Layout {
     let layout = Layout::create(1, 6);
     for i in 0..6 {
-        let radio = Button::create(ButtonType::Radio);
-        radio.text(&format!("Radio {}", i));
+        let radio = RadioButton::new(&format!("Radio {}", i));
         layout.button(&radio, 0, i);
     }
 
@@ -133,8 +132,8 @@ fn i_layout() -> Layout {
     let layout = Layout::create(3, 9);
     let label = Label::create();
     let edit = Edit::create();
-    let check = Button::create(ButtonType::Check);
-    let check3 = Button::create(ButtonType::Check3);
+    let check = CheckButton::new("");
+    let check3 = Check3Button::new("");
     let radio = i_radio_layout();
     let pop = PopUp::create();
     let list = ListBox::create();
@@ -217,7 +216,6 @@ impl AppHandler for App {
         window.panel(&panel);
         window.title("Hello, World!");
         window.origin(500.0, 200.0);
-        window.size(400.0, 300.0);
         window.on_close(|_window, _event| finish());
 
         window.show();

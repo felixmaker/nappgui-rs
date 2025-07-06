@@ -12,12 +12,10 @@ impl AppHandler for App {
         let panel = Panel::create();
         let layout = Layout::create(1, 3);
         let label = Label::create();
-        let button = Button::create(ButtonType::Push);
+        let button = PushButton::new("Click Me!");
         let text = TextView::create();
 
         label.text("Hello!, I'm a label");
-        button.text("Click Me!");
-
         layout.label(&label, 0, 0);
         layout.button(&button, 0, 1);
         layout.textview(&text, 0, 2);

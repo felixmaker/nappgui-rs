@@ -27,181 +27,109 @@ impl Cell {
     /// Get control of the inside of the cell.
     pub fn control(&self) -> Option<Control> {
         let ptr = unsafe { cell_control(self.as_ptr()) };
-        if ptr.is_null() {
-            None
-        } else {
-            Some(Control::new(ptr))
-        }
+        unsafe { Control::new_option_no_drop(ptr) }
     }
 
     /// Get the label inside the cell.
     pub fn label(&self) -> Option<Label> {
         let ptr = unsafe { cell_label(self.as_ptr()) };
-        if ptr.is_null() {
-            None
-        } else {
-            Some(Label::new(ptr))
-        }
+        unsafe { Label::new_option_no_drop(ptr) }
     }
 
     /// Get the button inside the cell.
     pub fn button(&self) -> Option<Button> {
         let ptr = unsafe { cell_button(self.as_ptr()) };
-        if ptr.is_null() {
-            None
-        } else {
-            Some(Button::new(ptr))
-        }
+        unsafe { Button::new_option_no_drop(ptr) }
     }
 
     /// Get the popup inside the cell.
     pub fn popup(&self) -> Option<PopUp> {
         let ptr = unsafe { cell_popup(self.as_ptr()) };
-        if ptr.is_null() {
-            None
-        } else {
-            Some(PopUp::new(ptr))
-        }
+        unsafe { PopUp::new_option_no_drop(ptr) }
     }
 
     /// Get the edit inside the cell.
     pub fn edit(&self) -> Option<Edit> {
         let ptr = unsafe { cell_edit(self.as_ptr()) };
-        if ptr.is_null() {
-            None
-        } else {
-            Some(Edit::new(ptr))
-        }
+        unsafe { Edit::new_option_no_drop(ptr) }
     }
 
     /// Get the combo inside the cell.
     pub fn combo(&self) -> Option<Combo> {
         let ptr = unsafe { cell_combo(self.as_ptr()) };
-        if ptr.is_null() {
-            None
-        } else {
-            Some(Combo::new(ptr))
-        }
+        unsafe { Combo::new_option_no_drop(ptr) }
     }
 
     /// Get the listbox inside the cell.
     pub fn listbox(&self) -> Option<ListBox> {
         let ptr = unsafe { cell_listbox(self.as_ptr()) };
-        if ptr.is_null() {
-            None
-        } else {
-            Some(ListBox::new(ptr))
-        }
+        unsafe { ListBox::new_option_no_drop(ptr) }
     }
 
     /// Get the updown inside the cell.
     pub fn updown(&self) -> Option<UpDown> {
         let ptr = unsafe { cell_updown(self.as_ptr()) };
-        if ptr.is_null() {
-            None
-        } else {
-            Some(UpDown::new(ptr))
-        }
+        unsafe { UpDown::new_option_no_drop(ptr) }
     }
 
     /// Get the slider inside the cell.
     pub fn slider(&self) -> Option<Slider> {
         let ptr = unsafe { cell_slider(self.as_ptr()) };
-        if ptr.is_null() {
-            None
-        } else {
-            Some(Slider::new(ptr))
-        }
+        unsafe { Slider::new_option_no_drop(ptr) }
     }
 
     /// Get the progress inside the cell.
     pub fn progress(&self) -> Option<Progress> {
         let ptr = unsafe { cell_progress(self.as_ptr()) };
-        if ptr.is_null() {
-            None
-        } else {
-            Some(Progress::new(ptr))
-        }
+        unsafe { Progress::new_option_no_drop(ptr) }
     }
 
     /// Get the view inside the cell.
     pub fn view(&self) -> Option<View> {
         let ptr = unsafe { cell_view(self.as_ptr()) };
-        if ptr.is_null() {
-            None
-        } else {
-            Some(View::new(ptr))
-        }
+        unsafe { View::new_option_no_drop(ptr) }
     }
 
     /// Get the textview inside the cell.
     pub fn textview(&self) -> Option<TextView> {
         let ptr = unsafe { cell_textview(self.as_ptr()) };
-        if ptr.is_null() {
-            None
-        } else {
-            Some(TextView::new(ptr))
-        }
+        unsafe { TextView::new_option_no_drop(ptr) }
     }
 
     /// Get the webview inside the cell.
     pub fn webview(&self) -> Option<WebView> {
         let ptr = unsafe { cell_webview(self.as_ptr()) };
-        if ptr.is_null() {
-            None
-        } else {
-            Some(WebView::new(ptr))
-        }
+        unsafe { WebView::new_option_no_drop(ptr) }
     }
 
     /// Get the imageview inside the cell.
     pub fn imageview(&self) -> Option<ImageView> {
         let ptr = unsafe { cell_imageview(self.as_ptr()) };
-        if ptr.is_null() {
-            None
-        } else {
-            Some(ImageView::new(ptr))
-        }
+        unsafe { ImageView::new_option_no_drop(ptr) }
     }
 
     /// Get the tableview inside the cell.
     pub fn tableview(&self) -> Option<TableView> {
         let ptr = unsafe { cell_tableview(self.as_ptr()) };
-        if ptr.is_null() {
-            None
-        } else {
-            Some(TableView::new(ptr))
-        }
+        unsafe { TableView::new_option_no_drop(ptr) }
     }
 
     /// Get the splitview inside the cell.
     pub fn splitview(&self) -> Option<SplitView> {
         let ptr = unsafe { cell_splitview(self.as_ptr()) };
-        if ptr.is_null() {
-            None
-        } else {
-            Some(SplitView::new(ptr))
-        }
+        unsafe { SplitView::new_option_no_drop(ptr) }
     }
 
     /// Get the panel inside the cell.
     pub fn panel(&self) -> Option<Panel> {
         let ptr = unsafe { cell_panel(self.as_ptr()) };
-        if ptr.is_null() {
-            None
-        } else {
-            Some(Panel::new(ptr))
-        }
+        unsafe { Panel::new_option_no_drop(ptr) }
     }
 
     /// Get the layout inside the cell.
     pub fn layout(&self) -> Option<Layout> {
         let ptr = unsafe { cell_layout(self.as_ptr()) };
-        if ptr.is_null() {
-            None
-        } else {
-            Some(Layout::new(ptr))
-        }
+        unsafe { Layout::new_option_no_drop(ptr) }
     }
 
     /// Activate or deactivate a cell.

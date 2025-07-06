@@ -52,6 +52,7 @@ macro_rules! callback {
 
 macro_rules! pub_crate_ptr_ops {
     ($pointer: ty) => {
+        #[allow(unused)]
         pub(crate) fn new(ptr: $pointer) -> Self {
             if ptr.is_null() {
                 panic!("pointer `{}` is null", std::any::type_name::<$pointer>());
@@ -61,6 +62,25 @@ macro_rules! pub_crate_ptr_ops {
             }
         }
 
+        #[allow(unused)]
+        pub(crate) fn new_option(ptr: $pointer) -> Option<Self> {
+            if ptr.is_null() {
+                None
+            } else {
+                Some(Self::new(ptr))
+            }
+        }
+
+        #[allow(unused)]
+        pub(crate) unsafe fn new_option_no_drop(ptr: $pointer) -> Option<Self> {
+            if ptr.is_null() {
+                None
+            } else {
+                Some(Self::new_no_drop(ptr))
+            }
+        }
+
+        #[allow(unused)]
         pub(crate) fn as_ptr(&self) -> $pointer {
             *self.inner
         }

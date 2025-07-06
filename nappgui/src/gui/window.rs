@@ -38,17 +38,6 @@ impl Window {
         Self::new(window)
     }
 
-    // /// Destroy the window and all its contents.
-    // ///
-    // /// # Remarks
-    // /// Panels, layouts and components will be recursively destroyed.
-    // pub fn destroy(&mut self) {
-    //     unsafe {
-    //         let window = &mut self.as_ptr();
-    //         window_destroy(window);
-    //     }
-    // }
-
     /// Associate the main panel with a window.
     ///
     /// # Remarks
@@ -271,6 +260,10 @@ impl Window {
 }
 
 impl Drop for Window {
+    /// Destroy the window and all its contents.
+    ///
+    /// # Remarks
+    /// Panels, layouts and components will be recursively destroyed.
     fn drop(&mut self) {
         if Rc::strong_count(&self.inner) == 1 {
             unsafe { window_destroy(&mut self.as_ptr()) }

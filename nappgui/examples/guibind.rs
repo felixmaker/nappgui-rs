@@ -73,7 +73,7 @@ fn i_radio_layout() -> Layout {
 }
 
 fn i_title_labels(layout: &Layout) {
-    let mut font = Font::system(Font::regular_size(), FontStyle::default());
+    let font = Font::system(Font::regular_size(), FontStyle::default());
     let strs = [
         "Label", "EditBox", "Check", "Check3", "Radio", "PopUp", "ListBox", "Slider", "UpDown",
     ];
@@ -85,13 +85,12 @@ fn i_title_labels(layout: &Layout) {
     }
 
     layout.hmargin(0, 10.0);
-    font.destroy();
 }
 
 fn i_value_labels(layout: &Layout) {
     for i in 0..I_NUM_CONTROLS {
         let label = Label::create();
-        label.align(Align::Center);
+        label.align(Align::Left);
         layout.label(&label, 2, i as _);
         layout.halign(2, i as _, Align::Justify);
     }
@@ -223,12 +222,17 @@ impl AppHandler for App {
 
         window.show();
 
-        App { _window: window, data }
+        App {
+            _window: window,
+            data,
+        }
     }
 
     fn destroy(&mut self) {
         // Release the data
-        unsafe { let _ = Box::from_raw(self.data); };
+        unsafe {
+            let _ = Box::from_raw(self.data);
+        };
     }
 }
 

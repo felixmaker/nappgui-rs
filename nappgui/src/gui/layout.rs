@@ -20,7 +20,11 @@ use nappgui_sys::{
     layout_vmargin, layout_vsize, layout_webview,
 };
 
-use crate::{draw_2d::Color, types::{Align, GuiOrient}, util::macros::pub_crate_ptr_ops};
+use crate::{
+    draw_2d::Color,
+    types::{Align, GuiOrient},
+    util::macros::pub_crate_ptr_ops,
+};
 
 use super::*;
 
@@ -41,22 +45,13 @@ impl Layout {
 
     /// Get a layout cell.
     pub fn cell(&self, col: u32, row: u32) -> Cell {
-        let mut cell = Cell::new(unsafe { layout_cell(self.as_ptr(), col, row) });
-        let inner = Rc::into_raw(cell.inner);
-        unsafe { Rc::increment_strong_count(inner) };
-        let inner = unsafe { Rc::from_raw(inner) };
-        cell.inner = inner;
-        cell
+        unsafe { Cell::new_no_drop(layout_cell(self.as_ptr(), col, row)) }
     }
 
     /// Gets the control assigned to a cell in the layout.
     pub fn control(&self, col: u32, row: u32) -> Option<Control> {
         let control = unsafe { layout_control(self.as_ptr(), col, row) };
-        if control.is_null() {
-            None
-        } else {
-            Some(Control::new(control))
-        }
+        unsafe { Control::new_option_no_drop(control) }
     }
 
     /// Insert a Label control in a layout.
@@ -156,171 +151,103 @@ impl Layout {
     /// Gets the Label of a cell.
     pub fn get_label(&self, col: u32, row: u32) -> Option<Label> {
         let label = unsafe { layout_get_label(self.as_ptr(), col, row) };
-        if label.is_null() {
-            None
-        } else {
-            Some(Label::new(label))
-        }
+        unsafe { Label::new_option_no_drop(label) }
     }
 
     /// Gets the Button of a cell.
     pub fn get_button(&self, col: u32, row: u32) -> Option<Button> {
         let button = unsafe { layout_get_button(self.as_ptr(), col, row) };
-        if button.is_null() {
-            None
-        } else {
-            Some(Button::new(button))
-        }
+        unsafe { Button::new_option_no_drop(button) }
     }
 
     /// Gets the PopUp of a cell.
     pub fn get_popup(&self, col: u32, row: u32) -> Option<PopUp> {
         let popup = unsafe { layout_get_popup(self.as_ptr(), col, row) };
-        if popup.is_null() {
-            None
-        } else {
-            Some(PopUp::new(popup))
-        }
+        unsafe { PopUp::new_option_no_drop(popup) }
     }
 
     /// Gets the Edit of a cell.
     pub fn get_edit(&self, col: u32, row: u32) -> Option<Edit> {
         let edit = unsafe { layout_get_edit(self.as_ptr(), col, row) };
-        if edit.is_null() {
-            None
-        } else {
-            Some(Edit::new(edit))
-        }
+        unsafe { Edit::new_option_no_drop(edit) }
     }
 
     /// Gets the Combo of a cell.
     pub fn get_combo(&self, col: u32, row: u32) -> Option<Combo> {
         let combo = unsafe { layout_get_combo(self.as_ptr(), col, row) };
-        if combo.is_null() {
-            None
-        } else {
-            Some(Combo::new(combo))
-        }
+        unsafe { Combo::new_option_no_drop(combo) }
     }
 
     /// Gets the ListBox of a cell.
     pub fn get_listbox(&self, col: u32, row: u32) -> Option<ListBox> {
         let listbox = unsafe { layout_get_listbox(self.as_ptr(), col, row) };
-        if listbox.is_null() {
-            None
-        } else {
-            Some(ListBox::new(listbox))
-        }
+        unsafe { ListBox::new_option_no_drop(listbox) }
     }
 
     /// Gets the UpDown of a cell.
     pub fn get_updown(&self, col: u32, row: u32) -> Option<UpDown> {
         let updown = unsafe { layout_get_updown(self.as_ptr(), col, row) };
-        if updown.is_null() {
-            None
-        } else {
-            Some(UpDown::new(updown))
-        }
+        unsafe { UpDown::new_option_no_drop(updown) }
     }
 
     /// Gets the Slider of a cell.
     pub fn get_slider(&self, col: u32, row: u32) -> Option<Slider> {
         let slider = unsafe { layout_get_slider(self.as_ptr(), col, row) };
-        if slider.is_null() {
-            None
-        } else {
-            Some(Slider::new(slider))
-        }
+        unsafe { Slider::new_option_no_drop(slider) }
     }
 
     /// Gets the Progress of a cell.
     pub fn get_progress(&self, col: u32, row: u32) -> Option<Progress> {
         let progress = unsafe { layout_get_progress(self.as_ptr(), col, row) };
-        if progress.is_null() {
-            None
-        } else {
-            Some(Progress::new(progress))
-        }
+        unsafe { Progress::new_option_no_drop(progress) }
     }
 
     /// Gets the View of a cell.
     pub fn get_view(&self, col: u32, row: u32) -> Option<View> {
         let view = unsafe { layout_get_view(self.as_ptr(), col, row) };
-        if view.is_null() {
-            None
-        } else {
-            Some(View::new(view))
-        }
+        unsafe { View::new_option_no_drop(view) }
     }
 
     /// Gets the TextView of a cell.
     pub fn get_textview(&self, col: u32, row: u32) -> Option<TextView> {
         let textview = unsafe { layout_get_textview(self.as_ptr(), col, row) };
-        if textview.is_null() {
-            None
-        } else {
-            Some(TextView::new(textview))
-        }
+        unsafe { TextView::new_option_no_drop(textview) }
     }
 
     /// Gets the WebView of a cell.
     pub fn get_webview(&self, col: u32, row: u32) -> Option<WebView> {
         let webview = unsafe { layout_get_webview(self.as_ptr(), col, row) };
-        if webview.is_null() {
-            None
-        } else {
-            Some(WebView::new(webview))
-        }
+        unsafe { WebView::new_option_no_drop(webview) }
     }
 
     /// Gets the ImageView of a cell.
     pub fn get_imageview(&self, col: u32, row: u32) -> Option<ImageView> {
         let imageview = unsafe { layout_get_imageview(self.as_ptr(), col, row) };
-        if imageview.is_null() {
-            None
-        } else {
-            Some(ImageView::new(imageview))
-        }
+        unsafe { ImageView::new_option_no_drop(imageview) }
     }
 
     /// Gets the TableView of a cell.
     pub fn get_tableview(&self, col: u32, row: u32) -> Option<TableView> {
         let tableview = unsafe { layout_get_tableview(self.as_ptr(), col, row) };
-        if tableview.is_null() {
-            None
-        } else {
-            Some(TableView::new(tableview))
-        }
+        unsafe { TableView::new_option_no_drop(tableview) }
     }
 
     /// Gets the SplitView of a cell.
     pub fn get_splitview(&self, col: u32, row: u32) -> Option<SplitView> {
         let splitview = unsafe { layout_get_splitview(self.as_ptr(), col, row) };
-        if splitview.is_null() {
-            None
-        } else {
-            Some(SplitView::new(splitview))
-        }
+        unsafe { SplitView::new_option_no_drop(splitview) }
     }
 
     /// Gets the Panel of a cell.
     pub fn get_panel(&self, col: u32, row: u32) -> Option<Panel> {
         let panel = unsafe { layout_get_panel(self.as_ptr(), col, row) };
-        if panel.is_null() {
-            None
-        } else {
-            Some(Panel::new(panel))
-        }
+        unsafe { Panel::new_option_no_drop(panel) }
     }
 
     /// Gets the Layout of a cell.
     pub fn get_layout(&self, col: u32, row: u32) -> Option<Layout> {
         let layout = unsafe { layout_get_layout(self.as_ptr(), col, row) };
-        if layout.is_null() {
-            None
-        } else {
-            Some(Layout::new(layout))
-        }
+        unsafe { Layout::new_option_no_drop(layout) }
     }
 
     /// Gets the number of columns in the layout.

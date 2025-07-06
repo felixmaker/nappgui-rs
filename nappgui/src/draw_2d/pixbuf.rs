@@ -66,11 +66,6 @@ impl Pixbuf {
         Self::new(pixbuf)
     }
 
-    /// Destroy the buffer.
-    pub fn destroy(mut self) {
-        unsafe { pixbuf_destroy(&mut self.inner) }
-    }
-
     /// Get the pixel format.
     pub fn format(&self) -> PixFormat {
         let result = unsafe { pixbuf_format(self.inner) };
@@ -135,5 +130,13 @@ impl Clone for Pixbuf {
     fn clone(&self) -> Self {
         let pixbuf = unsafe { pixbuf_copy(self.inner) };
         Self::new(pixbuf)
+    }
+}
+
+impl Drop for Pixbuf {
+    fn drop(&mut self) {
+        unsafe {
+            pixbuf_destroy(&mut self.inner);
+        }
     }
 }

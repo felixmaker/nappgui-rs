@@ -61,17 +61,6 @@ impl Font {
         Font::new(font)
     }
 
-    /// Creates an exact copy of a typeface.
-    pub fn copy(&self) -> Self {
-        let font = unsafe { font_copy(self.inner) };
-        Font::new(font)
-    }
-
-    /// Destroy the font.
-    pub fn destroy(&mut self) {
-        unsafe { font_destroy(&mut self.inner) };
-    }
-
     /// Compare two sources. They are considered equal if they have the same family, size and style.
     pub fn equals(&self, other: &Font) -> bool {
         unsafe { font_equals(self.inner, other.inner) != 0 }
@@ -205,5 +194,18 @@ impl Font {
         }
 
         families
+    }
+}
+
+impl Clone for Font {
+    fn clone(&self) -> Self {
+        let font = unsafe { font_copy(self.inner) };
+        Font::new(font)
+    }
+}
+
+impl Drop for Font {
+    fn drop(&mut self) {
+        unsafe { font_destroy(&mut self.inner) };
     }
 }

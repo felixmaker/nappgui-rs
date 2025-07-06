@@ -1,18 +1,18 @@
 use std::rc::Rc;
 
 use nappgui_sys::{
-    menu_create, menu_destroy, menu_add_item, menu_ins_item, menu_del_item, menu_launch, menu_off_items,
-    menu_count, menu_get_item, menu_is_menubar, V2Df,
+    menu_add_item, menu_count, menu_create, menu_del_item, menu_destroy, menu_get_item,
+    menu_ins_item, menu_is_menubar, menu_launch, menu_off_items, V2Df,
 };
 
 use crate::util::macros::pub_crate_ptr_ops;
 
 use super::{MenuItem, Window};
 
-/// A Menu is a type of control that integrates a series of options, also called items or Menuitems. 
-/// Each of them consists of a short text, optionally an icon and optionally also a keyboard shortcut, 
-/// such as the classic Ctrl+C/Ctrl+V to copy and paste. Additionally, an item can house a submenu 
-/// forming a hierarchy with different levels of depth. In Products you have an application that uses 
+/// A Menu is a type of control that integrates a series of options, also called items or Menuitems.
+/// Each of them consists of a short text, optionally an icon and optionally also a keyboard shortcut,
+/// such as the classic Ctrl+C/Ctrl+V to copy and paste. Additionally, an item can house a submenu
+/// forming a hierarchy with different levels of depth. In Products you have an application that uses
 /// menus and in Hello dynamic Menu! an example of adding or eliminating items at runtime.
 pub struct Menu {
     pub(crate) inner: Rc<*mut nappgui_sys::Menu>,
@@ -27,11 +27,6 @@ impl Menu {
         Self::new(menu)
     }
 
-    /// Destroy a menu and its entire hierarchy.
-    pub fn destroy(&mut self) {
-        unsafe { menu_destroy(&mut self.as_ptr()) };
-    }
-
     /// Add an item at the end of the menu.
     pub fn add_item(&self, item: &MenuItem) {
         unsafe { menu_add_item(self.as_ptr(), item.as_ptr()) };
@@ -43,9 +38,9 @@ impl Menu {
     }
 
     /// Remove an item from the menu.
-    /// 
+    ///
     /// # Remark
-    /// The element will be destroyed and cannot be reused. If has a submenu associated, 
+    /// The element will be destroyed and cannot be reused. If has a submenu associated,
     /// it will also be destroyed recursively.
     pub fn delete_item(&self, index: u32) {
         unsafe { menu_del_item(self.as_ptr(), index) };
@@ -59,7 +54,7 @@ impl Menu {
 
     /// Set status ekGUI_OFF for all menu items.
     pub fn off_items(&self) {
-        unsafe { menu_off_items (self.as_ptr()) };
+        unsafe { menu_off_items(self.as_ptr()) };
     }
 
     /// Get the number of items.
@@ -80,5 +75,11 @@ impl Menu {
     /// Returns TRUE if the menu is currently established as a menu bar.
     pub fn is_menubar(&self) -> bool {
         (unsafe { menu_is_menubar(self.as_ptr()) }) != 0
+    }
+}
+
+impl Drop for Menu {
+    fn drop(&mut self) {
+        unsafe { menu_destroy(&mut self.as_ptr()) };
     }
 }

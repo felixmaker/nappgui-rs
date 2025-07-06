@@ -75,10 +75,8 @@ impl Default for FontStyle {
 
 impl FontStyle {
     pub(crate) fn to_fstyle_t(&self) -> i32 {
-        let mut style = 0;
-        if self.is_normal {
-            style |= nappgui_sys::_fstyle_t_ekFNORMAL;
-        }
+        let mut style = nappgui_sys::_fstyle_t_ekFNORMAL;
+
         if self.is_bold {
             style |= nappgui_sys::_fstyle_t_ekFBOLD;
         }

@@ -100,11 +100,6 @@ impl Image {
         unsafe { image_to_file(self.inner, path.as_ptr(), std::ptr::null_mut()) != 0 }
     }
 
-    /// Destroy the image.
-    pub fn destroy(&mut self) {
-        unsafe { image_destroy(&mut self.inner) }
-    }
-
     /// Get the pixel format of the image.
     pub fn format(&self) -> pixformat_t {
         unsafe { image_format(self.inner) }
@@ -168,5 +163,11 @@ impl Clone for Image {
     fn clone(&self) -> Self {
         let image = unsafe { image_copy(self.inner) };
         Image::new(image)
+    }
+}
+
+impl Drop for Image {
+    fn drop(&mut self) {
+        unsafe { image_destroy(&mut self.inner) }
     }
 }

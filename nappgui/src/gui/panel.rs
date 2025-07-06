@@ -22,19 +22,19 @@ impl Panel {
     /// Create a panel.
     pub fn create() -> Self {
         let panel = unsafe { panel_create() };
-        Self::new(panel)
+        Self::from_raw(panel)
     }
 
     /// Create a panel with scroll bars.
     pub fn scroll(hscroll: bool, vscroll: bool) -> Self {
         let panel = unsafe { panel_scroll(hscroll as _, vscroll as _) };
-        Self::new(panel)
+        Self::from_raw(panel)
     }
 
     /// Create a fully configurable panel.
     pub fn custom(hscroll: bool, vscroll: bool, border: bool) -> Self {
         let panel = unsafe { panel_custom(hscroll as _, vscroll as _, border as _) };
-        Self::new(panel)
+        Self::from_raw(panel)
     }
 
     /// Sets the default size of the visible area of a panel.
@@ -58,7 +58,7 @@ impl Panel {
         if layout.is_null() {
             None
         } else {
-            Some(Layout::new(layout))
+            Some(Layout::from_raw(layout))
         }
     }
 

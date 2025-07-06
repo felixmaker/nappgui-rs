@@ -35,7 +35,7 @@ impl Window {
     pub fn create(flag: WindowFlags) -> Self {
         let result = flag.to_window_flag_t();
         let window = unsafe { window_create(result as u32) };
-        Self::new(window)
+        Self::from_raw(window)
     }
 
     /// Associate the main panel with a window.

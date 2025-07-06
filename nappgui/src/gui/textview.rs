@@ -25,7 +25,7 @@ impl TextView {
     /// Create a text view.
     pub fn create() -> Self {
         let textview = unsafe { textview_create() };
-        Self::new(textview)
+        Self::from_raw(textview)
     }
 
     callback! {

@@ -36,12 +36,12 @@ impl Layout {
     /// Create a new layout specifying the number of columns and rows.
     pub fn create(rows: usize, cols: usize) -> Self {
         let layout = unsafe { layout_create(rows as _, cols as _) };
-        Self::new(layout)
+        Self::from_raw(layout)
     }
 
     /// Get a layout cell.
     pub fn cell(&self, col: usize, row: usize) -> Cell {
-        unsafe { Cell::new_no_drop(layout_cell(self.as_ptr(), col as _, row as _)) }
+        unsafe { Cell::from_raw_no_drop(layout_cell(self.as_ptr(), col as _, row as _)) }
     }
 
     /// Gets the control assigned to a cell in the layout.

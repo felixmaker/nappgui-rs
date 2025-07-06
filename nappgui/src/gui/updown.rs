@@ -15,7 +15,7 @@ impl UpDown {
     /// Create an updown control.
     pub fn create() -> Self {
         let updown = unsafe { updown_create() };
-        Self::new(updown)
+        Self::from_raw(updown)
     }
 
     callback! {

@@ -24,13 +24,13 @@ impl MenuItem {
     /// Create a new item for a menu.
     pub fn create() -> Self {
         let menu_item = unsafe { menuitem_create() };
-        Self::new(menu_item)
+        Self::from_raw(menu_item)
     }
 
     /// Create a new separator for a menu.
     pub fn separator() -> Self {
         let menu_item = unsafe { menuitem_separator() };
-        Self::new(menu_item)
+        Self::from_raw(menu_item)
     }
 
     callback! {

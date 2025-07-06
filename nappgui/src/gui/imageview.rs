@@ -22,7 +22,7 @@ impl ImageView {
     /// Create a image view.
     pub fn create() -> Self {
         let imageview = unsafe { imageview_create() };
-        Self::new(imageview)
+        Self::from_raw(imageview)
     }
 
     /// Set the default control size.

@@ -24,7 +24,7 @@ impl Combo {
     /// Create a combo control.
     pub fn create() -> Self {
         let combo = unsafe { combo_create() };
-        Self::new(combo)
+        Self::from_raw(combo)
     }
 
     callback! {

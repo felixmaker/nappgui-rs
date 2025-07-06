@@ -26,13 +26,13 @@ impl Edit {
     /// Create a text edit control.
     pub fn create() -> Self {
         let edit = unsafe { edit_create() };
-        Self::new(edit)
+        Self::from_raw(edit)
     }
 
     /// Create a text editing control that allows multiple lines.
     pub fn new_multiline() -> Self {
         let edit = unsafe { edit_multiline() };
-        Self::new(edit)
+        Self::from_raw(edit)
     }
 
     callback! {

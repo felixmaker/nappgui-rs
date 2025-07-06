@@ -18,13 +18,13 @@ impl Slider {
     /// Create a new slider control.
     pub fn create() -> Self {
         let updown = unsafe { slider_create() };
-        Self::new(updown)
+        Self::from_raw(updown)
     }
 
     /// Create a new vertical slider.
     pub fn create_vertical() -> Self {
         let updown = unsafe { slider_vertical() };
-        Self::new(updown)
+        Self::from_raw(updown)
     }
 
     callback! {

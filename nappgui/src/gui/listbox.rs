@@ -22,7 +22,7 @@ impl ListBox {
     /// Create a new list control.
     pub fn create() -> Self {
         let listbox = unsafe { listbox_create() };
-        Self::new(listbox)
+        Self::from_raw(listbox)
     }
 
     callback! {

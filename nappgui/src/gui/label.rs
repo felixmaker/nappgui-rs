@@ -25,7 +25,7 @@ impl Label {
     /// Activate or deactivate the multiline attribute.
     pub fn create() -> Label {
         let label = unsafe { label_create() };
-        Self::new(label)
+        Self::from_raw(label)
     }
 
     callback! {

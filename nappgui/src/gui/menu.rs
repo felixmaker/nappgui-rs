@@ -24,7 +24,7 @@ impl Menu {
     /// Create a new menu.
     pub fn create() -> Self {
         let menu = unsafe { menu_create() };
-        Self::new(menu)
+        Self::from_raw(menu)
     }
 
     /// Add an item at the end of the menu.
@@ -68,7 +68,7 @@ impl Menu {
         if item.is_null() {
             None
         } else {
-            Some(MenuItem::new(item))
+            Some(MenuItem::from_raw(item))
         }
     }
 

@@ -29,7 +29,7 @@ impl TableView {
     /// Create an table view control.
     pub fn create() -> Self {
         let table = unsafe { tableview_create() };
-        Self::new(table)
+        Self::from_raw(table)
     }
 
     callback! {

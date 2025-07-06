@@ -27,13 +27,13 @@ impl SplitView {
     /// Create a splitview with horizontal split.
     pub fn horizontal() -> Self {
         let splitview = unsafe { splitview_horizontal() };
-        Self::new(splitview)
+        Self::from_raw(splitview)
     }
 
     /// Create a splitview with vertical split.
     pub fn vertical() -> Self {
         let splitview = unsafe { splitview_vertical() };
-        Self::new(splitview)
+        Self::from_raw(splitview)
     }
 
     /// Add a custom view to the splitview.

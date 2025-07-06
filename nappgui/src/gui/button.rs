@@ -8,8 +8,8 @@ use crate::{
 
 use nappgui_sys::{
     button_OnClick, button_check, button_check3, button_flat, button_flatgle, button_font,
-    button_get_height, button_get_state, button_get_tag, button_image, button_image_alt,
-    button_push, button_radio, button_state, button_tag, button_text, button_text_alt,
+    button_get_height, button_get_state, button_image, button_image_alt,
+    button_push, button_radio, button_state, button_text, button_text_alt,
     button_tooltip, button_vpadding,
 };
 
@@ -34,7 +34,7 @@ impl Button {
                 ButtonType::FlatGle => button_flatgle(),
             }
         };
-        Self::new(button)
+        Self::from_raw(button)
     }
 
     callback! {
@@ -95,11 +95,6 @@ impl Button {
         unsafe { button_state(self.as_ptr(), state as _) }
     }
 
-    /// Sets a numeric tag for the button.
-    pub fn tag(&self, tag: u32) {
-        unsafe { button_tag(self.as_ptr(), tag) }
-    }
-
     /// Sets the inner vertical margin.
     pub fn vpadding(&self, padding: f32) {
         unsafe { button_vpadding(self.as_ptr(), padding) }
@@ -112,11 +107,6 @@ impl Button {
     pub fn get_state(&self) -> GuiState {
         let state = unsafe { button_get_state(self.as_ptr()) };
         GuiState::try_from(state).unwrap()
-    }
-
-    /// Gets the button's tag.
-    pub fn get_tag(&self) -> u32 {
-        unsafe { button_get_tag(self.as_ptr()) }
     }
 
     /// Gets the current height of the control.

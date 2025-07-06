@@ -6,7 +6,7 @@ macro_rules! listener {
         unsafe extern "C" fn shim(data: *mut c_void, event: *mut nappgui_sys::Event) {
             let data = data as *mut (Box<dyn FnMut(&mut $obj, &Event)>, *mut c_void);
             let f = &mut *(*data).0;
-            let mut obj = <$obj>::new_no_drop((*data).1 as _);
+            let mut obj = <$obj>::from_raw_no_drop((*data).1 as _);
             let event = Event::new(event);
             let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut obj, &event)));
         }
@@ -53,7 +53,7 @@ macro_rules! callback {
 macro_rules! pub_crate_ptr_ops {
     ($pointer: ty) => {
         #[allow(unused)]
-        pub(crate) fn new(ptr: $pointer) -> Self {
+        pub(crate) fn from_raw(ptr: $pointer) -> Self {
             if ptr.is_null() {
                 panic!("pointer `{}` is null", std::any::type_name::<$pointer>());
             }
@@ -63,30 +63,7 @@ macro_rules! pub_crate_ptr_ops {
         }
 
         #[allow(unused)]
-        pub(crate) fn new_option(ptr: $pointer) -> Option<Self> {
-            if ptr.is_null() {
-                None
-            } else {
-                Some(Self::new(ptr))
-            }
-        }
-
-        #[allow(unused)]
-        pub(crate) unsafe fn new_option_no_drop(ptr: $pointer) -> Option<Self> {
-            if ptr.is_null() {
-                None
-            } else {
-                Some(Self::new_no_drop(ptr))
-            }
-        }
-
-        #[allow(unused)]
-        pub(crate) fn as_ptr(&self) -> $pointer {
-            *self.inner
-        }
-
-        #[allow(unused)]
-        pub(crate) unsafe fn new_no_drop(ptr: $pointer) -> Self {
+        pub(crate) unsafe fn from_raw_no_drop(ptr: $pointer) -> Self {
             if ptr.is_null() {
                 panic!("pointer `{}` is null", std::any::type_name::<$pointer>());
             }
@@ -96,6 +73,29 @@ macro_rules! pub_crate_ptr_ops {
             std::rc::Rc::increment_strong_count(inner);
             let inner = std::rc::Rc::from_raw(inner);
             Self { inner }
+        }
+
+        #[allow(unused)]
+        pub(crate) fn from_raw_option(ptr: $pointer) -> Option<Self> {
+            if ptr.is_null() {
+                None
+            } else {
+                Some(Self::from_raw(ptr))
+            }
+        }
+
+        #[allow(unused)]
+        pub(crate) unsafe fn from_raw_no_drop_option(ptr: $pointer) -> Option<Self> {
+            if ptr.is_null() {
+                None
+            } else {
+                Some(Self::from_raw_no_drop(ptr))
+            }
+        }
+
+        #[allow(unused)]
+        pub(crate) fn as_ptr(&self) -> $pointer {
+            *self.inner
         }
     };
 }
@@ -128,7 +128,7 @@ macro_rules! impl_gui_control {
             fn from_control_ptr(ptr: *mut nappgui_sys::GuiControl) -> Option<Self> {
                 unsafe {
                     let combo = nappgui_sys::$func(ptr);
-                    Self::new_option_no_drop(combo)
+                    Self::from_raw_no_drop_option(combo)
                 }
             }
         }

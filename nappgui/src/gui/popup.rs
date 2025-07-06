@@ -23,7 +23,7 @@ impl PopUp {
     /// Create a new popup control (PopUp button).
     pub fn create() -> Self {
         let popup = unsafe { popup_create() };
-        Self::new(popup)
+        Self::from_raw(popup)
     }
 
     callback! {

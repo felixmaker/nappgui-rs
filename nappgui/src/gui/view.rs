@@ -23,19 +23,19 @@ impl View {
     /// Create a new custom view.
     pub fn create() -> Self {
         let view = unsafe { view_create() };
-        Self::new(view)
+        Self::from_raw(view)
     }
 
     /// Create a new custom view with scrollbars.
     pub fn scroll() -> Self {
         let view = unsafe { view_scroll() };
-        Self::new(view)
+        Self::from_raw(view)
     }
 
     /// Create a new view with all the options.
     pub fn custom(hscroll: bool, vscroll: bool) -> Self {
         let view = unsafe { view_custom(hscroll as _, vscroll as _) };
-        Self::new(view)
+        Self::from_raw(view)
     }
 
     /// Set the default view size.

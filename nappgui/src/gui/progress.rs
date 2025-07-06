@@ -15,7 +15,7 @@ impl Progress {
     /// Create a progress bar.
     pub fn create() -> Self {
         let progress = unsafe { progress_create() };
-        Self::new(progress)
+        Self::from_raw(progress)
     }
 
     /// Set the progress bar as undefined.

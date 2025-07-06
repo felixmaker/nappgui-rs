@@ -19,7 +19,7 @@ impl WebView {
     /// Create a Web View.
     pub fn create() -> Self {
         let webview = unsafe { webview_create() };
-        Self::new(webview)
+        Self::from_raw(webview)
     }
 
     callback! {

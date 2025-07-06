@@ -90,7 +90,6 @@ fn i_title_labels(layout: &Layout) {
 fn i_value_labels(layout: &Layout) {
     for i in 0..I_NUM_CONTROLS {
         let label = Label::create();
-        label.align(Align::Left);
         layout.label(&label, 2, i as _);
         layout.halign(2, i as _, Align::Justify);
     }
@@ -142,6 +141,7 @@ fn i_layout() -> Layout {
     let slider = Slider::create();
     let updown = UpDown::create();
     layout.label(&label, 1, 0);
+    layout.halign(1, 0, Align::Justify);
     layout.edit(&edit, 1, 1);
     layout.button(&check, 1, 2);
     layout.button(&check3, 1, 3);

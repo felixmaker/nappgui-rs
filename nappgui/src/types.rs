@@ -4,18 +4,14 @@ use crate::{gui::GuiControl, util::macros::impl_i32_to_enum};
 #[repr(i32)]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub enum Align {
-    /// Alignment to the left margin.
+    /// Alignment to the left/upper margin.
     Left = 1,
-    /// Alignment to the upper margin.
-    Top = 2,
     /// Centered alignment.
-    Center = 3,
-    /// Alignment to the right margin.
-    Right = 4,
-    /// Alignment to the lower margin.
-    Bottom = 5,
+    Center = 2,
+    /// Alignment to the right/lower margin.
+    Right = 3,
     /// Justification or expansion of content.
-    Justify = 6,
+    Justify = 4,
 }
 
 /// State values.

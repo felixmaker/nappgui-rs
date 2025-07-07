@@ -1,6 +1,6 @@
-use nappgui_sys::{dctx_bitmap, dctx_image, draw_antialias, draw_clear, draw_matrixf, pixformat_t};
+use nappgui_sys::{dctx_bitmap, dctx_image, draw_antialias, draw_clear, draw_matrixf};
 
-use crate::types::Trans2D;
+use crate::types::{PixFormat, Trans2D};
 
 use super::{Color, Image};
 
@@ -21,8 +21,8 @@ impl DCtx {
     ///
     /// # Remark
     /// When we finish drawing, we must call dctx_image to get the picture.
-    pub fn bitmap(width: u32, height: u32, format: pixformat_t) -> Self {
-        let ptr = unsafe { dctx_bitmap(width, height, format) };
+    pub fn bitmap(width: u32, height: u32, format: PixFormat) -> Self {
+        let ptr = unsafe { dctx_bitmap(width, height, format as _) };
         DCtx::new(ptr)
     }
 

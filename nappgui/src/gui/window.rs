@@ -14,7 +14,7 @@ use crate::core::event::Event;
 use crate::draw_2d::Image;
 use crate::gui::{ControlTrait, ButtonTrait};
 use crate::types::{
-    FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, Modifiers, Point2D, Rect2D, Size2D,
+    FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D, Size2D,
     WindowFlags,
 };
 use crate::util::macros::{callback, listener, pub_crate_ptr_ops};
@@ -25,6 +25,12 @@ use super::panel::Panel;
 #[repr(transparent)]
 pub struct Window {
     pub(crate) inner: Rc<*mut nappgui_sys::Window>,
+}
+
+impl Default for Window {
+    fn default() -> Self {
+        Self::new(WindowFlags::default())
+    }
 }
 
 impl Window {
@@ -99,7 +105,7 @@ impl Window {
     }
 
     /// Sets an action associated with pressing a key.
-    pub fn hotkey<F>(&self, key: KeyCode, modifiers: Modifiers, handler: F)
+    pub fn hotkey<F>(&self, key: KeyCode, modifiers: ModifierKey, handler: F)
     where
         F: FnMut(&mut Window, &Event) + 'static,
     {

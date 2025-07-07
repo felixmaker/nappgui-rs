@@ -4,33 +4,9 @@ use nappgui_sys::{
     pixbuf_size, pixbuf_trim, pixbuf_width,
 };
 
-use crate::util::macros::impl_i32_to_enum;
+use crate::types::PixFormat;
 
 use super::Palette;
-
-/// Pixel format in an image. Number of bits per pixel and color model.
-#[repr(u32)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum PixFormat {
-    /// 1 bit per pixel. 2 colors, indexed.
-    Index1 = 1,
-    /// 2 bits per pixel. 4 colors, indexed.
-    Index2 = 2,
-    /// 4 bits per pixel. 16 colors, indexed.
-    Index4 = 3,
-    /// 8 bits per pixel. 256 colors, indexed.
-    Index8 = 4,
-    /// 8 bits per pixel in grayscale. 256 shades of gray.
-    Gray8 = 5,
-    /// 24 bits per RGB pixel. 8 bits per channel (red, green, blue). The lowest order byte corresponds to the red one and the highest one to the blue one.
-    RGB24 = 6,
-    /// 32 bits per pixel RGBA. 8 bits per channel (red, green, blue, alpha). The lowest order byte corresponds to the red one and the highest one to alpha (transparency).
-    RGBA32 = 7,
-    /// Represents the original format of the image. Only valid at image_pixels.
-    Image = 8,
-}
-
-impl_i32_to_enum!(PixFormat, 1..=8);
 
 /// Pixbuf
 pub struct Pixbuf {

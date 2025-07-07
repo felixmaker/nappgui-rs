@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     draw_2d::Image,
-    types::{GuiState, KeyCode, Modifiers},
+    types::{GuiState, KeyCode, ModifierKey},
     util::macros::{callback, pub_crate_ptr_ops},
 };
 
@@ -60,7 +60,7 @@ impl MenuItem {
     }
 
     /// Set a keyboard shortcut to select the menu item.
-    pub fn key(&self, key: KeyCode, modifiers: Modifiers) {
+    pub fn key(&self, key: KeyCode, modifiers: ModifierKey) {
         unsafe { menuitem_key(self.as_ptr(), key as _, modifiers as _) };
     }
 

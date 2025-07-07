@@ -14,6 +14,8 @@ pub enum Align {
     Justify = 4,
 }
 
+impl_i32_to_enum!(Align, 1..=4);
+
 /// State values.
 #[repr(i32)]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -130,6 +132,8 @@ pub enum GuiOrient {
     /// Vertical.
     Vertical = 2,
 }
+
+impl_i32_to_enum!(GuiOrient, 1..=2);
 
 /// Behavior of the divider in a SplitView.
 #[repr(i32)]
@@ -338,18 +342,18 @@ pub enum KeyCode {
     Add = 111,
 }
 
-impl_i32_to_enum!(KeyCode, 1..=111);
+impl_i32_to_enum!(KeyCode, 0..=111);
 
 /// Modifier keys.
 #[allow(missing_docs)]
 #[repr(i32)]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub enum Modifiers {
-    None = 1,
-    Shift = 2,
-    Control = 3,
+pub enum ModifierKey {
+    None = 0,
+    Shift = 1,
+    Control = 2,
     Alt = 4,
-    Command = 5,
+    Command = 8,
 }
 
 /// Result when changing the keyboard focus.
@@ -428,6 +432,8 @@ pub enum GuiClose {
     Deactivate = 4,
 }
 
+impl_i32_to_enum!(GuiClose, 1..=4);
+
 /// Cursors.
 #[repr(i32)]
 #[non_exhaustive]
@@ -451,6 +457,7 @@ pub enum GuiCursor {
 
 /// Represents a 2d vector or point.
 #[repr(C)]
+#[derive(Clone, Copy)]
 pub struct Point2D {
     /// Coordinate x.
     pub x: f32,
@@ -460,6 +467,7 @@ pub struct Point2D {
 
 /// 2d affine transformation.
 #[repr(C)]
+#[derive(Clone, Copy)]
 pub struct Trans2D {
     /// Component i of the linear transformation.
     pub i: Point2D,
@@ -471,6 +479,7 @@ pub struct Trans2D {
 
 /// Represents a 2d size.
 #[repr(C)]
+#[derive(Clone, Copy)]
 pub struct Size2D {
     /// Width.
     pub width: f32,
@@ -480,6 +489,7 @@ pub struct Size2D {
 
 /// 2d rectangle.
 #[repr(C)]
+#[derive(Clone, Copy)]
 pub struct Rect2D {
     /// Position.
     pub position: Point2D,
@@ -487,18 +497,62 @@ pub struct Rect2D {
     pub size: Size2D,
 }
 
-/// The type of button.
-pub enum ButtonType {
-    /// Create a push button, the typical \[Accept\], \[Cancel\], etc.
-    Push,
-    /// Create a checkbox.
-    Check,
-    /// Create a checkbox with three states.
-    Check3,
-    /// Create a radio button.
-    Radio,
-    /// Create a flat button, to which an image can be assigned. It is the typical toolbar button.
-    Flat,
-    /// Create a flat button with status. The button will alternate between pressed/released each time you click on it.
-    FlatGle,
+/// Pixel format in an image. Number of bits per pixel and color model.
+#[repr(u32)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum PixFormat {
+    /// 1 bit per pixel. 2 colors, indexed.
+    Index1 = 1,
+    /// 2 bits per pixel. 4 colors, indexed.
+    Index2 = 2,
+    /// 4 bits per pixel. 16 colors, indexed.
+    Index4 = 3,
+    /// 8 bits per pixel. 256 colors, indexed.
+    Index8 = 4,
+    /// 8 bits per pixel in grayscale. 256 shades of gray.
+    Gray8 = 5,
+    /// 24 bits per RGB pixel. 8 bits per channel (red, green, blue). The lowest order byte corresponds to the red one and the highest one to the blue one.
+    RGB24 = 6,
+    /// 32 bits per pixel RGBA. 8 bits per channel (red, green, blue, alpha). The lowest order byte corresponds to the red one and the highest one to alpha (transparency).
+    RGBA32 = 7,
+    /// Represents the original format of the image. Only valid at image_pixels.
+    Image = 8,
 }
+
+impl_i32_to_enum!(PixFormat, 1..=8);
+
+/// Mouse buttons.
+#[repr(i32)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum GuiMouse {
+    /// Left.
+    Left = 1,
+    /// Right.
+    Right = 2,
+    /// Center.
+    Middle = 3,
+}
+
+impl_i32_to_enum!(GuiMouse, 1..=3);
+
+/// Types of scroll.
+#[repr(i32)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum GuiScroll {
+    /// Jump to start.
+    Begin = 1,
+    /// Skip to the end.
+    End = 2,
+    /// Jump one step (or line) to the left or up.
+    StepLeft = 3,
+    /// Jump one step (or line) to the right or down.
+    StepRight = 4,
+    /// Jump a page to the left or up.
+    PageLeft = 5,
+    /// Jump a page to the right or down.
+    PageRight = 6,
+    /// Jump to the thumb position.
+    Thumb = 7,
+}
+
+impl_i32_to_enum!(GuiScroll, 1..=7);

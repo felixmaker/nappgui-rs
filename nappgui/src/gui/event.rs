@@ -1,15 +1,14 @@
-use nappgui_sys::{
-    align_t, gui_close_t, gui_mouse_t, gui_orient_t, gui_scroll_t, gui_state_t, vkey_t,
+use crate::{
+    draw_2d::DCtx,
+    types::{Align, GuiClose, GuiMouse, GuiOrient, GuiScroll, GuiState, KeyCode},
 };
-
-use crate::{draw_2d::DCtx, util::helper::array_u32};
 
 /// Parameters of the OnClick event of a button or OnSelect of a popup.
 pub struct EvButton {
     /// Button or item index.
-    pub index: u32,
+    pub index: usize,
     /// State.
-    pub state: gui_state_t,
+    pub state: GuiState,
     /// Text.
     pub text: String,
 }
@@ -21,8 +20,8 @@ impl EvButton {
         }
         let evbutton = unsafe { &*ptr };
         EvButton {
-            index: evbutton.index,
-            state: evbutton.state,
+            index: evbutton.index as _,
+            state: GuiState::try_from(evbutton.state).unwrap(),
             text: unsafe { std::ffi::CStr::from_ptr(evbutton.text) }
                 .to_string_lossy()
                 .into_owned(),
@@ -37,7 +36,7 @@ pub struct EvSlider {
     /// Increase with respect to the previous position.
     pub incr: f32,
     /// Interval index (only for discrete ranges).
-    pub step: u32,
+    pub step: usize,
 }
 
 impl EvSlider {
@@ -49,7 +48,7 @@ impl EvSlider {
         EvSlider {
             pos: evslider.pos,
             incr: evslider.incr,
-            step: evslider.step,
+            step: evslider.step as _,
         }
     }
 }
@@ -59,7 +58,7 @@ pub struct EvText {
     /// Text.
     pub text: String,
     /// Cursor position (caret).
-    pub cpos: u32,
+    pub cpos: usize,
     /// Number of characters inserted or deleted.
     pub len: i32,
 }
@@ -74,7 +73,7 @@ impl EvText {
             text: unsafe { std::ffi::CStr::from_ptr(evtext.text) }
                 .to_string_lossy()
                 .into_owned(),
-            cpos: evtext.cpos,
+            cpos: evtext.cpos as _,
             len: evtext.len,
         }
     }
@@ -87,7 +86,7 @@ pub struct EvTextFilter {
     /// New control text, which is a revision (filter) of the original text.
     pub text: String,
     /// Cursor position (caret).
-    pub cpos: u32,
+    pub cpos: usize,
 }
 
 impl EvTextFilter {
@@ -101,7 +100,7 @@ impl EvTextFilter {
             text: unsafe { std::ffi::CStr::from_ptr(evfilter.text.as_ptr()) }
                 .to_string_lossy()
                 .into_owned(),
-            cpos: evfilter.cpos,
+            cpos: evfilter.cpos as _,
         }
     }
 }
@@ -147,7 +146,7 @@ pub struct EvMouse {
     /// Y coordinate of the pointer on the control. Same as y if there are no scroll bars.
     pub ly: f32,
     /// Active button.
-    pub button: gui_mouse_t,
+    pub button: GuiMouse,
     /// Number of clicks.
     pub count: u32,
     /// Combination of values mkey_t. todo!
@@ -167,7 +166,7 @@ impl EvMouse {
             y: evmouse.y,
             lx: evmouse.lx,
             ly: evmouse.ly,
-            button: evmouse.button,
+            button: GuiMouse::try_from(evmouse.button).unwrap(),
             count: evmouse.count,
             modifiers: evmouse.modifiers,
             tag: evmouse.tag,
@@ -208,7 +207,7 @@ impl EvWheel {
 /// Keyboard event parameters.
 pub struct EvKey {
     /// Referenced key.
-    pub key: vkey_t,
+    pub key: KeyCode,
     /// Combination of values mkey_t. todo!
     pub modifiers: u32,
 }
@@ -220,7 +219,7 @@ impl EvKey {
         }
         let evkey = unsafe { &*ptr };
         EvKey {
-            key: evkey.key,
+            key: KeyCode::try_from(evkey.key).unwrap(),
             modifiers: evkey.modifiers,
         }
     }
@@ -271,7 +270,7 @@ impl EvSize {
 /// Window closing Event Parameters.
 pub struct EvWinClose {
     /// Origin of the close.
-    pub origin: gui_close_t,
+    pub origin: GuiClose,
 }
 
 impl EvWinClose {
@@ -281,7 +280,7 @@ impl EvWinClose {
         }
         let evclose = unsafe { &*ptr };
         EvWinClose {
-            origin: evclose.origin,
+            origin: GuiClose::try_from(evclose.origin).unwrap(),
         }
     }
 }
@@ -291,7 +290,7 @@ pub struct EvMenu {
     /// Menu item index.
     pub index: u32,
     /// Pressed item status.
-    pub state: gui_state_t,
+    pub state: GuiState,
     /// Pressed item text.
     pub text: String,
 }
@@ -304,7 +303,7 @@ impl EvMenu {
         let evmenu = unsafe { &*ptr };
         EvMenu {
             index: evmenu.index,
-            state: evmenu.state,
+            state: GuiState::try_from(evmenu.state).unwrap(),
             text: unsafe {
                 std::ffi::CStr::from_ptr(evmenu.text)
                     .to_string_lossy()
@@ -317,9 +316,9 @@ impl EvMenu {
 /// Scroll event parameters.
 pub struct EvScroll {
     /// Scroll bar orientation.
-    pub orient: gui_orient_t,
+    pub orient: GuiOrient,
     /// Scroll type.
-    pub scroll: gui_scroll_t,
+    pub scroll: GuiScroll,
     /// Scroll position.
     pub cpos: f32,
 }
@@ -331,8 +330,8 @@ impl EvScroll {
         }
         let evscroll = unsafe { &*ptr };
         EvScroll {
-            orient: evscroll.orient,
-            scroll: evscroll.scroll,
+            orient: GuiOrient::try_from(evscroll.orient).unwrap(),
+            scroll: GuiScroll::try_from(evscroll.scroll).unwrap(),
             cpos: evscroll.cpos,
         }
     }
@@ -341,9 +340,9 @@ impl EvScroll {
 /// Location of a cell in a table.
 pub struct EvTbPos {
     /// Column index.
-    pub col: u32,
+    pub col: usize,
     /// Row index.
-    pub row: u32,
+    pub row: usize,
 }
 
 impl EvTbPos {
@@ -353,8 +352,8 @@ impl EvTbPos {
         }
         let evtbpos = unsafe { &*ptr };
         EvTbPos {
-            col: evtbpos.col,
-            row: evtbpos.row,
+            col: evtbpos.col as _,
+            row: evtbpos.row as _,
         }
     }
 }
@@ -364,7 +363,7 @@ pub struct EvTbRow {
     /// Selected or not.
     pub sel: bool,
     /// Row index.
-    pub row: u32,
+    pub row: usize,
 }
 
 impl EvTbRow {
@@ -375,7 +374,7 @@ impl EvTbRow {
         let evtbrow = unsafe { &*ptr };
         EvTbRow {
             sel: evtbrow.sel != 0,
-            row: evtbrow.row,
+            row: evtbrow.row as _,
         }
     }
 }
@@ -383,13 +382,13 @@ impl EvTbRow {
 /// Group of cells in a table.
 pub struct EvTbRect {
     /// Initial column index.
-    pub stcol: u32,
+    pub stcol: usize,
     /// End column index.
-    pub edcol: u32,
+    pub edcol: usize,
     /// Initial row index.
-    pub strow: u32,
+    pub strow: usize,
     /// End row index.
-    pub edrow: u32,
+    pub edrow: usize,
 }
 
 impl EvTbRect {
@@ -399,18 +398,36 @@ impl EvTbRect {
         }
         let evtbrect = unsafe { &*ptr };
         EvTbRect {
-            stcol: evtbrect.stcol,
-            edcol: evtbrect.edcol,
-            strow: evtbrect.strow,
-            edrow: evtbrect.edrow,
+            stcol: evtbrect.stcol as _,
+            edcol: evtbrect.edcol as _,
+            strow: evtbrect.strow as _,
+            edrow: evtbrect.edrow as _,
         }
     }
+}
+
+fn array_usize(array: *mut nappgui_sys::ArrStuint32_t) -> Option<Vec<usize>> {
+    if array.is_null() {
+        return None;
+    }
+
+    let array = unsafe { *array };
+
+    if array.content.is_null() {
+        return None;
+    }
+
+    let content = unsafe { *array.content };
+
+    let elem = &content.elem;
+
+    Some(elem.iter().map(|&x| x as _).collect())
 }
 
 /// Selection in a table.
 pub struct EvTbSel {
     /// Row indices.
-    pub sel: Vec<u32>,
+    pub sel: Vec<usize>,
 }
 
 impl EvTbSel {
@@ -420,7 +437,7 @@ impl EvTbSel {
         }
         let evtbsel = unsafe { &*ptr };
         EvTbSel {
-            sel: array_u32(evtbsel.sel).unwrap(),
+            sel: array_usize(evtbsel.sel).unwrap(),
         }
     }
 }
@@ -430,7 +447,7 @@ pub struct EvTbCell {
     /// Cell text.
     pub text: String,
     /// Text alignment.
-    pub align: align_t,
+    pub align: Align,
 }
 
 impl EvTbCell {
@@ -445,7 +462,7 @@ impl EvTbCell {
                     .to_string_lossy()
                     .into_owned()
             },
-            align: evtbcell.align,
+            align: Align::try_from(evtbcell.align).unwrap(),
         }
     }
 }

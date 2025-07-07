@@ -13,7 +13,7 @@ impl Progress {
     pub_crate_ptr_ops!(*mut nappgui_sys::Progress);
 
     /// Create a progress bar.
-    pub fn create() -> Self {
+    pub fn new() -> Self {
         let progress = unsafe { progress_create() };
         Self::from_raw(progress)
     }

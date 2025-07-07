@@ -34,7 +34,7 @@ impl Layout {
     pub_crate_ptr_ops!(*mut nappgui_sys::Layout);
 
     /// Create a new layout specifying the number of columns and rows.
-    pub fn create(rows: usize, cols: usize) -> Self {
+    pub fn new(rows: usize, cols: usize) -> Self {
         let layout = unsafe { layout_create(rows as _, cols as _) };
         Self::from_raw(layout)
     }

@@ -21,19 +21,19 @@ impl View {
     pub_crate_ptr_ops!(*mut nappgui_sys::View);
 
     /// Create a new custom view.
-    pub fn create() -> Self {
+    pub fn new() -> Self {
         let view = unsafe { view_create() };
         Self::from_raw(view)
     }
 
     /// Create a new custom view with scrollbars.
-    pub fn scroll() -> Self {
+    pub fn new_scroll() -> Self {
         let view = unsafe { view_scroll() };
         Self::from_raw(view)
     }
 
     /// Create a new view with all the options.
-    pub fn custom(hscroll: bool, vscroll: bool) -> Self {
+    pub fn new_custom(hscroll: bool, vscroll: bool) -> Self {
         let view = unsafe { view_custom(hscroll as _, vscroll as _) };
         Self::from_raw(view)
     }

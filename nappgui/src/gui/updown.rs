@@ -13,7 +13,7 @@ impl UpDown {
     pub_crate_ptr_ops!(*mut nappgui_sys::UpDown);
 
     /// Create an updown control.
-    pub fn create() -> Self {
+    pub fn new() -> Self {
         let updown = unsafe { updown_create() };
         Self::from_raw(updown)
     }

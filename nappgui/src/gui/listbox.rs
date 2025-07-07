@@ -20,7 +20,7 @@ impl ListBox {
     pub_crate_ptr_ops!(*mut nappgui_sys::ListBox);
 
     /// Create a new list control.
-    pub fn create() -> Self {
+    pub fn new() -> Self {
         let listbox = unsafe { listbox_create() };
         Self::from_raw(listbox)
     }

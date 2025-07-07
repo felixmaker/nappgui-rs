@@ -21,7 +21,7 @@ impl PopUp {
     pub_crate_ptr_ops!(*mut nappgui_sys::PopUp);
 
     /// Create a new popup control (PopUp button).
-    pub fn create() -> Self {
+    pub fn new() -> Self {
         let popup = unsafe { popup_create() };
         Self::from_raw(popup)
     }

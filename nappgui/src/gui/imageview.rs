@@ -20,9 +20,11 @@ impl ImageView {
     pub_crate_ptr_ops!(*mut nappgui_sys::ImageView);
 
     /// Create a image view.
-    pub fn create() -> Self {
+    pub fn new( width: f32, height: f32) -> Self {
         let imageview = unsafe { imageview_create() };
-        Self::from_raw(imageview)
+        let imageview = Self::from_raw(imageview);
+        imageview.size(width, height);
+        imageview
     }
 
     /// Set the default control size.

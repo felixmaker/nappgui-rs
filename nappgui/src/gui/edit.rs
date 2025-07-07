@@ -24,12 +24,12 @@ impl Edit {
     pub_crate_ptr_ops!(*mut nappgui_sys::Edit);
 
     /// Create a text edit control.
-    pub fn create() -> Self {
+    pub fn new() -> Self {
         let edit = unsafe { edit_create() };
         Self::from_raw(edit)
     }
 
-    /// Create a text editing control that allows multiple lines.
+    /// Create a multiline text edit control.
     pub fn new_multiline() -> Self {
         let edit = unsafe { edit_multiline() };
         Self::from_raw(edit)

@@ -10,7 +10,6 @@ See [frang75/nappgui_src](https://github.com/frang75/nappgui_src) and its [home 
 ## example
 
 ```rust
-use nappgui::gui::*;
 use nappgui::osapp::*;
 use nappgui::prelude::*;
 
@@ -22,14 +21,11 @@ impl AppHandler for App {
     fn create() -> Self {
         let clicks = std::rc::Rc::new(std::cell::RefCell::new(0));
 
-        let panel = Panel::create();
-        let layout = Layout::create(1, 3);
-        let label = Label::create();
-        let button = Button::push();
-        let text = TextView::create();
-
-        label.text("Hello!, I'm a label");
-        button.text("Click Me!");
+        let panel = Panel::new();
+        let layout = Layout::new(1, 3);
+        let label = Label::new("Hello, I'm a label");
+        let button = PushButton::new("Click Me!");
+        let text = TextView::new();
 
         layout.label(&label, 0, 0);
         layout.button(&button, 0, 1);
@@ -47,7 +43,7 @@ impl AppHandler for App {
 
         panel.layout(&layout);
 
-        let window = Window::create(WindowFlag::ekWINDOW_STD);
+        let window = Window::new(WindowFlags::default());
         window.panel(&panel);
         window.title("Hello, World!");
         window.origin(500.0, 200.0);
@@ -55,9 +51,7 @@ impl AppHandler for App {
 
         window.show();
 
-        Self {
-            _window: window,
-        }
+        Self { _window: window }
     }
 }
 

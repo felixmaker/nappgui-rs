@@ -25,13 +25,13 @@ impl SplitView {
     pub_crate_ptr_ops!(*mut nappgui_sys::SplitView);
 
     /// Create a splitview with horizontal split.
-    pub fn horizontal() -> Self {
+    pub fn new_horizontal() -> Self {
         let splitview = unsafe { splitview_horizontal() };
         Self::from_raw(splitview)
     }
 
     /// Create a splitview with vertical split.
-    pub fn vertical() -> Self {
+    pub fn new_vertical() -> Self {
         let splitview = unsafe { splitview_vertical() };
         Self::from_raw(splitview)
     }

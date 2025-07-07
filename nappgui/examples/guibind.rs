@@ -62,7 +62,7 @@ fn i_data_bind() {
 }
 
 fn i_radio_layout() -> Layout {
-    let layout = Layout::create(1, 6);
+    let layout = Layout::new(1, 6);
     for i in 0..6 {
         let radio = RadioButton::new(&format!("Radio {}", i));
         layout.button(&radio, 0, i);
@@ -77,8 +77,7 @@ fn i_title_labels(layout: &Layout) {
         "Label", "EditBox", "Check", "Check3", "Radio", "PopUp", "ListBox", "Slider", "UpDown",
     ];
     for i in 0..I_NUM_CONTROLS {
-        let label = Label::create();
-        label.text(strs[i]);
+        let label = Label::new(strs[i]);
         label.font(&font);
         layout.label(&label, 0, i as _);
     }
@@ -88,7 +87,7 @@ fn i_title_labels(layout: &Layout) {
 
 fn i_value_labels(layout: &Layout) {
     for i in 0..I_NUM_CONTROLS {
-        let label = Label::create();
+        let label = Label::new("");
         layout.label(&label, 2, i as _);
         layout.halign(2, i as _, Align::Justify);
     }
@@ -129,16 +128,16 @@ fn i_value_labels(layout: &Layout) {
 }
 
 fn i_layout() -> Layout {
-    let layout = Layout::create(3, 9);
-    let label = Label::create();
-    let edit = Edit::create();
+    let layout = Layout::new(3, 9);
+    let label = Label::new("");
+    let edit = Edit::new();
     let check = CheckButton::new("");
     let check3 = Check3Button::new("");
     let radio = i_radio_layout();
-    let pop = PopUp::create();
-    let list = ListBox::create();
-    let slider = Slider::create();
-    let updown = UpDown::create();
+    let pop = PopUp::new();
+    let list = ListBox::new();
+    let slider = Slider::new();
+    let updown = UpDown::new();
     layout.label(&label, 1, 0);
     layout.halign(1, 0, Align::Justify);
     layout.edit(&edit, 1, 1);
@@ -193,7 +192,7 @@ impl AppHandler for App {
         i_data_bind();
 
         let layout = i_layout();
-        let panel = Panel::create();
+        let panel = Panel::new();
 
         let data = BasicTypes {
             bool_val: false,
@@ -212,7 +211,7 @@ impl AppHandler for App {
         layout_dbind!(&layout, BasicTypes);
         layout_dbind_obj!(&layout, data as _, BasicTypes);
 
-        let window = Window::create(WindowFlags::default());
+        let window = Window::new(WindowFlags::default());
         window.panel(&panel);
         window.title("Hello, World!");
         window.origin(500.0, 200.0);

@@ -16,13 +16,13 @@ impl Slider {
     pub_crate_ptr_ops!(*mut nappgui_sys::Slider);
 
     /// Create a new slider control.
-    pub fn create() -> Self {
+    pub fn new() -> Self {
         let updown = unsafe { slider_create() };
         Self::from_raw(updown)
     }
 
     /// Create a new vertical slider.
-    pub fn create_vertical() -> Self {
+    pub fn new_vertical() -> Self {
         let updown = unsafe { slider_vertical() };
         Self::from_raw(updown)
     }

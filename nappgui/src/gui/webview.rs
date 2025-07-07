@@ -17,7 +17,7 @@ impl WebView {
     pub_crate_ptr_ops!(*mut nappgui_sys::WebView);
 
     /// Create a Web View.
-    pub fn create() -> Self {
+    pub fn new() -> Self {
         let webview = unsafe { webview_create() };
         Self::from_raw(webview)
     }

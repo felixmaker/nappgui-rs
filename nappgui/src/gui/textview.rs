@@ -1,7 +1,9 @@
 use std::rc::Rc;
 
 use crate::{
-    draw_2d::Color, types::{Align, FontStyle}, util::macros::{callback, impl_gui_control, pub_crate_ptr_ops}
+    draw_2d::Color,
+    types::{Align, FontStyle},
+    util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
 };
 
 use nappgui_sys::{
@@ -23,7 +25,7 @@ impl TextView {
     pub_crate_ptr_ops!(*mut nappgui_sys::TextView);
 
     /// Create a text view.
-    pub fn create() -> Self {
+    pub fn new() -> Self {
         let textview = unsafe { textview_create() };
         Self::from_raw(textview)
     }

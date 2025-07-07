@@ -9,13 +9,12 @@ impl AppHandler for App {
     fn create() -> Self {
         let clicks = std::rc::Rc::new(std::cell::RefCell::new(0));
 
-        let panel = Panel::create();
-        let layout = Layout::create(1, 3);
-        let label = Label::create();
+        let panel = Panel::new();
+        let layout = Layout::new(1, 3);
+        let label = Label::new("Hello, I'm a label");
         let button = PushButton::new("Click Me!");
-        let text = TextView::create();
+        let text = TextView::new();
 
-        label.text("Hello!, I'm a label");
         layout.label(&label, 0, 0);
         layout.button(&button, 0, 1);
         layout.textview(&text, 0, 2);
@@ -32,7 +31,7 @@ impl AppHandler for App {
 
         panel.layout(&layout);
 
-        let window = Window::create(WindowFlags::default());
+        let window = Window::new(WindowFlags::default());
         window.panel(&panel);
         window.title("Hello, World!");
         window.origin(500.0, 200.0);

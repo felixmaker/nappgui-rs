@@ -20,7 +20,7 @@ impl Panel {
     pub_crate_ptr_ops!(*mut nappgui_sys::Panel);
 
     /// Create a panel.
-    pub fn create() -> Self {
+    pub fn new() -> Self {
         let panel = unsafe { panel_create() };
         Self::from_raw(panel)
     }

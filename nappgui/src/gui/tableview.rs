@@ -27,7 +27,7 @@ impl TableView {
     pub_crate_ptr_ops!(*mut nappgui_sys::TableView);
 
     /// Create an table view control.
-    pub fn create() -> Self {
+    pub fn new() -> Self {
         let table = unsafe { tableview_create() };
         Self::from_raw(table)
     }

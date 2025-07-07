@@ -22,7 +22,7 @@ impl Combo {
     pub_crate_ptr_ops!(*mut nappgui_sys::Combo);
 
     /// Create a combo control.
-    pub fn create() -> Self {
+    pub fn new() -> Self {
         let combo = unsafe { combo_create() };
         Self::from_raw(combo)
     }

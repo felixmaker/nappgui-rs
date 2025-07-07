@@ -31,7 +31,7 @@ impl Window {
     pub_crate_ptr_ops!(*mut nappgui_sys::Window);
 
     /// Create a new window.
-    pub fn create(flag: WindowFlags) -> Self {
+    pub fn new(flag: WindowFlags) -> Self {
         let result = flag.to_window_flag_t();
         let window = unsafe { window_create(result as u32) };
         Self::from_raw(window)

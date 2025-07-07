@@ -22,7 +22,7 @@ impl Menu {
     pub_crate_ptr_ops!(*mut nappgui_sys::Menu);
 
     /// Create a new menu.
-    pub fn create() -> Self {
+    pub fn new() -> Self {
         let menu = unsafe { menu_create() };
         Self::from_raw(menu)
     }

@@ -22,13 +22,13 @@ impl MenuItem {
     pub_crate_ptr_ops!(*mut nappgui_sys::MenuItem);
 
     /// Create a new item for a menu.
-    pub fn create() -> Self {
+    pub fn new() -> Self {
         let menu_item = unsafe { menuitem_create() };
         Self::from_raw(menu_item)
     }
 
     /// Create a new separator for a menu.
-    pub fn separator() -> Self {
+    pub fn new_separator() -> Self {
         let menu_item = unsafe { menuitem_separator() };
         Self::from_raw(menu_item)
     }

@@ -1,3 +1,5 @@
+use std::ffi::CString;
+
 use crate::{
     draw_2d::DCtx,
     types::{Align, GuiClose, GuiMouse, GuiOrient, GuiScroll, GuiState, KeyCode},
@@ -78,32 +80,6 @@ impl EvText {
         }
     }
 }
-
-// /// Result of the OnFilter event of the text boxes.
-// pub struct EvTextFilter {
-//     /// TRUE if the original control text should be changed.
-//     pub apply: bool,
-//     /// New control text, which is a revision (filter) of the original text.
-//     pub text: String,
-//     /// Cursor position (caret).
-//     pub cpos: usize,
-// }
-
-// impl EvTextFilter {
-//     pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvTextFilter) -> EvTextFilter {
-//         if ptr.is_null() {
-//             panic!("EvTextFilter is null");
-//         }
-//         let evfilter = unsafe { &*ptr };
-//         EvTextFilter {
-//             apply: evfilter.apply != 0,
-//             text: unsafe { std::ffi::CStr::from_ptr(evfilter.text.as_ptr()) }
-//                 .to_string_lossy()
-//                 .into_owned(),
-//             cpos: evfilter.cpos as _,
-//         }
-//     }
-// }
 
 /// OnDraw event parameters.
 pub struct EvDraw {
@@ -502,3 +478,66 @@ event_params!(EvTbRow);
 event_params!(EvTbRect);
 event_params!(EvTbSel);
 event_params!(EvTbCell);
+
+fn take_str_4096(text: &str) -> [i8; 4096] {
+    let text = CString::new(text).unwrap();
+    let mut cross_text = [0i8; 4096];
+    let length = if text.as_bytes().len() < 4096 {
+        text.as_bytes().len()
+    } else {
+        4096
+    };
+    cross_text[..length].copy_from_slice(
+        text.as_bytes()
+            .iter()
+            .map(|&x| x as i8)
+            .collect::<Vec<i8>>()
+            .as_slice(),
+    );
+    cross_text
+}
+
+/// Result of the OnFilter event of the text boxes.
+pub struct EvTextFilter {
+    /// TRUE if the original control text should be changed.
+    pub apply: bool,
+    /// New control text, which is a revision (filter) of the original text. len <= 4096usize!
+    pub text: String,
+    /// Cursor position (caret).
+    pub cpos: usize,
+}
+
+impl crate::core::event::NappGUIEventResult for EvTextFilter {
+    type CrossType = nappgui_sys::EvTextFilter;
+
+    fn type_() -> &'static str {
+        "EvTextFilter"
+    }
+
+    fn to_cross_type(&self) -> Self::CrossType {
+        nappgui_sys::EvTextFilter {
+            apply: self.apply as _,
+            text: take_str_4096(&self.text),
+            cpos: self.cpos as _,
+        }
+    }
+}
+
+macro_rules! event_results {
+    ($type:ty, $cross_type:literal) => {
+        impl crate::core::event::NappGUIEventResult for $type {
+            type CrossType = $type;
+
+            fn type_() -> &'static str {
+                $cross_type
+            }
+
+            fn to_cross_type(&self) -> Self::CrossType {
+                *self
+            }
+        }
+    };
+}
+
+event_results!(bool, "bool_t");
+event_results!(f32, "real32_t");

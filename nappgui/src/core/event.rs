@@ -32,11 +32,22 @@ impl Event {
         T::from_ptr(params)
     }
 
-    /// Gets an object to write the results of the event. Some events require the return of data by the receiver.
+    /// Set the result of the event. Some events require the return of data by the receiver.
     /// The type of result object will depend on the type of event.
-    pub unsafe fn result<G>(&self) -> &mut G {
-        let result = unsafe { nappgui_sys::event_result_imp(self.inner, c"".as_ptr()) };
-        &mut *(result as *mut G)
+    ///
+    /// # Safety
+    ///
+    /// Make sure the result is correct or undefined behavior may occur.
+    pub unsafe fn result<T>(&self, value: T)
+    where
+        T: NappGUIEventResult,
+    {
+        let tp = T::type_();
+        let tp = std::ffi::CString::new(tp).unwrap();
+        let result = unsafe { nappgui_sys::event_result_imp(self.inner, tp.as_ptr()) }
+            as *mut <T as NappGUIEventResult>::CrossType;
+        let value = value.to_cross_type();
+        *result = value;
     }
 }
 
@@ -44,8 +55,22 @@ impl Event {
 pub trait NappGUIEventParams {
     /// The event type.
     fn type_() -> &'static str;
+
     /// Get the event parameters from the pointer.
     fn from_ptr(ptr: *mut std::ffi::c_void) -> Option<Self>
     where
         Self: Sized;
+}
+
+/// The event parameters.
+pub trait NappGUIEventResult {
+    type CrossType;
+
+    /// The event type.
+    fn type_() -> &'static str {
+        ""
+    }
+
+    /// Convert to the cross type.
+    fn to_cross_type(&self) -> Self::CrossType;
 }

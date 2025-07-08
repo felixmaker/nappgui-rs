@@ -23,6 +23,7 @@ use super::panel::Panel;
 
 /// Window objects are the highest-level containers within the user interface.
 #[repr(transparent)]
+#[derive(Clone)]
 pub struct Window {
     pub(crate) inner: Rc<*mut nappgui_sys::Window>,
 }

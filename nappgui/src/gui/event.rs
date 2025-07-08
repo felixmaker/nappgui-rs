@@ -79,31 +79,31 @@ impl EvText {
     }
 }
 
-/// Result of the OnFilter event of the text boxes.
-pub struct EvTextFilter {
-    /// TRUE if the original control text should be changed.
-    pub apply: bool,
-    /// New control text, which is a revision (filter) of the original text.
-    pub text: String,
-    /// Cursor position (caret).
-    pub cpos: usize,
-}
+// /// Result of the OnFilter event of the text boxes.
+// pub struct EvTextFilter {
+//     /// TRUE if the original control text should be changed.
+//     pub apply: bool,
+//     /// New control text, which is a revision (filter) of the original text.
+//     pub text: String,
+//     /// Cursor position (caret).
+//     pub cpos: usize,
+// }
 
-impl EvTextFilter {
-    pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvTextFilter) -> EvTextFilter {
-        if ptr.is_null() {
-            panic!("EvTextFilter is null");
-        }
-        let evfilter = unsafe { &*ptr };
-        EvTextFilter {
-            apply: evfilter.apply != 0,
-            text: unsafe { std::ffi::CStr::from_ptr(evfilter.text.as_ptr()) }
-                .to_string_lossy()
-                .into_owned(),
-            cpos: evfilter.cpos as _,
-        }
-    }
-}
+// impl EvTextFilter {
+//     pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvTextFilter) -> EvTextFilter {
+//         if ptr.is_null() {
+//             panic!("EvTextFilter is null");
+//         }
+//         let evfilter = unsafe { &*ptr };
+//         EvTextFilter {
+//             apply: evfilter.apply != 0,
+//             text: unsafe { std::ffi::CStr::from_ptr(evfilter.text.as_ptr()) }
+//                 .to_string_lossy()
+//                 .into_owned(),
+//             cpos: evfilter.cpos as _,
+//         }
+//     }
+// }
 
 /// OnDraw event parameters.
 pub struct EvDraw {
@@ -485,24 +485,6 @@ macro_rules! event_params {
     };
 }
 
-macro_rules! event_result {
-    ($type:ty) => {
-        impl crate::core::event::NappGUIEventResult for $type {
-            fn type_() -> &'static str {
-                stringify!($type)
-            }
-
-            fn from_ptr(ptr: *mut std::ffi::c_void) -> Option<Self> {
-                if ptr.is_null() {
-                    return None;
-                }
-
-                Some(Self::from_ptr(ptr as _))
-            }
-        }
-    };
-}
-
 event_params!(EvButton);
 event_params!(EvSlider);
 event_params!(EvText);
@@ -520,5 +502,3 @@ event_params!(EvTbRow);
 event_params!(EvTbRect);
 event_params!(EvTbSel);
 event_params!(EvTbCell);
-
-event_result!(EvTextFilter);

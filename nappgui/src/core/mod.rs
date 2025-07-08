@@ -18,7 +18,7 @@ pub(crate) mod array;
 pub mod dbind;
 
 pub use {
-    event::{Event, NappGUIEventParams, NappGUIEventResult},
+    event::{Event, NappGUIEventParams},
     regex::RegEx,
     stream::Stream,
     string::NappguiString,

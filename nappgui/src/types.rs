@@ -1,4 +1,22 @@
-use crate::{gui::ControlTrait, util::macros::impl_i32_to_enum};
+use crate::gui::ControlTrait;
+
+macro_rules! impl_i32_to_enum {
+    ($type: ty, $range: expr) => {
+        impl TryFrom<i32> for $type {
+            type Error = crate::error::NappguiError;
+
+            fn try_from(value: i32) -> Result<Self, Self::Error> {
+                if !($range).contains(&value) {
+                    return Err(crate::error::NappguiError::Internal(
+                        crate::error::NappguiErrorKind::UndefinedEnumTransmute,
+                    ));
+                } else {
+                    Ok(unsafe { std::mem::transmute(value) })
+                }
+            }
+        }
+    };
+}
 
 /// Alignment values.
 #[repr(i32)]
@@ -556,3 +574,101 @@ pub enum GuiScroll {
 }
 
 impl_i32_to_enum!(GuiScroll, 1..=7);
+
+/// Event type.
+#[repr(i32)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum EventType {
+    // /// Redirection of Asserts.
+    // CoreAssert = 256,
+    // /// A file detected while browsing a directory. hfile_dir_loop.
+    // CoreFile = 257,
+    // /// Entry in a sub-directory while we go through a directory. hfile_dir_loop.
+    // CoreEntry = 258,
+    // /// Exit of a sub-directory.
+    // CoreExit = 259,
+    /// Click on a Label control.
+    Label = 1024,
+    /// Click on a Button control.
+    Button = 1025,
+    /// The selection of a PopUp control has been changed.
+    PopUp = 1026,
+    /// The selection of a control has been changed ListBox.
+    ListBox = 1027,
+    /// You are moving an Slider control.
+    Slider = 1028,
+    /// Click on a UpDown control.
+    UpDown = 1029,
+    /// The text of a Edit or Combo control is being edited.
+    TextFilter = 1030,
+    /// You have finished editing the text of a Edit or Combo control.
+    TextChange = 1031,
+    /// Ask a control if it wants to give up keyboard focus.
+    FocusResign = 1032,
+    /// Ask a control if it wants to accept keyboard focus.
+    FocusAccept = 1033,
+    /// A control has received or lost keyboard focus.
+    Focus = 1034,
+    /// Click on a menu.
+    Menu = 1035,
+    /// The view content must be redrawn.
+    Draw = 1036,
+    /// There is draw the overlay layer.
+    Overlay = 1037,
+    /// The size of a view has changed.
+    Resize = 1038,
+    /// The mouse has entered the view area.
+    Enter = 1039,
+    /// The mouse has left the view area.
+    Exit = 1040,
+    /// The mouse is moving on the view surface.
+    Move = 1041,
+    /// A mouse button was pressed.
+    Down = 1042,
+    /// A mouse button has been released.
+    Up = 1043,
+    /// The mouse has been double-clicked.
+    DoubleClick = 1044,
+    /// Click on a view.
+    Click = 1045,
+    /// Dragging is being done over.
+    Drag = 1046,
+    /// Mouse wheel has moved.
+    Wheel = 1047,
+    /// A key has been pressed.
+    KeyDown = 1048,
+    /// A key has been released.
+    KeyUp = 1049,
+    /// The scroll bars are being manipulated.
+    Scroll = 1050,
+    /// The window is moving across the desktop.
+    WindowMoved = 1051,
+    /// The window is being resized.
+    WindowSizing = 1052,
+    /// The window has been resized.
+    WindowSize = 1053,
+    /// The window has been closed.
+    WindowClose = 1054,
+    /// An update color of comwin_color.
+    Color = 1055,
+    /// Desktop theme has changed.
+    Theme = 1056,
+    /// An object linked to a layout has been edited. Notifications and calculated fields.
+    ObjectChange = 1057,
+    /// A table needs to know the number of rows.
+    TableNRows = 1058,
+    /// A table will begin to draw the visible part of the data.
+    TableBegin = 1059,
+    /// A table has finished drawing.
+    TableEnd = 1060,
+    /// A table needs the data of a cell.
+    TableCell = 1061,
+    /// The selected rows in a table have changed.
+    TableSelected = 1062,
+    /// Click on a table header.
+    TableHeadClick = 1063,
+    /// Click on a table row.
+    TableRowClick = 1064,
+}
+
+impl_i32_to_enum!(EventType, 1024..=1064);

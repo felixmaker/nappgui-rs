@@ -1,4 +1,6 @@
-/// An event is an action that occurs during the program execution, usually asynchronously or unpredictably and 
+use crate::types::EventType;
+
+/// An event is an action that occurs during the program execution, usually asynchronously or unpredictably and
 /// on which a given object must be notified.
 pub struct Event {
     pub(crate) inner: *mut nappgui_sys::Event,
@@ -13,8 +15,9 @@ impl Event {
     }
 
     /// Get the event type.
-    pub fn type_(&self) -> u32 {
-        unsafe { nappgui_sys::event_type(self.inner as _) }
+    pub fn type_(&self) -> EventType {
+        let event_type = unsafe { nappgui_sys::event_type(self.inner as _) } as i32;
+        EventType::try_from(event_type).unwrap()
     }
 
     /// Get the event parameters, encapsulated in a structure, which will be different depending on the event type.
@@ -31,15 +34,9 @@ impl Event {
 
     /// Gets an object to write the results of the event. Some events require the return of data by the receiver.
     /// The type of result object will depend on the type of event.
-    pub fn result<T>(&self) -> Option<T>
-    where
-        T: NappGUIEventResult,
-    {
-        let tp = T::type_();
-        let tp = std::ffi::CString::new(tp).unwrap();
-        let result = unsafe { nappgui_sys::event_result_imp(self.inner, tp.as_ptr()) };
-
-        T::from_ptr(result)
+    pub unsafe fn result<G>(&self) -> &mut G {
+        let result = unsafe { nappgui_sys::event_result_imp(self.inner, c"".as_ptr()) };
+        &mut *(result as *mut G)
     }
 }
 
@@ -51,14 +48,4 @@ pub trait NappGUIEventParams {
     fn from_ptr(ptr: *mut std::ffi::c_void) -> Option<Self>
     where
         Self: Sized;
-}
-
-/// The event result.
-pub trait NappGUIEventResult {
-    /// The event type.
-    fn type_() -> &'static str;
-    /// Get the event result from the pointer.
-    fn from_ptr(ptr: *mut std::ffi::c_void) -> Option<Self>
-    where
-        Self: Sized; 
 }

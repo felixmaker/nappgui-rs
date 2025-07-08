@@ -65,18 +65,26 @@ impl ListBox {
     }
 
     /// Adds a new element.
-    pub fn add_elem(&self, text: &str, image: &Image) {
+    pub fn add_elem(&self, text: &str, image: Option<&Image>) {
         let text = std::ffi::CString::new(text).unwrap();
+        let image = match image {
+            Some(value) => value.inner,
+            None => std::ptr::null(),
+        };
         unsafe {
-            listbox_add_elem(self.as_ptr(), text.as_ptr(), image.inner);
+            listbox_add_elem(self.as_ptr(), text.as_ptr(), image);
         }
     }
 
     /// Edit a list item.
-    pub fn set_elem(&self, index: usize, text: &str, image: &Image) {
+    pub fn set_elem(&self, index: usize, text: &str, image: Option<&Image>) {
         let text = std::ffi::CString::new(text).unwrap();
+        let image = match image {
+            Some(value) => value.inner,
+            None => std::ptr::null(),
+        };
         unsafe {
-            listbox_set_elem(self.as_ptr(), index as _, text.as_ptr(), image.inner);
+            listbox_set_elem(self.as_ptr(), index as _, text.as_ptr(), image);
         }
     }
 

@@ -41,18 +41,30 @@ impl PopUp {
     }
 
     /// Add a new item to the popup list.
-    pub fn add_elem(&self, text: &str, image: &Image) {
+    pub fn add_elem(&self, text: &str, image: Option<&Image>) {
         let text = std::ffi::CString::new(text).unwrap();
-        unsafe {
-            popup_add_elem(self.as_ptr(), text.as_ptr(), image.inner);
+        if let Some(image) = image {
+            unsafe {
+                popup_add_elem(self.as_ptr(), text.as_ptr(), image.inner);
+            }
+        } else {
+            unsafe {
+                popup_add_elem(self.as_ptr(), text.as_ptr(), std::ptr::null());
+            }
         }
     }
 
     /// Edit an item from the drop-down list.
-    pub fn set_elem(&self, index: usize, text: &str, image: &Image) {
+    pub fn set_elem(&self, index: usize, text: &str, image: Option<&Image>) {
         let text = std::ffi::CString::new(text).unwrap();
-        unsafe {
-            popup_set_elem(self.as_ptr(), index as _, text.as_ptr(), image.inner);
+        if let Some(image) = image {
+            unsafe {
+                popup_set_elem(self.as_ptr(), index as _, text.as_ptr(), image.inner);
+            }
+        } else {
+            unsafe {
+                popup_set_elem(self.as_ptr(), index as _, text.as_ptr(), std::ptr::null());
+            }
         }
     }
 

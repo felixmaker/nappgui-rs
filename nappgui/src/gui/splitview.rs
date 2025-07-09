@@ -17,6 +17,7 @@ use super::{Panel, TextView, View};
 /// The SplitView are views divided into two parts, where in each of them we place another view or
 /// a panel. The dividing line is scrollable, which allows resizing both halves, dividing the total
 /// size of the control between the children.
+#[derive(Clone)]
 pub struct SplitView {
     pub(crate) inner: Rc<*mut nappgui_sys::SplitView>,
 }

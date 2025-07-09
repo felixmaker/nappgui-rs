@@ -5,6 +5,7 @@ use nappgui_sys::{progress_create, progress_undefined, progress_value};
 use crate::util::macros::{impl_gui_control, pub_crate_ptr_ops};
 
 /// Progress bars are passive controls that show the remaining time to complete a certain task.
+#[derive(Clone)]
 pub struct Progress {
     pub(crate) inner: Rc<*mut nappgui_sys::Progress>,
 }

@@ -26,6 +26,7 @@ use super::*;
 
 /// A Layout is a virtual and transparent grid always linked with a Panel which serves to locate the different
 /// interface elements.
+#[derive(Clone)]
 pub struct Layout {
     pub(crate) inner: Rc<*mut nappgui_sys::Layout>,
 }

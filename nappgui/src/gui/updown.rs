@@ -5,6 +5,7 @@ use nappgui_sys::{updown_OnClick, updown_create, updown_tooltip};
 use crate::{gui::event::EvButton, util::macros::{callback, impl_gui_control, pub_crate_ptr_ops}};
 
 /// UpDown are two-part horizontally divided button controls.
+#[derive(Clone)]
 pub struct UpDown {
     pub(crate) inner: Rc<*mut nappgui_sys::UpDown>,
 }

@@ -11,6 +11,7 @@ use nappgui_sys::{
 };
 
 /// The ListBox are controls that display a series of elements as a list.
+#[derive(Clone)]
 pub struct ListBox {
     pub(crate) inner: Rc<*mut nappgui_sys::ListBox>,
 }

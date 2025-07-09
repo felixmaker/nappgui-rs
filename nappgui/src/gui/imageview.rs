@@ -12,6 +12,7 @@ use nappgui_sys::{
 };
 
 /// ImageView are specialized views in visualizing images and GIF animations.
+#[derive(Clone)]
 pub struct ImageView {
     pub(crate) inner: Rc<*mut nappgui_sys::ImageView>,
 }

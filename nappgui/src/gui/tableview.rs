@@ -19,6 +19,7 @@ use nappgui_sys::{
 };
 
 /// TableViews are data views that display tabulated information arranged in rows and columns.
+#[derive(Clone)]
 pub struct TableView {
     pub(crate) inner: Rc<*mut nappgui_sys::TableView>,
 }

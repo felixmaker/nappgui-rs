@@ -9,6 +9,7 @@ use crate::util::macros::{callback, impl_gui_control, pub_crate_ptr_ops};
 /// A WebView control will allow us to embed Web content in our application. It will behave in the same way
 /// as other view controls such as View or TextView in terms of layout or resizing, displaying a fully
 /// functional browser in its client area.
+#[derive(Clone)]
 pub struct WebView {
     pub(crate) inner: Rc<*mut nappgui_sys::WebView>,
 }

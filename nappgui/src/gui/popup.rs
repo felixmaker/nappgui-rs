@@ -14,6 +14,7 @@ use nappgui_sys::{
 /// PopUps are buttons that have a drop-down menu associated with them. Apparently they
 /// look like pushbuttons that when pressed show a list of options. In Hello PopUp and PopUp!
 /// you have an example of use.
+#[derive(Clone)]
 pub struct PopUp {
     pub(crate) inner: Rc<*mut nappgui_sys::PopUp>,
 }

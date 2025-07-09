@@ -13,6 +13,7 @@ use crate::{gui::event::{EvDraw, EvKey, EvMouse, EvScroll, EvSize}, util::macros
 
 /// The View controls or custom views are blank areas within the window that allow us
 /// to implement our own components.
+#[derive(Clone)]
 pub struct View {
     pub(crate) inner: Rc<*mut nappgui_sys::View>,
 }

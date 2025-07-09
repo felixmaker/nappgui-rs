@@ -11,6 +11,7 @@ use crate::{
 };
 
 /// Sliders are normally used to edit continuous and bounded numerical values.
+#[derive(Clone)]
 pub struct Slider {
     pub(crate) inner: Rc<*mut nappgui_sys::Slider>,
 }

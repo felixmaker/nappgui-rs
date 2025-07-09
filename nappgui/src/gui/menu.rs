@@ -14,6 +14,7 @@ use super::{MenuItem, Window};
 /// such as the classic Ctrl+C/Ctrl+V to copy and paste. Additionally, an item can house a submenu
 /// forming a hierarchy with different levels of depth. In Products you have an application that uses
 /// menus and in Hello dynamic Menu! an example of adding or eliminating items at runtime.
+#[derive(Clone)]
 pub struct Menu {
     pub(crate) inner: Rc<*mut nappgui_sys::Menu>,
 }

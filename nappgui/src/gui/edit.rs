@@ -14,6 +14,7 @@ use crate::{
 
 /// EditBox are small text boxes with editing capabilities. Like the Label they are of uniform format:
 /// The typeface and colors will affect the entire text
+#[derive(Clone)]
 pub struct Edit {
     pub(crate) inner: Rc<*mut nappgui_sys::Edit>,
 }

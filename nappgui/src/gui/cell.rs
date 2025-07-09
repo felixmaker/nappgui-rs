@@ -8,6 +8,7 @@ use nappgui_sys::{
 use crate::{gui::control::ControlTrait, util::macros::pub_crate_ptr_ops};
 
 /// Cells are the inner elements of a Layout and will house a control or a sublayout.
+#[derive(Clone)]
 pub struct Cell {
     pub(crate) inner: Rc<*mut nappgui_sys::Cell>,
 }

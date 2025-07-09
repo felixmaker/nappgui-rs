@@ -18,6 +18,7 @@ use nappgui_sys::{
 };
 
 /// TextView are views designed to work with rich text blocks, where fonts, sizes and colors can be combined.
+#[derive(Clone)]
 pub struct TextView {
     pub(crate) inner: Rc<*mut nappgui_sys::TextView>,
 }

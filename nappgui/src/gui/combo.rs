@@ -15,6 +15,7 @@ use nappgui_sys::{
 };
 
 /// ComboBox are text editing boxes with drop-down list.
+#[derive(Clone)]
 pub struct Combo {
     pub(crate) inner: Rc<*mut nappgui_sys::Combo>,
 }

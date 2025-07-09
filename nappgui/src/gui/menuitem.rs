@@ -15,6 +15,7 @@ use nappgui_sys::{
 use super::Menu;
 
 /// Represents an option within a Menu. They will always have an associated action that will be executed when activated.
+#[derive(Clone)]
 pub struct MenuItem {
     pub(crate) inner: Rc<*mut nappgui_sys::MenuItem>,
 }

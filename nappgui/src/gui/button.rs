@@ -109,6 +109,7 @@ macro_rules! button_image {
 }
 
 /// The push button.
+#[derive(Clone)]
 #[repr(transparent)]
 pub struct PushButton {
     pub(crate) inner: Rc<*mut nappgui_sys::Button>,
@@ -128,6 +129,7 @@ impl PushButton {
 }
 
 /// The checkbox button.
+#[derive(Clone)]
 #[repr(transparent)]
 pub struct CheckButton {
     pub(crate) inner: Rc<*mut nappgui_sys::Button>,
@@ -147,6 +149,7 @@ impl CheckButton {
 }
 
 /// The checkbox button with three states.
+#[derive(Clone)]
 #[repr(transparent)]
 pub struct Check3Button {
     pub(crate) inner: Rc<*mut nappgui_sys::Button>,
@@ -166,6 +169,7 @@ impl Check3Button {
 }
 
 /// The radio button
+#[derive(Clone)]
 #[repr(transparent)]
 pub struct RadioButton {
     pub(crate) inner: Rc<*mut nappgui_sys::Button>,
@@ -185,6 +189,7 @@ impl RadioButton {
 }
 
 /// The flat button, to which an image can be assigned. It is the typical toolbar button.
+#[derive(Clone)]
 #[repr(transparent)]
 pub struct FlatButton {
     pub(crate) inner: Rc<*mut nappgui_sys::Button>,
@@ -205,6 +210,7 @@ impl FlatButton {
 }
 
 /// The flat button with status. The button will alternate between pressed/released each time you click on it.
+#[derive(Clone)]
 #[repr(transparent)]
 pub struct FlatButtonEx {
     pub(crate) inner: Rc<*mut nappgui_sys::Button>,

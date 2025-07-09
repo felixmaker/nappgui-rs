@@ -16,6 +16,7 @@ use nappgui_sys::{
 /// that is, the font and color attributes will be applied to the entire text. In most cases the content will
 /// be limited to a single line, although it is possible to show blocks that extend in several lines. The control
 /// size will be adjusted to the text it contains
+#[derive(Clone)]
 pub struct Label {
     pub(crate) inner: Rc<*mut nappgui_sys::Label>,
 }

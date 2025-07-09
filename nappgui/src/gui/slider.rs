@@ -5,7 +5,10 @@ use nappgui_sys::{
     slider_vertical,
 };
 
-use crate::util::macros::{callback, impl_gui_control, pub_crate_ptr_ops};
+use crate::{
+    gui::event::EvSlider,
+    util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
+};
 
 /// Sliders are normally used to edit continuous and bounded numerical values.
 pub struct Slider {
@@ -29,7 +32,7 @@ impl Slider {
 
     callback! {
         /// Set an event handler for slider movement.
-        pub on_moved(Slider) => slider_OnMoved;
+        pub on_moved(Slider, EvSlider) => slider_OnMoved;
     }
 
     /// Set a tooltip for the slider. It is a small explanatory text that will appear when the mouse is over the control.

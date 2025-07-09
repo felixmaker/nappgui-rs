@@ -24,7 +24,7 @@ impl AppHandler for App {
         layout.vmargin(0, 5.0);
         layout.vmargin(1, 5.0);
 
-        button.on_click(move |_button, _event| {
+        button.on_click(move |_button, _params| {
             text.writef(&format!("Button click {}\n", clicks.borrow()));
             *clicks.borrow_mut() += 1;
         });

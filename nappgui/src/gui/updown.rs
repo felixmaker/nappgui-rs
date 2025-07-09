@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use nappgui_sys::{updown_OnClick, updown_create, updown_tooltip};
 
-use crate::util::macros::{callback, impl_gui_control, pub_crate_ptr_ops};
+use crate::{gui::event::EvButton, util::macros::{callback, impl_gui_control, pub_crate_ptr_ops}};
 
 /// UpDown are two-part horizontally divided button controls.
 pub struct UpDown {
@@ -20,7 +20,7 @@ impl UpDown {
 
     callback! {
         /// Set an event handler for pressing the button.
-        pub on_click(UpDown) => updown_OnClick;
+        pub on_click(UpDown, EvButton) => updown_OnClick;
     }
 
     /// Set a tooltip for the button. It is a small explanatory text that will appear when the mouse is over the control.

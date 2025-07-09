@@ -24,7 +24,7 @@ impl WebView {
 
     callback! {
         /// Sets a handler for keyboard focus.
-        pub on_focus(WebView) => webview_OnFocus;
+        pub on_focus(WebView, bool) => webview_OnFocus;
     }
 
     /// Sets the default size of the view.

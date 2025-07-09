@@ -9,9 +9,7 @@ use nappgui_sys::{
 };
 
 use crate::{
-    draw_2d::{font::Font, Color},
-    types::{Align, FontStyle},
-    util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
+    draw_2d::{font::Font, Color}, gui::event::{EvText, EvTextFilter}, types::{Align, FontStyle}, util::macros::{callback, impl_gui_control, pub_crate_ptr_ops}
 };
 
 /// EditBox are small text boxes with editing capabilities. Like the Label they are of uniform format:
@@ -37,13 +35,13 @@ impl Edit {
 
     callback! {
         /// Set a function to filter the text while editing.
-        pub on_filter(Edit) => edit_OnFilter;
+        pub on_filter(Edit, EvText) -> EvTextFilter => edit_OnFilter;
 
         /// Set a function to detect when the text has changed.
-        pub on_change(Edit) => edit_OnChange;
+        pub on_change(Edit, EvText) -> bool => edit_OnChange;
 
         /// Sets a handler for keyboard focus.
-        pub on_focus(Edit) => edit_OnFocus;
+        pub on_focus(Edit, bool) => edit_OnFocus;
     }
 
     /// Set the edit control text.

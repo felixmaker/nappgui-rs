@@ -1,8 +1,7 @@
 use std::rc::Rc;
 
 use crate::{
-    draw_2d::{Color, Font, Image},
-    util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
+    draw_2d::{Color, Font, Image}, gui::event::{EvButton, EvMouse}, util::macros::{callback, impl_gui_control, pub_crate_ptr_ops}
 };
 use nappgui_sys::{
     listbox_OnDown, listbox_OnSelect, listbox_add_elem, listbox_check, listbox_checkbox,
@@ -33,10 +32,10 @@ impl ListBox {
         /// element clicked will be received or UINT32_MAX if it corresponds to an empty area of the ListBox.
         /// If the event returns FALSE on event_result, the element will be prevented from being selected
         /// (TRUE by default). See GUI Events.
-        pub on_down(ListBox) => listbox_OnDown;
+        pub on_down(ListBox, EvMouse) -> bool => listbox_OnDown;
 
         /// Set an event handler for the selection of a new item.
-        pub on_select(ListBox) => listbox_OnSelect;
+        pub on_select(ListBox, EvButton) => listbox_OnSelect;
     }
 
     /// Set the default size of the list.

@@ -2,6 +2,7 @@ use std::{ffi::CString, rc::Rc};
 
 use crate::{
     draw_2d::{Color, Font},
+    gui::event::EvMouse,
     types::{Align, FontStyle},
     util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
 };
@@ -32,7 +33,7 @@ impl Label {
 
     callback! {
         /// Set the OnClick event handler.
-        pub on_click(Label) => label_OnClick;
+        pub on_click(Label, EvMouse) => label_OnClick;
     }
 
     /// Set the text that the label will display.

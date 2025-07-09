@@ -48,10 +48,11 @@ where
 }
 
 /// End a desktop application, destroying the message cycle and the application object.
-pub fn finish() {
+pub fn finish() -> bool {
     unsafe {
         osapp_finish();
     }
+    true
 }
 
 /// Set the general menu bar of the application.

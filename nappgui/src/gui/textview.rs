@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     draw_2d::Color,
+    gui::event::{EvText, EvTextFilter},
     types::{Align, FontStyle},
     util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
 };
@@ -35,10 +36,10 @@ impl TextView {
         ///
         /// # Remarks
         /// It works the same way as in Edit controls. See Filter texts and GUI Events.
-        pub on_filter(TextView) => textview_OnFilter;
+        pub on_filter(TextView, EvText) -> EvTextFilter => textview_OnFilter;
 
         /// Set a handler for keyboard focus.
-        pub on_focus(TextView) => textview_OnFocus;
+        pub on_focus(TextView, bool) => textview_OnFocus;
     }
 
     /// Sets the default size of the view.

@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     draw_2d::image::Image,
+    gui::event::EvButton,
     util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
 };
 
@@ -28,7 +29,7 @@ impl PopUp {
 
     callback! {
         /// Set an event handler for the selection of a new item.
-        pub on_select(PopUp) => popup_OnSelect;
+        pub on_select(PopUp, EvButton) => popup_OnSelect;
     }
 
     /// Assign a tooltip to the popup control.

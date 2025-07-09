@@ -479,6 +479,26 @@ event_params!(EvTbRect);
 event_params!(EvTbSel);
 event_params!(EvTbCell);
 
+macro_rules! event_params_core {
+    ($type:ty, $type_name:literal) => {
+        impl crate::core::event::NappGUIEventParams for $type {
+            fn type_() -> &'static str {
+                $type_name
+            }
+
+            fn from_ptr(ptr: *mut std::ffi::c_void) -> Option<Self> {
+                if ptr.is_null() {
+                    return None;
+                }
+
+                Some(unsafe { *(ptr as *mut $type) })
+            }
+        }
+    };
+}
+
+event_params_core!(bool, "bool_t");
+
 fn take_str_4096(text: &str) -> [i8; 4096] {
     let text = CString::new(text).unwrap();
     let mut cross_text = [0i8; 4096];

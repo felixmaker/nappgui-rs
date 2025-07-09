@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     draw_2d::Image,
+    gui::event::EvMenu,
     types::{GuiState, KeyCode, ModifierKey},
     util::macros::{callback, pub_crate_ptr_ops},
 };
@@ -35,7 +36,7 @@ impl MenuItem {
 
     callback! {
         /// Set an event handle for item click.
-        pub on_click(MenuItem) => menuitem_OnClick
+        pub on_click(MenuItem, EvMenu) => menuitem_OnClick
     }
 
     /// Enables or disables a menu item.

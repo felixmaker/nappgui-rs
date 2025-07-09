@@ -9,7 +9,7 @@ use nappgui_sys::{
     view_update, view_viewport, S2Df, V2Df,
 };
 
-use crate::util::macros::{callback, impl_gui_control, pub_crate_ptr_ops};
+use crate::{gui::event::{EvDraw, EvKey, EvMouse, EvScroll, EvSize}, util::macros::{callback, impl_gui_control, pub_crate_ptr_ops}};
 
 /// The View controls or custom views are blank areas within the window that allow us
 /// to implement our own components.
@@ -46,55 +46,55 @@ impl View {
 
     callback! {
         /// Set an event handler to draw in the view.
-        pub on_draw(View) => view_OnDraw;
+        pub on_draw(View, EvDraw) => view_OnDraw;
 
         /// Sets an event handler to draw the overlay.
-        pub on_overlay(View) => view_OnOverlay;
+        pub on_overlay(View, EvDraw) => view_OnOverlay;
 
         /// Set an event handler for resizing.
-        pub on_size(View) => view_OnSize;
+        pub on_size(View, EvSize) => view_OnSize;
 
         /// Set an event handler for mouse enter.
-        pub on_enter(View) => view_OnEnter;
+        pub on_enter(View, EvMouse) => view_OnEnter;
 
         /// Set an event handle for mouse exit.
-        pub on_exit(View) => view_OnExit;
+        pub on_exit(View, EvMouse) => view_OnExit;
 
         /// Set an event handler for mouse movement.
-        pub on_move(View) => view_OnMove;
+        pub on_move(View, EvMouse) => view_OnMove;
 
         /// Sets an event handler for a mouse button down.
-        pub on_down(View) => view_OnDown;
+        pub on_down(View, EvMouse) => view_OnDown;
 
         /// Sets an event handler for a mouse button up.
-        pub on_up(View) => view_OnUp;
+        pub on_up(View, EvMouse) => view_OnUp;
 
         /// Set an event handler for mouse click.
-        pub on_click(View) => view_OnClick;
+        pub on_click(View, EvMouse) => view_OnClick;
 
         /// Set an event handler for mouse drag.
-        pub on_drag(View) => view_OnDrag;
+        pub on_drag(View, EvMouse) => view_OnDrag;
 
         /// Set an event handler for mouse wheel.
-        pub on_wheel(View) => view_OnWheel;
+        pub on_wheel(View, EvMouse) => view_OnWheel;
 
         /// Set an event handler for a keystroke.
-        pub on_key_down(View) => view_OnKeyDown;
+        pub on_key_down(View, EvKey) => view_OnKeyDown;
 
         /// Set an event handler for releasing a key.
-        pub on_key_up(View) => view_OnKeyUp;
+        pub on_key_up(View, EvKey) => view_OnKeyUp;
 
         /// Sets an event handler for keyboard focus.
-        pub on_focus(View) => view_OnFocus;
+        pub on_focus(View, bool) => view_OnFocus;
 
         /// Set a handler to avoid losing keyboard focus.
-        pub on_accept_focus(View) => view_OnAcceptFocus;
+        pub on_accept_focus(View) -> bool => view_OnAcceptFocus;
 
         /// Set a handler to prevent getting keyboard focus.
-        pub on_resign_focus(View) => view_OnResignFocus;
+        pub on_resign_focus(View) -> bool => view_OnResignFocus;
 
         /// Set an event handler for the scroll bars.
-        pub on_scroll(View) => view_OnScroll;
+        pub on_scroll(View, EvScroll) -> f32 => view_OnScroll;
     }
 
     /// Allows to capture the press of the \[TAB\] key.

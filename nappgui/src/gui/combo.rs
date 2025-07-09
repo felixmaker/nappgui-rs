@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     draw_2d::{Color, Image},
+    gui::event::{EvText, EvTextFilter},
     types::{Align, FontStyle},
     util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
 };
@@ -29,14 +30,14 @@ impl Combo {
 
     callback! {
         /// Set a function to filter the text while editing.
-        pub on_filter(Combo) => combo_OnFilter;
+        pub on_filter(Combo, EvText) -> EvTextFilter => combo_OnFilter;
 
         /// Set a function to be called when the text has changed.
         ///
         /// # Remarks
         /// This event will also be launched when you select an item from the list, a sign that the text has changed
         /// in the edit box. See Validate texts and GUI Events.
-        pub on_change(Combo) => combo_OnChange;
+        pub on_change(Combo, EvText) -> bool => combo_OnChange;
     }
 
     /// Set the combo edit text.

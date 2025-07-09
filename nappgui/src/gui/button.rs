@@ -2,6 +2,7 @@ use std::{ffi::CString, rc::Rc};
 
 use crate::{
     draw_2d::{Font, Image},
+    gui::event::EvButton,
     types::GuiState,
     util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
 };
@@ -18,7 +19,7 @@ macro_rules! button_basic {
 
         callback! {
             /// Set a function for pressing the button.
-            pub on_click($button_type) => button_OnClick;
+            pub on_click($button_type, EvButton) => button_OnClick;
         }
 
         /// Set the text that the button will display.

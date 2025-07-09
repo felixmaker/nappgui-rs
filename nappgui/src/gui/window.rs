@@ -12,10 +12,11 @@ use std::rc::Rc;
 
 use crate::core::event::Event;
 use crate::draw_2d::Image;
-use crate::gui::{ControlTrait, ButtonTrait};
+use crate::gui::event::{EvPos, EvSize, EvWinClose};
+use crate::gui::{ButtonTrait, ControlTrait};
 use crate::types::{
-    FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D, Size2D,
-    WindowFlags,
+    FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D,
+    Size2D, WindowFlags,
 };
 use crate::util::macros::{callback, listener, pub_crate_ptr_ops};
 
@@ -54,13 +55,13 @@ impl Window {
 
     callback! {
         /// Set an event handler for the window closing.
-        pub on_close(Window) => window_OnClose;
+        pub on_close(Window, EvWinClose) -> bool => window_OnClose;
 
         /// Set an event handler for moving the window on the desktop.
-        pub on_moved(Window) => window_OnMoved;
+        pub on_moved(Window, EvPos) => window_OnMoved;
 
         /// Set an event handler for window resizing.
-        pub on_resize(Window) => window_OnResize;
+        pub on_resize(Window, EvSize) => window_OnResize;
     }
 
     /// Set the text that will display the window in the title bar.
@@ -252,7 +253,10 @@ impl Window {
     ///
     /// This function disables the possible previous default button. For the new button to be set,
     /// it must exist in the active layout, which requires this function to be called after window_panel
-    pub fn defbutton<T>(&self, button: &T) where T: ButtonTrait {
+    pub fn defbutton<T>(&self, button: &T)
+    where
+        T: ButtonTrait,
+    {
         unsafe {
             window_defbutton(self.as_ptr(), button.as_button_ptr());
         }

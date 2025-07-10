@@ -2,9 +2,9 @@ use std::{ffi::CString, rc::Rc};
 
 use crate::{
     draw_2d::{Color, Font},
-    gui::{event::EvMouse, impl_layout},
+    gui::{control::impl_control, event::EvMouse, impl_layout},
     types::{Align, FontStyle},
-    util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
+    util::macros::{callback, pub_crate_ptr_ops},
 };
 
 use nappgui_sys::{
@@ -131,5 +131,5 @@ impl Label {
     }
 }
 
-impl_gui_control!(Label, guicontrol_label);
+impl_control!(Label, guicontrol_label);
 impl_layout!(Label, layout_label);

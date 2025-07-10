@@ -5,7 +5,7 @@ use nappgui_sys::{
     panel_scroll_width, panel_size, panel_update, panel_visible_layout,
 };
 
-use crate::{gui::impl_layout, util::macros::{impl_gui_control, pub_crate_ptr_ops}};
+use crate::{gui::{control::impl_control, impl_layout}, util::macros::pub_crate_ptr_ops};
 
 use super::Layout;
 
@@ -99,5 +99,5 @@ impl Panel {
     }
 }
 
-impl_gui_control!(Panel, guicontrol_panel);
+impl_control!(Panel, guicontrol_panel);
 impl_layout!(Panel, layout_panel);

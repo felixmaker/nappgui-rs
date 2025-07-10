@@ -4,7 +4,7 @@ use nappgui_sys::{
     webview_OnFocus, webview_back, webview_create, webview_forward, webview_navigate, webview_size,
 };
 
-use crate::{gui::impl_layout, util::macros::{callback, impl_gui_control, pub_crate_ptr_ops}};
+use crate::{gui::{control::impl_control, impl_layout}, util::macros::{callback, pub_crate_ptr_ops}};
 
 /// A WebView control will allow us to embed Web content in our application. It will behave in the same way
 /// as other view controls such as View or TextView in terms of layout or resizing, displaying a fully
@@ -51,5 +51,5 @@ impl WebView {
     }
 }
 
-impl_gui_control!(WebView, guicontrol_webview);
+impl_control!(WebView, guicontrol_webview);
 impl_layout!(WebView, layout_webview);

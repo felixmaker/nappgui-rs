@@ -2,9 +2,9 @@ use std::rc::Rc;
 
 use crate::{
     draw_2d::Color,
-    gui::{event::{EvText, EvTextFilter}, impl_layout},
+    gui::{control::impl_control, event::{EvText, EvTextFilter}, impl_layout},
     types::{Align, FontStyle},
-    util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
+    util::macros::{callback, pub_crate_ptr_ops},
 };
 
 use nappgui_sys::{
@@ -253,5 +253,5 @@ impl TextView {
     }
 }
 
-impl_gui_control!(TextView, guicontrol_textview);
+impl_control!(TextView, guicontrol_textview);
 impl_layout!(TextView, layout_textview);

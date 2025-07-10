@@ -2,9 +2,9 @@ use std::{ffi::CString, rc::Rc};
 
 use crate::{
     draw_2d::{Font, Image},
-    gui::{event::EvButton, impl_layout},
+    gui::{control::impl_control, event::EvButton, impl_layout},
     types::GuiState,
-    util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
+    util::macros::{callback, pub_crate_ptr_ops},
 };
 
 use nappgui_sys::{
@@ -231,12 +231,12 @@ impl FlatButtonEx {
     button_alt!();
 }
 
-impl_gui_control!(PushButton, guicontrol_button);
-impl_gui_control!(CheckButton, guicontrol_button);
-impl_gui_control!(Check3Button, guicontrol_button);
-impl_gui_control!(RadioButton, guicontrol_button);
-impl_gui_control!(FlatButton, guicontrol_button);
-impl_gui_control!(FlatButtonEx, guicontrol_button);
+impl_control!(PushButton, guicontrol_button);
+impl_control!(CheckButton, guicontrol_button);
+impl_control!(Check3Button, guicontrol_button);
+impl_control!(RadioButton, guicontrol_button);
+impl_control!(FlatButton, guicontrol_button);
+impl_control!(FlatButtonEx, guicontrol_button);
 
 /// The button trait.
 pub trait ButtonTrait {

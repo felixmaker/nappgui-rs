@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use nappgui_sys::{updown_OnClick, updown_create, updown_tooltip};
 
-use crate::{gui::{event::EvButton, impl_layout}, util::macros::{callback, impl_gui_control, pub_crate_ptr_ops}};
+use crate::{gui::{control::impl_control, event::EvButton, impl_layout}, util::macros::{callback, pub_crate_ptr_ops}};
 
 /// UpDown are two-part horizontally divided button controls.
 #[derive(Clone)]
@@ -31,5 +31,5 @@ impl UpDown {
     }
 }
 
-impl_gui_control!(UpDown, guicontrol_updown);
+impl_control!(UpDown, guicontrol_updown);
 impl_layout!(UpDown, layout_updown);

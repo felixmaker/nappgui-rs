@@ -2,8 +2,8 @@ use std::rc::Rc;
 
 use crate::{
     draw_2d::image::Image,
-    gui::{event::EvButton, impl_layout},
-    util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
+    gui::{control::impl_control, event::EvButton, impl_layout},
+    util::macros::{callback, pub_crate_ptr_ops},
 };
 
 use nappgui_sys::{
@@ -108,5 +108,5 @@ impl PopUp {
     }
 }
 
-impl_gui_control!(PopUp, guicontrol_popup);
+impl_control!(PopUp, guicontrol_popup);
 impl_layout!(PopUp, layout_popup);

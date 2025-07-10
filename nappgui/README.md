@@ -36,16 +36,16 @@ impl AppHandler for App {
         let button = PushButton::new("Click Me!");
         let text = TextView::new();
 
-        layout.label(&label, 0, 0);
-        layout.button(&button, 0, 1);
-        layout.textview(&text, 0, 2);
+        layout.set(0, 0, &label);
+        layout.set(0, 1, &button);
+        layout.set(0, 2, &text);
         layout.hsize(0, 250.0);
         layout.vsize(2, 100.0);
         layout.margin(5.0);
         layout.vmargin(0, 5.0);
         layout.vmargin(1, 5.0);
 
-        button.on_click(move |_button, _event| {
+        button.on_click(move |_button, _params| {
             text.writef(&format!("Button click {}\n", clicks.borrow()));
             *clicks.borrow_mut() += 1;
         });

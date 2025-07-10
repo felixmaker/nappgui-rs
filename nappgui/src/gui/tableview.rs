@@ -1,9 +1,7 @@
 use std::rc::Rc;
 
 use crate::{
-    draw_2d::Font,
-    types::Align,
-    util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
+    draw_2d::Font, gui::impl_layout, types::Align, util::macros::{callback, impl_gui_control, pub_crate_ptr_ops}
 };
 
 use nappgui_sys::{
@@ -214,3 +212,4 @@ impl TableView {
 }
 
 impl_gui_control!(TableView, guicontrol_tableview);
+impl_layout!(TableView, layout_tableview);

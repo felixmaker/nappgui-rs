@@ -65,7 +65,7 @@ fn i_radio_layout() -> Layout {
     let layout = Layout::new(1, 6);
     for i in 0..6 {
         let radio = RadioButton::new(&format!("Radio {}", i));
-        layout.button(&radio, 0, i);
+        layout.set(0, i, &radio);
     }
 
     layout
@@ -79,7 +79,7 @@ fn i_title_labels(layout: &Layout) {
     for i in 0..I_NUM_CONTROLS {
         let label = Label::new(strs[i]);
         label.font(&font);
-        layout.label(&label, 0, i as _);
+        layout.set(0, i as _, &label);
     }
 
     layout.hmargin(0, 10.0);
@@ -88,7 +88,7 @@ fn i_title_labels(layout: &Layout) {
 fn i_value_labels(layout: &Layout) {
     for i in 0..I_NUM_CONTROLS {
         let label = Label::new("");
-        layout.label(&label, 2, i as _);
+        layout.set(2, i as _, &label);
         layout.halign(2, i as _, Align::Justify);
     }
 
@@ -138,16 +138,18 @@ fn i_layout() -> Layout {
     let list = ListBox::new();
     let slider = Slider::new();
     let updown = UpDown::new();
-    layout.label(&label, 1, 0);
+
     layout.halign(1, 0, Align::Justify);
-    layout.edit(&edit, 1, 1);
-    layout.button(&check, 1, 2);
-    layout.button(&check3, 1, 3);
-    layout.layout(&radio, 1, 4);
-    layout.popup(&pop, 1, 5);
-    layout.listbox(&list, 1, 6);
-    layout.slider(&slider, 1, 7);
-    layout.updown(&updown, 1, 8);
+
+    layout.set(1, 0, &label);
+    layout.set(1, 1, &edit);
+    layout.set(1, 2, &check);
+    layout.set(1, 3, &check3);
+    layout.set(1, 4, &radio);
+    layout.set(1, 5, &pop);
+    layout.set(1, 6, &list);
+    layout.set(1, 7, &slider);
+    layout.set(1, 8, &updown);
 
     cell_dbind!(
         &layout.cell(1, 0),

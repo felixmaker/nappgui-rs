@@ -9,7 +9,7 @@ use nappgui_sys::{
     view_update, view_viewport, S2Df, V2Df,
 };
 
-use crate::{gui::event::{EvDraw, EvKey, EvMouse, EvScroll, EvSize}, util::macros::{callback, impl_gui_control, pub_crate_ptr_ops}};
+use crate::{gui::{event::{EvDraw, EvKey, EvMouse, EvScroll, EvSize}, impl_layout}, util::macros::{callback, impl_gui_control, pub_crate_ptr_ops}};
 
 /// The View controls or custom views are blank areas within the window that allow us
 /// to implement our own components.
@@ -199,3 +199,4 @@ impl View {
 }
 
 impl_gui_control!(View, guicontrol_view);
+impl_layout!(View, layout_view);

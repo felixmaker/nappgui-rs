@@ -1,9 +1,7 @@
 use std::rc::Rc;
 
 use crate::{
-    draw_2d::Image,
-    types::Scale,
-    util::macros::{callback, pub_crate_ptr_ops},
+    draw_2d::Image, gui::impl_layout, types::Scale, util::macros::{callback, pub_crate_ptr_ops}
 };
 
 use nappgui_sys::{
@@ -58,3 +56,5 @@ impl ImageView {
         pub on_over_draw(ImageView) => imageview_OnOverDraw;
     }
 }
+
+impl_layout!(ImageView, layout_imageview);

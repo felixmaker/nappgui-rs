@@ -7,7 +7,7 @@ use nappgui_sys::{
 };
 
 use crate::{
-    gui::WebView,
+    gui::{impl_layout, WebView},
     types::SplitMode,
     util::macros::{impl_gui_control, pub_crate_ptr_ops},
 };
@@ -94,3 +94,4 @@ impl SplitView {
 }
 
 impl_gui_control!(SplitView, guicontrol_splitview);
+impl_layout!(SplitView, layout_splitview);

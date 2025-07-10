@@ -2,7 +2,7 @@ use std::{ffi::CString, rc::Rc};
 
 use crate::{
     draw_2d::{Font, Image},
-    gui::event::EvButton,
+    gui::{event::EvButton, impl_layout},
     types::GuiState,
     util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
 };
@@ -260,3 +260,11 @@ impl_button!(Check3Button);
 impl_button!(RadioButton);
 impl_button!(FlatButton);
 impl_button!(FlatButtonEx);
+
+impl_layout!(PushButton, layout_button);
+impl_layout!(CheckButton, layout_button);
+impl_layout!(Check3Button, layout_button);
+impl_layout!(RadioButton, layout_button);
+impl_layout!(FlatButton, layout_button);
+impl_layout!(FlatButtonEx, layout_button);
+

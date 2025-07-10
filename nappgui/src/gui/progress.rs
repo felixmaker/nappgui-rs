@@ -2,7 +2,10 @@ use std::rc::Rc;
 
 use nappgui_sys::{progress_create, progress_undefined, progress_value};
 
-use crate::util::macros::{impl_gui_control, pub_crate_ptr_ops};
+use crate::{
+    gui::impl_layout,
+    util::macros::{impl_gui_control, pub_crate_ptr_ops},
+};
 
 /// Progress bars are passive controls that show the remaining time to complete a certain task.
 #[derive(Clone)]
@@ -31,3 +34,4 @@ impl Progress {
 }
 
 impl_gui_control!(Progress, guicontrol_progress);
+impl_layout!(Progress, layout_progress);

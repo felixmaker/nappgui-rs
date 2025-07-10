@@ -29,7 +29,7 @@ pub mod event;
 
 pub use {
     button::*, cell::Cell, combo::Combo, control::ControlTrait, edit::Edit, imageview::ImageView,
-    label::Label, layout::Layout, listbox::ListBox, menu::Menu, menuitem::MenuItem, panel::Panel,
+    label::Label, layout::*, listbox::ListBox, menu::Menu, menuitem::MenuItem, panel::Panel,
     popup::PopUp, progress::Progress, slider::Slider, splitview::SplitView, tableview::TableView,
     textview::TextView, updown::UpDown, view::View, webview::WebView, window::Window,
 };

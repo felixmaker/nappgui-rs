@@ -6,7 +6,7 @@ use nappgui_sys::{
 };
 
 use crate::{
-    gui::event::EvSlider,
+    gui::{event::EvSlider, impl_layout},
     util::macros::{callback, impl_gui_control, pub_crate_ptr_ops},
 };
 
@@ -65,3 +65,4 @@ impl Slider {
 }
 
 impl_gui_control!(Slider, guicontrol_slider);
+impl_layout!(Slider, layout_slider);

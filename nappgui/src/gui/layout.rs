@@ -4,16 +4,13 @@ use std::{
 };
 
 use nappgui_sys::{
-    layout_bgcolor, layout_button, layout_cell, layout_combo, layout_control, layout_create,
-    layout_dbind_get_obj_imp, layout_dbind_imp, layout_dbind_obj_imp, layout_edit, layout_halign,
-    layout_hexpand, layout_hexpand2, layout_hexpand3, layout_hmargin, layout_hsize,
-    layout_imageview, layout_insert_col, layout_insert_row, layout_label, layout_layout,
-    layout_listbox, layout_margin, layout_margin2, layout_margin4, layout_ncols, layout_nrows,
-    layout_panel, layout_panel_replace, layout_popup, layout_progress, layout_remove_col,
-    layout_remove_row, layout_show_col, layout_show_row, layout_skcolor, layout_slider,
-    layout_splitview, layout_tableview, layout_taborder, layout_tabstop, layout_textview,
-    layout_update, layout_updown, layout_valign, layout_vexpand, layout_vexpand2, layout_vexpand3,
-    layout_view, layout_vmargin, layout_vsize, layout_webview,
+    layout_bgcolor, layout_cell, layout_control, layout_create, layout_dbind_get_obj_imp,
+    layout_dbind_imp, layout_dbind_obj_imp, layout_halign, layout_hexpand, layout_hexpand2,
+    layout_hexpand3, layout_hmargin, layout_hsize, layout_insert_col, layout_insert_row,
+    layout_margin, layout_margin2, layout_margin4, layout_ncols, layout_nrows,
+    layout_panel_replace, layout_remove_col, layout_remove_row, layout_show_col, layout_show_row,
+    layout_skcolor, layout_taborder, layout_tabstop, layout_update, layout_valign, layout_vexpand,
+    layout_vexpand2, layout_vexpand3, layout_vmargin, layout_vsize,
 };
 
 use crate::{
@@ -46,7 +43,7 @@ impl Layout {
     }
 
     /// Gets the control assigned to a cell in the layout.
-    pub fn control<T>(&self, col: usize, row: usize) -> Option<T>
+    pub fn get<T>(&self, col: usize, row: usize) -> Option<T>
     where
         T: ControlTrait,
     {
@@ -54,87 +51,12 @@ impl Layout {
         T::from_control_ptr(control)
     }
 
-    /// Insert a Label control in a layout.
-    pub fn label(&self, label: &Label, col: usize, row: usize) {
-        unsafe { layout_label(self.as_ptr(), label.as_ptr(), col as _, row as _) };
-    }
-
-    /// Insert a Button control in a layout.
-    pub fn button<T>(&self, button: &T, col: usize, row: usize)
+    /// Insert a control to the layout.
+    pub fn set<T>(&self, col: usize, row: usize, control: &T)
     where
-        T: ButtonTrait,
+        T: LayoutTrait,
     {
-        unsafe { layout_button(self.as_ptr(), button.as_button_ptr(), col as _, row as _) };
-    }
-
-    /// Insert a PopUp control in a layout.
-    pub fn popup(&self, popup: &PopUp, col: usize, row: usize) {
-        unsafe { layout_popup(self.as_ptr(), popup.as_ptr(), col as _, row as _) };
-    }
-
-    /// Insert an Edit control in a layout.
-    pub fn edit(&self, edit: &Edit, col: usize, row: usize) {
-        unsafe { layout_edit(self.as_ptr(), edit.as_ptr(), col as _, row as _) };
-    }
-
-    /// Insert a Combo control in a layout.
-    pub fn combo(&self, combo: &Combo, col: usize, row: usize) {
-        unsafe { layout_combo(self.as_ptr(), combo.as_ptr(), col as _, row as _) };
-    }
-
-    /// Insert a ListBox control in a layout.
-    pub fn listbox(&self, listbox: &ListBox, col: usize, row: usize) {
-        unsafe { layout_listbox(self.as_ptr(), listbox.as_ptr(), col as _, row as _) };
-    }
-
-    /// Insert an UpDown control in a layout.
-    pub fn updown(&self, updown: &UpDown, col: usize, row: usize) {
-        unsafe { layout_updown(self.as_ptr(), updown.as_ptr(), col as _, row as _) };
-    }
-
-    /// Insert an Slider control in a layout.
-    pub fn slider(&self, slider: &Slider, col: usize, row: usize) {
-        unsafe { layout_slider(self.as_ptr(), slider.as_ptr(), col as _, row as _) };
-    }
-
-    /// Insert a Progress control in a layout.
-    pub fn progress(&self, progress: &Progress, col: usize, row: usize) {
-        unsafe { layout_progress(self.as_ptr(), progress.as_ptr(), col as _, row as _) };
-    }
-
-    /// Insert View in a layout.
-    pub fn view(&self, view: &View, col: usize, row: usize) {
-        unsafe { layout_view(self.as_ptr(), view.as_ptr(), col as _, row as _) };
-    }
-
-    /// Insert a TextView control in a layout.
-    pub fn textview(&self, textview: &TextView, col: usize, row: usize) {
-        unsafe { layout_textview(self.as_ptr(), textview.as_ptr(), col as _, row as _) };
-    }
-
-    /// Insert a WebView control in a layout.
-    pub fn webview(&self, webview: &WebView, col: usize, row: usize) {
-        unsafe { layout_webview(self.as_ptr(), webview.as_ptr(), col as _, row as _) };
-    }
-
-    /// Insert an ImageView control in a layout.
-    pub fn imageview(&self, imageview: &ImageView, col: usize, row: usize) {
-        unsafe { layout_imageview(self.as_ptr(), imageview.as_ptr(), col as _, row as _) };
-    }
-
-    /// Insert an TableView control in a layout.
-    pub fn tableview(&self, tableview: &TableView, col: usize, row: usize) {
-        unsafe { layout_tableview(self.as_ptr(), tableview.as_ptr(), col as _, row as _) };
-    }
-
-    /// Insert an SplitView control in a layout.
-    pub fn splitview(&self, splitview: &SplitView, col: usize, row: usize) {
-        unsafe { layout_splitview(self.as_ptr(), splitview.as_ptr(), col as _, row as _) };
-    }
-
-    /// Insert a Panel control in a layout.
-    pub fn panel(&self, panel: &Panel, col: usize, row: usize) {
-        unsafe { layout_panel(self.as_ptr(), panel.as_ptr(), col as _, row as _) };
+        control.insert_in_layout(&self, col, row);
     }
 
     /// Replaces one Panel in a layout with another.
@@ -144,11 +66,6 @@ impl Layout {
     /// without the possibility of recovering it. See Replacing panels.
     pub fn panel_replace(&self, panel: &Panel, col: usize, row: usize) {
         unsafe { layout_panel_replace(self.as_ptr(), panel.as_ptr(), col as _, row as _) };
-    }
-
-    /// Insert a layout into a cell in another layout.
-    pub fn layout(&self, layout: &Layout, col: usize, row: usize) {
-        unsafe { layout_layout(self.as_ptr(), layout.as_ptr(), col as _, row as _) };
     }
 
     /// Gets the number of columns in the layout.
@@ -358,3 +275,25 @@ macro_rules! layout_dbind_obj {
         nappgui::gui::Layout::dbind_obj_imp($layout, $obj, stringify!($type))
     };
 }
+
+/// Define how controls are laid out in a layout.
+pub trait LayoutTrait {
+    /// Insert the control to the layout
+    fn insert_in_layout(&self, layout: &Layout, col: usize, row: usize);
+}
+
+macro_rules! impl_layout {
+    ($type: ty, $func: ident) => {
+        impl crate::gui::LayoutTrait for $type {
+            fn insert_in_layout(&self, layout: &crate::gui::Layout, col: usize, row: usize) {
+                unsafe {
+                    nappgui_sys::$func(layout.as_ptr(), self.as_ptr(), col as _, row as _);
+                }
+            }
+        }
+    };
+}
+
+pub(crate) use impl_layout;
+
+impl_layout!(Layout, layout_layout);

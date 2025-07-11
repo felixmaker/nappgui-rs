@@ -131,26 +131,44 @@ impl Combo {
     }
 
     /// Add a new item to the drop-down list.
-    pub fn add_elem(&self, text: &str, image: &Image) {
+    pub fn add_elem(&self, text: &str, image: Option<&Image>) {
         let text = std::ffi::CString::new(text).unwrap();
-        unsafe {
-            combo_add_elem(self.as_ptr(), text.as_ptr(), image.inner);
+        if let Some(image) = image {
+            unsafe {
+                combo_add_elem(self.as_ptr(), text.as_ptr(), image.inner);
+            }
+        } else {
+            unsafe {
+                combo_add_elem(self.as_ptr(), text.as_ptr(), std::ptr::null());
+            }
         }
     }
 
     /// Edit an item from the drop-down list.
-    pub fn set_elem(&self, index: u32, text: &str, image: &Image) {
+    pub fn set_elem(&self, index: u32, text: &str, image: Option<&Image>) {
         let text = std::ffi::CString::new(text).unwrap();
-        unsafe {
-            combo_set_elem(self.as_ptr(), index, text.as_ptr(), image.inner);
+        if let Some(image) = image {
+            unsafe {
+                combo_set_elem(self.as_ptr(), index, text.as_ptr(), image.inner);
+            }
+        } else {
+            unsafe {
+                combo_set_elem(self.as_ptr(), index, text.as_ptr(), std::ptr::null());
+            }
         }
     }
 
     /// Insert an item in the drop-down list.
-    pub fn ins_elem(&self, index: u32, text: &str, image: &Image) {
+    pub fn ins_elem(&self, index: u32, text: &str, image: Option<&Image>) {
         let text = std::ffi::CString::new(text).unwrap();
-        unsafe {
-            combo_ins_elem(self.as_ptr(), index, text.as_ptr(), image.inner);
+        if let Some(image) = image {
+            unsafe {
+                combo_ins_elem(self.as_ptr(), index, text.as_ptr(), image.inner);
+            }
+        } else {
+            unsafe {
+                combo_ins_elem(self.as_ptr(), index, text.as_ptr(), std::ptr::null());
+            }
         }
     }
 

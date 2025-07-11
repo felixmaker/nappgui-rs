@@ -25,13 +25,13 @@ impl App {
     }
 
     fn set_panel(&self, index: usize) {
-        // let mut defbutton = PushButton::new("");
+        let mut defbutton: Option<PushButton> = None;
 
         let panel = match index {
             0 => labels::labels_single_line(),
             1 => labels::labels_multi_line(),
             2 => labels::labels_mouse_over(),
-            3 => buttons::buttons_basics(),
+            3 => buttons::buttons_basics(&mut defbutton),
             4 => popcom::popup_combo(),
             _ => {
                 return;
@@ -39,7 +39,10 @@ impl App {
         };
 
         self.layout.panel_replace(&panel, 1, 0);
-        // self.window.defbutton(&mut defbutton);
+        
+        if let Some(defbutton) = &mut defbutton {
+            self.window.defbutton(defbutton);
+        }
     }
 
     fn panel(&self) -> Panel {

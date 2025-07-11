@@ -56,7 +56,7 @@ fn checks() -> Layout {
     layout
 }
 
-fn pushes() -> Layout {
+fn pushes(defbutton: &mut Option<PushButton>) -> Layout {
     let layout = Layout::new(4, 1);
     let push1 = PushButton::new("Re&try");
     let push2 = PushButton::new("&Cancel");
@@ -68,16 +68,19 @@ fn pushes() -> Layout {
 
     layout.hmargin(2, 5f32);
     layout.hexpand(1);
+
+    defbutton.replace(push1);
+
     layout
 }
 
-fn buttons() -> Layout {
+fn buttons(defbutton: &mut Option<PushButton>) -> Layout {
     let layout = Layout::new(1, 3);
     let layout1 = flatbuttons();
     let layout2 = Layout::new(2, 2);
     let layout3 = radios();
     let layout4 = checks();
-    let layout5 = pushes();
+    let layout5 = pushes(defbutton);
 
     let check1 = CheckButton::new("Enable 3&D Render");
     let check2 = Check3Button::new("Enable &Preview Settings");
@@ -103,8 +106,8 @@ fn buttons() -> Layout {
     layout
 }
 
-pub fn buttons_basics() -> Panel {
-    let layout = buttons();
+pub fn buttons_basics(defbutton: &mut Option<PushButton>) -> Panel {
+    let layout = buttons(defbutton);
     let panel = Panel::new();
     panel.layout(&layout);
     panel

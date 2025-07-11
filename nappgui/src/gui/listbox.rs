@@ -110,7 +110,7 @@ impl ListBox {
     }
 
     /// Sets the text color of an element.
-    pub fn color(&self, index: usize, color: &Color) {
+    pub fn color(&self, index: usize, color: Color) {
         unsafe {
             listbox_color(self.as_ptr(), index as _, color.inner);
         }

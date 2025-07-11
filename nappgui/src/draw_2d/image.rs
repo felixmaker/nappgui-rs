@@ -27,7 +27,7 @@ impl Image {
         height: u32,
         format: pixformat_t,
         data: &[u8],
-        palette: &Color,
+        palette: Color,
         palsize: u32,
     ) -> Self {
         let image = unsafe {

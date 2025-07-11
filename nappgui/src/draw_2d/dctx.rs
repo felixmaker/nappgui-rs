@@ -33,7 +33,7 @@ impl DCtx {
     }
 
     /// Clears the entire context area, using a solid color.
-    pub fn clear(&self, color: &Color) {
+    pub fn clear(&self, color: Color) {
         unsafe { draw_clear(self.inner, color.inner) }
     }
 

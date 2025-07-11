@@ -1,5 +1,6 @@
 mod buttons;
 mod labels;
+mod popcom;
 
 use nappgui::gui::event::*;
 use nappgui::osapp::*;
@@ -31,6 +32,7 @@ impl App {
             1 => labels::labels_multi_line(),
             2 => labels::labels_mouse_over(),
             3 => buttons::buttons_basics(),
+            4 => popcom::popup_combo(),
             _ => {
                 return;
             }

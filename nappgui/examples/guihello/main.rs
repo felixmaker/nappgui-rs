@@ -1,6 +1,7 @@
 mod buttons;
 mod labels;
 mod popcom;
+mod listboxes;
 
 use nappgui::gui::event::*;
 use nappgui::osapp::*;
@@ -33,13 +34,14 @@ impl App {
             2 => labels::labels_mouse_over(),
             3 => buttons::buttons_basics(&mut defbutton),
             4 => popcom::popup_combo(),
+            5 => listboxes::listboxes(),
             _ => {
                 return;
             }
         };
 
         self.layout.panel_replace(&panel, 1, 0);
-        
+
         if let Some(defbutton) = &mut defbutton {
             self.window.defbutton(defbutton);
         }

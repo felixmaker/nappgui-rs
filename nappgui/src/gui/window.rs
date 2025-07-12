@@ -88,10 +88,9 @@ impl Window {
     }
 
     /// Launch a window in modal mode.
-    pub fn modal(&self, parent: &Window) {
-        unsafe {
-            window_modal(self.as_ptr(), parent.as_ptr());
-        }
+    pub fn modal(&self, parent: &Window) -> GuiClose {
+        let value = unsafe { window_modal(self.as_ptr(), parent.as_ptr()) };
+        GuiClose::try_from(value as i32).unwrap()
     }
 
     /// Ends the modal cycle of a window.

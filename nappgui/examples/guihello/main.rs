@@ -3,6 +3,7 @@ mod form;
 mod labels;
 mod listboxes;
 mod popcom;
+mod seltext;
 
 use nappgui::gui::event::*;
 use nappgui::osapp::*;
@@ -94,6 +95,7 @@ fn set_panel(window: &WeakWindow, layout: &Layout, index: usize) {
         4 => popcom::popup_combo(),
         5 => listboxes::listboxes(),
         6 => form::form_basic(window.clone()),
+        7 => seltext::seltext(window.clone()),
         _ => {
             return;
         }

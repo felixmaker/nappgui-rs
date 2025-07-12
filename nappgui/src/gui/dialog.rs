@@ -4,13 +4,16 @@ use nappgui_sys::{comwin_color, comwin_open_file, comwin_save_file};
 
 use crate::{draw_2d::Color, gui::WindowTrait, types::Align, util::macros::listener};
 
-use super::window::Window;
-
 /// Launch the open file dialog.
-pub fn open_file(window: &Window, ftypes: &[&str], size: u32, start_dir: &str) -> String {
+pub fn open_file<T, I, S>(window: &T, ftypes: I, size: u32, start_dir: &str) -> String
+where
+    T: WindowTrait,
+    I: IntoIterator<Item = S>,
+    S: AsRef<str>,
+{
     let mut types: Vec<*const i8> = Vec::new();
-    for ftype in ftypes {
-        let cstr = CString::new(*ftype).unwrap();
+    for ftype in ftypes.into_iter() {
+        let cstr = CString::new(ftype.as_ref()).unwrap();
         types.push(cstr.as_ptr());
     }
     let start_dir = CString::new(start_dir).unwrap();
@@ -27,10 +30,15 @@ pub fn open_file(window: &Window, ftypes: &[&str], size: u32, start_dir: &str) -
 }
 
 /// Launch the save file dialog.
-pub fn save_file(window: &Window, ftypes: &[&str], size: u32, start_dir: &str) -> String {
+pub fn save_file<T, I, S>(window: &T, ftypes: I, size: u32, start_dir: &str) -> String
+where
+    T: WindowTrait,
+    I: IntoIterator<Item = S>,
+    S: AsRef<str>,
+{
     let mut types: Vec<*const i8> = Vec::new();
-    for ftype in ftypes {
-        let cstr = CString::new(*ftype).unwrap();
+    for ftype in ftypes.into_iter() {
+        let cstr = CString::new(ftype.as_ref()).unwrap();
         types.push(cstr.as_ptr());
     }
     let start_dir = CString::new(start_dir).unwrap();
@@ -47,8 +55,8 @@ pub fn save_file(window: &Window, ftypes: &[&str], size: u32, start_dir: &str) -
 }
 
 /// Launch the color selection dialog.
-pub fn color<F>(
-    window: &Window,
+pub fn color<T, F>(
+    window: &T,
     title: &str,
     x: f32,
     y: f32,
@@ -59,6 +67,7 @@ pub fn color<F>(
     n: u32,
     on_change: F,
 ) where
+    T: WindowTrait,
     F: FnMut() + 'static,
 {
     let listener = listener!(on_change, ());

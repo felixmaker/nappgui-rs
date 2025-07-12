@@ -41,12 +41,12 @@ pub enum GuiState {
     /// On
     On = 1,
     /// Off
-    Off = 2,
+    Off = 0,
     /// Medium/undetermined.
-    Mixed = 3,
+    Mixed = 2,
 }
 
-impl_i32_to_enum!(GuiState, 1..=3);
+impl_i32_to_enum!(GuiState, 0..=2);
 
 /// Style in typographic fonts.
 #[derive(Clone, Copy)]

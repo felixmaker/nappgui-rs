@@ -2,6 +2,7 @@ mod buttons;
 mod labels;
 mod popcom;
 mod listboxes;
+mod form;
 
 use nappgui::gui::event::*;
 use nappgui::osapp::*;
@@ -35,6 +36,7 @@ impl App {
             3 => buttons::buttons_basics(&mut defbutton),
             4 => popcom::popup_combo(),
             5 => listboxes::listboxes(),
+            6 => form::form_basic(self.window.clone()),
             _ => {
                 return;
             }

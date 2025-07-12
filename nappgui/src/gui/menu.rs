@@ -5,9 +5,9 @@ use nappgui_sys::{
     menu_ins_item, menu_is_menubar, menu_launch, menu_off_items, V2Df,
 };
 
-use crate::util::macros::pub_crate_ptr_ops;
+use crate::{gui::window::WindowTrait, util::macros::pub_crate_ptr_ops};
 
-use super::{MenuItem, Window};
+use super::MenuItem;
 
 /// A Menu is a type of control that integrates a series of options, also called items or Menuitems.
 /// Each of them consists of a short text, optionally an icon and optionally also a keyboard shortcut,
@@ -48,7 +48,10 @@ impl Menu {
     }
 
     /// Launch a menu as secondary or PopUp.
-    pub fn launch(&self, window: &Window, x: f32, y: f32) {
+    pub fn launch<T>(&self, window: &T, x: f32, y: f32)
+    where
+        T: WindowTrait,
+    {
         let position = V2Df { x, y };
         unsafe { menu_launch(self.as_ptr(), window.as_ptr(), position) };
     }

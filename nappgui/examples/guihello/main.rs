@@ -1,14 +1,13 @@
 mod buttons;
-mod labels;
-mod popcom;
-mod listboxes;
 mod form;
+mod labels;
+mod listboxes;
+mod popcom;
 
 use nappgui::gui::event::*;
 use nappgui::osapp::*;
 use nappgui::prelude::*;
 
-#[derive(Clone)]
 struct App {
     window: Window,
     layout: Layout,
@@ -24,29 +23,6 @@ impl App {
 
         let layout = Layout::new(2, 1);
         Self { window, layout }
-    }
-
-    fn set_panel(&self, index: usize) {
-        let mut defbutton: Option<PushButton> = None;
-
-        let panel = match index {
-            0 => labels::labels_single_line(),
-            1 => labels::labels_multi_line(),
-            2 => labels::labels_mouse_over(),
-            3 => buttons::buttons_basics(&mut defbutton),
-            4 => popcom::popup_combo(),
-            5 => listboxes::listboxes(),
-            6 => form::form_basic(self.window.clone()),
-            _ => {
-                return;
-            }
-        };
-
-        self.layout.panel_replace(&panel, 1, 0);
-
-        if let Some(defbutton) = &mut defbutton {
-            self.window.defbutton(defbutton);
-        }
     }
 
     fn panel(&self) -> Panel {
@@ -87,14 +63,15 @@ impl App {
 
         list.select(0, true);
 
-        let app = self.clone();
-        list.on_select(move |_, params| {
-            app.set_panel(params.index);
-            app.window.update();
+        let window = self.window.as_weak();
+        let layout = self.layout.clone();
+        list.on_select(move |params| {
+            set_panel(&window, &layout, params.index);
+            window.update();
         });
 
         self.layout.set(0, 0, &list);
-        self.set_panel(0);
+        set_panel(&self.window.as_weak(), &self.layout, 0);
 
         panel.layout(&self.layout);
         self.layout.valign(0, 0, Align::Left);
@@ -106,7 +83,33 @@ impl App {
     }
 }
 
-fn i_modal_window(parent: &Window, message: &str) {
+fn set_panel(window: &WeakWindow, layout: &Layout, index: usize) {
+    let mut defbutton: Option<PushButton> = None;
+
+    let panel = match index {
+        0 => labels::labels_single_line(),
+        1 => labels::labels_multi_line(),
+        2 => labels::labels_mouse_over(),
+        3 => buttons::buttons_basics(&mut defbutton),
+        4 => popcom::popup_combo(),
+        5 => listboxes::listboxes(),
+        6 => form::form_basic(window.clone()),
+        _ => {
+            return;
+        }
+    };
+
+    layout.panel_replace(&panel, 1, 0);
+
+    if let Some(defbutton) = &mut defbutton {
+        window.defbutton(defbutton);
+    }
+}
+
+fn i_modal_window<T>(parent: &T, message: &str)
+where
+    T: WindowTrait,
+{
     let panel = Panel::new();
     let layout = Layout::new(1, 1);
     let label = Label::new(message);
@@ -131,7 +134,10 @@ fn i_modal_window(parent: &Window, message: &str) {
     window.modal(parent);
 }
 
-fn i_on_close(window: &Window, params: &EvWinClose) -> bool {
+fn i_on_close<T>(window: &T, params: &EvWinClose) -> bool
+where
+    T: WindowTrait,
+{
     match params.origin {
         GuiClose::Cancel => {
             i_modal_window(
@@ -163,8 +169,9 @@ impl AppHandler for App {
         app.window.title("NAppGUI GUI Basics");
 
         app.window.origin(500f32, 200f32);
+        let window = app.window.as_weak();
         app.window
-            .on_close(|window, params| i_on_close(window, params));
+            .on_close(move |params| i_on_close(&window, params));
         app.window.show();
         app
     }

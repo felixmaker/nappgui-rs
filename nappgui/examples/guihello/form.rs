@@ -6,7 +6,7 @@ use nappgui::{
 };
 
 struct FormData {
-    window: Window,
+    window: WeakWindow,
     validate_check: Option<CheckButton>,
 }
 
@@ -29,13 +29,13 @@ fn modal_window(edit: &mut Edit, text: &str, focus_info: &FocusInfo) -> Window {
     let button1 = PushButton::new("Yes");
     let button2 = PushButton::new("No");
 
-    let window1 = window.clone();
-    button1.on_click(move |_, _| {
+    let window1 = window.as_weak();
+    button1.on_click(move |_| {
         window1.stop_modal(GuiClose::Accept);
     });
 
-    let window2 = window.clone();
-    button2.on_click(move |_, _| {
+    let window2 = window.as_weak();
+    button2.on_click(move |_| {
         window2.stop_modal(GuiClose::Cancel);
     });
 
@@ -59,7 +59,7 @@ fn modal_window(edit: &mut Edit, text: &str, focus_info: &FocusInfo) -> Window {
     window
 }
 
-fn modal_pos(window: &Window, parent: &Window) -> Point2D {
+fn modal_pos(window: &Window, parent: &WeakWindow) -> Point2D {
     let pos = parent.get_origin();
     let s1 = parent.get_size();
     let s2 = window.get_size();
@@ -96,24 +96,26 @@ fn numbers(data: Rc<RefCell<FormData>>, color_bg: Color) -> Layout {
     edit1.align(Align::Right);
     edit2.align(Align::Right);
 
-    edit1.on_filter(|_, params| -> EvTextFilter { filter_number(params) });
-    edit2.on_filter(|_, params| -> EvTextFilter { filter_number(params) });
+    edit1.on_filter(|params| -> EvTextFilter { filter_number(params) });
+    edit2.on_filter(|params| -> EvTextFilter { filter_number(params) });
 
     let data1 = data.clone();
-    edit1.on_change(move |edit, params| -> bool { on_edit_change(data1.clone(), edit, params) });
+    let mut edit01 = edit1.clone();
+    edit1.on_change(move |params| -> bool { on_edit_change(data1.clone(), &mut edit01, params) });
     let data2 = data.clone();
-    edit2.on_change(move |edit, params| -> bool { on_edit_change(data2.clone(), edit, params) });
+    let mut edit01 = edit2.clone();
+    edit2.on_change(move |params| -> bool { on_edit_change(data2.clone(), &mut edit01, params) });
 
     edit1.bgcolor_focus(color_bg);
     edit2.bgcolor_focus(color_bg);
 
     let mut edit_1 = edit1.clone();
-    updown1.on_click(move |_, params| {
+    updown1.on_click(move |params| {
         on_updown_click(&mut edit_1, params);
     });
 
     let mut edit_2 = edit2.clone();
-    updown2.on_click(move |_, params| {
+    updown2.on_click(move |params| {
         on_updown_click(&mut edit_2, params);
     });
 
@@ -213,15 +215,20 @@ fn edits(data: Rc<RefCell<FormData>>) -> Layout {
     edit2.password(true);
 
     let data1 = data.clone();
-    edit1.on_change(move |edit, params| on_edit_change(data1.clone(), edit, params));
+    let mut edit01 = edit1.clone();
+    edit1.on_change(move |params| on_edit_change(data1.clone(), &mut edit01, params));
     let data2 = data.clone();
-    edit2.on_change(move |edit, params| on_edit_change(data2.clone(), edit, params));
+    let mut edit01 = edit2.clone();
+    edit2.on_change(move |params| on_edit_change(data2.clone(), &mut edit01, params));
     let data3 = data.clone();
-    edit3.on_change(move |edit, params| on_edit_change(data3.clone(), edit, params));
+    let mut edit01 = edit2.clone();
+    edit3.on_change(move |params| on_edit_change(data3.clone(), &mut edit01, params));
     let data4 = data.clone();
-    edit4.on_change(move |edit, params| on_edit_change(data4.clone(), edit, params));
+    let mut edit01 = edit2.clone();
+    edit4.on_change(move |params| on_edit_change(data4.clone(), &mut edit01, params));
     let data5 = data.clone();
-    edit5.on_change(move |edit, params| on_edit_change(data5.clone(), edit, params));
+    let mut edit01 = edit2.clone();
+    edit5.on_change(move |params| on_edit_change(data5.clone(), &mut edit01, params));
 
     edit1.bgcolor_focus(colorbg);
     edit2.bgcolor_focus(colorbg);
@@ -291,7 +298,7 @@ fn form(data: Rc<RefCell<FormData>>) -> Layout {
     layout1
 }
 
-pub fn form_basic(window: Window) -> Panel {
+pub fn form_basic(window: WeakWindow) -> Panel {
     let data = Rc::new(RefCell::new(FormData {
         window: window,
         validate_check: None,

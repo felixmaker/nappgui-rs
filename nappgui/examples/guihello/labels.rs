@@ -17,7 +17,7 @@ fn width_popup(layout: &Layout) -> PopUp {
     popup.add_elem("200px", None);
     popup.add_elem("300px", None);
     popup.add_elem("400px", None);
-    popup.on_select(move |_, params| {
+    popup.on_select(move |params| {
         let width = match params.index {
             0 => 0,
             1 => 100,

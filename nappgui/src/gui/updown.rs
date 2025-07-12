@@ -21,7 +21,7 @@ impl UpDown {
 
     callback! {
         /// Set an event handler for pressing the button.
-        pub on_click(UpDown, EvButton) => updown_OnClick;
+        pub on_click(EvButton) => updown_OnClick;
     }
 
     /// Set a tooltip for the button. It is a small explanatory text that will appear when the mouse is over the control.

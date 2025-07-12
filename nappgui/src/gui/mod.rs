@@ -28,8 +28,7 @@ pub mod dialog;
 pub mod event;
 
 pub use {
-    button::*, cell::Cell, combo::Combo, control::ControlTrait, edit::Edit, imageview::ImageView,
-    label::Label, layout::*, listbox::ListBox, menu::Menu, menuitem::MenuItem, panel::Panel,
-    popup::PopUp, progress::Progress, slider::Slider, splitview::SplitView, tableview::TableView,
-    textview::TextView, updown::UpDown, view::View, webview::WebView, window::Window,
+    button::*, cell::*, combo::*, control::*, edit::*, imageview::*, label::*, layout::*,
+    listbox::*, menu::*, menuitem::*, panel::*, popup::*, progress::*, slider::*, splitview::*,
+    tableview::*, textview::*, updown::*, view::*, webview::*, window::*,
 };

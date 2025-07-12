@@ -41,7 +41,7 @@ impl Label {
 
     callback! {
         /// Set the OnClick event handler.
-        pub on_click(Label, EvMouse) => label_OnClick;
+        pub on_click(EvMouse) => label_OnClick;
     }
 
     /// Set the text that the label will display.

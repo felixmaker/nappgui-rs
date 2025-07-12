@@ -33,16 +33,16 @@ impl TableView {
 
     callback! {
         /// Sets up a handler to read data from the application.
-        pub on_data(TableView) => tableview_OnData;
+        pub on_data() => tableview_OnData;
 
         /// Notifies that the selection has changed.
-        pub on_select(TableView) => tableview_OnSelect;
+        pub on_select() => tableview_OnSelect;
 
         /// Notify each time a row is clicked.
-        pub on_row_click(TableView) => tableview_OnRowClick;
+        pub on_row_click() => tableview_OnRowClick;
 
         /// Notifies each time a header is clicked.
-        pub on_header_click(TableView)  => tableview_OnHeaderClick;
+        pub on_header_click()  => tableview_OnHeaderClick;
     }
 
     /// Sets the general font for the entire table.

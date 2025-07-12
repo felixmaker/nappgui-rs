@@ -1,21 +1,26 @@
 macro_rules! listener {
-    ($target:expr, $handler:ident, $obj:ty) => {{
-        use crate::core::event::Event;
+    ($handler:expr, ($($params: ty)?) $(-> $return:ty)?) => {{
         use std::ffi::c_void;
 
         unsafe extern "C" fn shim(data: *mut c_void, event: *mut nappgui_sys::Event) {
-            let data = data as *mut (Box<dyn FnMut(&mut $obj, &Event)>, *mut c_void);
-            let f = &mut *(*data).0;
-            let mut obj = <$obj>::from_raw_no_drop((*data).1 as _);
-            let event = Event::new(event);
-            let _r = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut obj, &event)));
+            let data = data as *mut Box<dyn FnMut($(& $params)?) $(-> $return)?>;
+            let f = &mut *data;
+            #[allow(unused)]
+            let event = crate::core::event::Event::new(event);
+            $(
+                let params = event.params::<$params>().unwrap();
+            )?
+            #[allow(unused)]
+            if let Ok(r) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f($(&(params as $params))?))) {
+                $( event.result(r as $return); )?
+            }
         }
 
-        let cb: Box<dyn FnMut(&mut $obj, &Event)> = Box::new($handler);
+        let cb: Box<dyn FnMut($(& $params)?) $(-> $return)?> = Box::new($handler);
+        let data: *mut Box<dyn FnMut($(& $params)?) $(-> $return)?> = Box::into_raw(Box::new(cb));
 
-        let data = Box::into_raw(Box::new((cb, $target)));
-
-        unsafe { nappgui_sys::listener_imp(data as *mut c_void, Some(shim)) }
+        let listener = unsafe { nappgui_sys::listener_imp(data as *mut c_void, Some(shim)) };
+        listener
     }};
 }
 
@@ -53,38 +58,31 @@ macro_rules! listener {
 macro_rules! callback {
     (
         $(#[$meta:meta])*
-        $vis:vis $func:ident($target:ty $(, $params: ty)?) $(-> $return:ty)? => $c_func:ident
+        $vis:vis $func:ident($($params: ty)?) $(-> $return:ty)? => $c_func:ident
     ) => {
         $(#[$meta])*
         $vis fn $func<F>(&self, handler: F)
         where
-            F: FnMut(&mut $target $(, & $params)?) $(-> $return)? + 'static,
+            F: FnMut($(& $params)?) $(-> $return)? + 'static,
         {
             use std::ffi::c_void;
 
             unsafe extern "C" fn shim(data: *mut c_void, event: *mut nappgui_sys::Event) {
-                let data = data as *mut (
-                    Box<dyn FnMut(&mut $target $(, & $params)?) $(-> $return)?>,
-                    *mut c_void,
-                );
-                let f = &mut *(*data).0;
-                let mut target = <$target>::from_raw_no_drop((*data).1 as _);
+                let data = data as *mut Box<dyn FnMut($(& $params)?) $(-> $return)?>;
+                let f = &mut *data;
                 #[allow(unused)]
                 let event = crate::core::event::Event::new(event);
                 $(
                     let params = event.params::<$params>().unwrap();
                 )?
                 #[allow(unused)]
-                if let Ok(r) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut target $(, &(params as $params))?))) {
+                if let Ok(r) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f($(&(params as $params))?))) {
                     $( event.result(r as $return); )?
                 }
             }
 
-            let cb: Box<dyn FnMut(&mut $target $(, & $params)?) $(-> $return)?> = Box::new(handler);
-            let data: *mut (
-                Box<dyn FnMut(&mut $target $(, & $params)?) $(-> $return)?>,
-                *mut c_void,
-            ) = Box::into_raw(Box::new((cb, self.as_ptr() as _)));
+            let cb: Box<dyn FnMut($(& $params)?) $(-> $return)?> = Box::new(handler);
+            let data: *mut Box<dyn FnMut($(& $params)?) $(-> $return)?> = Box::into_raw(Box::new(cb));
 
             let listener = unsafe { nappgui_sys::listener_imp(data as *mut c_void, Some(shim)) };
 
@@ -96,13 +94,13 @@ macro_rules! callback {
     (
         $(
             $(#[$meta:meta])*
-            $vis:vis $func:ident($target:ty $(, $params: ty)?) $(-> $return:ty)? => $c_func:ident
+            $vis:vis $func:ident($($params: ty)?) $(-> $return:ty)? => $c_func:ident
         );*$(;)?
     ) => {
         $(
             callback!(
                 $(#[$meta])*
-                $vis $func($target $(, $params)?) $(-> $return)? => $c_func
+                $vis $func($($params)?) $(-> $return)? => $c_func
             );
         )*
     }

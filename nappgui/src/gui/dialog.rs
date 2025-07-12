@@ -2,7 +2,7 @@ use std::ffi::CString;
 
 use nappgui_sys::{comwin_color, comwin_open_file, comwin_save_file};
 
-use crate::{core::event::Event, draw_2d::Color, types::Align, util::macros::listener};
+use crate::{draw_2d::Color, gui::WindowTrait, types::Align, util::macros::listener};
 
 use super::window::Window;
 
@@ -59,9 +59,9 @@ pub fn color<F>(
     n: u32,
     on_change: F,
 ) where
-    F: FnMut(&mut Window, &Event) + 'static,
+    F: FnMut() + 'static,
 {
-    let listener = listener!(window.as_ptr(), on_change, Window);
+    let listener = listener!(on_change, ());
 
     let title = CString::new(title).unwrap();
     let mut colors: Vec<u32> = colors.iter().map(|color| color.inner).collect();

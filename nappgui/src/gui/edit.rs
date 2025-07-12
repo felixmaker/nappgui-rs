@@ -41,13 +41,13 @@ impl Edit {
 
     callback! {
         /// Set a function to filter the text while editing.
-        pub on_filter(Edit, EvText) -> EvTextFilter => edit_OnFilter;
+        pub on_filter(EvText) -> EvTextFilter => edit_OnFilter;
 
         /// Set a function to detect when the text has changed.
-        pub on_change(Edit, EvText) -> bool => edit_OnChange;
+        pub on_change(EvText) -> bool => edit_OnChange;
 
         /// Sets a handler for keyboard focus.
-        pub on_focus(Edit, bool) => edit_OnFocus;
+        pub on_focus(bool) => edit_OnFocus;
     }
 
     /// Set the edit control text.

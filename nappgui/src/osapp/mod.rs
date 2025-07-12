@@ -2,7 +2,7 @@ use std::ffi::{c_void, CString};
 
 use nappgui_sys::{osapp_finish, osapp_menubar, osapp_open_url, osmain_imp};
 
-use crate::gui::{Menu, Window};
+use crate::gui::{window::WindowTrait, Menu};
 
 /// Application handler.
 pub trait AppHandler {
@@ -56,7 +56,10 @@ pub fn finish() -> bool {
 }
 
 /// Set the general menu bar of the application.
-pub fn menubar(menu: &Menu, win: &Window) {
+pub fn menubar<T>(menu: &Menu, win: &T)
+where
+    T: WindowTrait,
+{
     unsafe {
         osapp_menubar(menu.as_ptr(), win.as_ptr());
     }

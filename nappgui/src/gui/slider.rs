@@ -33,7 +33,7 @@ impl Slider {
 
     callback! {
         /// Set an event handler for slider movement.
-        pub on_moved(Slider, EvSlider) => slider_OnMoved;
+        pub on_moved(EvSlider) => slider_OnMoved;
     }
 
     /// Set a tooltip for the slider. It is a small explanatory text that will appear when the mouse is over the control.

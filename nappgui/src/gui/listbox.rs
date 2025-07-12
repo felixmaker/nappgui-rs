@@ -33,10 +33,10 @@ impl ListBox {
         /// element clicked will be received or UINT32_MAX if it corresponds to an empty area of the ListBox.
         /// If the event returns FALSE on event_result, the element will be prevented from being selected
         /// (TRUE by default). See GUI Events.
-        pub on_down(ListBox, EvMouse) -> bool => listbox_OnDown;
+        pub on_down(EvMouse) -> bool => listbox_OnDown;
 
         /// Set an event handler for the selection of a new item.
-        pub on_select(ListBox, EvButton) => listbox_OnSelect;
+        pub on_select(EvButton) => listbox_OnSelect;
     }
 
     /// Set the default size of the list.

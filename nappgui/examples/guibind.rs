@@ -217,7 +217,7 @@ impl AppHandler for App {
         window.panel(&panel);
         window.title("Hello, World!");
         window.origin(500.0, 200.0);
-        window.on_close(|_window, _event| finish());
+        window.on_close(|_| finish());
 
         window.show();
 

@@ -30,7 +30,7 @@ impl PopUp {
 
     callback! {
         /// Set an event handler for the selection of a new item.
-        pub on_select(PopUp, EvButton) => popup_OnSelect;
+        pub on_select(EvButton) => popup_OnSelect;
     }
 
     /// Assign a tooltip to the popup control.

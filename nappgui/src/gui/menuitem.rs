@@ -37,7 +37,7 @@ impl MenuItem {
 
     callback! {
         /// Set an event handle for item click.
-        pub on_click(MenuItem, EvMenu) => menuitem_OnClick
+        pub on_click(EvMenu) => menuitem_OnClick
     }
 
     /// Enables or disables a menu item.

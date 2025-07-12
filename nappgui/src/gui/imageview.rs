@@ -50,10 +50,10 @@ impl ImageView {
 
     callback! {
         /// Set a handle for the event click on the image.
-        pub on_click(ImageView) => imageview_OnClick;
+        pub on_click() => imageview_OnClick;
 
         /// Allows you to draw an overlay on the image when the mouse is over it.
-        pub on_over_draw(ImageView) => imageview_OnOverDraw;
+        pub on_over_draw() => imageview_OnOverDraw;
     }
 }
 

@@ -69,14 +69,14 @@ pub fn popup_combo() -> Panel {
     let button2 = PushButton::new("Clear PopUp");
 
     let data1 = data.clone();
-    button1.on_click(move |_, _| {
+    button1.on_click(move |_| {
         if let Some(popup) = &data1.borrow_mut().popup {
             popup.add_elem("Español", None);
         }
     });
 
     let data2 = data.clone();
-    button2.on_click(move |_, _| {
+    button2.on_click(move |_| {
         if let Some(popup) = &data2.borrow_mut().popup {
             popup.clear();
         }

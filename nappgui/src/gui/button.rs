@@ -19,7 +19,7 @@ macro_rules! button_basic {
 
         callback! {
             /// Set a function for pressing the button.
-            pub on_click($button_type, EvButton) => button_OnClick;
+            pub on_click(EvButton) => button_OnClick;
         }
 
         /// Set the text that the button will display.

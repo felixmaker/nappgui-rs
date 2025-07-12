@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use nappgui_sys::{
     view_OnAcceptFocus, view_OnClick, view_OnDown, view_OnDrag, view_OnDraw, view_OnEnter,
     view_OnExit, view_OnFocus, view_OnKeyDown, view_OnKeyUp, view_OnMove, view_OnOverlay,
@@ -11,96 +9,75 @@ use nappgui_sys::{
 
 use crate::{
     gui::{
-        control::impl_control, event::{EvDraw, EvKey, EvMouse, EvScroll, EvSize}, impl_layout
+        control::impl_control,
+        event::{EvDraw, EvKey, EvMouse, EvScroll, EvSize},
+        impl_layout,
     },
-    util::macros::{callback, pub_crate_ptr_ops},
+    util::macros::callback,
 };
 
-/// The View controls or custom views are blank areas within the window that allow us
-/// to implement our own components.
-#[derive(Clone)]
-pub struct View {
-    pub(crate) inner: Rc<*mut nappgui_sys::View>,
-}
-
-impl View {
-    pub_crate_ptr_ops!(*mut nappgui_sys::View);
-
-    /// Create a new custom view.
-    pub fn new() -> Self {
-        let view = unsafe { view_create() };
-        Self::from_raw(view)
-    }
-
-    /// Create a new custom view with scrollbars.
-    pub fn new_scroll() -> Self {
-        let view = unsafe { view_scroll() };
-        Self::from_raw(view)
-    }
-
-    /// Create a new view with all the options.
-    pub fn new_custom(hscroll: bool, vscroll: bool) -> Self {
-        let view = unsafe { view_custom(hscroll as _, vscroll as _) };
-        Self::from_raw(view)
-    }
+/// The view trait.
+pub trait ViewTrait {
+    /// Returns a raw pointer to the view object.
+    fn as_ptr(&self) -> *mut nappgui_sys::View;
 
     /// Set the default view size.
-    pub fn size(&self, width: f32, height: f32) {
+    fn size(&self, width: f32, height: f32) {
         let size = nappgui_sys::S2Df { width, height };
         unsafe { view_size(self.as_ptr(), size) }
     }
 
     callback! {
         /// Set an event handler to draw in the view.
-        pub on_draw(EvDraw) => view_OnDraw;
+     on_draw(EvDraw) => view_OnDraw;
 
         /// Sets an event handler to draw the overlay.
-        pub on_overlay(EvDraw) => view_OnOverlay;
+     on_overlay(EvDraw) => view_OnOverlay;
 
         /// Set an event handler for resizing.
-        pub on_size(EvSize) => view_OnSize;
+     on_size(EvSize) => view_OnSize;
 
         /// Set an event handler for mouse enter.
-        pub on_enter(EvMouse) => view_OnEnter;
+        on_enter(EvMouse) => view_OnEnter;
 
         /// Set an event handle for mouse exit.
-        pub on_exit(EvMouse) => view_OnExit;
+         on_exit(EvMouse) => view_OnExit;
 
         /// Set an event handler for mouse movement.
-        pub on_move(EvMouse) => view_OnMove;
+         on_move(EvMouse) => view_OnMove;
 
         /// Sets an event handler for a mouse button down.
-        pub on_down(EvMouse) => view_OnDown;
+         on_down(EvMouse) => view_OnDown;
 
         /// Sets an event handler for a mouse button up.
-        pub on_up(EvMouse) => view_OnUp;
+         on_up(EvMouse) => view_OnUp;
 
         /// Set an event handler for mouse click.
-        pub on_click(EvMouse) => view_OnClick;
+         on_click(EvMouse) => view_OnClick;
 
         /// Set an event handler for mouse drag.
-        pub on_drag(EvMouse) => view_OnDrag;
+         on_drag(EvMouse) => view_OnDrag;
 
         /// Set an event handler for mouse wheel.
-        pub on_wheel(EvMouse) => view_OnWheel;
+     on_wheel(EvMouse) => view_OnWheel;
 
         /// Set an event handler for a keystroke.
-        pub on_key_down(EvKey) => view_OnKeyDown;
+     on_key_down(EvKey) => view_OnKeyDown;
 
         /// Set an event handler for releasing a key.
-        pub on_key_up(EvKey) => view_OnKeyUp;
+     on_key_up(EvKey) => view_OnKeyUp;
 
         /// Sets an event handler for keyboard focus.
-        pub on_focus(bool) => view_OnFocus;
+     on_focus(bool) => view_OnFocus;
 
         /// Set a handler to avoid losing keyboard focus.
-        pub on_accept_focus() -> bool => view_OnAcceptFocus;
+     on_accept_focus() -> bool => view_OnAcceptFocus;
 
         /// Set a handler to prevent getting keyboard focus.
-        pub on_resign_focus() -> bool => view_OnResignFocus;
+     on_resign_focus() -> bool => view_OnResignFocus;
 
         /// Set an event handler for the scroll bars.
-        pub on_scroll(EvScroll) -> f32 => view_OnScroll;
+         on_scroll(EvScroll) -> f32 => view_OnScroll;
     }
 
     /// Allows to capture the press of the \[TAB\] key.
@@ -109,12 +86,12 @@ impl View {
     /// If TRUE the pressing of \[TAB\] with the keyboard focus in the view will be captured as a KeyDown
     /// event and not as navigation between the controls. The call to this function will have no effect
     /// if there is no associated OnKeyDown handler. In general, you should not use this function.
-    pub fn allow_tab(&self, allow: bool) {
+    fn allow_tab(&self, allow: bool) {
         unsafe { view_allow_tab(self.as_ptr(), allow as _) }
     }
 
     /// Gets the current size of the view.
-    pub fn get_size(&self) -> S2Df {
+    fn get_size(&self) -> S2Df {
         let mut size = S2Df {
             width: 0.0,
             height: 0.0,
@@ -128,28 +105,28 @@ impl View {
     /// # Remarks
     /// When creating a scroll view, this method indicates the entire drawing area. The control
     /// will use it to size and position the scroll bars.
-    pub fn content_size(&self, size: S2Df, line: S2Df) {
+    fn content_size(&self, size: S2Df, line: S2Df) {
         unsafe {
             view_content_size(self.as_ptr(), size, line);
         }
     }
 
     /// Move the horizontal scroll bar to the indicated position.
-    pub fn scroll_x(&self, pos: f32) {
+    fn scroll_x(&self, pos: f32) {
         unsafe {
             view_scroll_x(self.as_ptr(), pos);
         }
     }
 
     /// Move the vertical scroll bar to the indicated position.
-    pub fn scroll_y(&self, pos: f32) {
+    fn scroll_y(&self, pos: f32) {
         unsafe {
             view_scroll_y(self.as_ptr(), pos);
         }
     }
 
     /// Gets the measurements of the scroll bars.
-    pub fn scroll_size(&self) -> (f32, f32) {
+    fn scroll_size(&self) -> (f32, f32) {
         let mut height = 0f32;
         let mut width = 0f32;
         unsafe {
@@ -159,14 +136,14 @@ impl View {
     }
 
     /// Show or hide the scroll bars.
-    pub fn scroll_visible(&self, horizontal: bool, vertical: bool) {
+    fn scroll_visible(&self, horizontal: bool, vertical: bool) {
         unsafe {
             view_scroll_visible(self.as_ptr(), horizontal as _, vertical as _);
         }
     }
 
     /// Gets the dimensions of the visible area of the view.
-    pub fn viewport(&self) -> (V2Df, S2Df) {
+    fn viewport(&self) -> (V2Df, S2Df) {
         let mut pos = V2Df { x: 0.0, y: 0.0 };
         let mut size = S2Df {
             width: 0.0,
@@ -179,7 +156,7 @@ impl View {
     }
 
     /// Gets the scaling of the point.
-    pub fn point_scale(&self) -> f32 {
+    fn point_scale(&self) -> f32 {
         let mut scale = 0f32;
         unsafe {
             view_point_scale(self.as_ptr(), &mut scale);
@@ -188,7 +165,7 @@ impl View {
     }
 
     /// Send an order to the operating system that the view should be refreshed.
-    pub fn update(&self) {
+    fn update(&self) {
         unsafe {
             view_update(self.as_ptr());
         }
@@ -198,10 +175,48 @@ impl View {
     ///
     /// # Remarks
     /// Do not use this function if you do not know very well what you are doing.
-    pub fn native(&self) -> *mut std::ffi::c_void {
+    fn native(&self) -> *mut std::ffi::c_void {
         unsafe { view_native(self.as_ptr()) }
     }
 }
 
+/// The View controls or custom views are blank areas within the window that allow us
+/// to implement our own components.
+///
+/// # Remark
+/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
+/// components assciated with it will be automatically released.
+#[repr(transparent)]
+#[derive(Clone, Copy, Debug)]
+pub struct View {
+    pub(crate) inner: *mut nappgui_sys::View,
+}
+
+impl ViewTrait for View {
+    fn as_ptr(&self) -> *mut nappgui_sys::View {
+        self.inner
+    }
+}
+
+impl View {
+    /// Create a new custom view.
+    pub fn new() -> Self {
+        let view = unsafe { view_create() };
+        Self { inner: view }
+    }
+
+    /// Create a new custom view with scrollbars.
+    pub fn new_scroll() -> Self {
+        let view = unsafe { view_scroll() };
+        Self { inner: view }
+    }
+
+    /// Create a new view with all the options.
+    pub fn new_custom(hscroll: bool, vscroll: bool) -> Self {
+        let view = unsafe { view_custom(hscroll as _, vscroll as _) };
+        Self { inner: view }
+    }
+}
+
 impl_control!(View, guicontrol_view);
-impl_layout!(View, layout_view);
+impl_layout!(View, ViewTrait, layout_view);

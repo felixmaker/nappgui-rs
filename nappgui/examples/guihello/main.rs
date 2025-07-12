@@ -70,10 +70,10 @@ impl App {
             window.update();
         });
 
-        self.layout.set(0, 0, &list);
+        self.layout.set(0, 0, list);
         set_panel(&self.window.as_weak(), &self.layout, 0);
 
-        panel.layout(&self.layout);
+        panel.layout(self.layout);
         self.layout.valign(0, 0, Align::Left);
         self.layout.valign(1, 0, Align::Left);
         self.layout.margin(10f32);
@@ -99,7 +99,7 @@ fn set_panel(window: &WeakWindow, layout: &Layout, index: usize) {
         }
     };
 
-    layout.panel_replace(&panel, 1, 0);
+    layout.panel_replace(panel, 1, 0);
 
     if let Some(defbutton) = &mut defbutton {
         window.defbutton(defbutton);
@@ -118,10 +118,10 @@ where
         process_return_key: true,
         ..Default::default()
     });
-    layout.set(0, 0, &label);
+    layout.set(0, 0, label);
     layout.margin(10f32);
-    panel.layout(&layout);
-    window.panel(&panel);
+    panel.layout(layout);
+    window.panel(panel);
     window.title("Message");
 
     let mut pos = parent.get_origin();
@@ -165,7 +165,7 @@ impl AppHandler for App {
     fn create() -> Self {
         let app = App::new();
         let panel = app.panel();
-        app.window.panel(&panel);
+        app.window.panel(panel);
         app.window.title("NAppGUI GUI Basics");
 
         app.window.origin(500f32, 200f32);

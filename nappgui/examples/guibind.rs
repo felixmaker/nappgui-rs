@@ -65,7 +65,7 @@ fn i_radio_layout() -> Layout {
     let layout = Layout::new(1, 6);
     for i in 0..6 {
         let radio = RadioButton::new(&format!("Radio {}", i));
-        layout.set(0, i, &radio);
+        layout.set(0, i, radio);
     }
 
     layout
@@ -79,7 +79,7 @@ fn i_title_labels(layout: &Layout) {
     for i in 0..I_NUM_CONTROLS {
         let label = Label::new(strs[i]);
         label.font(&font);
-        layout.set(0, i as _, &label);
+        layout.set(0, i as _, label);
     }
 
     layout.hmargin(0, 10.0);
@@ -88,7 +88,7 @@ fn i_title_labels(layout: &Layout) {
 fn i_value_labels(layout: &Layout) {
     for i in 0..I_NUM_CONTROLS {
         let label = Label::new("");
-        layout.set(2, i as _, &label);
+        layout.set(2, i as _, label);
         layout.halign(2, i as _, Align::Justify);
     }
 
@@ -141,15 +141,15 @@ fn i_layout() -> Layout {
 
     layout.halign(1, 0, Align::Justify);
 
-    layout.set(1, 0, &label);
-    layout.set(1, 1, &edit);
-    layout.set(1, 2, &check);
-    layout.set(1, 3, &check3);
-    layout.set(1, 4, &radio);
-    layout.set(1, 5, &pop);
-    layout.set(1, 6, &list);
-    layout.set(1, 7, &slider);
-    layout.set(1, 8, &updown);
+    layout.set(1, 0,  label);
+    layout.set(1, 1,  edit);
+    layout.set(1, 2,  check);
+    layout.set(1, 3,  check3);
+    layout.set(1, 4,  radio);
+    layout.set(1, 5,  pop);
+    layout.set(1, 6,  list);
+    layout.set(1, 7,  slider);
+    layout.set(1, 8,  updown);
 
     cell_dbind!(
         &layout.cell(1, 0),
@@ -208,13 +208,13 @@ impl AppHandler for App {
         // for simple example...
         let data = Box::into_raw(Box::new(data));
 
-        panel.layout(&layout);
+        panel.layout(layout);
 
         layout_dbind!(&layout, BasicTypes);
         layout_dbind_obj!(&layout, data as _, BasicTypes);
 
         let window = Window::new(WindowFlags::default());
-        window.panel(&panel);
+        window.panel(panel);
         window.title("Hello, World!");
         window.origin(500.0, 200.0);
         window.on_close(|_| finish());

@@ -1,7 +1,11 @@
-use std::rc::Rc;
-
 use crate::{
-    draw_2d::{Color, Font, Image}, gui::{control::impl_control, event::{EvButton, EvMouse}, impl_layout}, util::macros::{callback, pub_crate_ptr_ops}
+    draw_2d::{Color, Font, Image},
+    gui::{
+        control::impl_control,
+        event::{EvButton, EvMouse},
+        impl_layout,
+    },
+    util::macros::callback,
 };
 use nappgui_sys::{
     listbox_OnDown, listbox_OnSelect, listbox_add_elem, listbox_check, listbox_checkbox,
@@ -10,20 +14,10 @@ use nappgui_sys::{
     listbox_size, listbox_text, S2Df,
 };
 
-/// The ListBox are controls that display a series of elements as a list.
-#[derive(Clone)]
-pub struct ListBox {
-    pub(crate) inner: Rc<*mut nappgui_sys::ListBox>,
-}
-
-impl ListBox {
-    pub_crate_ptr_ops!(*mut nappgui_sys::ListBox);
-
-    /// Create a new list control.
-    pub fn new() -> Self {
-        let listbox = unsafe { listbox_create() };
-        Self::from_raw(listbox)
-    }
+/// The listbox trait.
+pub trait ListBoxTrait {
+    /// Returns a raw pointer to the list box object.
+    fn as_ptr(&self) -> *mut nappgui_sys::ListBox;
 
     callback! {
         /// Sets a handler for a mouse button press.
@@ -33,17 +27,17 @@ impl ListBox {
         /// element clicked will be received or UINT32_MAX if it corresponds to an empty area of the ListBox.
         /// If the event returns FALSE on event_result, the element will be prevented from being selected
         /// (TRUE by default). See GUI Events.
-        pub on_down(EvMouse) -> bool => listbox_OnDown;
+        on_down(EvMouse) -> bool => listbox_OnDown;
 
         /// Set an event handler for the selection of a new item.
-        pub on_select(EvButton) => listbox_OnSelect;
+        on_select(EvButton) => listbox_OnSelect;
     }
 
     /// Set the default size of the list.
     ///
     /// # Remarks
     /// It corresponds to Natural sizing of control Default 128x128.
-    pub fn size(&self, width: f32, height: f32) {
+    fn size(&self, width: f32, height: f32) {
         let size = S2Df { width, height };
         unsafe {
             listbox_size(self.as_ptr(), size);
@@ -51,21 +45,21 @@ impl ListBox {
     }
 
     /// Show or hide checkboxes to the left of items.
-    pub fn checkbox(&self, show: bool) {
+    fn checkbox(&self, show: bool) {
         unsafe {
             listbox_checkbox(self.as_ptr(), show as _);
         }
     }
 
     /// Enable multiple selection.
-    pub fn multisel(&self, enable: bool) {
+    fn multisel(&self, enable: bool) {
         unsafe {
             listbox_multisel(self.as_ptr(), enable as _);
         }
     }
 
     /// Adds a new element.
-    pub fn add_elem(&self, text: &str, image: Option<&Image>) {
+    fn add_elem(&self, text: &str, image: Option<&Image>) {
         let text = std::ffi::CString::new(text).unwrap();
         let image = match image {
             Some(value) => value.inner,
@@ -77,7 +71,7 @@ impl ListBox {
     }
 
     /// Edit a list item.
-    pub fn set_elem(&self, index: usize, text: &str, image: Option<&Image>) {
+    fn set_elem(&self, index: usize, text: &str, image: Option<&Image>) {
         let text = std::ffi::CString::new(text).unwrap();
         let image = match image {
             Some(value) => value.inner,
@@ -89,28 +83,28 @@ impl ListBox {
     }
 
     /// Delete an item from the list.
-    pub fn del_elem(&self, index: usize) {
+    fn del_elem(&self, index: usize) {
         unsafe {
             listbox_del_elem(self.as_ptr(), index as _);
         }
     }
 
     /// Sets the font of the list.
-    pub fn font(&self, font: &Font) {
+    fn font(&self, font: &Font) {
         unsafe {
             listbox_font(self.as_ptr(), font.inner);
         }
     }
 
     /// Remove all items from the list.
-    pub fn clear(&self) {
+    fn clear(&self) {
         unsafe {
             listbox_clear(self.as_ptr());
         }
     }
 
     /// Sets the text color of an element.
-    pub fn color(&self, index: usize, color: Color) {
+    fn color(&self, index: usize, color: Color) {
         unsafe {
             listbox_color(self.as_ptr(), index as _, color.inner);
         }
@@ -120,7 +114,7 @@ impl ListBox {
     ///
     /// # Remarks
     /// If multiple selection is not enabled, selecting one item implies de-selecting all the others.
-    pub fn select(&self, index: usize, select: bool) {
+    fn select(&self, index: usize, select: bool) {
         unsafe {
             listbox_select(self.as_ptr(), index as _, select as _);
         }
@@ -131,7 +125,7 @@ impl ListBox {
     /// # Remarks
     /// Checking an item is independent of selecting it. Items can be marked even if checkboxes are not
     /// visible. See listbox_checkbox.
-    pub fn check(&self, index: usize, check: bool) {
+    fn check(&self, index: usize, check: bool) {
         unsafe {
             listbox_check(self.as_ptr(), index as _, check as _);
         }
@@ -141,12 +135,12 @@ impl ListBox {
     ///
     /// # Remarks
     /// The number of elements.
-    pub fn count(&self) -> usize {
+    fn count(&self) -> usize {
         unsafe { listbox_count(self.as_ptr()) as _ }
     }
 
     /// Returns the text of an element.
-    pub fn text(&self, index: usize) -> String {
+    fn text(&self, index: usize) -> String {
         unsafe {
             let text = listbox_text(self.as_ptr(), index as _);
             std::ffi::CStr::from_ptr(text)
@@ -156,7 +150,7 @@ impl ListBox {
     }
 
     /// Returns whether or not an element is selected.
-    pub fn selected(&self, index: usize) -> bool {
+    fn selected(&self, index: usize) -> bool {
         unsafe { listbox_selected(self.as_ptr(), index as _) != 0 }
     }
 
@@ -165,10 +159,35 @@ impl ListBox {
     /// # Remarks
     /// Checking an item is independent of selecting it. Items can be marked even if checkboxes are not
     /// visible. See listbox_checkbox.
-    pub fn checked(&self, index: usize) -> bool {
+    fn checked(&self, index: usize) -> bool {
         unsafe { listbox_checked(self.as_ptr(), index as _) != 0 }
     }
 }
 
+/// The ListBox are controls that display a series of elements as a list.
+///
+/// # Remark
+/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
+/// components assciated with it will be automatically released.
+#[repr(transparent)]
+#[derive(Clone, Copy, Debug)]
+pub struct ListBox {
+    pub(crate) inner: *mut nappgui_sys::ListBox,
+}
+
+impl ListBoxTrait for ListBox {
+    fn as_ptr(&self) -> *mut nappgui_sys::ListBox {
+        self.inner
+    }
+}
+
+impl ListBox {
+    /// Create a new list control.
+    pub fn new() -> Self {
+        let listbox = unsafe { listbox_create() };
+        Self { inner: listbox }
+    }
+}
+
 impl_control!(ListBox, guicontrol_listbox);
-impl_layout!(ListBox, layout_listbox);
+impl_layout!(ListBox, ListBoxTrait, layout_listbox);

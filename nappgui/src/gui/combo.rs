@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::{
     draw_2d::{Color, Image},
     gui::{
@@ -8,7 +6,7 @@ use crate::{
         impl_layout,
     },
     types::{Align, FontStyle},
-    util::macros::{callback, pub_crate_ptr_ops},
+    util::macros::callback,
 };
 
 use nappgui_sys::{
@@ -18,35 +16,25 @@ use nappgui_sys::{
     combo_set_elem, combo_text, combo_tooltip,
 };
 
-/// ComboBox are text editing boxes with drop-down list.
-#[derive(Clone)]
-pub struct Combo {
-    pub(crate) inner: Rc<*mut nappgui_sys::Combo>,
-}
-
-impl Combo {
-    pub_crate_ptr_ops!(*mut nappgui_sys::Combo);
-
-    /// Create a combo control.
-    pub fn new() -> Self {
-        let combo = unsafe { combo_create() };
-        Self::from_raw(combo)
-    }
+/// The combo trait.
+pub trait ComboTrait {
+    /// Returns a raw pointer to the combo object.
+    fn as_ptr(&self) -> *mut nappgui_sys::Combo;
 
     callback! {
         /// Set a function to filter the text while editing.
-        pub on_filter(EvText) -> EvTextFilter => combo_OnFilter;
+        on_filter(EvText) -> EvTextFilter => combo_OnFilter;
 
         /// Set a function to be called when the text has changed.
         ///
         /// # Remarks
         /// This event will also be launched when you select an item from the list, a sign that the text has changed
         /// in the edit box. See Validate texts and GUI Events.
-        pub on_change(EvText) -> bool => combo_OnChange;
+        on_change(EvText) -> bool => combo_OnChange;
     }
 
     /// Set the combo edit text.
-    pub fn text(&self, text: &str) {
+    fn text(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
             combo_text(self.as_ptr(), text.as_ptr());
@@ -54,14 +42,14 @@ impl Combo {
     }
 
     /// Set text alignment.
-    pub fn align(&self, align: Align) {
+    fn align(&self, align: Align) {
         unsafe {
             combo_align(self.as_ptr(), align as _);
         }
     }
 
     /// Assign a tooltip to the control combo.
-    pub fn tooltip(&self, text: &str) {
+    fn tooltip(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
             combo_tooltip(self.as_ptr(), text.as_ptr());
@@ -69,35 +57,35 @@ impl Combo {
     }
 
     /// Set the color of the combo text.
-    pub fn color(&self, color: Color) {
+    fn color(&self, color: Color) {
         unsafe {
             combo_color(self.as_ptr(), color.inner);
         }
     }
 
     /// Sets the color of the text, when the control has the keyboard focus.
-    pub fn color_focus(&self, color: Color) {
+    fn color_focus(&self, color: Color) {
         unsafe {
             combo_color_focus(self.as_ptr(), color.inner);
         }
     }
 
     /// Set the background color.
-    pub fn bgcolor(&self, color: Color) {
+    fn bgcolor(&self, color: Color) {
         unsafe {
             combo_bgcolor(self.as_ptr(), color.inner);
         }
     }
 
     /// Sets the background color when the control has keyboard focus.
-    pub fn bgcolor_focus(&self, color: Color) {
+    fn bgcolor_focus(&self, color: Color) {
         unsafe {
             combo_bgcolor_focus(self.as_ptr(), color.inner);
         }
     }
 
     /// Set an explanatory text for when the control is blank.
-    pub fn phtext(&self, text: &str) {
+    fn phtext(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
             combo_phtext(self.as_ptr(), text.as_ptr());
@@ -105,33 +93,33 @@ impl Combo {
     }
 
     /// Set the color of the placeholder text.
-    pub fn phcolor(&self, color: Color) {
+    fn phcolor(&self, color: Color) {
         unsafe {
             combo_phcolor(self.as_ptr(), color.inner);
         }
     }
 
     /// Set the font style for the placeholder.
-    pub fn phstyle(&self, style: FontStyle) {
+    fn phstyle(&self, style: FontStyle) {
         unsafe {
             combo_phstyle(self.as_ptr(), style.to_fstyle_t());
         }
     }
 
     /// Get control text.
-    pub fn get_text(&self, index: u32) -> String {
+    fn get_text(&self, index: u32) -> String {
         let text = unsafe { combo_get_text(self.as_ptr(), index) };
         let text = unsafe { std::ffi::CStr::from_ptr(text) };
         text.to_string_lossy().into_owned()
     }
 
     /// Gets the number of items in the dropdown list.
-    pub fn count(&self) -> u32 {
+    fn count(&self) -> u32 {
         unsafe { combo_count(self.as_ptr()) }
     }
 
     /// Add a new item to the drop-down list.
-    pub fn add_elem(&self, text: &str, image: Option<&Image>) {
+    fn add_elem(&self, text: &str, image: Option<&Image>) {
         let text = std::ffi::CString::new(text).unwrap();
         if let Some(image) = image {
             unsafe {
@@ -145,7 +133,7 @@ impl Combo {
     }
 
     /// Edit an item from the drop-down list.
-    pub fn set_elem(&self, index: u32, text: &str, image: Option<&Image>) {
+    fn set_elem(&self, index: u32, text: &str, image: Option<&Image>) {
         let text = std::ffi::CString::new(text).unwrap();
         if let Some(image) = image {
             unsafe {
@@ -159,7 +147,7 @@ impl Combo {
     }
 
     /// Insert an item in the drop-down list.
-    pub fn ins_elem(&self, index: u32, text: &str, image: Option<&Image>) {
+    fn ins_elem(&self, index: u32, text: &str, image: Option<&Image>) {
         let text = std::ffi::CString::new(text).unwrap();
         if let Some(image) = image {
             unsafe {
@@ -173,19 +161,41 @@ impl Combo {
     }
 
     /// Remove an item from the drop-down list.
-    pub fn del_elem(&self, index: u32) {
+    fn del_elem(&self, index: u32) {
         unsafe {
             combo_del_elem(self.as_ptr(), index);
         }
     }
 
     /// Prevents duplicate texts from the drop-down list.
-    pub fn duplicates(&self, duplicates: bool) {
+    fn duplicates(&self, duplicates: bool) {
         unsafe {
             combo_duplicates(self.as_ptr(), duplicates as _);
         }
     }
 }
 
+/// ComboBox are text editing boxes with drop-down list.
+#[derive(Clone, Copy, Debug)]
+pub struct Combo {
+    pub(crate) inner: *mut nappgui_sys::Combo,
+}
+
+impl ComboTrait for Combo {
+    fn as_ptr(&self) -> *mut nappgui_sys::Combo {
+        self.inner
+    }
+}
+
+impl Combo {
+    /// Create a combo control.
+    pub fn new() -> Self {
+        let combo = Self {
+            inner: unsafe { combo_create() },
+        };
+        combo
+    }
+}
+
 impl_control!(Combo, guicontrol_combo);
-impl_layout!(Combo, layout_combo);
+impl_layout!(Combo, ComboTrait, layout_combo);

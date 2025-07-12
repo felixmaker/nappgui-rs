@@ -49,16 +49,16 @@ fn labels(multiline: bool) -> Panel {
     label5.multiline(multiline);
     label6.multiline(multiline);
 
-    layout.set(0, 0, &popup);
-    layout.set(0, 1, &label1);
-    layout.set(0, 2, &label2);
-    layout.set(0, 3, &label3);
-    layout.set(0, 4, &label4);
-    layout.set(0, 5, &label5);
-    layout.set(0, 6, &label6);
+    layout.set(0, 0, popup);
+    layout.set(0, 1, label1);
+    layout.set(0, 2, label2);
+    layout.set(0, 3, label3);
+    layout.set(0, 4, label4);
+    layout.set(0, 5, label5);
+    layout.set(0, 6, label6);
 
     layout.vmargin(0, 5f32);
-    panel.layout(&layout);
+    panel.layout(layout);
     panel
 }
 
@@ -120,12 +120,12 @@ pub fn labels_mouse_over() -> Panel {
 
     label5.bgcolor_over(color_blue);
 
-    layout.set(0, 0, &label1);
-    layout.set(0, 1, &label2);
-    layout.set(0, 2, &label3);
-    layout.set(0, 3, &label4);
-    layout.set(0, 4, &label5);
+    layout.set(0, 0, label1);
+    layout.set(0, 1, label2);
+    layout.set(0, 2, label3);
+    layout.set(0, 3, label4);
+    layout.set(0, 4, label5);
 
-    panel.layout(&layout);
+    panel.layout(layout);
     panel
 }

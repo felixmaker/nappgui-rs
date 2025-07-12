@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::{
     draw_2d::Color,
     gui::{
@@ -8,7 +6,7 @@ use crate::{
         impl_layout,
     },
     types::{Align, FontStyle},
-    util::macros::{callback, pub_crate_ptr_ops},
+    util::macros::callback,
 };
 
 use nappgui_sys::{
@@ -21,45 +19,35 @@ use nappgui_sys::{
     textview_wrap, textview_writef, S2Df,
 };
 
-/// TextView are views designed to work with rich text blocks, where fonts, sizes and colors can be combined.
-#[derive(Clone)]
-pub struct TextView {
-    pub(crate) inner: Rc<*mut nappgui_sys::TextView>,
-}
-
-impl TextView {
-    pub_crate_ptr_ops!(*mut nappgui_sys::TextView);
-
-    /// Create a text view.
-    pub fn new() -> Self {
-        let textview = unsafe { textview_create() };
-        Self::from_raw(textview)
-    }
+/// The text view trait.
+pub trait TextViewTrait {
+    /// Returns a raw pointer to the text view object.
+    fn as_ptr(&self) -> *mut nappgui_sys::TextView;
 
     callback! {
         /// Set a handler to filter text while editing.
         ///
         /// # Remarks
         /// It works the same way as in Edit controls. See Filter texts and GUI Events.
-        pub on_filter(EvText) -> EvTextFilter => textview_OnFilter;
+          on_filter(EvText) -> EvTextFilter => textview_OnFilter;
 
         /// Set a handler for keyboard focus.
-        pub on_focus(bool) => textview_OnFocus;
+          on_focus(bool) => textview_OnFocus;
     }
 
     /// Sets the default size of the view.
-    pub fn size(&self, width: f32, height: f32) {
+    fn size(&self, width: f32, height: f32) {
         let size = S2Df { width, height };
         unsafe { textview_size(self.as_ptr(), size) }
     }
 
     /// Clears all content from view.
-    pub fn clear(&self) {
+    fn clear(&self) {
         unsafe { textview_clear(self.as_ptr()) }
     }
 
     /// Writes text to the view, using the format of the printf.
-    pub fn writef(&self, text: &str) {
+    fn writef(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
             textview_writef(self.as_ptr(), text.as_ptr());
@@ -67,7 +55,7 @@ impl TextView {
     }
 
     /// Insert text into the cursor position.
-    pub fn cpos_writef(&self, text: &str) {
+    fn cpos_writef(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
             textview_cpos_writef(self.as_ptr(), text.as_ptr());
@@ -75,7 +63,7 @@ impl TextView {
     }
 
     /// Sets the text units.
-    pub fn units(&self, units: u32) {
+    fn units(&self, units: u32) {
         unsafe { textview_units(self.as_ptr(), units) }
     }
 
@@ -83,7 +71,7 @@ impl TextView {
     ///
     /// # Remarks
     /// Not all families will be present on all platforms. Use font_exists_family or font_installed_families to check.
-    pub fn family(&self, family: &str) {
+    fn family(&self, family: &str) {
         let family = std::ffi::CString::new(family).unwrap();
         unsafe {
             textview_family(self.as_ptr(), family.as_ptr());
@@ -94,61 +82,61 @@ impl TextView {
     ///
     /// # Remarks
     /// The value is conditional on the units established in textview_units.
-    pub fn fsize(&self, size: f32) {
+    fn fsize(&self, size: f32) {
         unsafe { textview_fsize(self.as_ptr(), size) }
     }
 
     /// Sets the text style.
-    pub fn fstyle(&self, style: FontStyle) {
+    fn fstyle(&self, style: FontStyle) {
         unsafe {
             textview_fstyle(self.as_ptr(), style.to_fstyle_t());
         }
     }
 
     /// Sets the text color.
-    pub fn color(&self, color: Color) {
+    fn color(&self, color: Color) {
         unsafe {
             textview_color(self.as_ptr(), color.inner);
         }
     }
 
     /// Sets the background color of the text.
-    pub fn bgcolor(&self, color: Color) {
+    fn bgcolor(&self, color: Color) {
         unsafe {
             textview_bgcolor(self.as_ptr(), color.inner);
         }
     }
 
     /// Sets the background color of the control.
-    pub fn pgcolor(&self, color: Color) {
+    fn pgcolor(&self, color: Color) {
         unsafe {
             textview_pgcolor(self.as_ptr(), color.inner);
         }
     }
 
     /// Sets the alignment of text in a paragraph.
-    pub fn halign(&self, align: Align) {
+    fn halign(&self, align: Align) {
         unsafe {
             textview_halign(self.as_ptr(), align as _);
         }
     }
 
     /// Sets the line spacing of the paragraph.
-    pub fn lspacing(&self, spacing: f32) {
+    fn lspacing(&self, spacing: f32) {
         unsafe {
             textview_lspacing(self.as_ptr(), spacing);
         }
     }
 
     /// Sets a vertical space before the paragraph.
-    pub fn bfspace(&self, space: f32) {
+    fn bfspace(&self, space: f32) {
         unsafe {
             textview_bfspace(self.as_ptr(), space);
         }
     }
 
     /// Sets a vertical space after the paragraph.
-    pub fn afspace(&self, space: f32) {
+    fn afspace(&self, space: f32) {
         unsafe {
             textview_afspace(self.as_ptr(), space);
         }
@@ -156,28 +144,28 @@ impl TextView {
 
     /// Applies the character and paragraph attributes to all text in the control. If there is no
     /// text, they will be taken as the default attributes of the text added using the keyboard.
-    pub fn apply_all(&self) {
+    fn apply_all(&self) {
         unsafe {
             textview_apply_all(self.as_ptr());
         }
     }
 
     /// Applies character and paragraph attributes to selected text.
-    pub fn apply_select(&self) {
+    fn apply_select(&self) {
         unsafe {
             textview_apply_select(self.as_ptr());
         }
     }
 
     /// Show or hide scroll bars.
-    pub fn scroll_visible(&self, horizontal: bool, vertical: bool) {
+    fn scroll_visible(&self, horizontal: bool, vertical: bool) {
         unsafe {
             textview_scroll_visible(self.as_ptr(), horizontal as _, vertical as _);
         }
     }
 
     /// Sets whether or not the control text is editable.
-    pub fn editable(&self, editable: bool) {
+    fn editable(&self, editable: bool) {
         unsafe {
             textview_editable(self.as_ptr(), editable as _);
         }
@@ -187,7 +175,7 @@ impl TextView {
     ///
     /// # Remarks
     /// It works the same way as in Edit controls. See Text selection.
-    pub fn select(&self, start: i32, end: i32) {
+    fn select(&self, start: i32, end: i32) {
         unsafe {
             textview_select(self.as_ptr(), start, end);
         }
@@ -198,7 +186,7 @@ impl TextView {
     /// # Remarks
     /// When lose keyboard focus, the control will retain the text selection. This feature only
     /// affects the visibility of the selection.
-    pub fn show_select(&self, show: bool) {
+    fn show_select(&self, show: bool) {
         unsafe {
             textview_show_select(self.as_ptr(), show as _);
         }
@@ -208,54 +196,79 @@ impl TextView {
     /// # Remarks
     /// It has an effect similar to textview_cut, but without copying the eliminated text on the
     /// clipboard. See Select text.
-    pub fn del_select(&self) {
+    fn del_select(&self) {
         unsafe {
             textview_del_select(self.as_ptr());
         }
     }
 
     /// In texts that exceed the visible part, it scrolls to the position of the caret.
-    pub fn scroll_caret(&self) {
+    fn scroll_caret(&self) {
         unsafe {
             textview_scroll_caret(self.as_ptr());
         }
     }
 
     /// Gets the text of the control.
-    pub fn get_text(&self) -> String {
+    fn get_text(&self) -> String {
         let text = unsafe { textview_get_text(self.as_ptr()) };
         let text = unsafe { std::ffi::CStr::from_ptr(text) };
         text.to_string_lossy().into_owned()
     }
 
     /// Copies the selected text to the clipboard.
-    pub fn copy(&self) {
+    fn copy(&self) {
         unsafe {
             textview_copy(self.as_ptr());
         }
     }
 
     /// Cuts the selected text, copying it to the clipboard.
-    pub fn cut(&self) {
+    fn cut(&self) {
         unsafe {
             textview_cut(self.as_ptr());
         }
     }
 
     /// Pastes the text from the clipboard into the caret position.
-    pub fn paste(&self) {
+    fn paste(&self) {
         unsafe {
             textview_paste(self.as_ptr());
         }
     }
 
     /// Turn automatic text wrapping on or off.
-    pub fn wrap(&self, wrap: bool) {
+    fn wrap(&self, wrap: bool) {
         unsafe {
             textview_wrap(self.as_ptr(), wrap as _);
         }
     }
 }
 
+/// TextView are views designed to work with rich text blocks, where fonts, sizes and colors can be combined.
+///
+/// # Remark
+/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
+/// components assciated with it will be automatically released.
+#[repr(transparent)]
+#[derive(Clone, Copy, Debug)]
+pub struct TextView {
+    pub(crate) inner: *mut nappgui_sys::TextView,
+}
+
+impl TextViewTrait for TextView {
+    fn as_ptr(&self) -> *mut nappgui_sys::TextView {
+        self.inner
+    }
+}
+
+impl TextView {
+    /// Create a text view.
+    pub fn new() -> Self {
+        let textview = unsafe { textview_create() };
+        Self { inner: textview }
+    }
+}
+
 impl_control!(TextView, guicontrol_textview);
-impl_layout!(TextView, layout_textview);
+impl_layout!(TextView, TextViewTrait, layout_textview);

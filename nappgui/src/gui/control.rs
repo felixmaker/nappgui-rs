@@ -34,13 +34,15 @@ macro_rules! impl_control {
     ($type: ty, $func: ident) => {
         impl crate::gui::ControlTrait for $type {
             fn as_control_ptr(&self) -> *mut nappgui_sys::GuiControl {
-                *self.inner as _
+                self.inner as _
             }
 
             fn from_control_ptr(ptr: *mut nappgui_sys::GuiControl) -> Option<Self> {
-                unsafe {
-                    let combo = nappgui_sys::$func(ptr);
-                    Self::from_raw_no_drop_option(combo)
+                let result = unsafe { nappgui_sys::$func(ptr) };
+                if !result.is_null() {
+                    Some(Self { inner: result })
+                } else {
+                    None
                 }
             }
         }

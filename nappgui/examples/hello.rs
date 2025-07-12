@@ -15,9 +15,9 @@ impl AppHandler for App {
         let button = PushButton::new("Click Me!");
         let text = TextView::new();
 
-        layout.set(0, 0, &label);
-        layout.set(0, 1, &button);
-        layout.set(0, 2, &text);
+        layout.set(0, 0, label);
+        layout.set(0, 1, button);
+        layout.set(0, 2, text);
         layout.hsize(0, 250.0);
         layout.vsize(2, 100.0);
         layout.margin(5.0);
@@ -29,10 +29,10 @@ impl AppHandler for App {
             *clicks.borrow_mut() += 1;
         });
 
-        panel.layout(&layout);
+        panel.layout(layout);
 
         let window = Window::new(WindowFlags::default());
-        window.panel(&panel);
+        window.panel(panel);
         window.title("Hello, World!");
         window.origin(500.0, 200.0);
         window.on_close(|_| finish());

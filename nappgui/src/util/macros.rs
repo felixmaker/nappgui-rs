@@ -106,56 +106,56 @@ macro_rules! callback {
     }
 }
 
-macro_rules! pub_crate_ptr_ops {
-    ($pointer: ty) => {
-        #[allow(unused)]
-        pub(crate) fn from_raw(ptr: $pointer) -> Self {
-            if ptr.is_null() {
-                panic!("pointer `{}` is null", std::any::type_name::<$pointer>());
-            }
-            Self {
-                inner: std::rc::Rc::<$pointer>::new(ptr),
-            }
-        }
+// macro_rules! pub_crate_ptr_ops {
+//     ($pointer: ty) => {
+//         #[allow(unused)]
+//         pub(crate) fn from_raw(ptr: $pointer) -> Self {
+//             if ptr.is_null() {
+//                 panic!("pointer `{}` is null", std::any::type_name::<$pointer>());
+//             }
+//             Self {
+//                 inner: std::rc::Rc::<$pointer>::new(ptr),
+//             }
+//         }
 
-        #[allow(unused)]
-        pub(crate) unsafe fn from_raw_no_drop(ptr: $pointer) -> Self {
-            if ptr.is_null() {
-                panic!("pointer `{}` is null", std::any::type_name::<$pointer>());
-            }
+//         #[allow(unused)]
+//         pub(crate) unsafe fn from_raw_no_drop(ptr: $pointer) -> Self {
+//             if ptr.is_null() {
+//                 panic!("pointer `{}` is null", std::any::type_name::<$pointer>());
+//             }
 
-            let inner = std::rc::Rc::<$pointer>::new(ptr);
-            let inner = std::rc::Rc::<$pointer>::into_raw(inner);
-            std::rc::Rc::increment_strong_count(inner);
-            let inner = std::rc::Rc::from_raw(inner);
-            Self { inner }
-        }
+//             let inner = std::rc::Rc::<$pointer>::new(ptr);
+//             let inner = std::rc::Rc::<$pointer>::into_raw(inner);
+//             std::rc::Rc::increment_strong_count(inner);
+//             let inner = std::rc::Rc::from_raw(inner);
+//             Self { inner }
+//         }
 
-        #[allow(unused)]
-        pub(crate) fn from_raw_option(ptr: $pointer) -> Option<Self> {
-            if ptr.is_null() {
-                None
-            } else {
-                Some(Self::from_raw(ptr))
-            }
-        }
+//         #[allow(unused)]
+//         pub(crate) fn from_raw_option(ptr: $pointer) -> Option<Self> {
+//             if ptr.is_null() {
+//                 None
+//             } else {
+//                 Some(Self::from_raw(ptr))
+//             }
+//         }
 
-        #[allow(unused)]
-        pub(crate) unsafe fn from_raw_no_drop_option(ptr: $pointer) -> Option<Self> {
-            if ptr.is_null() {
-                None
-            } else {
-                Some(Self::from_raw_no_drop(ptr))
-            }
-        }
+//         #[allow(unused)]
+//         pub(crate) unsafe fn from_raw_no_drop_option(ptr: $pointer) -> Option<Self> {
+//             if ptr.is_null() {
+//                 None
+//             } else {
+//                 Some(Self::from_raw_no_drop(ptr))
+//             }
+//         }
 
-        #[allow(unused)]
-        pub(crate) fn as_ptr(&self) -> $pointer {
-            *self.inner
-        }
-    };
-}
+//         #[allow(unused)]
+//         pub(crate) fn as_ptr(&self) -> $pointer {
+//             *self.inner
+//         }
+//     };
+// }
 
 pub(crate) use callback;
 pub(crate) use listener;
-pub(crate) use pub_crate_ptr_ops;
+// pub(crate) use pub_crate_ptr_ops;

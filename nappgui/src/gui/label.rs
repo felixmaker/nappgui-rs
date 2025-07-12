@@ -1,10 +1,10 @@
-use std::{ffi::CString, rc::Rc};
+use std::ffi::CString;
 
 use crate::{
     draw_2d::{Color, Font},
     gui::{control::impl_control, event::EvMouse, impl_layout},
     types::{Align, FontStyle},
-    util::macros::{callback, pub_crate_ptr_ops},
+    util::macros::callback,
 };
 
 use nappgui_sys::{
@@ -12,40 +12,18 @@ use nappgui_sys::{
     label_create, label_font, label_multiline, label_size_text, label_style_over, label_text,
 };
 
-/// Label controls are used to insert small blocks of text into windows and forms. They are of uniform format,
-/// that is, the font and color attributes will be applied to the entire text. In most cases the content will
-/// be limited to a single line, although it is possible to show blocks that extend in several lines. The control
-/// size will be adjusted to the text it contains
-#[derive(Clone)]
-pub struct Label {
-    pub(crate) inner: Rc<*mut nappgui_sys::Label>,
-}
-
-impl Default for Label {
-    fn default() -> Self {
-        let label = unsafe { label_create() };
-        Self::from_raw(label)
-    }
-}
-
-impl Label {
-    pub_crate_ptr_ops!(*mut nappgui_sys::Label);
-
-    /// Create a text control.
-    pub fn new(text: &str) -> Label {
-        let label = unsafe { label_create() };
-        let label = Self::from_raw(label);
-        label.text(text);
-        label
-    }
+/// The label trait.
+pub trait LabelTrait {
+    /// Returns a raw pointer to the label object.
+    fn as_ptr(&self) -> *mut nappgui_sys::Label;
 
     callback! {
         /// Set the OnClick event handler.
-        pub on_click(EvMouse) => label_OnClick;
+        on_click(EvMouse) => label_OnClick;
     }
 
     /// Set the text that the label will display.
-    pub fn text(&self, text: &str) {
+    fn text(&self, text: &str) {
         let text = CString::new(text).unwrap();
         unsafe {
             label_text(self.as_ptr(), text.as_ptr());
@@ -57,7 +35,7 @@ impl Label {
     /// # Remarks
     /// By default, a Label control will be sized to the exact size of the text it
     /// contains. See Dynamic labels.
-    pub fn size_text(&self, text: &str) {
+    fn size_text(&self, text: &str) {
         let text = CString::new(text).unwrap();
         unsafe {
             label_size_text(self.as_ptr(), text.as_ptr());
@@ -65,26 +43,26 @@ impl Label {
     }
 
     /// Set the text font.
-    pub fn font(&self, font: &Font) {
+    fn font(&self, font: &Font) {
         unsafe {
             label_font(self.as_ptr(), font.inner);
         }
     }
 
     /// Set the font modifiers, when the mouse is over the control.
-    pub fn style_over(&self, style: FontStyle) {
+    fn style_over(&self, style: FontStyle) {
         unsafe {
             label_style_over(self.as_ptr(), style.to_fstyle_t() as _);
         }
     }
 
     /// Create a multi-line text control.
-    pub fn multiline(&self, multiline: bool) {
+    fn multiline(&self, multiline: bool) {
         unsafe { label_multiline(self.as_ptr(), multiline as _) };
     }
 
     /// Sets the horizontal alignment of the text with respect to the size of the control.
-    pub fn align(&self, align: Align) {
+    fn align(&self, align: Align) {
         unsafe {
             label_align(self.as_ptr(), align as _);
         }
@@ -94,7 +72,7 @@ impl Label {
     ///
     /// # Remarks
     /// RGB values may not be fully portable.
-    pub fn color(&self, color: Color) {
+    fn color(&self, color: Color) {
         unsafe {
             label_color(self.as_ptr(), color.inner);
         }
@@ -104,7 +82,7 @@ impl Label {
     ///
     /// # Remarks
     /// RGB values may not be fully portable.
-    pub fn color_over(&self, color: Color) {
+    fn color_over(&self, color: Color) {
         unsafe {
             label_color_over(self.as_ptr(), color.inner);
         }
@@ -114,7 +92,7 @@ impl Label {
     ///
     /// # Remarks
     /// RGB values may not be fully portable.
-    pub fn bgcolor(&self, color: Color) {
+    fn bgcolor(&self, color: Color) {
         unsafe {
             label_bgcolor(self.as_ptr(), color.inner);
         }
@@ -124,12 +102,49 @@ impl Label {
     ///
     /// # Remarks
     /// RGB values may not be fully portable.
-    pub fn bgcolor_over(&self, color: Color) {
+    fn bgcolor_over(&self, color: Color) {
         unsafe {
             label_bgcolor_over(self.as_ptr(), color.inner);
         }
     }
 }
 
+/// Label controls are used to insert small blocks of text into windows and forms. They are of uniform format,
+/// that is, the font and color attributes will be applied to the entire text. In most cases the content will
+/// be limited to a single line, although it is possible to show blocks that extend in several lines. The control
+/// size will be adjusted to the text it contains
+///
+/// # Remark
+/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
+/// components assciated with it will be automatically released.
+#[repr(transparent)]
+#[derive(Clone, Copy, Debug)]
+pub struct Label {
+    pub(crate) inner: *mut nappgui_sys::Label,
+}
+
+impl LabelTrait for Label {
+    /// Returns a raw pointer to the label object.
+    fn as_ptr(&self) -> *mut nappgui_sys::Label {
+        self.inner
+    }
+}
+
+impl Default for Label {
+    fn default() -> Self {
+        let label = unsafe { label_create() };
+        Self { inner: label }
+    }
+}
+
+impl Label {
+    /// Create a text control.
+    pub fn new(text: &str) -> Label {
+        let label = Label::default();
+        label.text(text);
+        label
+    }
+}
+
 impl_control!(Label, guicontrol_label);
-impl_layout!(Label, layout_label);
+impl_layout!(Label, LabelTrait, layout_label);

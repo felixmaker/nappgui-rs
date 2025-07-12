@@ -1,28 +1,24 @@
-use std::{ffi::CString, rc::Rc};
+use std::ffi::CString;
 
 use nappgui_sys::{
     cell_control, cell_dbind_imp, cell_empty, cell_enabled, cell_padding, cell_padding2,
     cell_padding4, cell_visible,
 };
 
-use crate::{gui::control::ControlTrait, util::macros::pub_crate_ptr_ops};
+use crate::gui::control::ControlTrait;
 
-/// Cells are the inner elements of a Layout and will house a control or a sublayout.
-#[derive(Clone)]
-pub struct Cell {
-    pub(crate) inner: Rc<*mut nappgui_sys::Cell>,
-}
-
-impl Cell {
-    pub_crate_ptr_ops!(*mut nappgui_sys::Cell);
+/// The cell trait.
+pub trait CellTrait {
+    /// Returns a raw pointer to the cell object.
+    fn as_ptr(&self) -> *mut nappgui_sys::Cell;
 
     /// Check if the cell is empty.
-    pub fn empty(&self) -> bool {
+    fn empty(&self) -> bool {
         unsafe { cell_empty(self.as_ptr()) != 0 }
     }
 
     /// Get control of the inside of the cell.
-    pub fn control<T>(&self) -> Option<T>
+    fn control<T>(&self) -> Option<T>
     where
         T: ControlTrait,
     {
@@ -31,7 +27,7 @@ impl Cell {
     }
 
     /// Activate or deactivate a cell.
-    pub fn enabled(&self, enabled: bool) {
+    fn enabled(&self, enabled: bool) {
         unsafe { cell_enabled(self.as_ptr(), enabled as _) }
     }
 
@@ -39,33 +35,33 @@ impl Cell {
     ///
     /// # Remarks
     /// If the cell contains a sublayout, the command will affect all controls recursively.
-    pub fn visible(&self, visible: bool) {
+    fn visible(&self, visible: bool) {
         unsafe { cell_visible(self.as_ptr(), visible as _) }
     }
 
     /// Set an inner margin.
-    pub fn padding(&self, pall: f32) {
+    fn padding(&self, pall: f32) {
         unsafe {
             cell_padding(self.as_ptr(), pall);
         }
     }
 
     /// Set an inner margin.
-    pub fn padding2(&self, pleft: f32, pright: f32) {
+    fn padding2(&self, pleft: f32, pright: f32) {
         unsafe {
             cell_padding2(self.as_ptr(), pleft, pright);
         }
     }
 
     /// Set an inner margin.
-    pub fn padding4(&self, pleft: f32, ptop: f32, pright: f32, pbottom: f32) {
+    fn padding4(&self, pleft: f32, ptop: f32, pright: f32, pbottom: f32) {
         unsafe {
             cell_padding4(self.as_ptr(), pleft, ptop, pright, pbottom);
         }
     }
 
     /// Associates a cell with the field of a struct.
-    pub fn dbind_imp(
+    fn dbind_imp(
         &self,
         type_: &str,
         size: u16,
@@ -88,6 +84,23 @@ impl Cell {
                 msize,
             );
         }
+    }
+}
+
+/// Cells are the inner elements of a Layout and will house a control or a sublayout.
+///
+/// # Remark
+/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
+/// components assciated with it will be automatically released.
+#[repr(transparent)]
+#[derive(Clone, Copy, Debug)]
+pub struct Cell {
+    pub(crate) inner: *mut nappgui_sys::Cell,
+}
+
+impl CellTrait for Cell {
+    fn as_ptr(&self) -> *mut nappgui_sys::Cell {
+        self.inner
     }
 }
 

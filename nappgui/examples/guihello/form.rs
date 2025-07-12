@@ -39,10 +39,10 @@ fn modal_window(edit: &mut Edit, text: &str, focus_info: &FocusInfo) -> Window {
         window2.stop_modal(GuiClose::Cancel);
     });
 
-    layout1.set(0, 0, &label);
-    layout2.set(1, 0, &button1);
-    layout2.set(2, 0, &button2);
-    layout1.set(0, 1, &layout2);
+    layout1.set(0, 0, label);
+    layout2.set(1, 0, button1);
+    layout2.set(2, 0, button2);
+    layout1.set(0, 1, layout2);
 
     layout1.hsize(0, 250.0);
     layout1.vmargin(0, 10.0);
@@ -52,8 +52,8 @@ fn modal_window(edit: &mut Edit, text: &str, focus_info: &FocusInfo) -> Window {
     layout2.hexpand(0);
 
     window.title("Data validation");
-    panel.layout(&layout1);
-    window.panel(&panel);
+    panel.layout(layout1);
+    window.panel(panel);
     window.defbutton(&button1);
 
     window
@@ -122,11 +122,11 @@ fn numbers(data: Rc<RefCell<FormData>>, color_bg: Color) -> Layout {
     updown1.tooltip("Increase/Decrease age");
     updown2.tooltip("Increase/Decrease height");
 
-    layout.set(2, 0, &label);
-    layout.set(0, 0, &edit1);
-    layout.set(3, 0, &edit2);
-    layout.set(1, 0, &updown1);
-    layout.set(4, 0, &updown2);
+    layout.set(2, 0, label);
+    layout.set(0, 0, edit1);
+    layout.set(3, 0, edit2);
+    layout.set(1, 0, updown1);
+    layout.set(4, 0, updown2);
 
     layout.hmargin(1, 10.);
     layout.hmargin(2, 10.);
@@ -236,20 +236,20 @@ fn edits(data: Rc<RefCell<FormData>>) -> Layout {
     edit4.bgcolor_focus(colorbg);
     edit5.bgcolor_focus(colorbg);
 
-    layout1.set(0, 0, &label1);
-    layout1.set(0, 1, &label2);
-    layout1.set(0, 2, &label3);
-    layout1.set(0, 3, &label4);
-    layout1.set(0, 4, &label5);
-    layout1.set(0, 5, &label6);
+    layout1.set(0, 0, label1);
+    layout1.set(0, 1, label2);
+    layout1.set(0, 2, label3);
+    layout1.set(0, 3, label4);
+    layout1.set(0, 4, label5);
+    layout1.set(0, 5, label6);
 
-    layout1.set(1, 0, &edit1);
-    layout1.set(1, 1, &edit2);
-    layout1.set(1, 2, &edit3);
-    layout1.set(1, 3, &edit4);
-    layout1.set(1, 4, &edit5);
+    layout1.set(1, 0, edit1);
+    layout1.set(1, 1, edit2);
+    layout1.set(1, 2, edit3);
+    layout1.set(1, 3, edit4);
+    layout1.set(1, 4, edit5);
 
-    layout1.set(1, 5, &layout2);
+    layout1.set(1, 5, layout2);
 
     layout1.hmargin(0, 5.);
     layout1.hexpand(1);
@@ -265,7 +265,7 @@ fn edits(data: Rc<RefCell<FormData>>) -> Layout {
 fn toolbar(data: Rc<RefCell<FormData>>) -> Layout {
     let layout = Layout::new(1, 1);
     let button = CheckButton::new("Field validations");
-    layout.set(0, 0, &button);
+    layout.set(0, 0, button);
     let mut data = data.borrow_mut();
     data.validate_check = Some(button);
     layout
@@ -284,9 +284,9 @@ fn form(data: Rc<RefCell<FormData>>) -> Layout {
     });
     label.multiline(true);
 
-    layout1.set(0, 0, &layout2);
-    layout1.set(0, 1, &layout3);
-    layout1.set(0, 2, &label);
+    layout1.set(0, 0, layout2);
+    layout1.set(0, 1, layout3);
+    layout1.set(0, 2, label);
 
     layout1.hsize(0, 300.);
     layout1.halign(0, 1, Align::Left);
@@ -306,6 +306,6 @@ pub fn form_basic(window: WeakWindow) -> Panel {
 
     let layout = form(data);
     let panel = Panel::new();
-    panel.layout(&layout);
+    panel.layout(layout);
     panel
 }

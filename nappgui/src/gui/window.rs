@@ -12,14 +12,12 @@ use std::rc::{Rc, Weak};
 
 use crate::draw_2d::Image;
 use crate::gui::event::{EvPos, EvSize, EvWinClose};
-use crate::gui::{ButtonTrait, ControlTrait};
+use crate::gui::{ButtonTrait, ControlTrait, PanelTrait};
 use crate::types::{
     FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D,
     Size2D, WindowFlags,
 };
 use crate::util::macros::{callback, listener};
-
-use super::panel::Panel;
 
 /// Window objects are the highest-level containers within the user interface.
 pub struct Window {
@@ -91,7 +89,10 @@ pub trait WindowTrait {
     ///
     /// # Remarks
     /// The size of the window will be adjusted based on the Natural sizing of the main panel.
-    fn panel(&self, panel: &Panel) {
+    fn panel<T>(&self, panel: T)
+    where
+        T: PanelTrait,
+    {
         unsafe { window_panel(self.as_ptr(), panel.as_ptr()) }
     }
 
@@ -305,7 +306,7 @@ pub trait WindowTrait {
         T: ButtonTrait,
     {
         unsafe {
-            window_defbutton(self.as_ptr(), button.as_button_ptr());
+            window_defbutton(self.as_ptr(), button.as_ptr());
         }
     }
 

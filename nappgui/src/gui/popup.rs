@@ -1,9 +1,7 @@
-use std::rc::Rc;
-
 use crate::{
     draw_2d::image::Image,
     gui::{control::impl_control, event::EvButton, impl_layout},
-    util::macros::{callback, pub_crate_ptr_ops},
+    util::macros::callback,
 };
 
 use nappgui_sys::{
@@ -11,30 +9,18 @@ use nappgui_sys::{
     popup_get_text, popup_list_height, popup_selected, popup_set_elem, popup_tooltip,
 };
 
-/// PopUps are buttons that have a drop-down menu associated with them. Apparently they
-/// look like pushbuttons that when pressed show a list of options. In Hello PopUp and PopUp!
-/// you have an example of use.
-#[derive(Clone)]
-pub struct PopUp {
-    pub(crate) inner: Rc<*mut nappgui_sys::PopUp>,
-}
-
-impl PopUp {
-    pub_crate_ptr_ops!(*mut nappgui_sys::PopUp);
-
-    /// Create a new popup control (PopUp button).
-    pub fn new() -> Self {
-        let popup = unsafe { popup_create() };
-        Self::from_raw(popup)
-    }
+/// The popup trait
+pub trait PopUpTrait {
+    /// Returns a raw pointer to the popup object.
+    fn as_ptr(&self) -> *mut nappgui_sys::PopUp;
 
     callback! {
         /// Set an event handler for the selection of a new item.
-        pub on_select(EvButton) => popup_OnSelect;
+         on_select(EvButton) => popup_OnSelect;
     }
 
     /// Assign a tooltip to the popup control.
-    pub fn tooltip(&self, text: &str) {
+    fn tooltip(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
             popup_tooltip(self.as_ptr(), text.as_ptr());
@@ -42,7 +28,7 @@ impl PopUp {
     }
 
     /// Add a new item to the popup list.
-    pub fn add_elem(&self, text: &str, image: Option<&Image>) {
+    fn add_elem(&self, text: &str, image: Option<&Image>) {
         let text = std::ffi::CString::new(text).unwrap();
         if let Some(image) = image {
             unsafe {
@@ -56,7 +42,7 @@ impl PopUp {
     }
 
     /// Edit an item from the drop-down list.
-    pub fn set_elem(&self, index: usize, text: &str, image: Option<&Image>) {
+    fn set_elem(&self, index: usize, text: &str, image: Option<&Image>) {
         let text = std::ffi::CString::new(text).unwrap();
         if let Some(image) = image {
             unsafe {
@@ -70,43 +56,70 @@ impl PopUp {
     }
 
     /// Remove all items from the dropdown list.
-    pub fn clear(&self) {
+    fn clear(&self) {
         unsafe {
             popup_clear(self.as_ptr());
         }
     }
 
     /// Gets the number of items in the list.
-    pub fn count(&self) -> usize {
+    fn count(&self) -> usize {
         unsafe { popup_count(self.as_ptr()) as _ }
     }
 
     /// Set the size of the drop-down list.
-    pub fn list_height(&self, elems: usize) {
+    fn list_height(&self, elems: usize) {
         unsafe {
             popup_list_height(self.as_ptr(), elems as _);
         }
     }
 
     /// Set the selected popup element.
-    pub fn selected(&self, index: usize) {
+    fn selected(&self, index: usize) {
         unsafe {
             popup_selected(self.as_ptr(), index as _);
         }
     }
 
     /// Get the selected popup item.
-    pub fn get_selected(&self) -> usize {
+    fn get_selected(&self) -> usize {
         unsafe { popup_get_selected(self.as_ptr()) as _ }
     }
 
     /// Gets the text of a popup element.
-    pub fn get_text(&self, index: usize) -> String {
+    fn get_text(&self, index: usize) -> String {
         let text = unsafe { popup_get_text(self.as_ptr(), index as _) };
         let text = unsafe { std::ffi::CStr::from_ptr(text) };
         text.to_string_lossy().into_owned()
     }
 }
 
+/// PopUps are buttons that have a drop-down menu associated with them. Apparently they
+/// look like pushbuttons that when pressed show a list of options. In Hello PopUp and PopUp!
+/// you have an example of use.
+///
+/// # Remark
+/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
+/// components assciated with it will be automatically released.
+#[repr(transparent)]
+#[derive(Clone, Copy, Debug)]
+pub struct PopUp {
+    pub(crate) inner: *mut nappgui_sys::PopUp,
+}
+
+impl PopUpTrait for PopUp {
+    fn as_ptr(&self) -> *mut nappgui_sys::PopUp {
+        self.inner
+    }
+}
+
+impl PopUp {
+    /// Create a new popup control (PopUp button).
+    pub fn new() -> Self {
+        let popup = unsafe { popup_create() };
+        Self { inner: popup }
+    }
+}
+
 impl_control!(PopUp, guicontrol_popup);
-impl_layout!(PopUp, layout_popup);
+impl_layout!(PopUp, PopUpTrait, layout_popup);

@@ -1,35 +1,51 @@
-use std::rc::Rc;
-
 use nappgui_sys::{updown_OnClick, updown_create, updown_tooltip};
 
-use crate::{gui::{control::impl_control, event::EvButton, impl_layout}, util::macros::{callback, pub_crate_ptr_ops}};
+use crate::{
+    gui::{control::impl_control, event::EvButton, impl_layout},
+    util::macros::callback,
+};
 
-/// UpDown are two-part horizontally divided button controls.
-#[derive(Clone)]
-pub struct UpDown {
-    pub(crate) inner: Rc<*mut nappgui_sys::UpDown>,
-}
-
-impl UpDown {
-    pub_crate_ptr_ops!(*mut nappgui_sys::UpDown);
-
-    /// Create an updown control.
-    pub fn new() -> Self {
-        let updown = unsafe { updown_create() };
-        Self::from_raw(updown)
-    }
+/// The updown trait.
+pub trait UpDownTrait {
+    /// Returns a raw pointer to the updown object.
+    fn as_ptr(&self) -> *mut nappgui_sys::UpDown;
 
     callback! {
         /// Set an event handler for pressing the button.
-        pub on_click(EvButton) => updown_OnClick;
+         on_click(EvButton) => updown_OnClick;
     }
 
     /// Set a tooltip for the button. It is a small explanatory text that will appear when the mouse is over the control.
-    pub fn tooltip(&self, tooltip: &str) {
+    fn tooltip(&self, tooltip: &str) {
         let tooltip = std::ffi::CString::new(tooltip).unwrap();
         unsafe { updown_tooltip(self.as_ptr(), tooltip.as_ptr()) }
     }
 }
 
+/// UpDown are two-part horizontally divided button controls.
+///
+/// # Remark
+/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
+/// components assciated with it will be automatically released.
+#[repr(transparent)]
+#[derive(Clone, Copy, Debug)]
+pub struct UpDown {
+    pub(crate) inner: *mut nappgui_sys::UpDown,
+}
+
+impl UpDownTrait for UpDown {
+    fn as_ptr(&self) -> *mut nappgui_sys::UpDown {
+        self.inner
+    }
+}
+
+impl UpDown {
+    /// Create an updown control.
+    pub fn new() -> Self {
+        let updown = unsafe { updown_create() };
+        Self { inner: updown }
+    }
+}
+
 impl_control!(UpDown, guicontrol_updown);
-impl_layout!(UpDown, layout_updown);
+impl_layout!(UpDown, UpDownTrait, layout_updown);

@@ -18,10 +18,10 @@ fn radios() -> Layout {
 
     radio1.state(GuiState::On);
 
-    layout.set(0, 0, &radio1);
-    layout.set(0, 1, &radio2);
-    layout.set(0, 2, &radio3);
-    layout.set(0, 3, &radio4);
+    layout.set(0, 0, radio1);
+    layout.set(0, 1, radio2);
+    layout.set(0, 2, radio3);
+    layout.set(0, 3, radio4);
 
     layout.margin(5f32);
     layout.vmargin(0, 3f32);
@@ -44,10 +44,10 @@ fn checks() -> Layout {
     check3.state(GuiState::Off);
     check4.state(GuiState::On);
 
-    layout.set(0, 0, &check1);
-    layout.set(0, 1, &check2);
-    layout.set(0, 2, &check3);
-    layout.set(0, 3, &check4);
+    layout.set(0, 0, check1);
+    layout.set(0, 1, check2);
+    layout.set(0, 2, check3);
+    layout.set(0, 3, check4);
 
     layout.margin(5f32);
     layout.vmargin(0, 3f32);
@@ -62,9 +62,9 @@ fn pushes(defbutton: &mut Option<PushButton>) -> Layout {
     let push2 = PushButton::new("&Cancel");
     let push3 = PushButton::new("&Ok");
 
-    layout.set(0, 0, &push1);
-    layout.set(2, 0, &push2);
-    layout.set(3, 0, &push3);
+    layout.set(0, 0, push1);
+    layout.set(2, 0, push2);
+    layout.set(3, 0, push3);
 
     layout.hmargin(2, 5f32);
     layout.hexpand(1);
@@ -88,15 +88,15 @@ fn buttons(defbutton: &mut Option<PushButton>) -> Layout {
     check1.state(GuiState::On);
     check2.state(GuiState::Mixed);
 
-    layout.set(0, 0, &layout1);
+    layout.set(0, 0, layout1);
 
-    layout2.set(0, 0, &check1);
-    layout2.set(0, 1, &layout3);
-    layout2.set(1, 0, &check2);
-    layout2.set(1, 1, &layout4);
+    layout2.set(0, 0, check1);
+    layout2.set(0, 1, layout3);
+    layout2.set(1, 0, check2);
+    layout2.set(1, 1, layout4);
 
-    layout.set(0, 1, &layout2);
-    layout.set(0, 2, &layout5);
+    layout.set(0, 1, layout2);
+    layout.set(0, 2, layout5);
 
     layout.halign(0, 0, Align::Left);
     layout2.margin(5f32);
@@ -109,6 +109,6 @@ fn buttons(defbutton: &mut Option<PushButton>) -> Layout {
 pub fn buttons_basics(defbutton: &mut Option<PushButton>) -> Panel {
     let layout = buttons(defbutton);
     let panel = Panel::new();
-    panel.layout(&layout);
+    panel.layout(layout);
     panel
 }

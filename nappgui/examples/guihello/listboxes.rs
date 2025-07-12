@@ -26,16 +26,16 @@ pub fn listboxes() -> Panel {
 
     let listbox1 = simple_listbox();
 
-    layout.set(0, 0, &label1);
-    layout.set(1, 0, &label2);
-    layout.set(2, 0, &label3);
+    layout.set(0, 0, label1);
+    layout.set(1, 0, label2);
+    layout.set(2, 0, label3);
 
-    layout.set(0, 1, &listbox1);
+    layout.set(0, 1, listbox1);
 
     layout.hmargin(0, 10.);
     layout.hmargin(1, 10.);
     layout.vmargin(0, 5.);
 
-    panel.layout(&layout);
+    panel.layout(layout);
     panel
 }

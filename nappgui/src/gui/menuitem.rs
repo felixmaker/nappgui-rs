@@ -1,5 +1,5 @@
 use crate::{
-    draw_2d::Image,
+    draw_2d::ImageTrait,
     gui::{event::EvMenu, MenuTrait},
     types::{GuiState, KeyCode, ModifierKey},
     util::macros::callback,
@@ -37,8 +37,11 @@ pub trait MenuItemTrait {
     }
 
     /// Set the icon that will display the item.
-    fn image(&self, image: &Image) {
-        unsafe { menuitem_image(self.as_ptr(), image.inner) };
+    fn image<T>(&self, image: &T)
+    where
+        T: ImageTrait,
+    {
+        unsafe { menuitem_image(self.as_ptr(), image.as_ptr()) };
     }
 
     /// Set a keyboard shortcut to select the menu item.

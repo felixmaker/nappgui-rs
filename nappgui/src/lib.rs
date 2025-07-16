@@ -31,3 +31,6 @@ pub mod prelude {
     pub use crate::gui::*;
     pub use crate::types::*;
 }
+
+/// Embed resources
+pub use nappgui_macros::include_resource;

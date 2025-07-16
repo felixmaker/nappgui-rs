@@ -1,5 +1,5 @@
 use crate::{
-    draw_2d::{Color, Image},
+    draw_2d::{Color, ImageTrait},
     gui::{
         control::impl_control,
         event::{EvText, EvTextFilter},
@@ -119,49 +119,65 @@ pub trait ComboTrait {
     }
 
     /// Add a new item to the drop-down list.
-    fn add_elem(&self, text: &str, image: Option<&Image>) {
+    fn add_element(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
-        if let Some(image) = image {
-            unsafe {
-                combo_add_elem(self.as_ptr(), text.as_ptr(), image.inner);
-            }
-        } else {
-            unsafe {
-                combo_add_elem(self.as_ptr(), text.as_ptr(), std::ptr::null());
-            }
+        unsafe {
+            combo_add_elem(self.as_ptr(), text.as_ptr(), std::ptr::null());
+        }
+    }
+
+    /// Add a new item with image to the drop-down list.
+    fn add_image_element<T>(&self, text: &str, image: &T)
+    where
+        T: ImageTrait,
+    {
+        let text = std::ffi::CString::new(text).unwrap();
+
+        unsafe {
+            combo_add_elem(self.as_ptr(), text.as_ptr(), image.as_ptr());
         }
     }
 
     /// Edit an item from the drop-down list.
-    fn set_elem(&self, index: u32, text: &str, image: Option<&Image>) {
+    fn set_element(&self, index: u32, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
-        if let Some(image) = image {
-            unsafe {
-                combo_set_elem(self.as_ptr(), index, text.as_ptr(), image.inner);
-            }
-        } else {
-            unsafe {
-                combo_set_elem(self.as_ptr(), index, text.as_ptr(), std::ptr::null());
-            }
+        unsafe {
+            combo_set_elem(self.as_ptr(), index, text.as_ptr(), std::ptr::null());
+        }
+    }
+
+    /// Edit an item with image from the drop-down list.
+    fn set_image_element<T>(&self, index: u32, text: &str, image: &T)
+    where
+        T: ImageTrait,
+    {
+        let text = std::ffi::CString::new(text).unwrap();
+        unsafe {
+            combo_set_elem(self.as_ptr(), index, text.as_ptr(), image.as_ptr());
         }
     }
 
     /// Insert an item in the drop-down list.
-    fn ins_elem(&self, index: u32, text: &str, image: Option<&Image>) {
+    fn insert_element(&self, index: u32, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
-        if let Some(image) = image {
-            unsafe {
-                combo_ins_elem(self.as_ptr(), index, text.as_ptr(), image.inner);
-            }
-        } else {
-            unsafe {
-                combo_ins_elem(self.as_ptr(), index, text.as_ptr(), std::ptr::null());
-            }
+        unsafe {
+            combo_ins_elem(self.as_ptr(), index, text.as_ptr(), std::ptr::null());
+        }
+    }
+
+    /// Insert an item with image in the drop-down list.
+    fn insert_image_element<T>(&self, index: u32, text: &str, image: &T)
+    where
+        T: ImageTrait,
+    {
+        let text = std::ffi::CString::new(text).unwrap();
+        unsafe {
+            combo_ins_elem(self.as_ptr(), index, text.as_ptr(), image.as_ptr());
         }
     }
 
     /// Remove an item from the drop-down list.
-    fn del_elem(&self, index: u32) {
+    fn delete_element(&self, index: u32) {
         unsafe {
             combo_del_elem(self.as_ptr(), index);
         }

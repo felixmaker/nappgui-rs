@@ -29,7 +29,7 @@ impl DCtx {
     /// Get the result image after drawing in the context created with dctx_bitmap.
     pub fn image(mut self) -> Image {
         let ptr = unsafe { dctx_image(&mut self.inner) };
-        Image::new(ptr)
+        Image::from_raw(ptr)
     }
 
     /// Clears the entire context area, using a solid color.

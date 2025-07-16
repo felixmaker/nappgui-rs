@@ -12,11 +12,11 @@ const LABEL_07: &str = "Mouse sensitive label";
 fn width_popup(layout: &Layout) -> PopUp {
     let popup = PopUp::new();
     let layout = layout.clone();
-    popup.add_elem("Natural", None);
-    popup.add_elem("100px", None);
-    popup.add_elem("200px", None);
-    popup.add_elem("300px", None);
-    popup.add_elem("400px", None);
+    popup.add_element("Natural");
+    popup.add_element("100px");
+    popup.add_element("200px");
+    popup.add_element("300px");
+    popup.add_element("400px");
     popup.on_select(move |params| {
         let width = match params.index {
             0 => 0,

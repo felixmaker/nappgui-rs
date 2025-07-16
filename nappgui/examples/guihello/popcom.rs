@@ -1,5 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
+use crate::res::*;
 use nappgui::prelude::*;
 
 struct PopUpData {
@@ -12,20 +13,19 @@ fn popups(layout: &Layout, data: &Rc<RefCell<PopUpData>>) {
     let popup1 = PopUp::new();
     let popup2 = PopUp::new();
 
-    // todo! gui_image
-    popup1.add_elem("English", None);
-    popup1.add_elem("Español", None);
-    popup1.add_elem("Portugues", None);
-    popup1.add_elem("Italiana", None);
-    popup1.add_elem("Tiếng Việt", None);
-    popup1.add_elem("России", None);
-    popup1.add_elem("日本語", None);
-    popup2.add_elem("Red", None);
-    popup2.add_elem("Blue", None);
-    popup2.add_elem("Green", None);
-    popup2.add_elem("Yellow", None);
-    popup2.add_elem("Black", None);
-    popup2.add_elem("White", None);
+    popup1.add_image_element("English", &gui_image(UKING_PNG));
+    popup1.add_image_element("Español", &gui_image(SPAIN_PNG));
+    popup1.add_image_element("Portugues", &gui_image(PORTUGAL_PNG));
+    popup1.add_image_element("Italiana", &gui_image(ITALY_PNG));
+    popup1.add_image_element("Tiếng Việt", &gui_image(VIETNAM_PNG));
+    popup1.add_image_element("России", &gui_image(RUSSIA_PNG));
+    popup1.add_image_element("日本語", &gui_image(JAPAN_PNG));
+    popup2.add_image_element("Red", &gui_image(RED_PNG));
+    popup2.add_image_element("Blue", &gui_image(BLUE_PNG));
+    popup2.add_image_element("Green", &gui_image(GREEN_PNG));
+    popup2.add_image_element("Yellow", &gui_image(YELLOW_PNG));
+    popup2.add_image_element("Black", &gui_image(BLACK_PNG));
+    popup2.add_image_element("White", &gui_image(WHITE_PNG));
 
     popup1.list_height(10);
     popup2.list_height(10);
@@ -45,14 +45,14 @@ pub fn combos(layout: &Layout) {
     let combo1 = Combo::new();
     let combo2 = Combo::new();
 
-    combo1.add_elem("Search", None);
-    combo1.add_elem("Disk", None);
-    combo1.add_elem("Edit", None);
+    combo1.add_element("Search");
+    combo1.add_element("Disk");
+    combo1.add_element("Edit");
 
-    combo2.add_elem("/home/fran/Desktop", None);
-    combo2.add_elem("/usr/include", None);
-    combo2.add_elem("/mnt/volume1", None);
-    combo2.add_elem("/etc/html/log.txt", None);
+    combo2.add_element("/home/fran/Desktop");
+    combo2.add_element("/usr/include");
+    combo2.add_element("/mnt/volume1");
+    combo2.add_element("/etc/html/log.txt");
 
     layout.set(2, 0, label1);
     layout.set(2, 1, label2);
@@ -71,7 +71,7 @@ pub fn popup_combo() -> Panel {
     let data1 = data.clone();
     button1.on_click(move |_| {
         if let Some(popup) = &data1.borrow_mut().popup {
-            popup.add_elem("Español", None);
+            popup.add_element("Español");
         }
     });
 

@@ -1,4 +1,4 @@
-use crate::{draw_2d::Image, gui::impl_layout, types::Scale, util::macros::callback};
+use crate::{draw_2d::ImageTrait, gui::impl_layout, types::Scale, util::macros::callback};
 
 use nappgui_sys::{
     imageview_OnClick, imageview_OnOverDraw, imageview_create, imageview_image, imageview_scale,
@@ -26,9 +26,12 @@ pub trait ImageViewTrait {
     }
 
     /// Set the image to be displayed in the control.
-    fn image(&self, image: &Image) {
+    fn image<T>(&self, image: &T)
+    where
+        T: ImageTrait,
+    {
         unsafe {
-            imageview_image(self.as_ptr(), image.inner);
+            imageview_image(self.as_ptr(), image.as_ptr());
         }
     }
 

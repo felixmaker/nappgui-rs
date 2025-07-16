@@ -1,5 +1,5 @@
 use crate::{
-    draw_2d::{Color, Font, Image},
+    draw_2d::{Color, Font, ImageTrait},
     gui::{
         control::impl_control,
         event::{EvButton, EvMouse},
@@ -59,31 +59,45 @@ pub trait ListBoxTrait {
     }
 
     /// Adds a new element.
-    fn add_elem(&self, text: &str, image: Option<&Image>) {
+    fn add_element(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
-        let image = match image {
-            Some(value) => value.inner,
-            None => std::ptr::null(),
-        };
         unsafe {
-            listbox_add_elem(self.as_ptr(), text.as_ptr(), image);
+            listbox_add_elem(self.as_ptr(), text.as_ptr(), std::ptr::null());
+        }
+    }
+
+    /// Adds a new element with image.
+    fn add_image_element<T>(&self, text: &str, image: &T)
+    where
+        T: ImageTrait,
+    {
+        let text = std::ffi::CString::new(text).unwrap();
+        unsafe {
+            listbox_add_elem(self.as_ptr(), text.as_ptr(), image.as_ptr());
         }
     }
 
     /// Edit a list item.
-    fn set_elem(&self, index: usize, text: &str, image: Option<&Image>) {
+    fn set_element(&self, index: usize, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
-        let image = match image {
-            Some(value) => value.inner,
-            None => std::ptr::null(),
-        };
         unsafe {
-            listbox_set_elem(self.as_ptr(), index as _, text.as_ptr(), image);
+            listbox_set_elem(self.as_ptr(), index as _, text.as_ptr(), std::ptr::null());
+        }
+    }
+
+    /// Edit a list item with image.
+    fn set_image_element<T>(&self, index: usize, text: &str, image: &T)
+    where
+        T: ImageTrait,
+    {
+        let text = std::ffi::CString::new(text).unwrap();
+        unsafe {
+            listbox_set_elem(self.as_ptr(), index as _, text.as_ptr(), image.as_ptr());
         }
     }
 
     /// Delete an item from the list.
-    fn del_elem(&self, index: usize) {
+    fn delete_element(&self, index: usize) {
         unsafe {
             listbox_del_elem(self.as_ptr(), index as _);
         }

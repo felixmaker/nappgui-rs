@@ -1,5 +1,5 @@
 use crate::{
-    draw_2d::image::Image,
+    draw_2d::ImageTrait,
     gui::{control::impl_control, event::EvButton, impl_layout},
     util::macros::callback,
 };
@@ -28,30 +28,40 @@ pub trait PopUpTrait {
     }
 
     /// Add a new item to the popup list.
-    fn add_elem(&self, text: &str, image: Option<&Image>) {
+    fn add_element(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
-        if let Some(image) = image {
-            unsafe {
-                popup_add_elem(self.as_ptr(), text.as_ptr(), image.inner);
-            }
-        } else {
-            unsafe {
-                popup_add_elem(self.as_ptr(), text.as_ptr(), std::ptr::null());
-            }
+        unsafe {
+            popup_add_elem(self.as_ptr(), text.as_ptr(), std::ptr::null());
+        }
+    }
+
+    /// Add a new item with image to the popup list.
+    fn add_image_element<T>(&self, text: &str, image: &T)
+    where
+        T: ImageTrait,
+    {
+        let text = std::ffi::CString::new(text).unwrap();
+        unsafe {
+            popup_add_elem(self.as_ptr(), text.as_ptr(), image.as_ptr());
         }
     }
 
     /// Edit an item from the drop-down list.
-    fn set_elem(&self, index: usize, text: &str, image: Option<&Image>) {
+    fn set_element(&self, index: usize, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
-        if let Some(image) = image {
-            unsafe {
-                popup_set_elem(self.as_ptr(), index as _, text.as_ptr(), image.inner);
-            }
-        } else {
-            unsafe {
-                popup_set_elem(self.as_ptr(), index as _, text.as_ptr(), std::ptr::null());
-            }
+        unsafe {
+            popup_set_elem(self.as_ptr(), index as _, text.as_ptr(), std::ptr::null());
+        }
+    }
+
+    /// Edit an item with image from the drop-down list.
+    fn set_image_element<T>(&self, index: usize, text: &str, image: &T)
+    where
+        T: ImageTrait,
+    {
+        let text = std::ffi::CString::new(text).unwrap();
+        unsafe {
+            popup_set_elem(self.as_ptr(), index as _, text.as_ptr(), image.as_ptr());
         }
     }
 

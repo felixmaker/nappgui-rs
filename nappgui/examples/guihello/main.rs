@@ -5,6 +5,11 @@ mod listboxes;
 mod popcom;
 mod seltext;
 
+#[allow(unused)]
+pub(crate) mod res {
+    nappgui::include_resource!(./nappgui/examples/guihello/res);
+}
+
 use nappgui::gui::event::*;
 use nappgui::osapp::*;
 use nappgui::prelude::*;
@@ -31,37 +36,36 @@ impl App {
         let list = ListBox::new();
         list.size(180f32, 256f32);
 
-        list.add_elem("Labels single line", None);
-        list.add_elem("Labels multi line", None);
-        list.add_elem("Labels mouse sensitive", None);
-        list.add_elem("Buttons", None);
-        list.add_elem("PopUp Combo", None);
-        list.add_elem("ListBoxes", None);
-        list.add_elem("Form", None);
-        list.add_elem("Text select", None);
-        list.add_elem("Text editor", None);
-        list.add_elem("Sliders", None);
-        list.add_elem("Vertical padding", None);
-        list.add_elem("Tabstops", None);
-        list.add_elem("TextViews", None);
-        list.add_elem("TableView", None);
-        list.add_elem("SplitViews", None);
-        list.add_elem("Modal Windows", None);
-        list.add_elem("Flyout Windows", None);
-        list.add_elem("Hotkeys", None);
-        list.add_elem("Data Binding", None);
-        list.add_elem("Struct Binding", None);
-        list.add_elem("Basic Layout", None);
-        list.add_elem("SubLayouts", None);
-        list.add_elem("Subpanels", None);
-        list.add_elem("Multi-Layouts", None);
-        list.add_elem("Scroll panel", None);
-        list.add_elem("Dynamic layouts", None);
-        list.add_elem("Dynamic menus", None);
-        list.add_elem("IP Input", None);
-        list.add_elem("Font x-scale", None);
-        list.add_elem("Reduce components", None);
-
+        list.add_element("Labels single line");
+        list.add_element("Labels multi line");
+        list.add_element("Labels mouse sensitive");
+        list.add_element("Buttons");
+        list.add_element("PopUp Combo");
+        list.add_element("ListBoxes");
+        list.add_element("Form");
+        list.add_element("Text select");
+        list.add_element("Text editor");
+        list.add_element("Sliders");
+        list.add_element("Vertical padding");
+        list.add_element("Tabstops");
+        list.add_element("TextViews");
+        list.add_element("TableView");
+        list.add_element("SplitViews");
+        list.add_element("Modal Windows");
+        list.add_element("Flyout Windows");
+        list.add_element("Hotkeys");
+        list.add_element("Data Binding");
+        list.add_element("Struct Binding");
+        list.add_element("Basic Layout");
+        list.add_element("SubLayouts");
+        list.add_element("Subpanels");
+        list.add_element("Multi-Layouts");
+        list.add_element("Scroll panel");
+        list.add_element("Dynamic layouts");
+        list.add_element("Dynamic menus");
+        list.add_element("IP Input");
+        list.add_element("Font x-scale");
+        list.add_element("Reduce components");
         list.select(0, true);
 
         let window = self.window.as_weak();
@@ -165,6 +169,9 @@ where
 
 impl AppHandler for App {
     fn create() -> Self {
+        gui_respack(res::res_respack);
+        gui_language("");
+
         let app = App::new();
         let panel = app.panel();
         app.window.panel(panel);

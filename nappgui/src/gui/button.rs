@@ -1,7 +1,7 @@
 use std::ffi::CString;
 
 use crate::{
-    draw_2d::{Font, Image},
+    draw_2d::{Font, ImageTrait},
     gui::{event::EvButton, impl_layout},
     types::GuiState,
     util::macros::callback,
@@ -69,8 +69,11 @@ pub trait ButtonAltTrait: ButtonTrait {
     ///
     /// # Remarks
     /// Only applicable on flat buttons with status button_flatgle. It will be displayed when the button is in ekGUI_ON status.
-    fn image_alt(&self, image: &Image) {
-        unsafe { button_image_alt(self.as_ptr(), image.inner) }
+    fn image_alt<T>(&self, image: &T)
+    where
+        T: ImageTrait,
+    {
+        unsafe { button_image_alt(self.as_ptr(), image.as_ptr()) }
     }
 }
 
@@ -100,8 +103,11 @@ pub trait ButtonImageTrait: ButtonTrait {
     ///
     /// # Remarks
     /// Not applicable in checkbox or radiobutton. In flat buttons, the size of the control will be adjusted to the image.
-    fn image(&self, image: &Image) {
-        unsafe { button_image(self.as_ptr(), image.inner) }
+    fn image<T>(&self, image: &T)
+    where
+        T: ImageTrait,
+    {
+        unsafe { button_image(self.as_ptr(), image.as_ptr()) }
     }
 }
 
@@ -160,6 +166,21 @@ pub struct FlatButton {
     pub(crate) inner: *mut nappgui_sys::Button,
 }
 
+impl FlatButton {
+    /// Create a flat button.
+    pub fn new<T>(text: &str, image: &T) -> Self
+    where
+        T: ImageTrait,
+    {
+        let button = Self {
+            inner: unsafe { button_flat() },
+        };
+        button.text(text);
+        button.image(image);
+        button
+    }
+}
+
 /// The flat button with status. The button will alternate between pressed/released each time you click on it.
 ///
 /// # Remark
@@ -169,6 +190,21 @@ pub struct FlatButton {
 #[derive(Clone, Copy, Debug)]
 pub struct FlatButtonEx {
     pub(crate) inner: *mut nappgui_sys::Button,
+}
+
+impl FlatButtonEx {
+    /// Create a flat button.
+    pub fn new<T>(text: &str, image: &T) -> Self
+    where
+        T: ImageTrait,
+    {
+        let button = Self {
+            inner: unsafe { button_flatgle() },
+        };
+        button.text(text);
+        button.image(image);
+        button
+    }
 }
 
 macro_rules! impl_button {
@@ -188,7 +224,7 @@ macro_rules! impl_button {
 macro_rules! impl_button_new {
     ($type: ty, $func: ident) => {
         impl $type {
-            /// Create a button. (with no ownership!)
+            /// Create a button.
             pub fn new(text: &str) -> Self {
                 let button = Self {
                     inner: unsafe { $func() },
@@ -211,8 +247,6 @@ impl_button_new!(PushButton, button_push);
 impl_button_new!(CheckButton, button_check);
 impl_button_new!(Check3Button, button_check3);
 impl_button_new!(RadioButton, button_radio);
-impl_button_new!(FlatButton, button_flat);
-impl_button_new!(FlatButtonEx, button_flatgle);
 
 impl_layout!(PushButton, ButtonTrait, layout_button);
 impl_layout!(CheckButton, ButtonTrait, layout_button);

@@ -10,7 +10,7 @@ use nappgui_sys::{
 use std::ffi::CString;
 use std::rc::{Rc, Weak};
 
-use crate::draw_2d::Image;
+use crate::draw_2d::ImageTrait;
 use crate::gui::event::{EvPos, EvSize, EvWinClose};
 use crate::gui::{ButtonTrait, ControlTrait, PanelTrait};
 use crate::types::{
@@ -315,7 +315,10 @@ pub trait WindowTrait {
     /// # Remarks
     ///
     /// hot_x, hot_y indicate the "sensitive" point within the image, which will indicate the exact position of the mouse.
-    fn cursor(&self, cursor: GuiCursor, image: &Image, hot_x: f32, hot_y: f32) {
-        unsafe { window_cursor(self.as_ptr(), cursor as i32, image.inner, hot_x, hot_y) }
+    fn cursor<T>(&self, cursor: GuiCursor, image: &T, hot_x: f32, hot_y: f32)
+    where
+        T: ImageTrait,
+    {
+        unsafe { window_cursor(self.as_ptr(), cursor as i32, image.as_ptr(), hot_x, hot_y) }
     }
 }

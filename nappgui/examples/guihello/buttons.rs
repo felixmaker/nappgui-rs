@@ -1,9 +1,22 @@
 use nappgui::prelude::*;
 
+use crate::res::*;
+
 fn flatbuttons() -> Layout {
     let layout = Layout::new(6, 1);
+    let button1 = FlatButton::new("Open File", &gui_image(FOLDER24_PNG));
+    let button2 = FlatButton::new("Save File", &gui_image(DISK24_PNG));
+    let button3 = FlatButton::new("Search File", &gui_image(SEARCH24_PNG));
+    let button4 = FlatButton::new("Edit File", &gui_image(EDIT24_PNG));
+    let button5 = FlatButton::new("Add File", &gui_image(PLUS24_PNG));
+    let button6 = FlatButton::new("Delete File", &gui_image(ERROR24_PNG));
 
-    // todo! after resource
+    layout.set(0, 0, button1);
+    layout.set(1, 0, button2);
+    layout.set(2, 0, button3);
+    layout.set(3, 0, button4);
+    layout.set(4, 0, button5);
+    layout.set(5, 0, button6);
 
     layout
 }

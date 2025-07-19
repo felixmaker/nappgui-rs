@@ -75,6 +75,8 @@ fn pushes(defbutton: &mut Option<PushButton>) -> Layout {
     let push2 = PushButton::new("&Cancel");
     let push3 = PushButton::new("&Ok");
 
+    push1.image(&gui_image(RETRY_PNG));
+
     layout.set(0, 0, push1);
     layout.set(2, 0, push2);
     layout.set(3, 0, push3);

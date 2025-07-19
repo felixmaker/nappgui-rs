@@ -65,4 +65,4 @@ fn main() {
 
  - CMake: for building the NAppGui static library
  - Windows SDK: only needed when using MSVC
-
+ - Rust MSRV: 1.88.0

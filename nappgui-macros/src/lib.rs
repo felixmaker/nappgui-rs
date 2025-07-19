@@ -10,7 +10,14 @@ pub fn include_resource(input: TokenStream) -> TokenStream {
     let input = input.to_string();
     let input = input.trim();
 
-    let resource = read_data(input);
+    let mut path = Path::new(&input).to_owned();
+    if !path.is_absolute() {
+        let local_file = proc_macro::Span::call_site().local_file().expect("Unable to get local file!");
+        let local_file_parent = local_file.parent().expect("Unable to get the parent local file!");
+        path = local_file_parent.join(input);
+    }
+
+    let resource = read_data(path);
     let code = generate_code(&resource);
 
     code.parse().expect("To parse")

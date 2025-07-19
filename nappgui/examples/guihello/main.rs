@@ -10,7 +10,7 @@ mod vpadding;
 
 #[allow(unused)]
 pub(crate) mod res {
-    nappgui::include_resource!(./nappgui/examples/guihello/res);
+    nappgui::include_resource!(res);
 }
 
 use nappgui::gui::event::*;

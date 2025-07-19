@@ -4,6 +4,7 @@ mod labels;
 mod listboxes;
 mod popcom;
 mod seltext;
+mod editor;
 
 #[allow(unused)]
 pub(crate) mod res {
@@ -100,6 +101,7 @@ fn set_panel(window: &WeakWindow, layout: &Layout, index: usize) {
         5 => listboxes::listboxes(),
         6 => form::form_basic(window.clone()),
         7 => seltext::seltext(window.clone()),
+        8 => editor::editor(),
         _ => {
             return;
         }

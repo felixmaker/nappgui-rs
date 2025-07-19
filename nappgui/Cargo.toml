@@ -1,6 +1,6 @@
 [package]
 name = "nappgui"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["felixmaker"]
 description = "Rust bindings to NAppGUI"
@@ -8,6 +8,7 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/felixmaker/nappgui-rs"
 categories = ["gui"]
+exclude = ["examples"]
 
 [dependencies]
 libc = "0.2"

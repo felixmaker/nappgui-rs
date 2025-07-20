@@ -42,7 +42,7 @@ pub trait LayoutTrait {
     fn set<T>(&self, col: usize, row: usize, control: T)
     where
         T: ControlLayoutTrait,
-        Self: Sized + Copy
+        Self: Sized + Copy,
     {
         control.insert_in_layout(*self, col, row);
     }
@@ -271,8 +271,8 @@ impl LayoutTrait for Layout {
 
 impl Layout {
     /// Create a new layout specifying the number of columns and rows.
-    pub fn new(rows: usize, cols: usize) -> Self {
-        let layout = unsafe { layout_create(rows as _, cols as _) };
+    pub fn new(ncols: usize, nrows: usize) -> Self {
+        let layout = unsafe { layout_create(ncols as _, nrows as _) };
         Self { inner: layout }
     }
 }

@@ -99,39 +99,39 @@ pub trait TableViewTrait {
     }
 
     /// Adds a new column to the table.
-    fn new_column_text(&self) -> usize {
-        unsafe { tableview_new_column_text(self.as_ptr()) as _ }
+    fn new_column_text(&self) -> u32 {
+        unsafe { tableview_new_column_text(self.as_ptr()) }
     }
 
     /// Sets the width of a column.
-    fn column_width(&self, index: usize, width: f32) {
-        unsafe { tableview_column_width(self.as_ptr(), index as _, width) }
+    fn column_width(&self, index: u32, width: f32) {
+        unsafe { tableview_column_width(self.as_ptr(), index, width) }
     }
 
     /// Sets the size limits of a column.
-    fn column_limits(&self, index: usize, min: f32, max: f32) {
-        unsafe { tableview_column_limits(self.as_ptr(), index as _, min, max) }
+    fn column_limits(&self, index: u32, min: f32, max: f32) {
+        unsafe { tableview_column_limits(self.as_ptr(), index, min, max) }
     }
 
     /// Sets whether a column is resizable or not.
-    fn column_resizable(&self, column_id: usize, resizable: bool) {
-        unsafe { tableview_column_resizable(self.as_ptr(), column_id as _, resizable as _) }
+    fn column_resizable(&self, column_id: u32, resizable: bool) {
+        unsafe { tableview_column_resizable(self.as_ptr(), column_id, resizable as _) }
     }
 
     /// Allows to freeze the first columns of the table. During horizontal movement they will remain fixed.
-    fn column_freeze(&self, freeze: usize) {
-        unsafe { tableview_column_freeze(self.as_ptr(), freeze as _) }
+    fn column_freeze(&self, freeze: u32) {
+        unsafe { tableview_column_freeze(self.as_ptr(), freeze) }
     }
 
     /// Sets the text of a column header.
-    fn header_title(&self, index: usize, text: &str) {
+    fn header_title(&self, index: u32, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
-        unsafe { tableview_header_title(self.as_ptr(), index as _, text.as_ptr()) }
+        unsafe { tableview_header_title(self.as_ptr(), index, text.as_ptr()) }
     }
 
     /// Sets the alignment of the header text.
-    fn header_align(&self, index: usize, align: Align) {
-        unsafe { tableview_header_align(self.as_ptr(), index as _, align as _) }
+    fn header_align(&self, index: u32, align: Align) {
+        unsafe { tableview_header_align(self.as_ptr(), index, align as _) }
     }
 
     /// Sets whether the table header is visible or not.
@@ -194,13 +194,13 @@ pub trait TableViewTrait {
     }
 
     /// Selects rows in the table.
-    fn select(&self, row: &[u32], n: usize) {
-        unsafe { tableview_select(self.as_ptr(), row.as_ptr(), n as _) }
+    fn select(&self, row: &[u32], n: u32) {
+        unsafe { tableview_select(self.as_ptr(), row.as_ptr(), n) }
     }
 
     /// Deselects rows in the table.
-    fn deselect(&self, row: &[u32], n: usize) {
-        unsafe { tableview_deselect(self.as_ptr(), row.as_ptr(), n as _) }
+    fn deselect(&self, row: &[u32], n: u32) {
+        unsafe { tableview_deselect(self.as_ptr(), row.as_ptr(), n) }
     }
 
     /// Deselects all rows in the table.
@@ -209,7 +209,7 @@ pub trait TableViewTrait {
     }
 
     /// Returns the currently selected rows.
-    fn selected(&self) -> Option<Vec<usize>> {
+    fn selected(&self) -> Option<Vec<u32>> {
         let result = unsafe { tableview_selected(self.as_ptr()) };
 
         if result.is_null() {
@@ -226,12 +226,7 @@ pub trait TableViewTrait {
 
         let elem = &content.elem;
 
-        Some(
-            elem[..result.size as usize]
-                .iter()
-                .map(|&x| x as _)
-                .collect(),
-        )
+        Some(elem[..result.size as usize].to_vec())
     }
 
     /// Set keyboard focus to a specific row.
@@ -240,13 +235,13 @@ pub trait TableViewTrait {
     /// Setting keyboard focus to a row only has effects on navigation, but does not involve
     /// selecting the row. The table is automatically scrolled so that the row is visible.
     /// In this case, align indicates where the vertical scroll is adjusted (up, down or centered).
-    fn focus_row(&self, row: usize, align: Align) {
-        unsafe { tableview_focus_row(self.as_ptr(), row as _, align as _) }
+    fn focus_row(&self, row: u32, align: Align) {
+        unsafe { tableview_focus_row(self.as_ptr(), row, align as _) }
     }
 
     /// Gets the row that has keyboard focus.
-    fn get_focus_row(&self) -> usize {
-        unsafe { tableview_get_focus_row(self.as_ptr()) as _ }
+    fn get_focus_row(&self) -> u32 {
+        unsafe { tableview_get_focus_row(self.as_ptr()) }
     }
 
     /// Show or hide scroll bars.

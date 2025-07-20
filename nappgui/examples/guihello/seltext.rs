@@ -71,9 +71,9 @@ fn text_controls(data: Rc<RefCell<SelData>>) -> Layout {
                 let right = *group.get(1).unwrap_or(&1);
 
                 if let Some(edit) = window.get_focus::<Edit>() {
-                    edit.select(left, right);
+                    edit.select(left as _, right as _);
                 } else if let Some(textview) = window.get_focus::<TextView>() {
-                    textview.select(left, right);
+                    textview.select(left as _, right as _);
                 }
             }
         }

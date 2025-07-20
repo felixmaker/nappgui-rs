@@ -23,11 +23,11 @@ pub trait MenuTrait {
     }
 
     /// Insert an item in an arbitrary position of the menu.
-    fn insert_item<T>(&self, index: usize, item: T)
+    fn insert_item<T>(&self, index: u32, item: T)
     where
         T: MenuItemTrait,
     {
-        unsafe { menu_ins_item(self.as_ptr(), index as _, item.as_ptr()) };
+        unsafe { menu_ins_item(self.as_ptr(), index, item.as_ptr()) };
     }
 
     /// Remove an item from the menu.
@@ -35,8 +35,8 @@ pub trait MenuTrait {
     /// # Remark
     /// The element will be destroyed and cannot be reused. If has a submenu associated,
     /// it will also be destroyed recursively.
-    fn delete_item(&self, index: usize) {
-        unsafe { menu_del_item(self.as_ptr(), index as _) };
+    fn delete_item(&self, index: u32) {
+        unsafe { menu_del_item(self.as_ptr(), index) };
     }
 
     /// Launch a menu as secondary or PopUp.
@@ -59,8 +59,8 @@ pub trait MenuTrait {
     }
 
     /// Get an item from the menu.
-    fn get_item(&self, index: usize) -> Option<MenuItem> {
-        let item = unsafe { menu_get_item(self.as_ptr(), index as _) };
+    fn get_item(&self, index: u32) -> Option<MenuItem> {
+        let item = unsafe { menu_get_item(self.as_ptr(), index) };
         if item.is_null() {
             None
         } else {

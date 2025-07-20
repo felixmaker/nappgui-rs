@@ -23,13 +23,13 @@ impl<T> NappguiArray<T> {
     }
 
     /// Get the number of elements in an array.
-    pub fn len(&self) -> usize {
-        unsafe { nappgui_sys::array_size(self.inner) as _ }
+    pub fn len(&self) -> u32 {
+        unsafe { nappgui_sys::array_size(self.inner) }
     }
 
     /// Get the const item in pos position.
-    pub fn get(&self, pos: usize) -> Option<&T> {
-        let ptr = unsafe { nappgui_sys::array_get(self.inner, pos as _) };
+    pub fn get(&self, pos: u32) -> Option<&T> {
+        let ptr = unsafe { nappgui_sys::array_get(self.inner, pos) };
         if !ptr.is_null() {
             unsafe { Some(&*(ptr as *mut T)) }
         } else {
@@ -38,8 +38,8 @@ impl<T> NappguiArray<T> {
     }
 
     /// Get the mutable item in pos position.
-    pub fn get_mut(&mut self, pos: usize) -> Option<&mut T> {
-        let ptr = unsafe { nappgui_sys::array_get(self.inner, pos as _) };
+    pub fn get_mut(&mut self, pos: u32) -> Option<&mut T> {
+        let ptr = unsafe { nappgui_sys::array_get(self.inner, pos) };
         if !ptr.is_null() {
             unsafe { Some(&mut *(ptr as *mut T)) }
         } else {
@@ -48,22 +48,22 @@ impl<T> NappguiArray<T> {
     }
 
     /// Insert an element at position `index` within the array
-    pub fn insert(&mut self, index: usize, value: T) {
-        let inserted = unsafe { nappgui_sys::array_insert(self.inner, index as _, 1) };
+    pub fn insert(&mut self, index: u32, value: T) {
+        let inserted = unsafe { nappgui_sys::array_insert(self.inner, index, 1) };
         unsafe {
             inserted.cast::<T>().write(value);
         }
     }
 
     /// Insert `n` elements at position `index` within the array.
-    pub fn insert_n<I>(&mut self, index: usize, n: usize, array: I)
+    pub fn insert_n<I>(&mut self, index: u32, n: u32, array: I)
     where
         I: IntoIterator<Item = T>,
     {
-        let inserted = unsafe { nappgui_sys::array_insert(self.inner, index as _, n as _) };
+        let inserted = unsafe { nappgui_sys::array_insert(self.inner, index, n) };
 
         for (i, item) in array.into_iter().enumerate() {
-            if i == n {
+            if i == n as usize {
                 break;
             }
             let c_item = unsafe { inserted.cast::<T>().add(i) };
@@ -72,18 +72,18 @@ impl<T> NappguiArray<T> {
     }
 
     /// Remove an element at position `index` within the array.
-    pub fn remove(&mut self, index: usize) {
+    pub fn remove(&mut self, index: u32) {
         self.remove_n(index, 1);
     }
 
     /// Remove `n` element at position `index` within the array.
-    pub fn remove_n(&mut self, index: usize, n: usize) {
+    pub fn remove_n(&mut self, index: u32, n: u32) {
         unsafe extern "C" fn delete_func<T>(ptr: *mut libc::c_void) {
             let ptr = ptr as *mut T;
             drop(unsafe { ptr.read() });
         }
         unsafe {
-            nappgui_sys::array_delete(self.inner, index as _, n as _, Some(delete_func::<T>));
+            nappgui_sys::array_delete(self.inner, index, n, Some(delete_func::<T>));
         }
     }
 
@@ -116,7 +116,7 @@ impl<T> NappguiArray<T> {
     /// Creates an array from a vector.
     pub fn from_vec(&self, vec: Vec<T>) -> Self {
         let mut array = NappguiArray::new();
-        array.insert_n(0, vec.len(), vec);
+        array.insert_n(0, vec.len() as _, vec);
         array
     }
 
@@ -145,7 +145,7 @@ impl<'a, T> NappguiArrayIter<'a, T> {
         Self {
             ptr: array.as_ptr(),
             pos: 0,
-            len: array.len(),
+            len: array.len() as _,
             _marker: PhantomData,
         }
     }

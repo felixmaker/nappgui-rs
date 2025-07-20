@@ -95,7 +95,7 @@ impl App {
     }
 }
 
-fn set_panel(window: &WeakWindow, layout: &Layout, index: usize) {
+fn set_panel(window: &WeakWindow, layout: &Layout, index: u32) {
     let mut defbutton: Option<PushButton> = None;
 
     let panel = match index {

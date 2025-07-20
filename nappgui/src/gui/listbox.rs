@@ -78,28 +78,28 @@ pub trait ListBoxTrait {
     }
 
     /// Edit a list item.
-    fn set_element(&self, index: usize, text: &str) {
+    fn set_element(&self, index: u32, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
-            listbox_set_elem(self.as_ptr(), index as _, text.as_ptr(), std::ptr::null());
+            listbox_set_elem(self.as_ptr(), index, text.as_ptr(), std::ptr::null());
         }
     }
 
     /// Edit a list item with image.
-    fn set_image_element<T>(&self, index: usize, text: &str, image: &T)
+    fn set_image_element<T>(&self, index: u32, text: &str, image: &T)
     where
         T: ImageTrait,
     {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
-            listbox_set_elem(self.as_ptr(), index as _, text.as_ptr(), image.as_ptr());
+            listbox_set_elem(self.as_ptr(), index, text.as_ptr(), image.as_ptr());
         }
     }
 
     /// Delete an item from the list.
-    fn delete_element(&self, index: usize) {
+    fn delete_element(&self, index: u32) {
         unsafe {
-            listbox_del_elem(self.as_ptr(), index as _);
+            listbox_del_elem(self.as_ptr(), index);
         }
     }
 
@@ -118,9 +118,9 @@ pub trait ListBoxTrait {
     }
 
     /// Sets the text color of an element.
-    fn color(&self, index: usize, color: Color) {
+    fn color(&self, index: u32, color: Color) {
         unsafe {
-            listbox_color(self.as_ptr(), index as _, color.inner);
+            listbox_color(self.as_ptr(), index, color.inner);
         }
     }
 
@@ -128,9 +128,9 @@ pub trait ListBoxTrait {
     ///
     /// # Remarks
     /// If multiple selection is not enabled, selecting one item implies de-selecting all the others.
-    fn select(&self, index: usize, select: bool) {
+    fn select(&self, index: u32, select: bool) {
         unsafe {
-            listbox_select(self.as_ptr(), index as _, select as _);
+            listbox_select(self.as_ptr(), index, select as _);
         }
     }
 
@@ -139,9 +139,9 @@ pub trait ListBoxTrait {
     /// # Remarks
     /// Checking an item is independent of selecting it. Items can be marked even if checkboxes are not
     /// visible. See listbox_checkbox.
-    fn check(&self, index: usize, check: bool) {
+    fn check(&self, index: u32, check: bool) {
         unsafe {
-            listbox_check(self.as_ptr(), index as _, check as _);
+            listbox_check(self.as_ptr(), index, check as _);
         }
     }
 
@@ -154,9 +154,9 @@ pub trait ListBoxTrait {
     }
 
     /// Returns the text of an element.
-    fn text(&self, index: usize) -> String {
+    fn text(&self, index: u32) -> String {
         unsafe {
-            let text = listbox_text(self.as_ptr(), index as _);
+            let text = listbox_text(self.as_ptr(), index);
             std::ffi::CStr::from_ptr(text)
                 .to_string_lossy()
                 .into_owned()
@@ -164,8 +164,8 @@ pub trait ListBoxTrait {
     }
 
     /// Returns whether or not an element is selected.
-    fn selected(&self, index: usize) -> bool {
-        unsafe { listbox_selected(self.as_ptr(), index as _) != 0 }
+    fn selected(&self, index: u32) -> bool {
+        unsafe { listbox_selected(self.as_ptr(), index) != 0 }
     }
 
     /// Returns whether an element is checked or not.
@@ -173,8 +173,8 @@ pub trait ListBoxTrait {
     /// # Remarks
     /// Checking an item is independent of selecting it. Items can be marked even if checkboxes are not
     /// visible. See listbox_checkbox.
-    fn checked(&self, index: usize) -> bool {
-        unsafe { listbox_checked(self.as_ptr(), index as _) != 0 }
+    fn checked(&self, index: u32) -> bool {
+        unsafe { listbox_checked(self.as_ptr(), index) != 0 }
     }
 }
 

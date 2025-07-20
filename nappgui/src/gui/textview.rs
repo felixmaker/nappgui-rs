@@ -183,9 +183,9 @@ pub trait TextViewTrait {
     ///
     /// # Remarks
     /// It works the same way as in Edit controls. See Text selection.
-    fn select(&self, start: usize, end: usize) {
+    fn select(&self, start: i32, end: i32) {
         unsafe {
-            textview_select(self.as_ptr(), start as _, end as _);
+            textview_select(self.as_ptr(), start, end);
         }
     }
 

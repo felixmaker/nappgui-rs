@@ -77,7 +77,7 @@ pub trait EditTrait {
     }
 
     /// Select text.
-    fn select(&self, start: usize, end: usize) {
+    fn select(&self, start: i32, end: i32) {
         unsafe {
             edit_select(self.as_ptr(), start as _, end as _);
         }

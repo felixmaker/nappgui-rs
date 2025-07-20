@@ -147,8 +147,8 @@ pub fn table_view() -> Panel {
 
     for i in 0..=8 {
         table.new_column_text();
-        table.header_title(i, table_title[i]);
-        table.column_width(i, table_width[i]);
+        table.header_title(i, table_title[i as usize]);
+        table.column_width(i, table_width[i as usize]);
     }
 
     table.on_data(|params| match params {

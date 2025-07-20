@@ -27,9 +27,9 @@ pub trait SliderTrait {
     }
 
     /// Changes the slider from continuous range to discrete intervals.
-    fn steps(&self, steps: usize) {
+    fn steps(&self, steps: u32) {
         unsafe {
-            slider_steps(self.as_ptr(), steps as _);
+            slider_steps(self.as_ptr(), steps);
         }
     }
 

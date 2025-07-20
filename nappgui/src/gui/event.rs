@@ -11,7 +11,7 @@ use crate::{
 /// Parameters of the OnClick event of a button or OnSelect of a popup.
 pub struct EvButton {
     /// Button or item index.
-    pub index: usize,
+    pub index: u32,
     /// State.
     pub state: GuiState,
     /// Text.
@@ -41,7 +41,7 @@ pub struct EvSlider {
     /// Increase with respect to the previous position.
     pub incr: f32,
     /// Interval index (only for discrete ranges).
-    pub step: usize,
+    pub step: u32,
 }
 
 impl EvSlider {
@@ -63,7 +63,7 @@ pub struct EvText {
     /// Text.
     pub text: String,
     /// Cursor position (caret).
-    pub cpos: usize,
+    pub cpos: u32,
     /// Number of characters inserted or deleted.
     pub len: i32,
 }
@@ -319,9 +319,9 @@ impl EvScroll {
 /// Location of a cell in a table.
 pub struct EvTbPos {
     /// Column index.
-    pub col: usize,
+    pub col: u32,
     /// Row index.
-    pub row: usize,
+    pub row: u32,
 }
 
 impl EvTbPos {
@@ -342,7 +342,7 @@ pub struct EvTbRow {
     /// Selected or not.
     pub sel: bool,
     /// Row index.
-    pub row: usize,
+    pub row: u32,
 }
 
 impl EvTbRow {
@@ -361,13 +361,13 @@ impl EvTbRow {
 /// Group of cells in a table.
 pub struct EvTbRect {
     /// Initial column index.
-    pub stcol: usize,
+    pub stcol: u32,
     /// End column index.
-    pub edcol: usize,
+    pub edcol: u32,
     /// Initial row index.
-    pub strow: usize,
+    pub strow: u32,
     /// End row index.
-    pub edrow: usize,
+    pub edrow: u32,
 }
 
 impl EvTbRect {
@@ -527,7 +527,7 @@ pub struct EvTextFilter {
     /// New control text, which is a revision (filter) of the original text. len <= 4096usize!
     pub text: String,
     /// Cursor position (caret).
-    pub cpos: usize,
+    pub cpos: u32,
 }
 
 impl crate::core::event::NappGUIEventResult for EvTextFilter {

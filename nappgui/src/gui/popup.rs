@@ -47,21 +47,21 @@ pub trait PopUpTrait {
     }
 
     /// Edit an item from the drop-down list.
-    fn set_element(&self, index: usize, text: &str) {
+    fn set_element(&self, index: u32, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
-            popup_set_elem(self.as_ptr(), index as _, text.as_ptr(), std::ptr::null());
+            popup_set_elem(self.as_ptr(), index, text.as_ptr(), std::ptr::null());
         }
     }
 
     /// Edit an item with image from the drop-down list.
-    fn set_image_element<T>(&self, index: usize, text: &str, image: &T)
+    fn set_image_element<T>(&self, index: u32, text: &str, image: &T)
     where
         T: ImageTrait,
     {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
-            popup_set_elem(self.as_ptr(), index as _, text.as_ptr(), image.as_ptr());
+            popup_set_elem(self.as_ptr(), index, text.as_ptr(), image.as_ptr());
         }
     }
 
@@ -73,32 +73,32 @@ pub trait PopUpTrait {
     }
 
     /// Gets the number of items in the list.
-    fn count(&self) -> usize {
-        unsafe { popup_count(self.as_ptr()) as _ }
+    fn count(&self) -> u32 {
+        unsafe { popup_count(self.as_ptr()) }
     }
 
     /// Set the size of the drop-down list.
-    fn list_height(&self, elems: usize) {
+    fn list_height(&self, elems: u32) {
         unsafe {
-            popup_list_height(self.as_ptr(), elems as _);
+            popup_list_height(self.as_ptr(), elems);
         }
     }
 
     /// Set the selected popup element.
-    fn selected(&self, index: usize) {
+    fn selected(&self, index: u32) {
         unsafe {
-            popup_selected(self.as_ptr(), index as _);
+            popup_selected(self.as_ptr(), index);
         }
     }
 
     /// Get the selected popup item.
-    fn get_selected(&self) -> usize {
-        unsafe { popup_get_selected(self.as_ptr()) as _ }
+    fn get_selected(&self) -> u32 {
+        unsafe { popup_get_selected(self.as_ptr()) }
     }
 
     /// Gets the text of a popup element.
-    fn get_text(&self, index: usize) -> String {
-        let text = unsafe { popup_get_text(self.as_ptr(), index as _) };
+    fn get_text(&self, index: u32) -> String {
+        let text = unsafe { popup_get_text(self.as_ptr(), index) };
         let text = unsafe { std::ffi::CStr::from_ptr(text) };
         text.to_string_lossy().into_owned()
     }

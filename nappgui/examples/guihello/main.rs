@@ -10,6 +10,7 @@ mod tabstops;
 mod vpadding;
 mod textviews;
 mod table;
+mod splits;
 
 #[allow(unused)]
 pub(crate) mod res {
@@ -112,6 +113,7 @@ fn set_panel(window: &WeakWindow, layout: &Layout, index: usize) {
         11 => tabstops::tabstops(),
         12 => textviews::textviews(),
         13 => table::table_view(),
+        14 => splits::split_panel(),
         _ => {
             return;
         }

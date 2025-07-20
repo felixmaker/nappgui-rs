@@ -1,11 +1,12 @@
 mod buttons;
+mod editor;
 mod form;
 mod labels;
 mod listboxes;
 mod popcom;
 mod seltext;
-mod editor;
 mod sliders;
+mod tabstops;
 mod vpadding;
 
 #[allow(unused)]
@@ -106,6 +107,7 @@ fn set_panel(window: &WeakWindow, layout: &Layout, index: usize) {
         8 => editor::editor(),
         9 => sliders::sliders(),
         10 => vpadding::vpadding(),
+        11 => tabstops::tabstops(),
         _ => {
             return;
         }

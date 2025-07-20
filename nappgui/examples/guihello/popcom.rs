@@ -89,15 +89,15 @@ pub fn popup_combo() -> Panel {
     layout.set(1, 3, button2);
 
     layout.margin(10.);
-    layout.vmargin(0, 10.);
-    layout.vmargin(1, 10.);
-    layout.vmargin(2, 5.);
-    layout.hmargin(0, 5.);
-    layout.hmargin(1, 10.);
-    layout.hmargin(2, 5.);
+    layout.vertical_margin(0, 10.);
+    layout.vertical_margin(1, 10.);
+    layout.vertical_margin(2, 5.);
+    layout.horizontal_margin(0, 5.);
+    layout.horizontal_margin(1, 10.);
+    layout.horizontal_margin(2, 5.);
 
-    layout.hsize(1, 150.);
-    layout.hsize(3, 150.);
+    layout.horizontal_size(1, 150.);
+    layout.horizontal_size(3, 150.);
 
     panel.layout(layout);
     panel

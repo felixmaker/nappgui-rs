@@ -83,9 +83,9 @@ pub fn listboxes() -> Panel {
     layout.set(1, 1, listbox2);
     layout.set(2, 1, listbox3);
 
-    layout.hmargin(0, 10.);
-    layout.hmargin(1, 10.);
-    layout.vmargin(0, 5.);
+    layout.horizontal_margin(0, 10.);
+    layout.horizontal_margin(1, 10.);
+    layout.vertical_margin(0, 5.);
 
     panel.layout(layout);
     panel

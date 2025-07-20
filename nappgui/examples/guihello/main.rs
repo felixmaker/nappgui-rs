@@ -86,10 +86,10 @@ impl App {
         set_panel(&self.window.as_weak(), &self.layout, 0);
 
         panel.layout(self.layout);
-        self.layout.valign(0, 0, Align::Left);
-        self.layout.valign(1, 0, Align::Left);
+        self.layout.vertical_align(0, 0, Align::Left);
+        self.layout.vertical_align(1, 0, Align::Left);
         self.layout.margin(10f32);
-        self.layout.hmargin(0, 10f32);
+        self.layout.horizontal_margin(0, 10f32);
 
         panel
     }
@@ -122,7 +122,7 @@ fn set_panel(window: &WeakWindow, layout: &Layout, index: u32) {
     layout.panel_replace(panel, 1, 0);
 
     if let Some(defbutton) = &mut defbutton {
-        window.defbutton(defbutton);
+        window.default_button(defbutton);
     }
 }
 

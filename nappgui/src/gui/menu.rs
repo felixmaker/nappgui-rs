@@ -75,6 +75,7 @@ pub trait MenuTrait {
 }
 
 /// The inner type of menu.
+#[doc(hidden)]
 #[repr(transparent)]
 pub struct MenuInner {
     pub(crate) inner: *mut nappgui_sys::Menu,

@@ -29,13 +29,13 @@ pub trait ViewTrait {
 
     callback! {
         /// Set an event handler to draw in the view.
-     on_draw(EvDraw) => view_OnDraw;
+        on_draw(EvDraw) => view_OnDraw;
 
         /// Sets an event handler to draw the overlay.
-     on_overlay(EvDraw) => view_OnOverlay;
+        on_overlay(EvDraw) => view_OnOverlay;
 
         /// Set an event handler for resizing.
-     on_size(EvSize) => view_OnSize;
+        on_size(EvSize) => view_OnSize;
 
         /// Set an event handler for mouse enter.
         on_enter(EvMouse) => view_OnEnter;
@@ -59,25 +59,25 @@ pub trait ViewTrait {
          on_drag(EvMouse) => view_OnDrag;
 
         /// Set an event handler for mouse wheel.
-     on_wheel(EvMouse) => view_OnWheel;
+        on_wheel(EvMouse) => view_OnWheel;
 
         /// Set an event handler for a keystroke.
-     on_key_down(EvKey) => view_OnKeyDown;
+        on_key_down(EvKey) => view_OnKeyDown;
 
         /// Set an event handler for releasing a key.
-     on_key_up(EvKey) => view_OnKeyUp;
+        on_key_up(EvKey) => view_OnKeyUp;
 
         /// Sets an event handler for keyboard focus.
-     on_focus(bool) => view_OnFocus;
+        on_focus(bool) => view_OnFocus;
 
         /// Set a handler to avoid losing keyboard focus.
-     on_accept_focus() -> bool => view_OnAcceptFocus;
+        on_accept_focus() -> bool => view_OnAcceptFocus;
 
         /// Set a handler to prevent getting keyboard focus.
-     on_resign_focus() -> bool => view_OnResignFocus;
+        on_resign_focus() -> bool => view_OnResignFocus;
 
         /// Set an event handler for the scroll bars.
-         on_scroll(EvScroll) -> f32 => view_OnScroll;
+        on_scroll(EvScroll) -> f32 => view_OnScroll;
     }
 
     /// Allows to capture the press of the \[TAB\] key.
@@ -112,14 +112,14 @@ pub trait ViewTrait {
     }
 
     /// Move the horizontal scroll bar to the indicated position.
-    fn scroll_x(&self, pos: f32) {
+    fn scroll_horizontal(&self, pos: f32) {
         unsafe {
             view_scroll_x(self.as_ptr(), pos);
         }
     }
 
     /// Move the vertical scroll bar to the indicated position.
-    fn scroll_y(&self, pos: f32) {
+    fn scroll_vertical(&self, pos: f32) {
         unsafe {
             view_scroll_y(self.as_ptr(), pos);
         }

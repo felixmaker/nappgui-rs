@@ -21,7 +21,7 @@ fn i_layout(data: &Rc<RefCell<Data>>, tabstop: usize) -> Layout {
     let data1 = data.clone();
     button.on_click(move |_| {
         if let Some(text) = data1.borrow().text[tabstop] {
-            text.writef("Button click\n");
+            text.write("Button click\n");
         }
     });
 
@@ -32,7 +32,7 @@ fn i_layout(data: &Rc<RefCell<Data>>, tabstop: usize) -> Layout {
     let data2 = data.clone();
     popup.on_select(move |params| {
         if let Some(text) = data2.borrow().text[tabstop] {
-            text.writef(&format!("Popup select {}\n", params.index));
+            text.write(&format!("Popup select {}\n", params.index));
         }
     });
 
@@ -70,7 +70,7 @@ fn i_layout(data: &Rc<RefCell<Data>>, tabstop: usize) -> Layout {
     });
 
     let text = TextView::new();
-    text.writef("Hello text!\n");
+    text.write("Hello text!\n");
 
     let table = TableView::new();
     let list = ListBox::new();
@@ -106,20 +106,20 @@ fn i_layout(data: &Rc<RefCell<Data>>, tabstop: usize) -> Layout {
     layout.set(0, 0, layout1);
     layout.set(0, 1, layout2);
 
-    layout.halign(0, 0, Align::Left);
-    layout.halign(0, 1, Align::Left);
+    layout.horizontal_align(0, 0, Align::Left);
+    layout.horizontal_align(0, 1, Align::Left);
 
-    layout1.hmargin(0, 10.0);
-    layout1.hmargin(1, 10.0);
-    layout1.hmargin(2, 10.0);
-    layout1.hmargin(3, 10.0);
-    layout1.hmargin(4, 10.0);
+    layout1.horizontal_margin(0, 10.0);
+    layout1.horizontal_margin(1, 10.0);
+    layout1.horizontal_margin(2, 10.0);
+    layout1.horizontal_margin(3, 10.0);
+    layout1.horizontal_margin(4, 10.0);
 
-    layout2.hmargin(0, 10.0);
-    layout2.hmargin(1, 10.0);
-    layout2.hmargin(2, 10.0);
+    layout2.horizontal_margin(0, 10.0);
+    layout2.horizontal_margin(1, 10.0);
+    layout2.horizontal_margin(2, 10.0);
 
-    layout.vmargin(0, 10.0);
+    layout.vertical_margin(0, 10.0);
 
     data.borrow_mut().button[tabstop] = Some(button);
     data.borrow_mut().popup[tabstop] = Some(popup);
@@ -145,9 +145,9 @@ pub fn tabstops() -> Panel {
     layout.set(0, 2, label2);
     layout.set(0, 3, layout2);
 
-    layout.vmargin(0, 10.0);
-    layout.vmargin(1, 10.0);
-    layout.vmargin(2, 10.0);
+    layout.vertical_margin(0, 10.0);
+    layout.vertical_margin(1, 10.0);
+    layout.vertical_margin(2, 10.0);
 
     panel.layout(layout);
     panel

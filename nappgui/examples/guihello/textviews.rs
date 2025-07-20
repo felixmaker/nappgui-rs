@@ -9,80 +9,80 @@ fn set_rtf(text: &TextView) {
 
 fn set_hard_coding(text: &TextView) {
     text.units(64);
-    text.lspacing(1.15);
-    text.afspace(10.0);
-    text.family("Arial");
-    text.fsize(16.0);
-    text.writef("What is Lorem Ipsum?\n");
-    text.fsize(11.0);
-    text.writef("Lorem Ipsum ");
-    text.fstyle(FontStyle {
+    text.line_spacing(1.15);
+    text.after_space(10.0);
+    text.font_family("Arial");
+    text.font_size(16.0);
+    text.write("What is Lorem Ipsum?\n");
+    text.font_size(11.0);
+    text.write("Lorem Ipsum ");
+    text.font_style(FontStyle {
         is_bold: true,
         ..Default::default()
     });
-    text.writef("is simply");
-    text.fstyle(FontStyle {
+    text.write("is simply");
+    text.font_style(FontStyle {
         is_normal: true,
         ..Default::default()
     });
-    text.writef(" dummy text of the ");
-    text.fstyle(FontStyle {
+    text.write(" dummy text of the ");
+    text.font_style(FontStyle {
         is_italic: true,
         ..Default::default()
     });
-    text.writef("printing and typesetting ");
-    text.fstyle(FontStyle {
+    text.write("printing and typesetting ");
+    text.font_style(FontStyle {
         is_normal: true,
         ..Default::default()
     });
-    text.writef("industry. ");
-    text.fsize(16.0);
+    text.write("industry. ");
+    text.font_size(16.0);
     text.color(Color::rgb(255, 0, 0));
-    text.writef("Lorem Ipsum ");
-    text.fsize(11.0);
-    text.writef("has been the ");
-    text.family("Courier New");
-    text.fsize(14.0);
-    text.writef("[industry's standard] ");
-    text.family("Arial");
-    text.fsize(11.0);
-    text.fstyle(FontStyle {
+    text.write("Lorem Ipsum ");
+    text.font_size(11.0);
+    text.write("has been the ");
+    text.font_family("Courier New");
+    text.font_size(14.0);
+    text.write("[industry's standard] ");
+    text.font_family("Arial");
+    text.font_size(11.0);
+    text.font_style(FontStyle {
         is_underlined: true,
         ..Default::default()
     });
-    text.writef("dummy text");
-    text.fstyle(FontStyle {
+    text.write("dummy text");
+    text.font_style(FontStyle {
         is_normal: true,
         ..Default::default()
     });
-    text.writef(" ever ");
-    text.fstyle(FontStyle {
+    text.write(" ever ");
+    text.font_style(FontStyle {
         is_strike_out: true,
         ..Default::default()
     });
-    text.writef("since the 1500s");
-    text.fstyle(FontStyle {
+    text.write("since the 1500s");
+    text.font_style(FontStyle {
         is_normal: true,
         ..Default::default()
     });
-    text.writef(", when an ");
+    text.write(", when an ");
     text.color(Color::rgb(0, 176, 80));
-    text.writef("unknown printer ");
-    text.writef("took a galley of type and scrambled it to make a type specimen book");
-    text.fstyle(FontStyle {
+    text.write("unknown printer ");
+    text.write("took a galley of type and scrambled it to make a type specimen book");
+    text.font_style(FontStyle {
         is_italic: true,
         ..Default::default()
     });
     text.color(Color::rgb(0, 77, 187));
-    text.bgcolor(Color::rgb(192, 192, 192));
-    text.writef(". It has survived not only five centuries");
-    text.fstyle(FontStyle {
+    text.background_color(Color::rgb(192, 192, 192));
+    text.write(". It has survived not only five centuries");
+    text.font_style(FontStyle {
         is_normal: true,
         ..Default::default()
     });
     text.color(Color::rgb(0, 0, 0));
-    text.bgcolor(Color::rgb(255, 255, 255));
-    text.writef(
+    text.background_color(Color::rgb(255, 255, 255));
+    text.write(
         ", but also the leap into electronic typesetting, remaining essentially unchanged.",
     );
 }
@@ -107,9 +107,9 @@ pub fn textviews() -> Panel {
     layout.set(0, 2, label2);
     layout.set(0, 3, text2);
 
-    layout.vmargin( 0, 5.0);
-    layout.vmargin( 1, 10.0);
-    layout.vmargin( 2, 5.0);
+    layout.vertical_margin( 0, 5.0);
+    layout.vertical_margin( 1, 10.0);
+    layout.vertical_margin( 2, 5.0);
 
     panel.layout(layout);
     panel

@@ -16,14 +16,14 @@ fn table_control_layout(data: &Rc<RefCell<Data>>) -> Layout {
     let data1 = data.clone();
     button1.on_click(move |_| {
         if let Some(table) = &data1.borrow_mut().table {
-            table.multisel(false, false);
+            table.multiselect(false, false);
         }
     });
     let button2 = RadioButton::new("Multi select");
     let data2 = data.clone();
     button2.on_click(move |_| {
         if let Some(table) = &data2.borrow_mut().table {
-            table.multisel(true, false);
+            table.multiselect(true, false);
         }
     });
 
@@ -31,7 +31,7 @@ fn table_control_layout(data: &Rc<RefCell<Data>>) -> Layout {
     let data3 = data.clone();
     button3.on_click(move |_| {
         if let Some(table) = &data3.borrow_mut().table {
-            table.multisel(true, true);
+            table.multiselect(true, true);
         }
     });
 
@@ -81,7 +81,7 @@ fn table_control_layout(data: &Rc<RefCell<Data>>) -> Layout {
         } = &*data8.borrow_mut()
         {
             if let Some(rows) = table.selected() {
-                text.writef(&format!(
+                text.write(&format!(
                     "Selected rows: {}\n",
                     rows.iter()
                         .map(|x| x.to_string())
@@ -109,13 +109,13 @@ fn table_control_layout(data: &Rc<RefCell<Data>>) -> Layout {
     layout.set(0, 4, button7);
     layout.set(0, 5, button8);
 
-    layout2.hmargin(0, 5.0);
-    layout2.hmargin(1, 5.0);
-    layout.vmargin(0, 5.0);
-    layout.vmargin(1, 5.0);
-    layout.vmargin(2, 5.0);
-    layout.vmargin(3, 5.0);
-    layout.vmargin(4, 5.0);
+    layout2.horizontal_margin(0, 5.0);
+    layout2.horizontal_margin(1, 5.0);
+    layout.vertical_margin(0, 5.0);
+    layout.vertical_margin(1, 5.0);
+    layout.vertical_margin(2, 5.0);
+    layout.vertical_margin(3, 5.0);
+    layout.vertical_margin(4, 5.0);
 
     layout
 }
@@ -208,7 +208,7 @@ pub fn table_view() -> Panel {
     });
 
     table.size(500.0, 300.0);
-    table.multisel(false, false);
+    table.multiselect(false, false);
     table.header_visible(true);
     table.grid(true, true);
     table.update();
@@ -216,8 +216,8 @@ pub fn table_view() -> Panel {
     layout.set(0, 0, layout2);
     layout.set(0, 1, table);
     layout.set(0, 2, text);
-    layout.vmargin(0, 5.0);
-    layout.vmargin(1, 5.0);
+    layout.vertical_margin(0, 5.0);
+    layout.vertical_margin(1, 5.0);
 
     panel.layout(layout);
     panel

@@ -112,21 +112,21 @@ pub trait EditTrait {
     }
 
     /// Set the background color.
-    fn bgcolor(&self, color: Color) {
+    fn background_color(&self, color: Color) {
         unsafe {
             edit_bgcolor(self.as_ptr(), color.inner);
         }
     }
 
     /// Sets the background color, when the control has keyboard focus.
-    fn bgcolor_focus(&self, color: Color) {
+    fn background_color_focus(&self, color: Color) {
         unsafe {
             edit_bgcolor_focus(self.as_ptr(), color.inner);
         }
     }
 
     /// Set an explanatory text for when the control is blank (placeholder).
-    fn phtext(&self, text: &str) {
+    fn placeholder_text(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
             edit_phtext(self.as_ptr(), text.as_ptr());
@@ -134,14 +134,14 @@ pub trait EditTrait {
     }
 
     /// Set the color of the placeholder text.
-    fn phcolor(&self, color: Color) {
+    fn placeholder_color(&self, color: Color) {
         unsafe {
             edit_phcolor(self.as_ptr(), color.inner);
         }
     }
 
     /// Set the font style for the placeholder.
-    fn phstyle(&self, style: FontStyle) {
+    fn placeholder_style(&self, style: FontStyle) {
         unsafe {
             edit_phstyle(self.as_ptr(), style.to_fstyle_t());
         }

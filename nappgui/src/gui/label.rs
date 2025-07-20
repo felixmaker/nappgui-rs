@@ -56,7 +56,7 @@ pub trait LabelTrait {
         }
     }
 
-    /// Create a multi-line text control.
+    /// Set the label multi-lined.
     fn multiline(&self, multiline: bool) {
         unsafe { label_multiline(self.as_ptr(), multiline as _) };
     }
@@ -92,7 +92,7 @@ pub trait LabelTrait {
     ///
     /// # Remarks
     /// RGB values may not be fully portable.
-    fn bgcolor(&self, color: Color) {
+    fn background_color(&self, color: Color) {
         unsafe {
             label_bgcolor(self.as_ptr(), color.inner);
         }
@@ -102,7 +102,7 @@ pub trait LabelTrait {
     ///
     /// # Remarks
     /// RGB values may not be fully portable.
-    fn bgcolor_over(&self, color: Color) {
+    fn background_color_over(&self, color: Color) {
         unsafe {
             label_bgcolor_over(self.as_ptr(), color.inner);
         }

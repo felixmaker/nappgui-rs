@@ -82,20 +82,20 @@ fn i_title_labels(layout: &Layout) {
         layout.set(0, i as _, label);
     }
 
-    layout.hmargin(0, 10.0);
+    layout.horizontal_margin(0, 10.0);
 }
 
 fn i_value_labels(layout: &Layout) {
     for i in 0..I_NUM_CONTROLS {
         let label = Label::new("");
         layout.set(2, i as _, label);
-        layout.halign(2, i as _, Align::Justify);
+        layout.horizontal_align(2, i as _, Align::Justify);
     }
 
-    layout.hsize(2, 80.0);
-    layout.hmargin(0, 10.0);
+    layout.horizontal_size(2, 80.0);
+    layout.horizontal_margin(0, 10.0);
     for i in 0..(I_NUM_CONTROLS - 1) {
-        layout.vmargin(i as _, 5.0);
+        layout.vertical_margin(i as _, 5.0);
     }
 
     cell_dbind!(
@@ -139,7 +139,7 @@ fn i_layout() -> Layout {
     let slider = Slider::new();
     let updown = UpDown::new();
 
-    layout.halign(1, 0, Align::Justify);
+    layout.horizontal_align(1, 0, Align::Justify);
 
     layout.set(1, 0,  label);
     layout.set(1, 1,  edit);

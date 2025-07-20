@@ -15,9 +15,9 @@ pub fn vpadding() -> Panel {
     edit2.text("Edit with zero padding");
     edit3.text("Edit with high padding");
 
-    edit1.bgcolor(bg);
-    edit2.bgcolor(bg);
-    edit3.bgcolor(bg);
+    edit1.background_color(bg);
+    edit2.background_color(bg);
+    edit3.background_color(bg);
 
     let button1 = PushButton::new("Button with default padding");
     let button2 = PushButton::new("Button with zero padding");
@@ -32,20 +32,20 @@ pub fn vpadding() -> Panel {
 
     edit2.vpadding(0.0);
     edit3.vpadding(20.0);
-    button2.vpadding(0.0);
-    button3.vpadding(20.0);
+    button2.vertical_padding(0.0);
+    button3.vertical_padding(20.0);
     layout.set(0, 0, edit1);
     layout.set(0, 1, edit2);
     layout.set(0, 2, edit3);
     layout.set(0, 3, button1);
     layout.set(0, 4, button2);
     layout.set(0, 5, button3);
-    layout.hsize(0, 250.0);
-    layout.vmargin(0, 5.0);
-    layout.vmargin(1, 5.0);
-    layout.vmargin(2, 5.0);
-    layout.vmargin(3, 5.0);
-    layout.vmargin(4, 5.0);
+    layout.horizontal_size(0, 250.0);
+    layout.vertical_margin(0, 5.0);
+    layout.vertical_margin(1, 5.0);
+    layout.vertical_margin(2, 5.0);
+    layout.vertical_margin(3, 5.0);
+    layout.vertical_margin(4, 5.0);
 
     panel.layout(layout);
     panel

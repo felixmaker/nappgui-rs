@@ -17,12 +17,12 @@ fn left_panel() -> Panel {
     }
 
     for i in 0..N - 1 {
-        layout.vmargin(i, 3.0);
+        layout.vertical_margin(i, 3.0);
     }
 
-    layout.hmargin(0, 5.0);
+    layout.horizontal_margin(0, 5.0);
     layout.margin4(0.0, rmargin, 0.0, 0.0);
-    layout.hexpand(1);
+    layout.horizontal_expand(1);
     panel.layout(layout);
 
     panel
@@ -38,7 +38,7 @@ pub fn split_panel() -> Panel {
     let text = TextView::new();
     let view = View::new();
 
-    text.writef(LOREM);
+    text.write(LOREM);
     view.size(400.0, 200.0);
     text.size(400.0, 200.0);
 

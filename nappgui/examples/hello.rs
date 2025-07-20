@@ -18,14 +18,14 @@ impl AppHandler for App {
         layout.set(0, 0, label);
         layout.set(0, 1, button);
         layout.set(0, 2, text);
-        layout.hsize(0, 250.0);
-        layout.vsize(2, 100.0);
+        layout.horizontal_size(0, 250.0);
+        layout.vertical_size(2, 100.0);
         layout.margin(5.0);
-        layout.vmargin(0, 5.0);
-        layout.vmargin(1, 5.0);
+        layout.vertical_margin(0, 5.0);
+        layout.vertical_margin(1, 5.0);
 
         button.on_click(move |_params| {
-            text.writef(&format!("Button click {}\n", clicks.borrow()));
+            text.write(&format!("Button click {}\n", clicks.borrow()));
             *clicks.borrow_mut() += 1;
         });
 

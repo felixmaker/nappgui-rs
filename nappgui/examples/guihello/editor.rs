@@ -44,9 +44,9 @@ fn set_params(data: &Rc<RefCell<EditData>>) {
             ..Default::default()
         };
 
-        text.family(&ffamily);
-        text.fsize(size);
-        text.fstyle(fstyle);
+        text.font_family(&ffamily);
+        text.font_size(size);
+        text.font_style(fstyle);
     }
 }
 
@@ -159,16 +159,16 @@ fn text_controls(data: &Rc<RefCell<EditData>>) -> Layout {
     layout.set(2, 1, layout2);
     layout.set(3, 1, popup3);
     layout.set(4, 1, popup4);
-    layout.hmargin(0, 5.0);
-    layout.hmargin(1, 5.0);
-    layout.hmargin(2, 5.0);
-    layout.hmargin(3, 5.0);
-    layout.vmargin(0, 5.0);
-    layout.valign(0, 1, Align::Left);
-    layout.valign(1, 1, Align::Left);
-    layout.valign(2, 1, Align::Left);
-    layout.valign(3, 1, Align::Left);
-    layout.valign(4, 1, Align::Left);
+    layout.horizontal_margin(0, 5.0);
+    layout.horizontal_margin(1, 5.0);
+    layout.horizontal_margin(2, 5.0);
+    layout.horizontal_margin(3, 5.0);
+    layout.vertical_margin(0, 5.0);
+    layout.vertical_align(0, 1, Align::Left);
+    layout.vertical_align(1, 1, Align::Left);
+    layout.vertical_align(2, 1, Align::Left);
+    layout.vertical_align(3, 1, Align::Left);
+    layout.vertical_align(4, 1, Align::Left);
 
     data.borrow_mut().family_popup = Some(popup1);
     data.borrow_mut().size_popup = Some(popup2);
@@ -189,14 +189,14 @@ fn apply_buttons(data: &Rc<RefCell<EditData>>) -> Layout {
     let data1 = data.clone();
     button1.on_click(move |_| {
         if let Some(text) = &data1.borrow().text {
-            text.cpos_writef("ins");
+            text.current_position_write("ins");
         }
     });
 
     let data2 = data.clone();
     button2.on_click(move |_| {
         if let Some(text) = &data2.borrow().text {
-            text.writef("add");
+            text.write("add");
         }
     });
 
@@ -220,10 +220,10 @@ fn apply_buttons(data: &Rc<RefCell<EditData>>) -> Layout {
     layout.set(3, 0, button3);
     layout.set(4, 0, button4);
 
-    layout.hmargin(0, 5.0);
-    layout.hmargin(1, 10.0);
-    layout.hmargin(2, 5.0);
-    layout.hmargin(3, 5.0);
+    layout.horizontal_margin(0, 5.0);
+    layout.horizontal_margin(1, 10.0);
+    layout.horizontal_margin(2, 5.0);
+    layout.horizontal_margin(3, 5.0);
 
     layout
 }
@@ -241,9 +241,9 @@ fn layout(data: &Rc<RefCell<EditData>>) -> Layout {
     layout.set(0, 1, text);
     layout.set(0, 2, layout3);
 
-    layout.halign(0, 2, Align::Right);
-    layout.vmargin(0, 10.0);
-    layout.vmargin(1, 10.0);
+    layout.horizontal_align(0, 2, Align::Right);
+    layout.vertical_margin(0, 10.0);
+    layout.vertical_margin(1, 10.0);
     layout.tabstop(0, 1, true);
 
     data.borrow_mut().text = Some(text);

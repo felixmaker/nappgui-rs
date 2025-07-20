@@ -92,7 +92,7 @@ pub trait LayoutTrait {
     /// # Panics
     ///
     /// Panics if col is out of bounds.
-    fn insert_col(&self, col: u32) {
+    fn insert_column(&self, col: u32) {
         assert!(col < self.ncols());
 
         unsafe { layout_insert_col(self.as_ptr(), col) };
@@ -122,7 +122,7 @@ pub trait LayoutTrait {
     /// # Panics
     ///
     /// Panics if col is out of bounds.
-    fn remove_col(&self, col: u32) {
+    fn remove_column(&self, col: u32) {
         assert!(col < self.ncols());
 
         unsafe { layout_remove_col(self.as_ptr(), col) };
@@ -165,7 +165,7 @@ pub trait LayoutTrait {
     /// # Panics
     ///
     /// Panics if col is out of bounds.
-    fn hsize(&self, col: u32, width: f32) {
+    fn horizontal_size(&self, col: u32, width: f32) {
         assert!(col < self.ncols());
 
         unsafe { layout_hsize(self.as_ptr(), col, width) };
@@ -176,7 +176,7 @@ pub trait LayoutTrait {
     /// # Panics
     ///
     /// Panics if row is out of bounds.
-    fn vsize(&self, row: u32, height: f32) {
+    fn vertical_size(&self, row: u32, height: f32) {
         assert!(row < self.nrows());
 
         unsafe { layout_vsize(self.as_ptr(), row, height) };
@@ -188,7 +188,7 @@ pub trait LayoutTrait {
     /// # Panics
     ///
     /// Panics if col is out of bounds.
-    fn hmargin(&self, col: u32, margin: f32) {
+    fn horizontal_margin(&self, col: u32, margin: f32) {
         assert!(col < self.ncols());
 
         unsafe { layout_hmargin(self.as_ptr(), col, margin) };
@@ -199,7 +199,7 @@ pub trait LayoutTrait {
     /// # Panics
     ///
     /// Panics if row is out of bounds.
-    fn vmargin(&self, row: u32, margin: f32) {
+    fn vertical_margin(&self, row: u32, margin: f32) {
         assert!(row < self.nrows());
 
         unsafe { layout_vmargin(self.as_ptr(), row, margin) };
@@ -210,7 +210,7 @@ pub trait LayoutTrait {
     /// # Panics
     ///
     /// Panics if col is out of bounds.
-    fn hexpand(&self, col: u32) {
+    fn horizontal_expand(&self, col: u32) {
         unsafe { layout_hexpand(self.as_ptr(), col) };
     }
 
@@ -222,7 +222,7 @@ pub trait LayoutTrait {
     /// # Panics
     ///
     /// Panics if col1 or col2 is out of bounds.
-    fn hexpand2(&self, col1: u32, col2: u32, exp: f32) {
+    fn horizontal_expand2(&self, col1: u32, col2: u32, exp: f32) {
         assert!(col1 < self.ncols());
         assert!(col2 < self.ncols());
 
@@ -237,7 +237,7 @@ pub trait LayoutTrait {
     /// # Panics
     ///
     /// Panics if col1 or col2 or col3 is out of bounds.
-    fn hexpand3(&self, col1: u32, col2: u32, col3: u32, exp1: f32, exp2: f32) {
+    fn horizontal_expand3(&self, col1: u32, col2: u32, col3: u32, exp1: f32, exp2: f32) {
         assert!(col1 < self.ncols());
         assert!(col2 < self.ncols());
         assert!(col3 < self.ncols());
@@ -250,7 +250,7 @@ pub trait LayoutTrait {
     /// # Panics
     ///
     /// Panics if row is out of bounds.
-    fn vexpand(&self, row: u32) {
+    fn vertical_expand(&self, row: u32) {
         unsafe { layout_vexpand(self.as_ptr(), row) };
     }
 
@@ -262,7 +262,7 @@ pub trait LayoutTrait {
     /// # Panics
     ///
     /// Panics if row1 or row2 is out of bounds.
-    fn vexpand2(&self, row1: u32, row2: u32, exp: f32) {
+    fn vertical_expand2(&self, row1: u32, row2: u32, exp: f32) {
         assert!(row1 < self.nrows());
         assert!(row2 < self.nrows());
 
@@ -277,7 +277,7 @@ pub trait LayoutTrait {
     /// # Panics
     ///
     /// Panics if row1 or row2 or row3 is out of bounds.
-    fn vexpand3(&self, row1: u32, row2: u32, row3: u32, exp1: f32, exp2: f32) {
+    fn vertical_expand3(&self, row1: u32, row2: u32, row3: u32, exp1: f32, exp2: f32) {
         assert!(row1 < self.nrows());
         assert!(row2 < self.nrows());
         assert!(row3 < self.nrows());
@@ -291,7 +291,7 @@ pub trait LayoutTrait {
     /// # Panics
     ///
     /// Panics if col or row is out of bounds.
-    fn halign(&self, col: u32, row: u32, align: Align) {
+    fn horizontal_align(&self, col: u32, row: u32, align: Align) {
         assert!(col < self.ncols());
         assert!(row < self.nrows());
 
@@ -304,7 +304,7 @@ pub trait LayoutTrait {
     /// # Panics
     ///
     /// Panics if col or row is out of bounds.
-    fn valign(&self, col: u32, row: u32, align: Align) {
+    fn vertical_align(&self, col: u32, row: u32, align: Align) {
         assert!(col < self.ncols());
         assert!(row < self.nrows());
 
@@ -316,7 +316,7 @@ pub trait LayoutTrait {
     /// # Panics
     ///
     /// Panics if col is out of bounds.
-    fn show_col(&self, col: u32, visible: bool) {
+    fn show_column(&self, col: u32, visible: bool) {
         assert!(col < self.ncols());
 
         unsafe { layout_show_col(self.as_ptr(), col, visible as _) };
@@ -349,12 +349,12 @@ pub trait LayoutTrait {
     }
 
     /// Assign a background color to the layout.
-    fn bgcolor(&self, color: Color) {
+    fn background_color(&self, color: Color) {
         unsafe { layout_bgcolor(self.as_ptr(), color.inner) };
     }
 
     /// Assign a color to the edge of the layout.
-    fn skcolor(&self, color: Color) {
+    fn skin_color(&self, color: Color) {
         unsafe { layout_skcolor(self.as_ptr(), color.inner) };
     }
 

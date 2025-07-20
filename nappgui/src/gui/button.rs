@@ -39,7 +39,7 @@ pub trait ButtonTrait {
     }
 
     /// Sets the inner vertical margin.
-    fn vpadding(&self, padding: f32) {
+    fn vertical_padding(&self, padding: f32) {
         unsafe { button_vpadding(self.as_ptr(), padding) }
     }
 

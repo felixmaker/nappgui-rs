@@ -100,13 +100,13 @@ fn text_controls(data: Rc<RefCell<SelData>>) -> Layout {
     layout.set(5, 0, button5);
     layout.set(6, 0, button6);
 
-    layout.hsize(3, 40.0);
-    layout.hmargin(0, 5.0);
-    layout.hmargin(1, 5.0);
-    layout.hmargin(2, 5.0);
-    layout.hmargin(3, 5.0);
-    layout.hmargin(4, 5.0);
-    layout.hmargin(5, 5.0);
+    layout.horizontal_size(3, 40.0);
+    layout.horizontal_margin(0, 5.0);
+    layout.horizontal_margin(1, 5.0);
+    layout.horizontal_margin(2, 5.0);
+    layout.horizontal_margin(3, 5.0);
+    layout.horizontal_margin(4, 5.0);
+    layout.horizontal_margin(5, 5.0);
 
     (*data.borrow_mut()).edit_range = Some(edit);
     (*data.borrow_mut()).caps = Some(button5);
@@ -125,21 +125,21 @@ fn textview_controls(data: Rc<RefCell<SelData>>) -> Layout {
     let data1 = data.clone();
     button1.on_click(move |_| {
         if let Some(text) = &data1.borrow().text {
-            text.writef("add");
+            text.write("add");
         }
     });
 
     let data2 = data.clone();
     button2.on_click(move |_| {
         if let Some(text) = &data2.borrow().text {
-            text.writef("ins");
+            text.write("ins");
         }
     });
 
     let data3 = data.clone();
     button3.on_click(move |_| {
         if let Some(text) = &data3.borrow().text {
-            text.del_select();
+            text.delete_select();
         }
     });
 
@@ -152,7 +152,7 @@ fn textview_controls(data: Rc<RefCell<SelData>>) -> Layout {
     layout.set(3, 0, button2);
     layout.set(4, 0, button3);
 
-    layout.hexpand(1);
+    layout.horizontal_expand(1);
 
     layout
 }
@@ -197,11 +197,11 @@ fn layout(data: Rc<RefCell<SelData>>) -> Layout {
     layout1.tabstop(0, 7, true);
     layout1.tabstop(0, 8, false);
 
-    layout1.halign(0, 8, Align::Left);
-    layout1.vmargin(1, 5.0);
-    layout1.vmargin(3, 5.0);
-    layout1.vmargin(5, 5.0);
-    layout1.vmargin(7, 5.0);
+    layout1.horizontal_align(0, 8, Align::Left);
+    layout1.vertical_margin(1, 5.0);
+    layout1.vertical_margin(3, 5.0);
+    layout1.vertical_margin(5, 5.0);
+    layout1.vertical_margin(7, 5.0);
 
     (*data.borrow_mut()).text = Some(text1);
     (*data.borrow_mut()).info_text = Some(text2);

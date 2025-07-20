@@ -55,32 +55,32 @@ pub trait SplitViewTrait {
     }
 
     /// Sets the position of the view separator.
-    fn pos(&self, mode: SplitMode, pos: f32) {
+    fn position(&self, mode: SplitMode, pos: f32) {
         unsafe { splitview_pos(self.as_ptr(), mode as _, pos) }
     }
 
     /// Get the current divider position.
-    fn get_pos(&self, mode: SplitMode) -> f32 {
+    fn get_position(&self, mode: SplitMode) -> f32 {
         unsafe { splitview_get_pos(self.as_ptr(), mode as _) }
     }
 
     /// Show/hide the left/upper child.
-    fn visible0(&self, visible: bool) {
+    fn visible_front(&self, visible: bool) {
         unsafe { splitview_visible0(self.as_ptr(), visible as _) }
     }
 
     /// Show/hide the right/bottom child.
-    fn visible1(&self, visible: bool) {
+    fn visible_back(&self, visible: bool) {
         unsafe { splitview_visible1(self.as_ptr(), visible as _) }
     }
 
     /// Set the minimum size of the left/upper child.
-    fn min_size0(&self, size: f32) {
+    fn min_size_front(&self, size: f32) {
         unsafe { splitview_minsize0(self.as_ptr(), size) }
     }
 
     /// Set the minimum size of the right/bottom child.
-    fn min_size1(&self, size: f32) {
+    fn min_size_back(&self, size: f32) {
         unsafe { splitview_minsize1(self.as_ptr(), size) }
     }
 }

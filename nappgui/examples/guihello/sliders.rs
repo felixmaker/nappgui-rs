@@ -41,16 +41,16 @@ pub fn sliders() -> Panel {
     layout2.set(0, 5, progress1);
     layout2.set(0, 7, progress2);
 
-    layout2.hsize(0, 300.0);
+    layout2.horizontal_size(0, 300.0);
     layout1.set(0, 0, layout2);
-    layout2.vmargin(0, 5.0);
-    layout2.vmargin(1, 5.0);
-    layout2.vmargin(2, 5.0);
-    layout2.vmargin(3, 5.0);
-    layout2.vmargin(4, 5.0);
-    layout2.vmargin(5, 5.0);
-    layout2.vmargin(6, 5.0);
-    layout2.hmargin(0, 10.0);
+    layout2.vertical_margin(0, 5.0);
+    layout2.vertical_margin(1, 5.0);
+    layout2.vertical_margin(2, 5.0);
+    layout2.vertical_margin(3, 5.0);
+    layout2.vertical_margin(4, 5.0);
+    layout2.vertical_margin(5, 5.0);
+    layout2.vertical_margin(6, 5.0);
+    layout2.horizontal_margin(0, 10.0);
 
     panel.layout(layout1);
 

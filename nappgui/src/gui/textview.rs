@@ -15,9 +15,9 @@ use nappgui_sys::{
     textview_apply_select, textview_bfspace, textview_bgcolor, textview_clear, textview_color,
     textview_copy, textview_cpos_writef, textview_create, textview_cut, textview_del_select,
     textview_editable, textview_family, textview_fsize, textview_fstyle, textview_get_text,
-    textview_halign, textview_lspacing, textview_paste, textview_pgcolor, textview_rtf,
-    textview_scroll_caret, textview_scroll_visible, textview_select, textview_show_select,
-    textview_size, textview_units, textview_wrap, textview_writef, S2Df,
+    textview_halign, textview_lspacing, textview_paste, textview_rtf, textview_scroll_caret,
+    textview_scroll_visible, textview_select, textview_show_select, textview_size, textview_units,
+    textview_wrap, textview_writef, S2Df,
 };
 
 /// The text view trait.
@@ -48,7 +48,7 @@ pub trait TextViewTrait {
     }
 
     /// Writes text to the view, using the format of the printf.
-    fn writef(&self, text: &str) {
+    fn write(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
             textview_writef(self.as_ptr(), text.as_ptr());
@@ -56,7 +56,7 @@ pub trait TextViewTrait {
     }
 
     /// Insert text into the cursor position.
-    fn cpos_writef(&self, text: &str) {
+    fn current_position_write(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
             textview_cpos_writef(self.as_ptr(), text.as_ptr());
@@ -79,7 +79,7 @@ pub trait TextViewTrait {
     ///
     /// # Remarks
     /// Not all families will be present on all platforms. Use font_exists_family or font_installed_families to check.
-    fn family(&self, family: &str) {
+    fn font_family(&self, family: &str) {
         let family = std::ffi::CString::new(family).unwrap();
         unsafe {
             textview_family(self.as_ptr(), family.as_ptr());
@@ -90,12 +90,12 @@ pub trait TextViewTrait {
     ///
     /// # Remarks
     /// The value is conditional on the units established in textview_units.
-    fn fsize(&self, size: f32) {
+    fn font_size(&self, size: f32) {
         unsafe { textview_fsize(self.as_ptr(), size) }
     }
 
     /// Sets the text style.
-    fn fstyle(&self, style: FontStyle) {
+    fn font_style(&self, style: FontStyle) {
         unsafe {
             textview_fstyle(self.as_ptr(), style.to_fstyle_t());
         }
@@ -109,42 +109,35 @@ pub trait TextViewTrait {
     }
 
     /// Sets the background color of the text.
-    fn bgcolor(&self, color: Color) {
+    fn background_color(&self, color: Color) {
         unsafe {
             textview_bgcolor(self.as_ptr(), color.inner);
         }
     }
 
-    /// Sets the background color of the control.
-    fn pgcolor(&self, color: Color) {
-        unsafe {
-            textview_pgcolor(self.as_ptr(), color.inner);
-        }
-    }
-
     /// Sets the alignment of text in a paragraph.
-    fn halign(&self, align: Align) {
+    fn horizontal_align(&self, align: Align) {
         unsafe {
             textview_halign(self.as_ptr(), align as _);
         }
     }
 
     /// Sets the line spacing of the paragraph.
-    fn lspacing(&self, spacing: f32) {
+    fn line_spacing(&self, spacing: f32) {
         unsafe {
             textview_lspacing(self.as_ptr(), spacing);
         }
     }
 
     /// Sets a vertical space before the paragraph.
-    fn bfspace(&self, space: f32) {
+    fn before_space(&self, space: f32) {
         unsafe {
             textview_bfspace(self.as_ptr(), space);
         }
     }
 
     /// Sets a vertical space after the paragraph.
-    fn afspace(&self, space: f32) {
+    fn after_space(&self, space: f32) {
         unsafe {
             textview_afspace(self.as_ptr(), space);
         }
@@ -204,7 +197,7 @@ pub trait TextViewTrait {
     /// # Remarks
     /// It has an effect similar to textview_cut, but without copying the eliminated text on the
     /// clipboard. See Select text.
-    fn del_select(&self) {
+    fn delete_select(&self) {
         unsafe {
             textview_del_select(self.as_ptr());
         }

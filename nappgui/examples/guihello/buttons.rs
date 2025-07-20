@@ -37,9 +37,9 @@ fn radios() -> Layout {
     layout.set(0, 3, radio4);
 
     layout.margin(5f32);
-    layout.vmargin(0, 3f32);
-    layout.vmargin(1, 3f32);
-    layout.vmargin(2, 3f32);
+    layout.vertical_margin(0, 3f32);
+    layout.vertical_margin(1, 3f32);
+    layout.vertical_margin(2, 3f32);
 
     layout
 }
@@ -63,9 +63,9 @@ fn checks() -> Layout {
     layout.set(0, 3, check4);
 
     layout.margin(5f32);
-    layout.vmargin(0, 3f32);
-    layout.vmargin(1, 3f32);
-    layout.vmargin(2, 3f32);
+    layout.vertical_margin(0, 3f32);
+    layout.vertical_margin(1, 3f32);
+    layout.vertical_margin(2, 3f32);
     layout
 }
 
@@ -81,8 +81,8 @@ fn pushes(defbutton: &mut Option<PushButton>) -> Layout {
     layout.set(2, 0, push2);
     layout.set(3, 0, push3);
 
-    layout.hmargin(2, 5f32);
-    layout.hexpand(1);
+    layout.horizontal_margin(2, 5f32);
+    layout.horizontal_expand(1);
 
     defbutton.replace(push1);
 
@@ -113,9 +113,9 @@ fn buttons(defbutton: &mut Option<PushButton>) -> Layout {
     layout.set(0, 1, layout2);
     layout.set(0, 2, layout5);
 
-    layout.halign(0, 0, Align::Left);
+    layout.horizontal_align(0, 0, Align::Left);
     layout2.margin(5f32);
-    layout2.hmargin(0, 10f32);
+    layout2.horizontal_margin(0, 10f32);
     layout5.margin(5f32);
 
     layout

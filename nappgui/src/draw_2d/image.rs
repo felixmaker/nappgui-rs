@@ -15,6 +15,7 @@ pub struct Image {
 }
 
 /// The image inner type.
+#[doc(hidden)]
 #[repr(transparent)]
 pub struct ImageInner {
     pub(crate) inner: *mut nappgui_sys::Image,

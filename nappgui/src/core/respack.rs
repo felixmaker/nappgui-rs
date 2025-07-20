@@ -11,7 +11,7 @@ impl ResPack {
     }
 
     /// Creates a embedded resource package.
-    pub fn embedded(name: &str) -> Self {
+    pub fn new_embedded(name: &str) -> Self {
         let name = std::ffi::CString::new(name).unwrap();
         let pack = unsafe { nappgui_sys::respack_embedded(name.as_ptr()) };
         Self {

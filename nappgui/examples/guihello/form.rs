@@ -44,17 +44,17 @@ fn modal_window(edit: &mut Edit, text: &str, focus_info: &FocusInfo) -> Window {
     layout2.set(2, 0, button2);
     layout1.set(0, 1, layout2);
 
-    layout1.hsize(0, 250.0);
-    layout1.vmargin(0, 10.0);
-    layout2.hmargin(1, 5.0);
+    layout1.horizontal_size(0, 250.0);
+    layout1.vertical_margin(0, 10.0);
+    layout2.horizontal_margin(1, 5.0);
     layout2.margin4(0.0, 10.0, 0.0, 0.0);
     layout1.margin(10.0);
-    layout2.hexpand(0);
+    layout2.horizontal_expand(0);
 
     window.title("Data validation");
     panel.layout(layout1);
     window.panel(panel);
-    window.defbutton(&button1);
+    window.default_button(&button1);
 
     window
 }
@@ -106,8 +106,8 @@ fn numbers(data: Rc<RefCell<FormData>>, color_bg: Color) -> Layout {
     let mut edit01 = edit2.clone();
     edit2.on_change(move |params| -> bool { on_edit_change(data2.clone(), &mut edit01, params) });
 
-    edit1.bgcolor_focus(color_bg);
-    edit2.bgcolor_focus(color_bg);
+    edit1.background_color_focus(color_bg);
+    edit2.background_color_focus(color_bg);
 
     let mut edit_1 = edit1.clone();
     updown1.on_click(move |params| {
@@ -128,9 +128,9 @@ fn numbers(data: Rc<RefCell<FormData>>, color_bg: Color) -> Layout {
     layout.set(1, 0, updown1);
     layout.set(4, 0, updown2);
 
-    layout.hmargin(1, 10.);
-    layout.hmargin(2, 10.);
-    layout.hexpand2(0, 3, 0.5);
+    layout.horizontal_margin(1, 10.);
+    layout.horizontal_margin(2, 10.);
+    layout.horizontal_expand2(0, 3, 0.5);
 
     layout
 }
@@ -230,11 +230,11 @@ fn edits(data: Rc<RefCell<FormData>>) -> Layout {
     let mut edit01 = edit2.clone();
     edit5.on_change(move |params| on_edit_change(data5.clone(), &mut edit01, params));
 
-    edit1.bgcolor_focus(colorbg);
-    edit2.bgcolor_focus(colorbg);
-    edit3.bgcolor_focus(colorbg);
-    edit4.bgcolor_focus(colorbg);
-    edit5.bgcolor_focus(colorbg);
+    edit1.background_color_focus(colorbg);
+    edit2.background_color_focus(colorbg);
+    edit3.background_color_focus(colorbg);
+    edit4.background_color_focus(colorbg);
+    edit5.background_color_focus(colorbg);
 
     layout1.set(0, 0, label1);
     layout1.set(0, 1, label2);
@@ -251,13 +251,13 @@ fn edits(data: Rc<RefCell<FormData>>) -> Layout {
 
     layout1.set(1, 5, layout2);
 
-    layout1.hmargin(0, 5.);
-    layout1.hexpand(1);
-    layout1.vmargin(0, 5.);
-    layout1.vmargin(1, 5.);
-    layout1.vmargin(2, 5.);
-    layout1.vmargin(3, 5.);
-    layout1.vmargin(4, 5.);
+    layout1.horizontal_margin(0, 5.);
+    layout1.horizontal_expand(1);
+    layout1.vertical_margin(0, 5.);
+    layout1.vertical_margin(1, 5.);
+    layout1.vertical_margin(2, 5.);
+    layout1.vertical_margin(3, 5.);
+    layout1.vertical_margin(4, 5.);
 
     layout1
 }
@@ -288,10 +288,10 @@ fn form(data: Rc<RefCell<FormData>>) -> Layout {
     layout1.set(0, 1, layout3);
     layout1.set(0, 2, label);
 
-    layout1.hsize(0, 300.);
-    layout1.halign(0, 1, Align::Left);
-    layout1.vmargin(0, 10.);
-    layout1.vmargin(1, 10.);
+    layout1.horizontal_size(0, 300.);
+    layout1.horizontal_align(0, 1, Align::Left);
+    layout1.vertical_margin(0, 10.);
+    layout1.vertical_margin(1, 10.);
     layout1.margin(10.);
     layout1.tabstop(0, 1, false);
 

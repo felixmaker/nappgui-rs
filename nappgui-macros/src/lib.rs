@@ -252,7 +252,7 @@ fn generate_code(resource: &Resource) -> String {
         "let locale = unsafe { std::ffi::CStr::from_ptr(locale).to_str().unwrap() };".to_owned(),
     );
     code.push(format!(
-        "let mut respack = nappgui::core::ResPack::embedded(\"{}\");",
+        "let mut respack = nappgui::core::ResPack::new_embedded(\"{}\");",
         resource.rid
     ));
 

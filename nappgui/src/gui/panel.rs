@@ -107,7 +107,7 @@ impl Panel {
     }
 
     /// Create a fully configurable panel.
-    pub fn custom(hscroll: bool, vscroll: bool, border: bool) -> Self {
+    pub fn new_custom(hscroll: bool, vscroll: bool, border: bool) -> Self {
         let panel = unsafe { panel_custom(hscroll as _, vscroll as _, border as _) };
         Self { inner: panel }
     }

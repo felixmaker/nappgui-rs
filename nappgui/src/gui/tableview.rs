@@ -170,12 +170,12 @@ pub trait TableViewTrait {
     }
 
     /// Sets the horizontal scrolling when pressing the \[LEFT\] and \[RIGHT\] keys.
-    fn hkey_scroll(&self, force_column: bool, scoll: f32) {
+    fn horizontal_key_scroll(&self, force_column: bool, scoll: f32) {
         unsafe { tableview_hkey_scroll(self.as_ptr(), force_column as _, scoll) }
     }
 
     /// Sets the row selection mode.
-    fn multisel(&self, multisel: bool, preserve: bool) {
+    fn multiselect(&self, multisel: bool, preserve: bool) {
         unsafe { tableview_multisel(self.as_ptr(), multisel as _, preserve as _) }
     }
 

@@ -75,6 +75,7 @@ impl WindowTrait for WeakWindow {
 }
 
 /// Wrappers to Window object.
+#[doc(hidden)]
 #[repr(transparent)]
 pub struct WindowInner {
     pub(crate) inner: *mut nappgui_sys::Window,
@@ -301,7 +302,7 @@ pub trait WindowTrait {
     ///
     /// This function disables the possible previous default button. For the new button to be set,
     /// it must exist in the active layout, which requires this function to be called after window_panel
-    fn defbutton<T>(&self, button: &T)
+    fn default_button<T>(&self, button: &T)
     where
         T: ButtonTrait,
     {

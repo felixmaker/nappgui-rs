@@ -26,7 +26,7 @@ fn width_popup(layout: &Layout) -> PopUp {
             4 => 400,
             _ => 0,
         };
-        layout.hsize(0, width as _);
+        layout.horizontal_size(0, width as _);
         layout.update();
     });
     popup
@@ -57,7 +57,7 @@ fn labels(multiline: bool) -> Panel {
     layout.set(0, 5, label5);
     layout.set(0, 6, label6);
 
-    layout.vmargin(0, 5f32);
+    layout.vertical_margin(0, 5f32);
     panel.layout(layout);
     panel
 }
@@ -118,7 +118,7 @@ pub fn labels_mouse_over() -> Panel {
         ..Default::default()
     });
 
-    label5.bgcolor_over(color_blue);
+    label5.background_color_over(color_blue);
 
     layout.set(0, 0, label1);
     layout.set(0, 1, label2);

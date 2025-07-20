@@ -52,7 +52,7 @@ pub trait ListBoxTrait {
     }
 
     /// Enable multiple selection.
-    fn multisel(&self, enable: bool) {
+    fn multiselect(&self, enable: bool) {
         unsafe {
             listbox_multisel(self.as_ptr(), enable as _);
         }

@@ -1,4 +1,5 @@
 use crate::{
+    core::Stream,
     draw_2d::Color,
     gui::{
         control::impl_control,
@@ -14,9 +15,9 @@ use nappgui_sys::{
     textview_apply_select, textview_bfspace, textview_bgcolor, textview_clear, textview_color,
     textview_copy, textview_cpos_writef, textview_create, textview_cut, textview_del_select,
     textview_editable, textview_family, textview_fsize, textview_fstyle, textview_get_text,
-    textview_halign, textview_lspacing, textview_paste, textview_pgcolor, textview_scroll_caret,
-    textview_scroll_visible, textview_select, textview_show_select, textview_size, textview_units,
-    textview_wrap, textview_writef, S2Df,
+    textview_halign, textview_lspacing, textview_paste, textview_pgcolor, textview_rtf,
+    textview_scroll_caret, textview_scroll_visible, textview_select, textview_show_select,
+    textview_size, textview_units, textview_wrap, textview_writef, S2Df,
 };
 
 /// The text view trait.
@@ -59,6 +60,13 @@ pub trait TextViewTrait {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
             textview_cpos_writef(self.as_ptr(), text.as_ptr());
+        }
+    }
+
+    /// Insert text in Microsoft RTF format.
+    fn rtf(&self, text: &Stream) {
+        unsafe {
+            textview_rtf(self.as_ptr(), text.inner);
         }
     }
 

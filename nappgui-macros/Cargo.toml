@@ -2,6 +2,11 @@
 name = "nappgui-macros"
 version = "0.1.0"
 edition = "2021"
+authors = ["felixmaker"]
+description = "Macro helper for nappgui crate"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/felixmaker/nappgui-rs"
 
 [lib]
 proc-macro = true

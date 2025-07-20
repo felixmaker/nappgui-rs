@@ -39,11 +39,18 @@ pub trait LayoutTrait {
     }
 
     /// Insert a control to the layout.
+    ///
+    /// # Panics
+    ///
+    /// Panics if col or row is out of bounds.
     fn set<T>(&self, col: usize, row: usize, control: T)
     where
         T: ControlLayoutTrait,
         Self: Sized + Copy,
     {
+        assert!(col < self.ncols());
+        assert!(row < self.nrows());
+
         control.insert_in_layout(*self, col, row);
     }
 
@@ -52,10 +59,17 @@ pub trait LayoutTrait {
     /// # Remarks
     /// In cell (col,row) there must previously exist a panel that will be destroyed,
     /// without the possibility of recovering it. See Replacing panels.
+    ///
+    /// # Panics
+    ///
+    /// Panics if col or row is out of bounds.
     fn panel_replace<T>(&self, panel: T, col: usize, row: usize)
     where
         T: PanelTrait,
     {
+        assert!(col < self.ncols());
+        assert!(row < self.nrows());
+
         unsafe { layout_panel_replace(self.as_ptr(), panel.as_ptr(), col as _, row as _) };
     }
 
@@ -72,24 +86,45 @@ pub trait LayoutTrait {
     /// Insert a new column into the layout.
     ///
     /// # Remarks
+    ///
     /// Empty cells are inserted that will not affect the layout of the window.
+    ///
+    /// # Panics
+    ///
+    /// Panics if col is out of bounds.
     fn insert_col(&self, col: usize) {
+        assert!(col < self.ncols());
+
         unsafe { layout_insert_col(self.as_ptr(), col as _) };
     }
 
     /// Insert a new row into the layout.
     ///
     /// # Remarks
+    ///
     /// Empty cells are inserted that will not affect the layout of the window.
+    ///
+    /// # Panics
+    ///
+    /// Panics if row is out of bounds.
     fn insert_row(&self, row: usize) {
+        assert!(row < self.nrows());
+
         unsafe { layout_insert_row(self.as_ptr(), row as _) };
     }
 
     /// Deletes an existing column in the layout.
     ///
     /// # Remarks
+    ///
     /// All cell content (controls/sub-layouts) is irreversibly deleted.
+    ///
+    /// # Panics
+    ///
+    /// Panics if col is out of bounds.
     fn remove_col(&self, col: usize) {
+        assert!(col < self.ncols());
+
         unsafe { layout_remove_col(self.as_ptr(), col as _) };
     }
 
@@ -97,7 +132,13 @@ pub trait LayoutTrait {
     ///
     /// # Remarks
     /// All cell content (controls/sub-layouts) is irreversibly deleted.
+    ///
+    /// # Panics
+    ///
+    /// Panics if row is out of bounds.
     fn remove_row(&self, row: usize) {
+        assert!(row < self.nrows());
+
         unsafe { layout_remove_row(self.as_ptr(), row as _) };
     }
 
@@ -108,32 +149,67 @@ pub trait LayoutTrait {
 
     /// Sets whether or not a cell in the layout will receive keyboard focus when navigating
     /// with \[TAB\]-\[SHIFT\]\[TAB\].
-    fn tabstop(&self, col: u32, row: u32, tabstop: bool) {
-        unsafe { layout_tabstop(self.as_ptr(), col, row, tabstop as _) };
+    ///
+    /// # Panics
+    ///
+    /// Panics if col or row is out of bounds.
+    fn tabstop(&self, col: usize, row: usize, tabstop: bool) {
+        assert!(col < self.ncols());
+        assert!(row < self.nrows());
+
+        unsafe { layout_tabstop(self.as_ptr(), col as _, row as _, tabstop as _) };
     }
 
     /// Set a fixed width for a layout column.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if col is out of bounds.
     fn hsize(&self, col: usize, width: f32) {
+        assert!(col < self.ncols());
+
         unsafe { layout_hsize(self.as_ptr(), col as _, width) };
     }
 
     /// Set a fixed height for a layout row.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if row is out of bounds.
     fn vsize(&self, row: usize, height: f32) {
+        assert!(row < self.nrows());
+
         unsafe { layout_vsize(self.as_ptr(), row as _, height) };
     }
 
     /// Establish an inter-column margin within the layout. It is the separation between two
     /// consecutive columns.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if col is out of bounds.
     fn hmargin(&self, col: usize, margin: f32) {
+        assert!(col < self.ncols());
+
         unsafe { layout_hmargin(self.as_ptr(), col as _, margin) };
     }
 
     /// Set an inter-row margin within the layout. It is the separation between two consecutive rows.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if row is out of bounds.
     fn vmargin(&self, row: usize, margin: f32) {
+        assert!(row < self.nrows());
+
         unsafe { layout_vmargin(self.as_ptr(), row as _, margin) };
     }
 
     /// Set the column to expand horizontally.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if col is out of bounds.
     fn hexpand(&self, col: usize) {
         unsafe { layout_hexpand(self.as_ptr(), col as _) };
     }
@@ -142,7 +218,14 @@ pub trait LayoutTrait {
     ///
     /// # Remarks
     /// The expansion of col2 = 1 - exp.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if col1 or col2 is out of bounds.
     fn hexpand2(&self, col1: usize, col2: usize, exp: f32) {
+        assert!(col1 < self.ncols());
+        assert!(col2 < self.ncols());
+
         unsafe { layout_hexpand2(self.as_ptr(), col1 as _, col2 as _, exp) };
     }
 
@@ -150,11 +233,23 @@ pub trait LayoutTrait {
     ///
     /// # Remarks
     /// exp1 + exp2 < = 1. The expansion of col3 = 1 - exp1 - exp2.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if col1 or col2 or col3 is out of bounds.
     fn hexpand3(&self, col1: usize, col2: usize, col3: usize, exp1: f32, exp2: f32) {
+        assert!(col1 < self.ncols());
+        assert!(col2 < self.ncols());
+        assert!(col3 < self.ncols());
+
         unsafe { layout_hexpand3(self.as_ptr(), col1 as _, col2 as _, col3 as _, exp1, exp2) };
     }
 
     /// Set the row that will expand vertically.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if row is out of bounds.
     fn vexpand(&self, row: usize) {
         unsafe { layout_vexpand(self.as_ptr(), row as _) };
     }
@@ -163,7 +258,14 @@ pub trait LayoutTrait {
     ///
     /// # Remarks
     /// The expansion of row2 = 1 - exp.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if row1 or row2 is out of bounds.
     fn vexpand2(&self, row1: usize, row2: usize, exp: f32) {
+        assert!(row1 < self.nrows());
+        assert!(row2 < self.nrows());
+
         unsafe { layout_vexpand2(self.as_ptr(), row1 as _, row2 as _, exp) };
     }
 
@@ -171,29 +273,63 @@ pub trait LayoutTrait {
     ///
     /// # Remarks
     /// exp1 + exp2 < = 1. The expansion of row3 = 1 - exp1 - exp2.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if row1 or row2 or row3 is out of bounds.
     fn vexpand3(&self, row1: usize, row2: usize, row3: usize, exp1: f32, exp2: f32) {
+        assert!(row1 < self.nrows());
+        assert!(row2 < self.nrows());
+        assert!(row3 < self.nrows());
+
         unsafe { layout_vexpand3(self.as_ptr(), row1 as _, row2 as _, row3 as _, exp1, exp2) };
     }
 
     /// Sets the horizontal alignment of a cell. It will take effect when the column is
     /// wider than the cell.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if col or row is out of bounds.
     fn halign(&self, col: usize, row: usize, align: Align) {
+        assert!(col < self.ncols());
+        assert!(row < self.nrows());
+
         unsafe { layout_halign(self.as_ptr(), col as _, row as _, align as _) };
     }
 
     /// Sets the vertical alignment of a cell. It will take effect when the row is
     /// taller than the cell.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if col or row is out of bounds.
     fn valign(&self, col: usize, row: usize, align: Align) {
+        assert!(col < self.ncols());
+        assert!(row < self.nrows());
+
         unsafe { layout_valign(self.as_ptr(), col as _, row as _, align as _) };
     }
 
     /// Show or hide a layout column.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if col is out of bounds.
     fn show_col(&self, col: usize, visible: bool) {
+        assert!(col < self.ncols());
+
         unsafe { layout_show_col(self.as_ptr(), col as _, visible as _) };
     }
 
     /// Show or hide a layout row.
+    /// 
+    /// # Panics
+    /// 
+    /// Panics if row is out of bounds.
     fn show_row(&self, row: usize, visible: bool) {
+        assert!(row < self.nrows());
+
         unsafe { layout_show_row(self.as_ptr(), row as _, visible as _) };
     }
 

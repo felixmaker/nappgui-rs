@@ -218,7 +218,7 @@ pub trait TableViewTrait {
 
         let result = unsafe { *result };
 
-        if result.content.is_null() {
+        if result.size == 0 || result.content.is_null() {
             return None;
         }
 
@@ -226,7 +226,12 @@ pub trait TableViewTrait {
 
         let elem = &content.elem;
 
-        Some(elem.iter().map(|&x| x as _).collect())
+        Some(
+            elem[..result.size as usize]
+                .iter()
+                .map(|&x| x as _)
+                .collect(),
+        )
     }
 
     /// Set keyboard focus to a specific row.

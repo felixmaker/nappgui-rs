@@ -9,6 +9,7 @@ mod sliders;
 mod tabstops;
 mod vpadding;
 mod textviews;
+mod table;
 
 #[allow(unused)]
 pub(crate) mod res {
@@ -110,6 +111,7 @@ fn set_panel(window: &WeakWindow, layout: &Layout, index: usize) {
         10 => vpadding::vpadding(),
         11 => tabstops::tabstops(),
         12 => textviews::textviews(),
+        13 => table::table_view(),
         _ => {
             return;
         }

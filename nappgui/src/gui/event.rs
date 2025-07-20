@@ -1,4 +1,7 @@
-use std::ffi::CString;
+use std::{
+    ffi::CString,
+    sync::{Arc, LazyLock, Mutex},
+};
 
 use crate::{
     draw_2d::DCtx,
@@ -543,6 +546,24 @@ impl crate::core::event::NappGUIEventResult for EvTextFilter {
     }
 }
 
+/// Keep the temp text.
+static TEMP_TEXT: LazyLock<Arc<Mutex<Option<CString>>>> =
+    LazyLock::new(|| Arc::new(Mutex::new(None)));
+
+impl crate::core::event::NappGUIEventResult for EvTbCell {
+    type CrossType = nappgui_sys::EvTbCell;
+
+    fn to_cross_type(&self) -> Self::CrossType {
+        let mut text = TEMP_TEXT.lock().unwrap();
+        text.replace(CString::new(&*self.text).unwrap());
+        let text = text.as_ref().unwrap();
+        nappgui_sys::EvTbCell {
+            text: text.as_ptr(),
+            align: self.align as _,
+        }
+    }
+}
+
 macro_rules! event_results {
     ($type:ty, $cross_type:literal) => {
         impl crate::core::event::NappGUIEventResult for $type {
@@ -561,3 +582,20 @@ macro_rules! event_results {
 
 event_results!(bool, "bool_t");
 event_results!(f32, "real32_t");
+event_results!(u32, "u32_t");
+
+/// The params of table on_data handler.
+pub enum EvTbDataParams {
+    /// Column index.
+    TableNCols,
+    /// Row index.
+    TableCell(EvTbPos),
+}
+
+/// The result of table on_data handler.
+pub enum EvTbDataResult {
+    /// The text of the cell.
+    TableNCols(u32),
+    /// The align of the cell.
+    TableCell(EvTbCell),
+}

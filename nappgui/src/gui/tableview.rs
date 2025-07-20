@@ -1,7 +1,11 @@
 use crate::{
     draw_2d::Font,
-    gui::{control::impl_control, impl_layout},
-    types::Align,
+    gui::{
+        control::impl_control,
+        event::{EvTbDataParams, EvTbDataResult},
+        impl_layout,
+    },
+    types::{Align, EventType},
     util::macros::callback,
 };
 
@@ -23,17 +27,61 @@ pub trait TableViewTrait {
     fn as_ptr(&self) -> *mut nappgui_sys::TableView;
 
     callback! {
-        /// Sets up a handler to read data from the application.
-         on_data() => tableview_OnData;
-
         /// Notifies that the selection has changed.
-         on_select() => tableview_OnSelect;
+        on_select() => tableview_OnSelect;
 
         /// Notify each time a row is clicked.
-         on_row_click() => tableview_OnRowClick;
+        on_row_click() => tableview_OnRowClick;
 
         /// Notifies each time a header is clicked.
-         on_header_click()  => tableview_OnHeaderClick;
+        on_header_click()  => tableview_OnHeaderClick;
+    }
+
+    /// Sets up a handler to read data from the application.
+    fn on_data<F>(&self, handler: F)
+    where
+        F: FnMut(&EvTbDataParams) -> EvTbDataResult + 'static,
+    {
+        use std::ffi::c_void;
+
+        unsafe extern "C" fn shim(data: *mut c_void, event: *mut nappgui_sys::Event) {
+            let data = data as *mut Box<dyn FnMut(&EvTbDataParams) -> EvTbDataResult>;
+            let f = &mut *data;
+            let event = crate::core::event::Event::new(event);
+            match event.type_() {
+                EventType::TableNRows => {
+                    let params = EvTbDataParams::TableNCols;
+                    if let Ok(r) =
+                        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&params)))
+                    {
+                        if let EvTbDataResult::TableNCols(nrows) = r {
+                            event.result(nrows);
+                        }
+                    }
+                }
+                EventType::TableCell => {
+                    let params = EvTbDataParams::TableCell(event.params().unwrap());
+                    if let Ok(r) =
+                        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&params)))
+                    {
+                        if let EvTbDataResult::TableCell(cell) = r {
+                            event.result(cell);
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        let cb: Box<dyn FnMut(&EvTbDataParams) -> EvTbDataResult> = Box::new(handler);
+        let data: *mut Box<dyn FnMut(&EvTbDataParams) -> EvTbDataResult> =
+            Box::into_raw(Box::new(cb));
+
+        let listener = unsafe { nappgui_sys::listener_imp(data as *mut c_void, Some(shim)) };
+
+        unsafe {
+            tableview_OnData(self.as_ptr(), listener);
+        }
     }
 
     /// Sets the general font for the entire table.

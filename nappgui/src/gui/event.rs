@@ -599,3 +599,15 @@ pub enum EvTbDataResult {
     /// The align of the cell.
     TableCell(EvTbCell),
 }
+
+impl From<u32> for EvTbDataResult {
+    fn from(value: u32) -> Self {
+        Self::TableNCols(value)
+    }
+}
+
+impl From<EvTbCell> for EvTbDataResult {
+    fn from(value: EvTbCell) -> Self {
+        Self::TableCell(value)
+    }
+}

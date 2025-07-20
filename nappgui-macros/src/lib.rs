@@ -24,7 +24,7 @@ pub fn include_resource(input: TokenStream) -> TokenStream {
     let resource = read_data(path);
     let code = generate_code(&resource);
 
-    code.parse().expect("To parse")
+    code.parse().expect("Unable to parse resources!")
 }
 
 #[derive(Debug)]
@@ -36,258 +36,213 @@ enum ResourceData {
 
 #[derive(Debug)]
 struct Resource {
-    pub rid: String,
-    pub uids_ordered: Vec<String>,
-    pub uids: HashMap<String, usize>,
-    pub locates: HashSet<String>,
-    pub resource: HashMap<String, HashMap<String, ResourceData>>,
+    rid: String,
+    size: usize,
+    uids_ordered: Vec<String>,
+    uids: HashMap<String, usize>, // UID -> ID
+    locates: HashSet<String>,
+    resource: Vec<HashMap<String, ResourceData>>, // Locale -> ResourceData
 }
 
 impl Resource {
-    fn new<T>(rid: T) -> Self
-    where
-        T: AsRef<str>,
-    {
+    fn new(rid: &str) -> Self {
         Self {
-            rid: rid.as_ref().to_owned(),
+            rid: rid.to_owned(),
+            size: 0,
             uids_ordered: Vec::new(),
             uids: HashMap::new(),
             locates: HashSet::new(),
-            resource: HashMap::new(),
+            resource: Vec::new(),
         }
     }
 
-    fn get_uid<T>(&self, uid: T) -> String
-    where
-        T: AsRef<str>,
-    {
-        format!("N23R3C75::{}::{}", self.rid, self.uids[uid.as_ref()])
+    fn get_sid(&self, uid: &str) -> Option<String> {
+        self.uids
+            .get(uid)
+            .map(|id| format!("N23R3C75::{}::{}", self.rid, id))
     }
 
-    fn push<T>(&mut self, uid: T, locale: T, data: ResourceData)
-    where
-        T: AsRef<str>,
-    {
-        let uid = uid.as_ref().to_owned();
+    fn get_id(&self, uid: &str) -> Option<usize> {
+        self.uids.get(uid).copied()
+    }
 
-        if !self.uids.contains_key(&uid) {
-            self.uids.insert(uid.clone(), self.uids.len());
-        }
-        let iuid = self.get_uid(&uid);
-        if !self.resource.contains_key(iuid.as_str()) {
-            self.uids_ordered.push(uid.clone());
-            self.resource.insert(iuid.clone(), HashMap::new());
-        }
-        let uid_data = self.resource.get_mut(&iuid).unwrap();
+    fn push(&mut self, uid: &str, locale: &str, data: ResourceData) {
+        let id = if !self.uids.contains_key(uid) {
+            let id = self.size;
+            self.uids.insert(uid.to_owned(), id);
+            self.uids_ordered.push(uid.to_owned());
+            self.resource.push(HashMap::new());
+            self.size += 1;
+            id
+        } else {
+            *self
+                .uids
+                .get(uid)
+                .expect("Unable to get uid when add data to Resource!")
+        };
 
-        if !uid_data.contains_key(locale.as_ref()) {
-            self.locates.insert(locale.as_ref().to_string());
-            uid_data.insert(locale.as_ref().to_string(), data);
+        self.locates.insert(locale.to_uppercase());
+        self.resource
+            .get_mut(id)
+            .expect("Unable to get resource!")
+            .insert(locale.to_uppercase(), data);
+    }
+
+    fn push_message(&mut self, locale: &str, message: &str) {
+        let mut comment = false;
+        for line in message.lines() {
+            let line = line.trim();
+            // support comment start with /* end with */
+            if comment {
+                if line.ends_with("*/") {
+                    comment = false;
+                }
+                continue;
+            }
+            if line.starts_with("/*") {
+                comment = true;
+                if line.trim().ends_with("*/") {
+                    comment = false;
+                }
+                continue;
+            }
+            // support comment start with //
+            if line.starts_with("//") {
+                continue;
+            }
+            // support empty line
+            if line.len() == 0 {
+                continue;
+            }
+            let line = line
+                .split_once(char::is_whitespace)
+                .expect(&format!("Unable to get id and message in line {}!", line));
+            let uid = line.0.to_uppercase();
+            // support message with ""
+            let message = line.1.trim().trim_matches('"').to_string();
+            self.push(&uid, locale, ResourceData::Message(message));
+        }
+    }
+
+    fn push_file(&mut self, locale: &str, file: &Path) {
+        assert!(file.is_file());
+
+        let name = file.file_name().unwrap().to_string_lossy().to_string();
+        let extension = file.extension().unwrap().to_string_lossy().to_string();
+        match extension.as_ref() {
+            "msg" => {
+                let text = std::fs::read_to_string(file).expect("Unable to read messages");
+                self.push_message(&locale, &text);
+            }
+            "png" | "jpg" | "gif" | "bmp" => {
+                let uid = name.replace(".", "_").to_uppercase();
+                self.push(&uid, &locale, ResourceData::Bytes(file.to_owned()));
+            }
+            _ => {
+                let uid = name.replace(".", "_").to_uppercase();
+                self.push(&uid, &locale, ResourceData::File(file.to_owned()));
+            }
         }
     }
 }
+
+const DEFAULT: &str = "DEFAULT";
 
 fn read_data<P>(dir: P) -> Resource
 where
     P: AsRef<Path>,
 {
     let dir = Path::new(dir.as_ref());
-    let rid = dir.file_name().unwrap();
-    let mut resources = Resource::new(rid.to_string_lossy());
+    let rid = dir
+        .file_name()
+        .expect("Unable to get resource id from folder!");
+    let mut resources = Resource::new(rid.to_string_lossy().as_ref());
 
-    let items = std::fs::read_dir(dir).unwrap();
+    let items = std::fs::read_dir(dir).expect("Unable to read items in resource folder!");
     for item in items {
         let path = item.unwrap().path();
         if path.is_dir() {
-            // Dir name is locale
-            let locale = path.file_name().unwrap();
+            // folder name <-> locale
+            let locale = path
+                .file_name()
+                .expect("Unable to get locale from folder!")
+                .to_string_lossy();
             let inner_items = std::fs::read_dir(&path).unwrap();
             for inner_item in inner_items {
                 let inner_path = inner_item.unwrap().path();
                 if inner_path.is_dir() {
                     continue;
                 }
-                if let Some(extension) = inner_path.extension() {
-                    if let Some(file_name) = inner_path.file_name() {
-                        let file_name = file_name.to_string_lossy().to_string();
-                        if extension.to_string_lossy() == "msg" {
-                            let text = std::fs::read_to_string(inner_path).unwrap();
-
-                            let mut comment = false;
-                            for line in text.lines() {
-                                // support comment start with /* end with */
-                                if comment {
-                                    if line.trim().ends_with("*/") {
-                                        comment = false;
-                                    }
-                                    continue;
-                                }
-                                if line.trim().starts_with("/*") {
-                                    comment = true;
-                                    if line.trim().ends_with("*/") {
-                                        comment = false;
-                                    }
-                                    continue;
-                                }
-                                // support comment start with //
-                                if line.trim().starts_with("//") {
-                                    continue;
-                                }
-                                // suppor empty line
-                                if line.trim().len() == 0 {
-                                    continue;
-                                }
-                                let line = line.trim().split_once(char::is_whitespace).unwrap();
-                                let message_id = line.0.to_uppercase();
-                                let message = line.1.trim().trim_matches('"').to_string();
-                                resources.push(
-                                    message_id,
-                                    locale.to_string_lossy().to_string(),
-                                    ResourceData::Message(message),
-                                );
-                            }
-                        }
-                        else if extension.to_string_lossy() == "png"
-                            || extension.to_string_lossy() == "jpg"
-                            || extension.to_string_lossy() == "gif"
-                            || extension.to_string_lossy() == "bmp"
-                        {
-                            let uid = file_name.replace(".", "_").to_uppercase();
-
-                            resources.push(
-                                uid,
-                                locale.to_string_lossy().to_string(),
-                                ResourceData::Bytes(inner_path),
-                            );
-                        } else {
-                            let uid = file_name.replace(".", "_").to_uppercase();
-
-                            resources.push(
-                                uid,
-                                locale.to_string_lossy().to_string(),
-                                ResourceData::File(inner_path),
-                            );
-                        }
-                    }
-                }
+                resources.push_file(&locale, &inner_path);
             }
         } else {
-            if let Some(extension) = path.extension() {
-                if let Some(file_name) = path.file_name() {
-                    let file_name = file_name.to_string_lossy().to_string();
-                    if extension.to_string_lossy() == "msg" {
-                        let text = std::fs::read_to_string(path).unwrap();
-
-                        let mut comment = false;
-                        for line in text.lines() {
-                            // support comment start with /* end with */
-                            if comment {
-                                if line.trim().ends_with("*/") {
-                                    comment = false;
-                                }
-                                continue;
-                            }
-                            if line.trim().starts_with("/*") {
-                                comment = true;
-                                if line.trim().ends_with("*/") {
-                                    comment = false;
-                                }
-                                continue;
-                            }
-                            // support comment start with //
-                            if line.trim().starts_with("//") {
-                                continue;
-                            }
-                            // suppor empty line
-                            if line.trim().len() == 0 {
-                                continue;
-                            }
-                            let line = line.trim().split_once(char::is_whitespace).unwrap();
-                            let message_id = line.0.to_uppercase();
-                            let message = line.1.trim().trim_matches('"').to_string();
-                            resources.push(
-                                message_id,
-                                "default".to_owned(),
-                                ResourceData::Message(message),
-                            );
-                        }
-                    } else {
-                        let uid = file_name.replace(".", "_").to_uppercase();
-                        resources.push(uid, "default".to_owned(), ResourceData::Bytes(path));
-                    }
-                }
-            }
+            resources.push_file(DEFAULT, &path);
         }
     }
     resources
 }
 
+fn generate_static_object(uid: &str, locale: &str, data: &ResourceData) -> String {
+    let locale = if locale == DEFAULT {
+        "".to_owned()
+    } else {
+        format!("{}_", locale)
+    };
+    match data {
+        ResourceData::Message(message) => {
+            format!(
+                "static {}_{}TEXT: &'static str = \"{}\";",
+                uid, locale, message
+            )
+        }
+        ResourceData::Bytes(path) | ResourceData::File(path) => {
+            format!(
+                "static {}_{}DATA: &'static [u8] = include_bytes!(\"{}\");",
+                uid,
+                locale,
+                std::path::absolute(path)
+                    .unwrap()
+                    .as_os_str()
+                    .to_string_lossy()
+                    .replace("\\", "/")
+            )
+        }
+    }
+}
+
+fn generate_add_resource(uid: &str, locale: &str, data: &ResourceData) -> String {
+    let locale = if locale == DEFAULT {
+        "".to_owned()
+    } else {
+        format!("{}_", locale)
+    };
+    match data {
+        ResourceData::Message(_) => {
+            format!("respack.add_message({}_{}TEXT);", uid, locale)
+        }
+        ResourceData::Bytes(_) => {
+            format!("respack.add_bytes({}_{}DATA);", uid, locale)
+        }
+        ResourceData::File(_) => {
+            format!("respack.add_file({}_{}DATA);", uid, locale)
+        }
+    }
+}
+
 fn generate_code(resource: &Resource) -> String {
     let mut code: Vec<String> = Vec::new();
 
-    // Init Pub
+    // init public uid definition
     for uid in resource.uids_ordered.iter() {
         code.push(format!(
             "pub static {}: &str = \"{}\";",
             uid,
-            resource.get_uid(uid)
+            resource.get_sid(uid).unwrap(),
         ));
-    }
 
-    // Init Private
-    for uid in resource.uids_ordered.iter() {
-        let inner_uid = resource.get_uid(uid);
-        for (locate, data) in resource.resource[&inner_uid].iter() {
-            match data {
-                ResourceData::Message(message) => {
-                    if locate == "default" {
-                        code.push(format!("static {}_TEXT: &str = \"{}\";", uid, message));
-                    } else {
-                        code.push(format!(
-                            "static {}_{}_TEXT: &str = \"{}\";",
-                            uid,
-                            locate.to_uppercase(),
-                            message
-                        ));
-                    }
-                }
-                ResourceData::Bytes(path) => {
-                    if locate == "default" {
-                        code.push(format!(
-                            "static {}_DATA: &'static [u8] = include_bytes!(\"{}\");",
-                            uid,
-                            std::path::absolute(path)
-                                .unwrap()
-                                .as_os_str()
-                                .to_string_lossy()
-                                .replace("\\", "/")
-                        ));
-                    } else {
-                        code.push(format!(
-                            "static {}_{}_DATA: &'static [u8] = include_bytes!(\"{}\");",
-                            uid,
-                            locate.to_uppercase(),
-                            std::path::absolute(path)
-                                .unwrap()
-                                .as_os_str()
-                                .to_string_lossy()
-                                .replace("\\", "/")
-                        ));
-                    }
-                }
-                ResourceData::File(path) => {
-                    code.push(format!(
-                        "static {}_{}_DATA: &'static [u8] = include_bytes!(\"{}\");",
-                        uid,
-                        locate.to_uppercase(),
-                        std::path::absolute(path)
-                            .unwrap()
-                            .as_os_str()
-                            .to_string_lossy()
-                            .replace("\\", "/")
-                    ));
-                }
-            }
+        let id = resource.get_id(uid).unwrap();
+        for (local, data) in resource.resource[id].iter() {
+            code.push(generate_static_object(uid, local, data));
         }
     }
 
@@ -300,72 +255,35 @@ fn generate_code(resource: &Resource) -> String {
         "let mut respack = nappgui::core::ResPack::embedded(\"{}\");",
         resource.rid
     ));
+
     for locale in resource.locates.iter() {
-        if locale == "default" {
+        if locale == DEFAULT {
             continue;
         }
         code.push(format!("if locale == \"{}\" {{", locale));
         for uid in resource.uids_ordered.iter() {
-            let rid = resource.get_uid(uid);
-            let take_default = !resource.resource[&rid].contains_key(locale);
-            let resource = resource.resource[&rid]
-                .get(locale)
-                .unwrap_or(resource.resource[&rid].get("default").unwrap());
-            match resource {
-                ResourceData::Message(_) => {
-                    if take_default {
-                        code.push(format!("respack.add_message({}_TEXT);", uid));
-                    } else {
-                        code.push(format!(
-                            "respack.add_message({}_{}_TEXT);",
-                            uid,
-                            locale.to_uppercase()
-                        ));
-                    }
-                }
-                ResourceData::Bytes(_) => {
-                    if take_default {
-                        code.push(format!("respack.add_bytes({}_DATA);", uid));
-                    } else {
-                        code.push(format!(
-                            "respack.add_bytes({}_{}_DATA);",
-                            uid,
-                            locale.to_uppercase()
-                        ));
-                    }
-                }
-                ResourceData::File(_) => {
-                    if take_default {
-                        code.push(format!("respack.add_file({}_DATA);", uid));
-                    } else {
-                        code.push(format!(
-                            "respack.add_file({}_{}_DATA);",
-                            uid,
-                            locale.to_uppercase()
-                        ));
-                    }
-                }
-            }
+            let id = resource.get_id(uid).unwrap();
+            let locale = if resource.resource[id].contains_key(locale) {
+                locale
+            } else {
+                DEFAULT
+            };
+            let data = &resource.resource[id][locale];
+            code.push(generate_add_resource(uid, locale, data))
         }
         code.push("return respack.as_ptr()".to_owned());
         code.push("}".to_owned());
     }
+
     for uid in resource.uids_ordered.iter() {
-        let rid = resource.get_uid(uid);
-        let resource = resource.resource[&rid].get("default").unwrap();
-        match resource {
-            ResourceData::Message(_) => {
-                code.push(format!("respack.add_message({}_TEXT);", uid));
-            }
-            ResourceData::Bytes(_) => {
-                code.push(format!("respack.add_bytes({}_DATA);", uid));
-            }
-            ResourceData::File(_) => {
-                code.push(format!("respack.add_file({}_DATA);", uid));
-            }
-        }
+        let id = resource.get_id(uid).unwrap();
+        let data = &resource.resource[id][DEFAULT];
+        code.push(generate_add_resource(uid, DEFAULT, data));
     }
+
     code.push("respack.as_ptr()".to_owned());
     code.push("}".to_owned());
-    code.join("\n")
+
+    let code = code.join("\n");
+    code
 }

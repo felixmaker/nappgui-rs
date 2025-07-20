@@ -1,9 +1,7 @@
-pub(crate) mod heap;
 pub(crate) mod event;
 pub(crate) mod regex;
 pub(crate) mod stream;
 pub(crate) mod string;
-pub(crate) mod array;
 pub(crate) mod respack;
 
 /// In high-level languages, such as .NET or Javascript, data binding is a technique that allows establishing an automatic 
@@ -23,7 +21,5 @@ pub use {
     regex::RegEx,
     stream::Stream,
     string::NappguiString,
-    array::NappguiArray,
-    heap::NappguiHeap,
     respack::*
 };

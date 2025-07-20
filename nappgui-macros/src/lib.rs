@@ -12,8 +12,12 @@ pub fn include_resource(input: TokenStream) -> TokenStream {
 
     let mut path = Path::new(&input).to_owned();
     if !path.is_absolute() {
-        let local_file = proc_macro::Span::call_site().local_file().expect("Unable to get local file!");
-        let local_file_parent = local_file.parent().expect("Unable to get the parent local file!");
+        let local_file = proc_macro::Span::call_site()
+            .local_file()
+            .expect("Unable to get local file!");
+        let local_file_parent = local_file
+            .parent()
+            .expect("Unable to get the parent local file!");
         path = local_file_parent.join(input);
     }
 
@@ -27,6 +31,7 @@ pub fn include_resource(input: TokenStream) -> TokenStream {
 enum ResourceData {
     Message(String),
     Bytes(PathBuf),
+    File(PathBuf),
 }
 
 #[derive(Debug)]
@@ -141,13 +146,26 @@ where
                                     ResourceData::Message(message),
                                 );
                             }
-                        } else {
+                        }
+                        else if extension.to_string_lossy() == "png"
+                            || extension.to_string_lossy() == "jpg"
+                            || extension.to_string_lossy() == "gif"
+                            || extension.to_string_lossy() == "bmp"
+                        {
                             let uid = file_name.replace(".", "_").to_uppercase();
 
                             resources.push(
                                 uid,
                                 locale.to_string_lossy().to_string(),
                                 ResourceData::Bytes(inner_path),
+                            );
+                        } else {
+                            let uid = file_name.replace(".", "_").to_uppercase();
+
+                            resources.push(
+                                uid,
+                                locale.to_string_lossy().to_string(),
+                                ResourceData::File(inner_path),
                             );
                         }
                     }
@@ -257,6 +275,18 @@ fn generate_code(resource: &Resource) -> String {
                         ));
                     }
                 }
+                ResourceData::File(path) => {
+                    code.push(format!(
+                        "static {}_{}_DATA: &'static [u8] = include_bytes!(\"{}\");",
+                        uid,
+                        locate.to_uppercase(),
+                        std::path::absolute(path)
+                            .unwrap()
+                            .as_os_str()
+                            .to_string_lossy()
+                            .replace("\\", "/")
+                    ));
+                }
             }
         }
     }
@@ -304,6 +334,17 @@ fn generate_code(resource: &Resource) -> String {
                         ));
                     }
                 }
+                ResourceData::File(_) => {
+                    if take_default {
+                        code.push(format!("respack.add_file({}_DATA);", uid));
+                    } else {
+                        code.push(format!(
+                            "respack.add_file({}_{}_DATA);",
+                            uid,
+                            locale.to_uppercase()
+                        ));
+                    }
+                }
             }
         }
         code.push("return respack.as_ptr()".to_owned());
@@ -318,6 +359,9 @@ fn generate_code(resource: &Resource) -> String {
             }
             ResourceData::Bytes(_) => {
                 code.push(format!("respack.add_bytes({}_DATA);", uid));
+            }
+            ResourceData::File(_) => {
+                code.push(format!("respack.add_file({}_DATA);", uid));
             }
         }
     }

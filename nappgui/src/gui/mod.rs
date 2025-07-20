@@ -49,6 +49,17 @@ pub fn gui_text(rid: &str) -> String {
     text.to_string_lossy().to_string()
 }
 
+/// Get the contents of a file through its resource identifier.
+pub fn gui_file(rid: &str) -> (&[u8], usize) {
+    let mut size = 0u32;
+    let rid = std::ffi::CString::new(rid).unwrap();
+    let file = unsafe { nappgui_sys::gui_file(rid.as_ptr(), &mut size) };
+    (
+        unsafe { std::slice::from_raw_parts(file, size as usize) },
+        size as usize,
+    )
+}
+
 /// Nappgui resource handler.
 pub type NappguiResourceHandler =
     unsafe extern "C" fn(locale: *const std::ffi::c_char) -> *mut nappgui_sys::ResPack;

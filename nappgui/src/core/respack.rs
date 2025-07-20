@@ -36,6 +36,15 @@ impl ResPack {
         self.len += 1;
         self.len
     }
+
+    /// Add a file to the resource package. Used for other file.
+    pub fn add_file(&mut self, bytes: &[u8]) -> usize {
+        unsafe {
+            nappgui_sys::respack_add_cdata(self.as_ptr(), 2, bytes.as_ptr(), bytes.len() as u32)
+        }
+        self.len += 1;
+        self.len
+    }
 }
 
 #[doc(hidden)]

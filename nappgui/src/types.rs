@@ -627,48 +627,48 @@ pub enum EventType {
     Down = 1042,
     /// A mouse button has been released.
     Up = 1043,
-    /// The mouse has been double-clicked.
-    DoubleClick = 1044,
     /// Click on a view.
-    Click = 1045,
+    Click = 1044,
     /// Dragging is being done over.
-    Drag = 1046,
+    Drag = 1045,
     /// Mouse wheel has moved.
-    Wheel = 1047,
+    Wheel = 1046,
     /// A key has been pressed.
-    KeyDown = 1048,
+    KeyDown = 1047,
     /// A key has been released.
-    KeyUp = 1049,
+    KeyUp = 1048,
     /// The scroll bars are being manipulated.
-    Scroll = 1050,
+    Scroll = 1049,
     /// The window is moving across the desktop.
-    WindowMoved = 1051,
+    WindowMoved = 1050,
     /// The window is being resized.
-    WindowSizing = 1052,
+    WindowSizing = 1051,
     /// The window has been resized.
-    WindowSize = 1053,
+    WindowSize = 1052,
     /// The window has been closed.
-    WindowClose = 1054,
+    WindowClose = 1053,
     /// An update color of comwin_color.
-    Color = 1055,
+    Color = 1054,
     /// Desktop theme has changed.
-    Theme = 1056,
+    Theme = 1055,
     /// An object linked to a layout has been edited. Notifications and calculated fields.
-    ObjectChange = 1057,
+    ObjectChange = 1056,
     /// A table needs to know the number of rows.
-    TableNRows = 1058,
+    TableNRows = 1057,
     /// A table will begin to draw the visible part of the data.
-    TableBegin = 1059,
+    TableBegin = 1058,
     /// A table has finished drawing.
-    TableEnd = 1060,
+    TableEnd = 1059,
     /// A table needs the data of a cell.
-    TableCell = 1061,
+    TableCell = 1060,
     /// The selected rows in a table have changed.
-    TableSelected = 1062,
+    TableSelected = 1061,
     /// Click on a table header.
-    TableHeadClick = 1063,
+    TableHeadClick = 1062,
     /// Click on a table row.
-    TableRowClick = 1064,
+    TableRowClick = 1063,
 }
 
-impl_i32_to_enum!(EventType, 1024..=1064);
+impl_i32_to_enum!(EventType, 1024..=1063);
+
+pub use crate::gui::event::*;

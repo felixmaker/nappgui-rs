@@ -27,8 +27,8 @@ impl Stream {
     /// # Remark
     /// The original block will not be modified (read only). When the end of the block is reached stm_state will
     /// return ekSTEND. Block stream.
-    pub fn from_block(data: *const u8, size: u32) -> Self {
-        let ptr = unsafe { stm_from_block(data, size) };
+    pub fn from_block(data: &[u8], size: u32) -> Self {
+        let ptr = unsafe { stm_from_block(data.as_ptr(), size) };
         Self::new(ptr)
     }
 

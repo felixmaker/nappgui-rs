@@ -140,13 +140,13 @@ pub trait WindowTrait {
         T: WindowTrait,
     {
         let value = unsafe { window_modal(self.as_ptr(), parent.as_ptr()) };
-        GuiClose::try_from(value as i32).unwrap()
+        GuiClose::from(value)
     }
 
     /// Ends the modal cycle of a window.
     fn stop_modal(&self, return_value: GuiClose) {
         unsafe {
-            window_stop_modal(self.as_ptr(), return_value as u32);
+            window_stop_modal(self.as_ptr(), return_value.into());
         }
     }
 

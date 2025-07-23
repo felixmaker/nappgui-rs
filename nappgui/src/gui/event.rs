@@ -259,7 +259,7 @@ impl EvWinClose {
         }
         let evclose = unsafe { &*ptr };
         EvWinClose {
-            origin: GuiClose::try_from(evclose.origin).unwrap(),
+            origin: GuiClose::from(evclose.origin as u32),
         }
     }
 }

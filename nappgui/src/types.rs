@@ -233,7 +233,7 @@ impl Default for WindowFlags {
             has_maximize_button: false,
             has_minimize_button: true,
             has_close_button: true,
-            has_resizable_borders: true,
+            has_resizable_borders: false,
             process_return_key: false,
             process_escape_key: false,
             avoid_hiding_modal: false,
@@ -437,20 +437,43 @@ impl WindowFlags {
 }
 
 /// Reason for closing a window.
-#[repr(u32)]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub enum GuiClose {
     /// The \[ESC\] key has been pressed (cancel).
-    Cancel = 1,
+    Cancel,
     /// The \[ENTER\] key has been pressed (accept).
-    Accept = 2,
+    Accept,
     /// The close button \[X\] has been pressed in the title bar.
-    Close = 3,
+    Close,
     /// The main window has been clicked (only received by overlay windows).
-    Deactivate = 4,
+    Deactivate,
+    /// Custem close reason,
+    Custom(u32)
 }
 
-impl_i32_to_enum!(GuiClose, 1..=4);
+impl From<u32> for GuiClose {
+    fn from(value: u32) -> Self {
+        match value {
+            1 => GuiClose::Cancel,
+            2 => GuiClose::Accept,
+            3 => GuiClose::Close,
+            4 => GuiClose::Deactivate,
+            v => GuiClose::Custom(v),
+        }
+    }
+}
+
+impl From<GuiClose> for u32 {
+    fn from(value: GuiClose) -> Self {
+        match value {
+            GuiClose::Cancel => 1,
+            GuiClose::Accept => 2,
+            GuiClose::Close => 3,
+            GuiClose::Deactivate => 4,
+            GuiClose::Custom(v) => v,
+        }
+    }
+}
 
 /// Cursors.
 #[repr(i32)]

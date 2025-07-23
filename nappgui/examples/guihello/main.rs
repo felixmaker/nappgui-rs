@@ -11,6 +11,7 @@ mod vpadding;
 mod textviews;
 mod table;
 mod splits;
+mod modalwin;
 
 #[allow(unused)]
 pub(crate) mod res {
@@ -114,6 +115,7 @@ fn set_panel(window: &WeakWindow, layout: &Layout, index: u32) {
         12 => textviews::textviews(),
         13 => table::table_view(),
         14 => splits::split_panel(),
+        15 => modalwin::modal_windows(window.clone()),
         _ => {
             return;
         }
@@ -176,7 +178,7 @@ where
         GuiClose::Close => {
             finish();
         }
-        GuiClose::Deactivate => {}
+        _ => {}
     }
     true
 }

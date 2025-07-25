@@ -12,6 +12,7 @@ mod textviews;
 mod table;
 mod splits;
 mod modalwin;
+mod flyout;
 
 #[allow(unused)]
 pub(crate) mod res {
@@ -116,6 +117,7 @@ fn set_panel(window: &WeakWindow, layout: &Layout, index: u32) {
         13 => table::table_view(),
         14 => splits::split_panel(),
         15 => modalwin::modal_windows(window.clone()),
+        16 => flyout::flyout_window(window.clone()),
         _ => {
             return;
         }

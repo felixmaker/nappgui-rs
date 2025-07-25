@@ -211,6 +211,8 @@ pub trait LayoutTrait {
     ///
     /// Panics if col is out of bounds.
     fn horizontal_expand(&self, col: u32) {
+        assert!(col < self.ncols());
+
         unsafe { layout_hexpand(self.as_ptr(), col) };
     }
 
@@ -251,6 +253,8 @@ pub trait LayoutTrait {
     ///
     /// Panics if row is out of bounds.
     fn vertical_expand(&self, row: u32) {
+        assert!(row < self.nrows());
+
         unsafe { layout_vexpand(self.as_ptr(), row) };
     }
 

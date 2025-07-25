@@ -87,3 +87,9 @@ impl MenuItem {
         Self { inner: menu_item }
     }
 }
+
+impl MenuItemTrait for MenuItem {
+    fn as_ptr(&self) -> *mut nappgui_sys::MenuItem {
+        self.inner
+    }
+}

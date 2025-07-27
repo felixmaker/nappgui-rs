@@ -1,15 +1,12 @@
 use std::mem::offset_of;
 
 use nappgui::cell_dbind;
-use nappgui::core::NappguiString;
 use nappgui::dbind;
 use nappgui::dbind_enum;
 use nappgui::dbind_increment;
 use nappgui::dbind_range;
-use nappgui::draw_2d::Font;
 use nappgui::layout_dbind;
 use nappgui::layout_dbind_obj;
-use nappgui::osapp::*;
 use nappgui::prelude::*;
 
 #[repr(C)]
@@ -141,15 +138,15 @@ fn i_layout() -> Layout {
 
     layout.horizontal_align(1, 0, Align::Justify);
 
-    layout.set(1, 0,  label);
-    layout.set(1, 1,  edit);
-    layout.set(1, 2,  check);
-    layout.set(1, 3,  check3);
-    layout.set(1, 4,  radio);
-    layout.set(1, 5,  pop);
-    layout.set(1, 6,  list);
-    layout.set(1, 7,  slider);
-    layout.set(1, 8,  updown);
+    layout.set(1, 0, label);
+    layout.set(1, 1, edit);
+    layout.set(1, 2, check);
+    layout.set(1, 3, check3);
+    layout.set(1, 4, radio);
+    layout.set(1, 5, pop);
+    layout.set(1, 6, list);
+    layout.set(1, 7, slider);
+    layout.set(1, 8, updown);
 
     cell_dbind!(
         &layout.cell(1, 0),
@@ -184,57 +181,28 @@ fn i_layout() -> Layout {
     layout
 }
 
-struct App {
-    _window: Window,
-    data: *mut BasicTypes,
-}
+pub fn guibind() -> Panel {
+    i_data_bind();
 
-impl AppHandler for App {
-    fn create() -> Self {
-        i_data_bind();
+    let layout = i_layout();
+    let panel = Panel::new();
 
-        let layout = i_layout();
-        let panel = Panel::new();
+    let data = BasicTypes {
+        bool_val: false,
+        uint16_val: 0,
+        real32_val: 0.0,
+        enum_val: Color::White,
+        enum3_val: GuiState::Mixed,
+        str_val: NappguiString::new("Text"),
+    };
 
-        let data = BasicTypes {
-            bool_val: false,
-            uint16_val: 0,
-            real32_val: 0.0,
-            enum_val: Color::White,
-            enum3_val: GuiState::Mixed,
-            str_val: NappguiString::new("Text"),
-        };
+    // for simple example... todo!
+    let data = Box::into_raw(Box::new(data));
 
-        // for simple example...
-        let data = Box::into_raw(Box::new(data));
+    panel.layout(layout);
 
-        panel.layout(layout);
+    layout_dbind!(&layout, BasicTypes);
+    layout_dbind_obj!(&layout, data as _, BasicTypes);
 
-        layout_dbind!(&layout, BasicTypes);
-        layout_dbind_obj!(&layout, data as _, BasicTypes);
-
-        let window = Window::new(WindowFlags::default());
-        window.panel(panel);
-        window.title("Hello, World!");
-        window.origin(500.0, 200.0);
-        window.on_close(|_| finish());
-
-        window.show();
-
-        App {
-            _window: window,
-            data,
-        }
-    }
-
-    fn destroy(&mut self) {
-        // Release the data
-        unsafe {
-            let _ = Box::from_raw(self.data);
-        };
-    }
-}
-
-fn main() {
-    osmain::<App>();
+    panel
 }

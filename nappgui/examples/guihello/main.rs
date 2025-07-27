@@ -14,6 +14,7 @@ mod splits;
 mod modalwin;
 mod flyout;
 mod hotkeys;
+mod guibind;
 
 #[allow(unused)]
 pub(crate) mod res {
@@ -120,6 +121,7 @@ fn set_panel(window: &WeakWindow, layout: &Layout, index: u32) {
         15 => modalwin::modal_windows(window.clone()),
         16 => flyout::flyout_window(window.clone()),
         17 => hotkeys::hotkeys(window.clone()),
+        18 => guibind::guibind(),
         _ => {
             return;
         }

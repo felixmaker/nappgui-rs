@@ -13,6 +13,7 @@ mod table;
 mod splits;
 mod modalwin;
 mod flyout;
+mod hotkeys;
 
 #[allow(unused)]
 pub(crate) mod res {
@@ -118,6 +119,7 @@ fn set_panel(window: &WeakWindow, layout: &Layout, index: u32) {
         14 => splits::split_panel(),
         15 => modalwin::modal_windows(window.clone()),
         16 => flyout::flyout_window(window.clone()),
+        17 => hotkeys::hotkeys(window.clone()),
         _ => {
             return;
         }

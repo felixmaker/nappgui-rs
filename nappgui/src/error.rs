@@ -11,7 +11,7 @@ pub enum NappguiError {
     Utf8Error(FromUtf8Error),
     /// Null string conversion error
     NullError(std::ffi::NulError),
-    /// Internal fltk error
+    /// Internal error
     Internal(NappguiErrorKind),
     /// Error using an erroneous env variable
     EnvVarError(std::env::VarError),

@@ -56,7 +56,7 @@ pub trait EditTrait {
     }
 
     /// Activate the password mode, which will hide the typed characters.
-    fn password(&self, passmode: bool) {
+    fn passmode(&self, passmode: bool) {
         unsafe {
             edit_passmode(self.as_ptr(), passmode as _);
         }

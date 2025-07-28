@@ -212,7 +212,7 @@ fn edits(data: Rc<RefCell<FormData>>) -> Layout {
     edit5.text("+35 654 333 000");
 
     edit1.select(2, 6);
-    edit2.password(true);
+    edit2.passmode(true);
 
     let data1 = data.clone();
     let mut edit01 = edit1.clone();

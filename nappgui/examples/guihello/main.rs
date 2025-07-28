@@ -16,6 +16,7 @@ mod flyout;
 mod hotkeys;
 mod guibind;
 mod baslayout;
+mod sublayout;
 
 #[allow(unused)]
 pub(crate) mod res {
@@ -124,6 +125,7 @@ fn set_panel(window: &WeakWindow, layout: &Layout, index: u32) {
         17 => hotkeys::hotkeys(window.clone()),
         18 => guibind::guibind(),
         20 => baslayout::basic_layout(),
+        21 => sublayout::sublayouts(),
         _ => {
             return;
         }

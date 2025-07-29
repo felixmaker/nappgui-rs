@@ -1,22 +1,23 @@
+mod baslayout;
 mod buttons;
 mod editor;
+mod flyout;
 mod form;
+mod guibind;
+mod hotkeys;
 mod labels;
 mod listboxes;
+mod modalwin;
 mod popcom;
 mod seltext;
 mod sliders;
-mod tabstops;
-mod vpadding;
-mod textviews;
-mod table;
 mod splits;
-mod modalwin;
-mod flyout;
-mod hotkeys;
-mod guibind;
-mod baslayout;
 mod sublayout;
+mod subpanel;
+mod table;
+mod tabstops;
+mod textviews;
+mod vpadding;
 
 #[allow(unused)]
 pub(crate) mod res {
@@ -126,6 +127,7 @@ fn set_panel(window: &WeakWindow, layout: &Layout, index: u32) {
         18 => guibind::guibind(),
         20 => baslayout::basic_layout(),
         21 => sublayout::sublayouts(),
+        22 => subpanel::subpanels(),
         _ => {
             return;
         }

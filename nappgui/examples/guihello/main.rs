@@ -8,6 +8,7 @@ mod hotkeys;
 mod labels;
 mod listboxes;
 mod modalwin;
+mod multilayout;
 mod popcom;
 mod seltext;
 mod sliders;
@@ -128,6 +129,7 @@ fn set_panel(window: &WeakWindow, layout: &Layout, index: u32) {
         20 => baslayout::basic_layout(),
         21 => sublayout::sublayouts(),
         22 => subpanel::subpanels(),
+        23 => multilayout::multilayouts(),
         _ => {
             return;
         }

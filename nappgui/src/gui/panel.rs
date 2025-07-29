@@ -29,7 +29,7 @@ pub trait PanelTrait {
     }
 
     /// Get a layout of a panel.
-    fn get_layout(&self, index: usize) -> Option<Layout> {
+    fn get_layout(&self, index: u32) -> Option<Layout> {
         let layout = unsafe { panel_get_layout(self.as_ptr(), index as _) };
         if layout.is_null() {
             None
@@ -42,7 +42,7 @@ pub trait PanelTrait {
     ///
     /// # Remarks
     /// To make the change effective, you have to call panel_update.
-    fn visible_layout(&self, index: usize) {
+    fn visible_layout(&self, index: u32) {
         unsafe {
             panel_visible_layout(self.as_ptr(), index as _);
         }

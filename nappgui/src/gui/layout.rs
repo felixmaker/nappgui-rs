@@ -358,7 +358,7 @@ pub trait LayoutTrait {
     }
 
     /// Assign a color to the edge of the layout.
-    fn skin_color(&self, color: Color) {
+    fn border_color(&self, color: Color) {
         unsafe { layout_skcolor(self.as_ptr(), color.inner) };
     }
 

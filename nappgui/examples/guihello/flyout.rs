@@ -168,7 +168,7 @@ fn create_flywin() -> Window {
 
     layout.horizontal_margin(0, 5.0);
     layout.margin(10.0);
-    layout.skin_color(Color::red(204));
+    layout.border_color(Color::red(204));
     panel.layout(layout);
     window.panel(panel);
     window

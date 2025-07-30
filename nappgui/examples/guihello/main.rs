@@ -10,6 +10,7 @@ mod listboxes;
 mod modalwin;
 mod multilayout;
 mod popcom;
+mod scrollpanel;
 mod seltext;
 mod sliders;
 mod splits;
@@ -130,6 +131,7 @@ fn set_panel(window: &WeakWindow, layout: &Layout, index: u32) {
         21 => sublayout::sublayouts(),
         22 => subpanel::subpanels(),
         23 => multilayout::multilayouts(),
+        24 => scrollpanel::scrollpanel().into(),
         _ => {
             return;
         }

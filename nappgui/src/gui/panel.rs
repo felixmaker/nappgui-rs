@@ -57,12 +57,15 @@ pub trait PanelTrait {
             panel_update(self.as_ptr());
         }
     }
+}
 
+/// The scroll panel trait.
+pub trait ScrollPanelTrait: PanelTrait {
     /// Gets the width of the scroll bar of the associated panel.
     ///
     /// # Remarks
-    /// Only valid if the panel has been created with panel_scroll. Useful if we want to take into
-    /// account the size of the scroll bars when setting the margins of the Layout.
+    /// Useful if we want to take into account the size of the scroll bars
+    /// when setting the margins of the Layout.
     fn scroll_width(&self) -> f32 {
         unsafe { panel_scroll_width(self.as_ptr()) }
     }
@@ -93,15 +96,20 @@ impl PanelTrait for Panel {
     }
 }
 
-impl Panel {
-    /// Create a panel.
-    pub fn new() -> Self {
-        let panel = unsafe { panel_create() };
-        Self { inner: panel }
-    }
+/// The scroll panel.
+///
+/// # Remark
+/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
+/// components assciated with it will be automatically released.
+#[repr(transparent)]
+#[derive(Clone, Copy, Debug)]
+pub struct ScrollPanel {
+    pub(crate) inner: *mut nappgui_sys::Panel,
+}
 
+impl ScrollPanel {
     /// Create a panel with scroll bars.
-    pub fn new_scroll(hscroll: bool, vscroll: bool) -> Self {
+    pub fn new(hscroll: bool, vscroll: bool) -> Self {
         let panel = unsafe { panel_scroll(hscroll as _, vscroll as _) };
         Self { inner: panel }
     }
@@ -113,5 +121,29 @@ impl Panel {
     }
 }
 
+impl From<ScrollPanel> for Panel {
+    fn from(sp: ScrollPanel) -> Self {
+        Self { inner: sp.inner }
+    }
+}
+
+impl PanelTrait for ScrollPanel {
+    fn as_ptr(&self) -> *mut nappgui_sys::Panel {
+        self.inner
+    }
+}
+
+impl ScrollPanelTrait for ScrollPanel {}
+
+impl Panel {
+    /// Create a panel.
+    pub fn new() -> Self {
+        let panel = unsafe { panel_create() };
+        Self { inner: panel }
+    }
+}
+
 impl_control!(Panel, guicontrol_panel);
+impl_control!(ScrollPanel, guicontrol_panel);
 impl_layout!(Panel, PanelTrait, layout_panel);
+impl_layout!(ScrollPanel, PanelTrait, layout_panel);

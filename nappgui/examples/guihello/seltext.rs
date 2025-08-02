@@ -14,9 +14,9 @@ struct SelData {
 
 fn text_controls(data: Rc<RefCell<SelData>>) -> Layout {
     let layout = Layout::new(7, 1);
-    let button1 = FlatButton::new("Copy", &gui_image(COPY_PNG));
-    let button2 = FlatButton::new("Paste", &gui_image(PASTE_PNG));
-    let button3 = FlatButton::new("Cut", &gui_image(CUT_PNG));
+    let button1 = FlatButton::new("Copy", gui_image(COPY_PNG));
+    let button2 = FlatButton::new("Paste", gui_image(PASTE_PNG));
+    let button3 = FlatButton::new("Cut", gui_image(CUT_PNG));
     let button4 = PushButton::new("Select Text");
     let button5 = CheckButton::new("Caps");
     let button6 = CheckButton::new("Wrap");
@@ -118,9 +118,9 @@ fn textview_controls(data: Rc<RefCell<SelData>>) -> Layout {
     let layout = Layout::new(5, 1);
     let label = Label::new("TextView");
 
-    let button1 = FlatButton::new("Edit", &gui_image(EDIT16_PNG)); 
-    let button2 = FlatButton::new("Cursor", &gui_image(CURSOR16_PNG));
-    let button3 = FlatButton::new("Error", &gui_image(ERROR16_PNG));
+    let button1 = FlatButton::new("Edit", gui_image(EDIT16_PNG)); 
+    let button2 = FlatButton::new("Cursor", gui_image(CURSOR16_PNG));
+    let button3 = FlatButton::new("Error", gui_image(ERROR16_PNG));
 
     let data1 = data.clone();
     button1.on_click(move |_| {

@@ -2,7 +2,7 @@ use nappgui_sys::{dctx_bitmap, dctx_image, draw_antialias, draw_clear, draw_matr
 
 use crate::types::{PixFormat, Trans2D};
 
-use super::{Color, Image};
+use super::{Color, ImageBuf};
 
 /// Drawing context.
 pub struct DCtx {
@@ -27,9 +27,9 @@ impl DCtx {
     }
 
     /// Get the result image after drawing in the context created with dctx_bitmap.
-    pub fn image(mut self) -> Image {
+    pub fn image(mut self) -> ImageBuf {
         let ptr = unsafe { dctx_image(&mut self.inner) };
-        Image::from_raw(ptr)
+        ImageBuf::from_raw(ptr)
     }
 
     /// Clears the entire context area, using a solid color.

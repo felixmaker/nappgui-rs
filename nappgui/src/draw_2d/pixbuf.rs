@@ -9,11 +9,11 @@ use crate::types::PixFormat;
 use super::Palette;
 
 /// Pixbuf
-pub struct Pixbuf {
+pub struct PixBuf {
     pub(crate) inner: *mut nappgui_sys::Pixbuf,
 }
 
-impl Pixbuf {
+impl PixBuf {
     pub(crate) fn new(ptr: *mut nappgui_sys::Pixbuf) -> Self {
         if ptr.is_null() {
             panic!("ptr is null");
@@ -102,14 +102,14 @@ impl Pixbuf {
     }
 }
 
-impl Clone for Pixbuf {
+impl Clone for PixBuf {
     fn clone(&self) -> Self {
         let pixbuf = unsafe { pixbuf_copy(self.inner) };
         Self::new(pixbuf)
     }
 }
 
-impl Drop for Pixbuf {
+impl Drop for PixBuf {
     fn drop(&mut self) {
         unsafe {
             pixbuf_destroy(&mut self.inner);

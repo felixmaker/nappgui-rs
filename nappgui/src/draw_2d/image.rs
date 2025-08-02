@@ -7,17 +7,16 @@ use nappgui_sys::{
     image_trim, image_width, pixformat_t,
 };
 
-use super::{color::Color, palette::Palette, pixbuf::Pixbuf};
+use super::{color::Color, palette::Palette, pixbuf::PixBuf};
 
-/// Image
-pub struct Image {
-    pub(crate) inner: Rc<ImageInner>,
+/// The image type whose ownership is on rust side.
+pub struct ImageBuf {
+    pub(crate) inner: Rc<Image>,
 }
 
-/// The image inner type.
-#[doc(hidden)]
+/// The image type.
 #[repr(transparent)]
-pub struct ImageInner {
+pub struct Image {
     pub(crate) inner: *mut nappgui_sys::Image,
 }
 
@@ -52,9 +51,9 @@ pub trait ImageTrait {
     /// # Remarks
     /// If in pixformat we indicate ekFIMAGE it will return the buffer with the original format of the image.
     /// We can indicate ekRGB24, ekRGBA32 or ekGRAY8 if we need a specific format. Cannot use indexed formats.
-    fn pixels(&self, format: pixformat_t) -> Pixbuf {
+    fn pixels(&self, format: pixformat_t) -> PixBuf {
         let pixbuf = unsafe { image_pixels(self.as_ptr(), format) };
-        Pixbuf::new(pixbuf)
+        PixBuf::new(pixbuf)
     }
 
     /// Change the default codec associated with the image.
@@ -91,13 +90,13 @@ pub trait ImageTrait {
     }
 
     /// Create an image by cropping another image.
-    fn trim(&self, x: u32, y: u32, width: u32, height: u32) -> Image {
+    fn trim(&self, x: u32, y: u32, width: u32, height: u32) -> ImageBuf {
         let image = unsafe { image_trim(self.as_ptr(), x, y, width, height) };
-        Image::from_raw(image)
+        ImageBuf::from_raw(image)
     }
 
     /// Create a new image by rotating an existing one.
-    fn rotate(&self, angle: f32, nsize: bool, background: Color) -> Image {
+    fn rotate(&self, angle: f32, nsize: bool, background: Color) -> ImageBuf {
         let image = unsafe {
             image_rotate(
                 self.as_ptr(),
@@ -107,23 +106,23 @@ pub trait ImageTrait {
                 std::ptr::null_mut(),
             )
         };
-        Image::from_raw(image)
+        ImageBuf::from_raw(image)
     }
 
     /// Create a copy of the image, with a new size.
-    fn scale(&self, width: u32, height: u32) -> Image {
+    fn scale(&self, width: u32, height: u32) -> ImageBuf {
         let image = unsafe { image_scale(self.as_ptr(), width, height) };
-        Image::from_raw(image)
+        ImageBuf::from_raw(image)
     }
 }
 
-impl Image {
+impl ImageBuf {
     pub(crate) fn from_raw(ptr: *mut nappgui_sys::Image) -> Self {
         if ptr.is_null() {
             panic!("Image is NULL");
         }
-        Image {
-            inner: Rc::new(ImageInner { inner: ptr }),
+        ImageBuf {
+            inner: Rc::new(Image { inner: ptr }),
         }
     }
 
@@ -146,13 +145,13 @@ impl Image {
                 palsize,
             )
         };
-        Image::from_raw(image)
+        ImageBuf::from_raw(image)
     }
 
     /// Create an image from a buffer pixel.
-    pub fn from_pixbuf(pixbuf: &Pixbuf, palette: &Palette) -> Self {
+    pub fn from_pixbuf(pixbuf: &PixBuf, palette: &Palette) -> Self {
         let image = unsafe { image_from_pixbuf(pixbuf.inner, palette.inner) };
-        Image::from_raw(image)
+        ImageBuf::from_raw(image)
     }
 
     /// Create an image from a file on disk.
@@ -163,7 +162,7 @@ impl Image {
         if image.is_null() {
             None
         } else {
-            Some(Image::from_raw(image))
+            Some(ImageBuf::from_raw(image))
         }
     }
 
@@ -171,23 +170,23 @@ impl Image {
     pub fn from_data(data: &[u8]) -> Self {
         let size = data.len();
         let image = unsafe { image_from_data(data.as_ptr(), size as u32) };
-        Image::from_raw(image)
+        ImageBuf::from_raw(image)
     }
 
     /// Get the weak reference of the window.
-    pub fn as_weak(&self) -> Weak<ImageInner> {
+    pub fn as_weak(&self) -> Weak<Image> {
         Rc::downgrade(&self.inner)
     }
 }
 
-impl ImageTrait for ImageInner {
+impl ImageTrait for Image {
     fn as_ptr(&self) -> *mut nappgui_sys::Image {
         self.inner
     }
 }
 
 /// Window Weak Reference
-pub type WeakImage = Weak<ImageInner>;
+pub type WeakImage = Weak<Image>;
 
 impl ImageTrait for WeakImage {
     fn as_ptr(&self) -> *mut nappgui_sys::Image {
@@ -196,20 +195,20 @@ impl ImageTrait for WeakImage {
     }
 }
 
-impl ImageTrait for Image {
+impl ImageTrait for ImageBuf {
     fn as_ptr(&self) -> *mut nappgui_sys::Image {
         self.inner.inner
     }
 }
 
-impl Clone for Image {
+impl Clone for ImageBuf {
     fn clone(&self) -> Self {
         let image = unsafe { image_copy(self.as_ptr()) };
-        Image::from_raw(image)
+        ImageBuf::from_raw(image)
     }
 }
 
-impl Drop for Image {
+impl Drop for ImageBuf {
     fn drop(&mut self) {
         unsafe { image_destroy(&mut self.as_ptr()) }
     }

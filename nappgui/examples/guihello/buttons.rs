@@ -4,12 +4,12 @@ use crate::res::*;
 
 fn flatbuttons() -> Layout {
     let layout = Layout::new(6, 1);
-    let button1 = FlatButton::new("Open File", &gui_image(FOLDER24_PNG));
-    let button2 = FlatButton::new("Save File", &gui_image(DISK24_PNG));
-    let button3 = FlatButton::new("Search File", &gui_image(SEARCH24_PNG));
-    let button4 = FlatButton::new("Edit File", &gui_image(EDIT24_PNG));
-    let button5 = FlatButton::new("Add File", &gui_image(PLUS24_PNG));
-    let button6 = FlatButton::new("Delete File", &gui_image(ERROR24_PNG));
+    let button1 = FlatButton::new("Open File", gui_image(FOLDER24_PNG));
+    let button2 = FlatButton::new("Save File", gui_image(DISK24_PNG));
+    let button3 = FlatButton::new("Search File", gui_image(SEARCH24_PNG));
+    let button4 = FlatButton::new("Edit File", gui_image(EDIT24_PNG));
+    let button5 = FlatButton::new("Add File", gui_image(PLUS24_PNG));
+    let button6 = FlatButton::new("Delete File", gui_image(ERROR24_PNG));
 
     layout.set(0, 0, button1);
     layout.set(1, 0, button2);
@@ -75,7 +75,7 @@ fn pushes(defbutton: &mut Option<PushButton>) -> Layout {
     let push2 = PushButton::new("&Cancel");
     let push3 = PushButton::new("&Ok");
 
-    push1.image(&gui_image(RETRY_PNG));
+    push1.image(gui_image(RETRY_PNG));
 
     layout.set(0, 0, push1);
     layout.set(2, 0, push2);

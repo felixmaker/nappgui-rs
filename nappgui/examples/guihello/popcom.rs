@@ -13,19 +13,19 @@ fn popups(layout: &Layout, data: &Rc<RefCell<PopUpData>>) {
     let popup1 = PopUp::new();
     let popup2 = PopUp::new();
 
-    popup1.add_image_element("English", &gui_image(UKING_PNG));
-    popup1.add_image_element("Español", &gui_image(SPAIN_PNG));
-    popup1.add_image_element("Portugues", &gui_image(PORTUGAL_PNG));
-    popup1.add_image_element("Italiana", &gui_image(ITALY_PNG));
-    popup1.add_image_element("Tiếng Việt", &gui_image(VIETNAM_PNG));
-    popup1.add_image_element("России", &gui_image(RUSSIA_PNG));
-    popup1.add_image_element("日本語", &gui_image(JAPAN_PNG));
-    popup2.add_image_element("Red", &gui_image(RED_PNG));
-    popup2.add_image_element("Blue", &gui_image(BLUE_PNG));
-    popup2.add_image_element("Green", &gui_image(GREEN_PNG));
-    popup2.add_image_element("Yellow", &gui_image(YELLOW_PNG));
-    popup2.add_image_element("Black", &gui_image(BLACK_PNG));
-    popup2.add_image_element("White", &gui_image(WHITE_PNG));
+    popup1.add_image_element("English", gui_image(UKING_PNG));
+    popup1.add_image_element("Español", gui_image(SPAIN_PNG));
+    popup1.add_image_element("Portugues", gui_image(PORTUGAL_PNG));
+    popup1.add_image_element("Italiana", gui_image(ITALY_PNG));
+    popup1.add_image_element("Tiếng Việt", gui_image(VIETNAM_PNG));
+    popup1.add_image_element("России", gui_image(RUSSIA_PNG));
+    popup1.add_image_element("日本語", gui_image(JAPAN_PNG));
+    popup2.add_image_element("Red", gui_image(RED_PNG));
+    popup2.add_image_element("Blue", gui_image(BLUE_PNG));
+    popup2.add_image_element("Green", gui_image(GREEN_PNG));
+    popup2.add_image_element("Yellow", gui_image(YELLOW_PNG));
+    popup2.add_image_element("Black", gui_image(BLACK_PNG));
+    popup2.add_image_element("White", gui_image(WHITE_PNG));
 
     popup1.list_height(10);
     popup2.list_height(10);

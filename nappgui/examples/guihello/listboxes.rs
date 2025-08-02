@@ -4,25 +4,25 @@ use nappgui::prelude::*;
 fn full_listbox() -> ListBox {
     let listbox = ListBox::new();
     listbox.size(150.0, 200.0);
-    listbox.add_image_element("Sales presentation", &gui_image(POWERPOINT_PNG));
-    listbox.add_image_element("Balance 2017", &gui_image(POWERPOINT_PNG));
-    listbox.add_image_element("The Last of Us Analysis", &gui_image(POWERPOINT_PNG));
-    listbox.add_image_element("Phone list", &gui_image(ACCESS_PNG));
-    listbox.add_image_element("Customer database", &gui_image(ACCESS_PNG));
-    listbox.add_image_element("My first book", &gui_image(WORD_PNG));
-    listbox.add_image_element("Letter to April", &gui_image(WORD_PNG));
-    listbox.add_image_element("Cookbook Recipes", &gui_image(WORD_PNG));
-    listbox.add_image_element("Dog playing piano", &gui_image(JPG_PNG));
-    listbox.add_image_element("Hollidays 2019", &gui_image(JPG_PNG));
-    listbox.add_image_element("Amanda's party", &gui_image(JPG_PNG));
-    listbox.add_image_element("Flying", &gui_image(JPG_PNG));
-    listbox.add_image_element("The C Programing Language", &gui_image(PDF_PNG));
-    listbox.add_image_element("Graphics Programing with GDI+", &gui_image(PDF_PNG));
-    listbox.add_image_element("Personal finances", &gui_image(EXCEL_PNG));
-    listbox.add_image_element("Stocks 2017", &gui_image(EXCEL_PNG));
-    listbox.add_image_element("Website Dashboard", &gui_image(EXCEL_PNG));
-    listbox.add_image_element("Open Issues", &gui_image(DOCUMENT_PNG));
-    listbox.add_image_element("TODO List", &gui_image(DOCUMENT_PNG));
+    listbox.add_image_element("Sales presentation", gui_image(POWERPOINT_PNG));
+    listbox.add_image_element("Balance 2017", gui_image(POWERPOINT_PNG));
+    listbox.add_image_element("The Last of Us Analysis", gui_image(POWERPOINT_PNG));
+    listbox.add_image_element("Phone list", gui_image(ACCESS_PNG));
+    listbox.add_image_element("Customer database", gui_image(ACCESS_PNG));
+    listbox.add_image_element("My first book", gui_image(WORD_PNG));
+    listbox.add_image_element("Letter to April", gui_image(WORD_PNG));
+    listbox.add_image_element("Cookbook Recipes", gui_image(WORD_PNG));
+    listbox.add_image_element("Dog playing piano", gui_image(JPG_PNG));
+    listbox.add_image_element("Hollidays 2019", gui_image(JPG_PNG));
+    listbox.add_image_element("Amanda's party", gui_image(JPG_PNG));
+    listbox.add_image_element("Flying", gui_image(JPG_PNG));
+    listbox.add_image_element("The C Programing Language", gui_image(PDF_PNG));
+    listbox.add_image_element("Graphics Programing with GDI+", gui_image(PDF_PNG));
+    listbox.add_image_element("Personal finances", gui_image(EXCEL_PNG));
+    listbox.add_image_element("Stocks 2017", gui_image(EXCEL_PNG));
+    listbox.add_image_element("Website Dashboard", gui_image(EXCEL_PNG));
+    listbox.add_image_element("Open Issues", gui_image(DOCUMENT_PNG));
+    listbox.add_image_element("TODO List", gui_image(DOCUMENT_PNG));
     listbox.select(0, true);
     listbox
 }
@@ -30,19 +30,19 @@ fn full_listbox() -> ListBox {
 fn image_listbox() -> ListBox {
     let listbox = ListBox::new();
     listbox.size(150.0, 200.0);
-    listbox.add_image_element("Spain", &gui_image(SPAIN_PNG));
-    listbox.add_image_element("Italy", &gui_image(ITALY_PNG));
-    listbox.add_image_element("United Kingdom", &gui_image(UKING_PNG));
-    listbox.add_image_element("Vietnam", &gui_image(VIETNAM_PNG));
-    listbox.add_image_element("Russia", &gui_image(RUSSIA_PNG));
-    listbox.add_image_element("Portugal", &gui_image(PORTUGAL_PNG));
-    listbox.add_image_element("Japan", &gui_image(JAPAN_PNG));
-    listbox.add_image_element("Disk", &gui_image(DISK16_PNG));
-    listbox.add_image_element("Edit", &gui_image(EDIT16_PNG));
-    listbox.add_image_element("Folder", &gui_image(FOLDER16_PNG));
-    listbox.add_image_element("Restore", &gui_image(RESTORE16_PNG));
-    listbox.add_image_element("Search", &gui_image(SEARCH16_PNG));
-    listbox.add_image_element("Error", &gui_image(ERROR16_PNG));
+    listbox.add_image_element("Spain", gui_image(SPAIN_PNG));
+    listbox.add_image_element("Italy", gui_image(ITALY_PNG));
+    listbox.add_image_element("United Kingdom", gui_image(UKING_PNG));
+    listbox.add_image_element("Vietnam", gui_image(VIETNAM_PNG));
+    listbox.add_image_element("Russia", gui_image(RUSSIA_PNG));
+    listbox.add_image_element("Portugal", gui_image(PORTUGAL_PNG));
+    listbox.add_image_element("Japan", gui_image(JAPAN_PNG));
+    listbox.add_image_element("Disk", gui_image(DISK16_PNG));
+    listbox.add_image_element("Edit", gui_image(EDIT16_PNG));
+    listbox.add_image_element("Folder", gui_image(FOLDER16_PNG));
+    listbox.add_image_element("Restore", gui_image(RESTORE16_PNG));
+    listbox.add_image_element("Search", gui_image(SEARCH16_PNG));
+    listbox.add_image_element("Error", gui_image(ERROR16_PNG));
     listbox.select(0, true);
     listbox
 }

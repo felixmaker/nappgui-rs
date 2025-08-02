@@ -26,9 +26,9 @@ pub fn vpadding() -> Panel {
     let font = Font::system(20.0, FontStyle::default());
     button2.font(&font);
 
-    button1.image(&gui_image(FOLDER24_PNG));
-    button2.image(&gui_image(FOLDER24_PNG));
-    button3.image(&gui_image(FOLDER24_PNG));
+    button1.image(gui_image(FOLDER24_PNG));
+    button2.image(gui_image(FOLDER24_PNG));
+    button3.image(gui_image(FOLDER24_PNG));
 
     edit2.vpadding(0.0);
     edit3.vpadding(20.0);

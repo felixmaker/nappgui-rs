@@ -59,6 +59,8 @@ pub enum NappguiErrorKind {
     UndefinedError,
     /// Undefined enum transmute
     UndefinedEnumTransmute,
+    /// Wrong type transmute
+    WrongTypeTransmute,
 }
 
 impl NappguiError {

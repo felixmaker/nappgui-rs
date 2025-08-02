@@ -8,10 +8,7 @@ use nappgui_sys::{
 };
 
 use crate::{
-    gui::{
-        control::impl_control,
-        event::{EvDraw, EvKey, EvMouse, EvScroll, EvSize},
-    },
+    gui::event::{EvDraw, EvKey, EvMouse, EvScroll, EvSize},
     util::macros::callback,
 };
 
@@ -216,5 +213,3 @@ impl View {
         Self { inner: view }
     }
 }
-
-impl_control!(View, guicontrol_view);

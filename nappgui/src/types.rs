@@ -1,4 +1,4 @@
-use crate::gui::ControlTrait;
+use crate::gui::Control;
 
 macro_rules! impl_i32_to_enum {
     ($type: ty, $range: expr) => {
@@ -194,11 +194,13 @@ pub struct FocusInfo {
 
 impl FocusInfo {
     /// Control that has received the focus.
-    pub fn next<T>(&self) -> Option<T>
-    where
-        T: ControlTrait,
-    {
-        T::from_control_ptr(self.next)
+    pub fn next(&self) -> Option<&Control> {
+        if self.next.is_null() {
+            None
+        } else {
+            let next = &self.next;
+            Some(unsafe { std::mem::transmute(next) })
+        }
     }
 }
 
@@ -448,7 +450,7 @@ pub enum GuiClose {
     /// The main window has been clicked (only received by overlay windows).
     Deactivate,
     /// Custem close reason,
-    Custom(u32)
+    Custom(u32),
 }
 
 impl From<u32> for GuiClose {

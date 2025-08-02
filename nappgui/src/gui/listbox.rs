@@ -1,9 +1,6 @@
 use crate::{
     draw_2d::{Color, Font, ImageTrait},
-    gui::{
-        control::impl_control,
-        event::{EvButton, EvMouse},
-    },
+    gui::event::{EvButton, EvMouse},
     util::macros::callback,
 };
 use nappgui_sys::{
@@ -201,5 +198,3 @@ impl ListBox {
         Self { inner: listbox }
     }
 }
-
-impl_control!(ListBox, guicontrol_listbox);

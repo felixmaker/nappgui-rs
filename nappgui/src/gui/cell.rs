@@ -5,7 +5,7 @@ use nappgui_sys::{
     cell_padding4, cell_visible,
 };
 
-use crate::gui::control::ControlTrait;
+use crate::gui::Control;
 
 /// The cell trait.
 pub trait CellTrait {
@@ -18,12 +18,16 @@ pub trait CellTrait {
     }
 
     /// Get control of the inside of the cell.
-    fn control<T>(&self) -> Option<T>
-    where
-        T: ControlTrait,
-    {
+    ///
+    /// # Remarks
+    /// If the cell is empty or contains a sublayout, this function will return `None`.
+    fn control(&self) -> Option<&Control> {
         let ptr = unsafe { cell_control(self.as_ptr()) };
-        T::from_control_ptr(ptr)
+        if ptr.is_null() {
+            None
+        } else {
+            Some(unsafe { std::mem::transmute(ptr) })
+        }
     }
 
     /// Activate or deactivate a cell.

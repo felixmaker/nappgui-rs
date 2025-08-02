@@ -1,9 +1,6 @@
 use crate::{
     draw_2d::{Color, ImageTrait},
-    gui::{
-        control::impl_control,
-        event::{EvText, EvTextFilter},
-    },
+    gui::event::{EvText, EvTextFilter},
     types::{Align, FontStyle},
     util::macros::callback,
 };
@@ -211,5 +208,3 @@ impl Combo {
         combo
     }
 }
-
-impl_control!(Combo, guicontrol_combo);

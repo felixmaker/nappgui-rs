@@ -1,7 +1,5 @@
 use nappgui_sys::{progress_create, progress_undefined, progress_value};
 
-use crate::gui::control::impl_control;
-
 /// The progress trait.
 pub trait ProgressTrait {
     /// Returns a raw pointer to the progress object.
@@ -42,5 +40,3 @@ impl Progress {
         Self { inner: progress }
     }
 }
-
-impl_control!(Progress, guicontrol_progress);

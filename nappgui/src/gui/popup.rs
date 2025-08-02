@@ -1,8 +1,4 @@
-use crate::{
-    draw_2d::ImageTrait,
-    gui::{control::impl_control, event::EvButton},
-    util::macros::callback,
-};
+use crate::{draw_2d::ImageTrait, gui::event::EvButton, util::macros::callback};
 
 use nappgui_sys::{
     popup_OnSelect, popup_add_elem, popup_clear, popup_count, popup_create, popup_get_selected,
@@ -130,5 +126,3 @@ impl PopUp {
         Self { inner: popup }
     }
 }
-
-impl_control!(PopUp, guicontrol_popup);

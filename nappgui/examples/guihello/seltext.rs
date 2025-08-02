@@ -26,10 +26,12 @@ fn text_controls(data: Rc<RefCell<SelData>>) -> Layout {
     let data1 = data.clone();
     button1.on_click(move |_| {
         if let Some(window) = &data1.borrow().window {
-            if let Some(edit) = window.get_focus::<Edit>() {
-                edit.copy();
-            } else if let Some(textview) = window.get_focus::<TextView>() {
-                textview.copy();
+            if let Some(control) = window.get_focus() {
+                if let Ok(edit) = <&Edit>::try_from(control) {
+                    edit.copy();
+                } else if let Ok(textview) = <&TextView>::try_from(control) {
+                    textview.copy();
+                }
             }
         }
     });
@@ -37,10 +39,12 @@ fn text_controls(data: Rc<RefCell<SelData>>) -> Layout {
     let data2 = data.clone();
     button2.on_click(move |_| {
         if let Some(window) = &data2.borrow().window {
-            if let Some(edit) = window.get_focus::<Edit>() {
-                edit.paste();
-            } else if let Some(textview) = window.get_focus::<TextView>() {
-                textview.paste();
+            if let Some(control) = window.get_focus() {
+                if let Ok(edit) = <&Edit>::try_from(control) {
+                    edit.paste();
+                } else if let Ok(textview) = <&TextView>::try_from(control) {
+                    textview.paste();
+                }
             }
         }
     });
@@ -48,10 +52,12 @@ fn text_controls(data: Rc<RefCell<SelData>>) -> Layout {
     let data3 = data.clone();
     button3.on_click(move |_| {
         if let Some(window) = &data3.borrow().window {
-            if let Some(edit) = window.get_focus::<Edit>() {
-                edit.cut();
-            } else if let Some(textview) = window.get_focus::<TextView>() {
-                textview.cut();
+            if let Some(control) = window.get_focus() {
+                if let Ok(edit) = <&Edit>::try_from(control) {
+                    edit.cut();
+                } else if let Ok(textview) = <&TextView>::try_from(control) {
+                    textview.cut();
+                }
             }
         }
     });
@@ -70,10 +76,12 @@ fn text_controls(data: Rc<RefCell<SelData>>) -> Layout {
                 let left = *group.get(0).unwrap_or(&0);
                 let right = *group.get(1).unwrap_or(&1);
 
-                if let Some(edit) = window.get_focus::<Edit>() {
-                    edit.select(left as _, right as _);
-                } else if let Some(textview) = window.get_focus::<TextView>() {
-                    textview.select(left as _, right as _);
+                if let Some(control) = window.get_focus() {
+                    if let Ok(edit) = <&Edit>::try_from(control) {
+                        edit.select(left as _, right as _);
+                    } else if let Ok(textview) = <&TextView>::try_from(control) {
+                        textview.select(left as _, right as _);
+                    }
                 }
             }
         }
@@ -118,7 +126,7 @@ fn textview_controls(data: Rc<RefCell<SelData>>) -> Layout {
     let layout = Layout::new(5, 1);
     let label = Label::new("TextView");
 
-    let button1 = FlatButton::new("Edit", gui_image(EDIT16_PNG)); 
+    let button1 = FlatButton::new("Edit", gui_image(EDIT16_PNG));
     let button2 = FlatButton::new("Cursor", gui_image(CURSOR16_PNG));
     let button3 = FlatButton::new("Error", gui_image(ERROR16_PNG));
 

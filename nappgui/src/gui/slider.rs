@@ -3,10 +3,7 @@ use nappgui_sys::{
     slider_vertical,
 };
 
-use crate::{
-    gui::{control::impl_control, event::EvSlider},
-    util::macros::callback,
-};
+use crate::{gui::event::EvSlider, util::macros::callback};
 
 /// The slider trait.
 pub trait SliderTrait {
@@ -76,5 +73,3 @@ impl Slider {
         Self { inner: updown }
     }
 }
-
-impl_control!(Slider, guicontrol_slider);

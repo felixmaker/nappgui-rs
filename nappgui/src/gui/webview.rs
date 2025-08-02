@@ -2,7 +2,7 @@ use nappgui_sys::{
     webview_OnFocus, webview_back, webview_create, webview_forward, webview_navigate, webview_size,
 };
 
-use crate::{gui::control::impl_control, util::macros::callback};
+use crate::util::macros::callback;
 
 /// The webview trait.
 pub trait WebViewTrait {
@@ -63,5 +63,3 @@ impl WebView {
         Self { inner: webview }
     }
 }
-
-impl_control!(WebView, guicontrol_webview);

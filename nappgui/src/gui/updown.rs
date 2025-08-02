@@ -1,9 +1,6 @@
 use nappgui_sys::{updown_OnClick, updown_create, updown_tooltip};
 
-use crate::{
-    gui::{control::impl_control, event::EvButton},
-    util::macros::callback,
-};
+use crate::{gui::event::EvButton, util::macros::callback};
 
 /// The updown trait.
 pub trait UpDownTrait {
@@ -46,5 +43,3 @@ impl UpDown {
         Self { inner: updown }
     }
 }
-
-impl_control!(UpDown, guicontrol_updown);

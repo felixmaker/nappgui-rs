@@ -1,9 +1,6 @@
 use crate::{
     draw_2d::Font,
-    gui::{
-        control::impl_control,
-        event::{EvTbDataParams, EvTbDataResult},
-    },
+    gui::event::{EvTbDataParams, EvTbDataResult},
     types::{Align, EventType},
     util::macros::callback,
 };
@@ -273,5 +270,3 @@ impl TableView {
         Self { inner: table }
     }
 }
-
-impl_control!(TableView, guicontrol_tableview);

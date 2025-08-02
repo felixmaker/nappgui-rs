@@ -5,7 +5,7 @@ use nappgui_sys::{
 };
 
 use crate::{
-    gui::{control::impl_control, PanelTrait, TextViewTrait, ViewTrait, WebViewTrait},
+    gui::{PanelTrait, TextViewTrait, ViewTrait, WebViewTrait},
     types::SplitMode,
 };
 
@@ -117,5 +117,3 @@ impl SplitView {
         Self { inner: splitview }
     }
 }
-
-impl_control!(SplitView, guicontrol_splitview);

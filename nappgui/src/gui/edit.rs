@@ -8,10 +8,7 @@ use nappgui_sys::{
 
 use crate::{
     draw_2d::{font::Font, Color},
-    gui::{
-        control::impl_control,
-        event::{EvText, EvTextFilter},
-    },
+    gui::event::{EvText, EvTextFilter},
     types::{Align, FontStyle},
     util::macros::callback,
 };
@@ -218,5 +215,3 @@ impl Edit {
         Self { inner: edit }
     }
 }
-
-impl_control!(Edit, guicontrol_edit);

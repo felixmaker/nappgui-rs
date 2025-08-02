@@ -30,12 +30,13 @@ pub trait LayoutTrait {
     }
 
     /// Gets the control assigned to a cell in the layout.
-    fn get<T>(&self, col: u32, row: u32) -> Option<T>
-    where
-        T: ControlTrait,
-    {
+    fn get(&self, col: u32, row: u32) -> Option<&Control> {
         let control = unsafe { layout_control(self.as_ptr(), col, row) };
-        T::from_control_ptr(control)
+        if control.is_null() {
+            None
+        } else {
+            Some(unsafe { std::mem::transmute(control) })
+        }
     }
 
     /// Insert a control to the layout.

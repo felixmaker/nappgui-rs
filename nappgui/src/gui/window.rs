@@ -12,7 +12,7 @@ use std::rc::{Rc, Weak};
 
 use crate::draw_2d::ImageTrait;
 use crate::gui::event::{EvPos, EvSize, EvWinClose};
-use crate::gui::{ButtonTrait, ControlTrait, PanelTrait};
+use crate::gui::{ButtonTrait, Control, ControlTrait, PanelTrait};
 use crate::types::{
     FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D,
     Size2D, WindowFlags,
@@ -190,21 +190,22 @@ pub trait WindowTrait {
     }
 
     /// Set keyboard focus to a specific control.
-    fn focus<T>(&self, control: &T) -> GuiFocus
+    fn focus<T>(&self, control: T) -> GuiFocus
     where
-        T: ControlTrait,
+        T: AsRef<Control>,
     {
-        let focus = unsafe { window_focus(self.as_ptr(), control.as_control_ptr()) };
+        let focus = unsafe { window_focus(self.as_ptr(), control.as_ref().as_ptr()) };
         GuiFocus::try_from(focus).unwrap()
     }
 
     /// Gets the control that keyboard focus has.
-    fn get_focus<T>(&self) -> Option<T>
-    where
-        T: ControlTrait,
-    {
-        let control = unsafe { window_get_focus(self.as_ptr()) };
-        T::from_control_ptr(control)
+    fn get_focus(&self) -> Option<&Control> {
+        let control = Box::leak(Box::new(unsafe { window_get_focus(self.as_ptr()) }));
+        if control.is_null() {
+            None
+        } else {
+            Some(unsafe { std::mem::transmute(control) })
+        }
     }
 
     /// Gets additional information about a keyboard focus change operation.
@@ -278,12 +279,12 @@ pub trait WindowTrait {
     /// # Remarks
     ///
     /// control must belong to the window, be active and visible. The point (0,0) corresponds to the upper left vertex of the client area of the window.
-    fn control_frame<T>(&self, control: &T) -> Rect2D
+    fn control_frame<T>(&self, control: T) -> Rect2D
     where
-        T: ControlTrait,
+        T: AsRef<Control>,
     {
         unsafe {
-            let rect = window_control_frame(self.as_ptr(), control.as_control_ptr());
+            let rect = window_control_frame(self.as_ptr(), control.as_ref().as_ptr());
             std::mem::transmute(rect)
         }
     }

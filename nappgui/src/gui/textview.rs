@@ -1,10 +1,7 @@
 use crate::{
     core::Stream,
     draw_2d::Color,
-    gui::{
-        control::impl_control,
-        event::{EvText, EvTextFilter},
-    },
+    gui::event::{EvText, EvTextFilter},
     types::{Align, FontStyle},
     util::macros::callback,
 };
@@ -269,5 +266,3 @@ impl TextView {
         Self { inner: textview }
     }
 }
-
-impl_control!(TextView, guicontrol_textview);

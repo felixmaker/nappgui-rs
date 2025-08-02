@@ -169,6 +169,14 @@ impl Font {
                 let family = CStr::from_ptr(family.as_ptr());
                 families.push(family.to_string_lossy().to_string());
             }
+            unsafe extern "C" fn shim(ptr: *mut *mut std::ffi::c_void) {
+                nappgui_sys::str_destroy(std::mem::transmute(ptr));
+            }
+            nappgui_sys::array_destroy_ptr(
+                std::mem::transmute(&ptr),
+                Some(shim),
+                c"String".as_ptr(),
+            );
         }
 
         families
@@ -191,6 +199,14 @@ impl Font {
                 let family = CStr::from_ptr(family.as_ptr());
                 families.push(family.to_string_lossy().to_string());
             }
+            unsafe extern "C" fn shim(ptr: *mut *mut std::ffi::c_void) {
+                nappgui_sys::str_destroy(std::mem::transmute(ptr));
+            }
+            nappgui_sys::array_destroy_ptr(
+                std::mem::transmute(&ptr),
+                Some(shim),
+                c"String".as_ptr(),
+            );
         }
 
         families

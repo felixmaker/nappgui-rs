@@ -11,7 +11,6 @@ use crate::{
     gui::{
         control::impl_control,
         event::{EvDraw, EvKey, EvMouse, EvScroll, EvSize},
-        impl_layout,
     },
     util::macros::callback,
 };
@@ -219,4 +218,3 @@ impl View {
 }
 
 impl_control!(View, guicontrol_view);
-impl_layout!(View, ViewTrait, layout_view);

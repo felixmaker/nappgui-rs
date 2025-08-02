@@ -3,7 +3,6 @@ use crate::{
     gui::{
         control::impl_control,
         event::{EvButton, EvMouse},
-        impl_layout,
     },
     util::macros::callback,
 };
@@ -204,4 +203,3 @@ impl ListBox {
 }
 
 impl_control!(ListBox, guicontrol_listbox);
-impl_layout!(ListBox, ListBoxTrait, layout_listbox);

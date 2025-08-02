@@ -4,7 +4,7 @@ use nappgui_sys::{
 };
 
 use crate::{
-    gui::{control::impl_control, event::EvSlider, impl_layout},
+    gui::{control::impl_control, event::EvSlider},
     util::macros::callback,
 };
 
@@ -78,4 +78,3 @@ impl Slider {
 }
 
 impl_control!(Slider, guicontrol_slider);
-impl_layout!(Slider, SliderTrait, layout_slider);

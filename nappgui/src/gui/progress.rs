@@ -1,6 +1,6 @@
 use nappgui_sys::{progress_create, progress_undefined, progress_value};
 
-use crate::gui::{control::impl_control, impl_layout};
+use crate::gui::control::impl_control;
 
 /// The progress trait.
 pub trait ProgressTrait {
@@ -44,4 +44,3 @@ impl Progress {
 }
 
 impl_control!(Progress, guicontrol_progress);
-impl_layout!(Progress, ProgressTrait, layout_progress);

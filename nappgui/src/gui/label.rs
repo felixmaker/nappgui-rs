@@ -2,7 +2,7 @@ use std::ffi::CString;
 
 use crate::{
     draw_2d::{Color, Font},
-    gui::{control::impl_control, event::EvMouse, impl_layout},
+    gui::{control::impl_control, event::EvMouse},
     types::{Align, FontStyle},
     util::macros::callback,
 };
@@ -147,4 +147,3 @@ impl Label {
 }
 
 impl_control!(Label, guicontrol_label);
-impl_layout!(Label, LabelTrait, layout_label);

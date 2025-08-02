@@ -1,6 +1,6 @@
 use crate::{
     draw_2d::ImageTrait,
-    gui::{control::impl_control, event::EvButton, impl_layout},
+    gui::{control::impl_control, event::EvButton},
     util::macros::callback,
 };
 
@@ -132,4 +132,3 @@ impl PopUp {
 }
 
 impl_control!(PopUp, guicontrol_popup);
-impl_layout!(PopUp, PopUpTrait, layout_popup);

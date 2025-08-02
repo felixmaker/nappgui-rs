@@ -3,7 +3,7 @@ use nappgui_sys::{
     panel_scroll_width, panel_size, panel_update, panel_visible_layout,
 };
 
-use crate::gui::{control::impl_control, impl_layout, Layout, LayoutTrait};
+use crate::gui::{control::impl_control, Layout, LayoutTrait};
 
 /// The panel trait.
 pub trait PanelTrait {
@@ -145,5 +145,3 @@ impl Panel {
 
 impl_control!(Panel, guicontrol_panel);
 impl_control!(ScrollPanel, guicontrol_panel);
-impl_layout!(Panel, PanelTrait, layout_panel);
-impl_layout!(ScrollPanel, PanelTrait, layout_panel);

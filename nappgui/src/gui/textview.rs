@@ -4,7 +4,6 @@ use crate::{
     gui::{
         control::impl_control,
         event::{EvText, EvTextFilter},
-        impl_layout,
     },
     types::{Align, FontStyle},
     util::macros::callback,
@@ -272,4 +271,3 @@ impl TextView {
 }
 
 impl_control!(TextView, guicontrol_textview);
-impl_layout!(TextView, TextViewTrait, layout_textview);

@@ -3,7 +3,6 @@ use crate::{
     gui::{
         control::impl_control,
         event::{EvTbDataParams, EvTbDataResult},
-        impl_layout,
     },
     types::{Align, EventType},
     util::macros::callback,
@@ -276,4 +275,3 @@ impl TableView {
 }
 
 impl_control!(TableView, guicontrol_tableview);
-impl_layout!(TableView, TableViewTrait, layout_tableview);

@@ -1,4 +1,4 @@
-use crate::{draw_2d::ImageTrait, gui::impl_layout, types::Scale, util::macros::callback};
+use crate::{draw_2d::ImageTrait, types::Scale, util::macros::callback};
 
 use nappgui_sys::{
     imageview_OnClick, imageview_OnOverDraw, imageview_create, imageview_image, imageview_scale,
@@ -71,4 +71,3 @@ impl ImageView {
     }
 }
 
-impl_layout!(ImageView, ImageViewTrait, layout_imageview);

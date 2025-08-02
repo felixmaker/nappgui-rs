@@ -1,7 +1,7 @@
 use nappgui_sys::{updown_OnClick, updown_create, updown_tooltip};
 
 use crate::{
-    gui::{control::impl_control, event::EvButton, impl_layout},
+    gui::{control::impl_control, event::EvButton},
     util::macros::callback,
 };
 
@@ -48,4 +48,3 @@ impl UpDown {
 }
 
 impl_control!(UpDown, guicontrol_updown);
-impl_layout!(UpDown, UpDownTrait, layout_updown);

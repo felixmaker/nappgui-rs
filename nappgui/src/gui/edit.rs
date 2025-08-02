@@ -11,7 +11,6 @@ use crate::{
     gui::{
         control::impl_control,
         event::{EvText, EvTextFilter},
-        impl_layout,
     },
     types::{Align, FontStyle},
     util::macros::callback,
@@ -221,4 +220,3 @@ impl Edit {
 }
 
 impl_control!(Edit, guicontrol_edit);
-impl_layout!(Edit, EditTrait, layout_edit);

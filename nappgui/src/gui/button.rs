@@ -2,7 +2,7 @@ use std::ffi::CString;
 
 use crate::{
     draw_2d::{Font, ImageTrait},
-    gui::{event::EvButton, impl_layout},
+    gui::event::EvButton,
     types::GuiState,
     util::macros::callback,
 };
@@ -111,7 +111,7 @@ pub trait ButtonImageTrait: ButtonTrait {
     }
 }
 
-/// The push button. (no ownership on rust side)
+/// The push button.
 ///
 /// # Remark
 /// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
@@ -247,10 +247,3 @@ impl_button_new!(PushButton, button_push);
 impl_button_new!(CheckButton, button_check);
 impl_button_new!(Check3Button, button_check3);
 impl_button_new!(RadioButton, button_radio);
-
-impl_layout!(PushButton, ButtonTrait, layout_button);
-impl_layout!(CheckButton, ButtonTrait, layout_button);
-impl_layout!(Check3Button, ButtonTrait, layout_button);
-impl_layout!(RadioButton, ButtonTrait, layout_button);
-impl_layout!(FlatButton, ButtonTrait, layout_button);
-impl_layout!(FlatButtonEx, ButtonTrait, layout_button);

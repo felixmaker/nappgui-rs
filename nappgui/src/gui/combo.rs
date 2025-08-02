@@ -3,7 +3,6 @@ use crate::{
     gui::{
         control::impl_control,
         event::{EvText, EvTextFilter},
-        impl_layout,
     },
     types::{Align, FontStyle},
     util::macros::callback,
@@ -214,4 +213,3 @@ impl Combo {
 }
 
 impl_control!(Combo, guicontrol_combo);
-impl_layout!(Combo, ComboTrait, layout_combo);

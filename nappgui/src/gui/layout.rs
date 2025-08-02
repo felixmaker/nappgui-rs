@@ -459,6 +459,26 @@ macro_rules! impl_layout {
     };
 }
 
-pub(crate) use impl_layout;
-
 impl_layout!(Layout, LayoutTrait, layout_layout);
+impl_layout!(PushButton, ButtonTrait, layout_button);
+impl_layout!(CheckButton, ButtonTrait, layout_button);
+impl_layout!(Check3Button, ButtonTrait, layout_button);
+impl_layout!(RadioButton, ButtonTrait, layout_button);
+impl_layout!(FlatButton, ButtonTrait, layout_button);
+impl_layout!(FlatButtonEx, ButtonTrait, layout_button);
+impl_layout!(Combo, ComboTrait, layout_combo);
+impl_layout!(Edit, EditTrait, layout_edit);
+impl_layout!(ImageView, ImageViewTrait, layout_imageview);
+impl_layout!(Label, LabelTrait, layout_label);
+impl_layout!(Panel, PanelTrait, layout_panel);
+impl_layout!(ScrollPanel, PanelTrait, layout_panel);
+impl_layout!(ListBox, ListBoxTrait, layout_listbox);
+impl_layout!(PopUp, PopUpTrait, layout_popup);
+impl_layout!(Progress, ProgressTrait, layout_progress);
+impl_layout!(Slider, SliderTrait, layout_slider);
+impl_layout!(SplitView, SplitViewTrait, layout_splitview);
+impl_layout!(TableView, TableViewTrait, layout_tableview);
+impl_layout!(TextView, TextViewTrait, layout_textview);
+impl_layout!(UpDown, UpDownTrait, layout_updown);
+impl_layout!(View, ViewTrait, layout_view);
+impl_layout!(WebView, WebViewTrait, layout_webview);

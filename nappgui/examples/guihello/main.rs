@@ -88,7 +88,7 @@ impl App {
         let layout = self.layout.clone();
         list.on_select(move |params| {
             set_panel(&window, &layout, params.index);
-            window.update();
+            window.upgrade().unwrap().update();
         });
 
         self.layout.set(0, 0, list);
@@ -140,11 +140,11 @@ fn set_panel(window: &WeakWindow, layout: &Layout, index: u32) {
     layout.panel_replace(panel, 1, 0);
 
     if let Some(defbutton) = &mut defbutton {
-        window.default_button(defbutton);
+        window.upgrade().unwrap().default_button(defbutton);
     }
 }
 
-fn i_modal_window<T>(parent: &T, message: &str)
+fn i_modal_window<T>(parent: T, message: &str)
 where
     T: WindowTrait,
 {
@@ -172,7 +172,7 @@ where
     window.modal(parent);
 }
 
-fn i_on_close<T>(window: &T, params: &EvWinClose) -> bool
+fn i_on_close<T>(window: T, params: &EvWinClose) -> bool
 where
     T: WindowTrait,
 {
@@ -212,7 +212,7 @@ impl AppHandler for App {
         app.window.origin(500f32, 200f32);
         let window = app.window.as_weak();
         app.window
-            .on_close(move |params| i_on_close(&window, params));
+            .on_close(move |params| i_on_close(window.upgrade().unwrap(), params));
         app.window.show();
         app
     }

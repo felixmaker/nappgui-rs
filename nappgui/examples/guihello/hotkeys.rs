@@ -19,6 +19,7 @@ fn hotkey_event(data: &Rc<RefCell<Data>>, key: &str) {
 fn set_hotkeys(data: &Rc<RefCell<Data>>) {
     if let Some(window) = data.borrow().window.as_ref() {
         let data1 = data.clone();
+        let window = window.upgrade().unwrap();
         window.hotkey(KeyCode::F1, ModifierKey::None, move || {
             hotkey_event(&data1, "F1")
         });
@@ -79,6 +80,7 @@ pub fn hotkeys(window: WeakWindow) -> Panel {
     let data1 = data.clone();
     button1.on_click(move |_| {
         if let Some(window) = data1.borrow().window.as_ref() {
+            let window = window.upgrade().unwrap();
             window.clear_hotkeys();
         }
     });

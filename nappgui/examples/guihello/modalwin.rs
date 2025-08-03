@@ -43,22 +43,22 @@ fn close_layout(window: &WeakWindow) -> Layout {
 
     let window1 = window.clone();
     button1.on_click(move |_| {
-        window1.stop_modal(GuiClose::Custom(10));
+        window1.upgrade().unwrap().stop_modal(GuiClose::Custom(10));
     });
 
     let window2 = window.clone();
     button2.on_click(move |_| {
-        window2.stop_modal(GuiClose::Custom(20));
+        window2.upgrade().unwrap().stop_modal(GuiClose::Custom(20));
     });
 
     let window3 = window.clone();
     button3.on_click(move |_| {
-        window3.stop_modal(GuiClose::Custom(30));
+        window3.upgrade().unwrap().stop_modal(GuiClose::Custom(30));
     });
 
     let window4 = window.clone();
     button4.on_click(move |_| {
-        window4.stop_modal(GuiClose::Custom(40));
+        window4.upgrade().unwrap().stop_modal(GuiClose::Custom(40));
     });
 
     layout.set(0, 0, button1);
@@ -80,6 +80,7 @@ fn modal_window(data: &Rc<RefCell<Data>>) {
         window: Some(parent),
     } = &*data.borrow()
     {
+        let parent = parent.upgrade().unwrap();
         let pos = parent.get_origin();
         let window = Window::new(window_flags(*type_));
         let panel = Panel::new();

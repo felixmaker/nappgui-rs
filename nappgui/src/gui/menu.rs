@@ -40,7 +40,7 @@ pub trait MenuTrait {
     }
 
     /// Launch a menu as secondary or PopUp.
-    fn launch<T>(&self, window: &T, x: f32, y: f32)
+    fn launch<T>(&self, window: T, x: f32, y: f32)
     where
         T: WindowTrait,
     {
@@ -126,6 +126,8 @@ impl MenuTrait for Weak<MenuInner> {
 
 impl Drop for Menu {
     fn drop(&mut self) {
-        unsafe { menu_destroy(&mut self.as_ptr()) };
+        if Rc::strong_count(&self.inner) == 0 {
+            unsafe { menu_destroy(&mut self.as_ptr()) };
+        }
     }
 }

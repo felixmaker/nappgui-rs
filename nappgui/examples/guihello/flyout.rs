@@ -47,6 +47,7 @@ fn controls_layout(data: &Rc<RefCell<Data>>) -> Layout {
             ..
         } = &*data1.borrow()
         {
+            let parent = parent.upgrade().unwrap();
             let frame = parent.control_frame(edit);
             let mut pos = parent.client_to_screen(frame.position.x, frame.position.y);
             let size = flywin.get_size();
@@ -107,6 +108,7 @@ fn listbox_layout(data: &Rc<RefCell<Data>>) -> Layout {
                 ..
             } = &*data1.borrow()
             {
+                let window = window.upgrade().unwrap();
                 menu.launch(window, pos.x, pos.y);
             }
         }
@@ -161,7 +163,7 @@ fn create_flywin() -> Window {
         layout.set(0, i, label);
         layout.set(1, i, slider);
 
-        if i < nrows -1 {
+        if i < nrows - 1 {
             layout.vertical_margin(i, 5.0);
         }
     }

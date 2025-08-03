@@ -31,12 +31,12 @@ fn modal_window(edit: &mut Edit, text: &str, focus_info: &FocusInfo) -> Window {
 
     let window1 = window.as_weak();
     button1.on_click(move |_| {
-        window1.stop_modal(GuiClose::Accept);
+        window1.upgrade().unwrap().stop_modal(GuiClose::Accept);
     });
 
     let window2 = window.as_weak();
     button2.on_click(move |_| {
-        window2.stop_modal(GuiClose::Cancel);
+        window2.upgrade().unwrap().stop_modal(GuiClose::Cancel);
     });
 
     layout1.set(0, 0, label);
@@ -60,8 +60,8 @@ fn modal_window(edit: &mut Edit, text: &str, focus_info: &FocusInfo) -> Window {
 }
 
 fn modal_pos(window: &Window, parent: &WeakWindow) -> Point2D {
-    let pos = parent.get_origin();
-    let s1 = parent.get_size();
+    let pos = parent.upgrade().unwrap().get_origin();
+    let s1 = parent.upgrade().unwrap().get_size();
     let s2 = window.get_size();
     let x = pos.x + (s1.width - s2.width) / 2.0;
     let y = pos.y + (s1.height - s2.height) / 2.0;
@@ -71,12 +71,12 @@ fn modal_pos(window: &Window, parent: &WeakWindow) -> Point2D {
 fn validate_field(data: Rc<RefCell<FormData>>, edit: &mut Edit, text: &str) -> bool {
     let window = &data.borrow().window;
 
-    let focus_info = window.focus_info();
+    let focus_info = window.upgrade().unwrap().focus_info();
     let modal = modal_window(edit, text, &focus_info);
 
     let pos = modal_pos(&modal, window);
     modal.origin(pos.x, pos.y);
-    match modal.modal(window) {
+    match modal.modal(window.upgrade().unwrap()) {
         GuiClose::Accept => return true,
         _ => return false,
     }

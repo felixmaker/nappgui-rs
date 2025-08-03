@@ -67,10 +67,9 @@ impl WindowTrait for Window {
 /// Window Weak Reference
 pub type WeakWindow = Weak<WindowInner>;
 
-impl WindowTrait for WeakWindow {
+impl WindowTrait for Rc<WindowInner> {
     fn as_ptr(&self) -> *mut nappgui_sys::Window {
-        let window = self.upgrade().unwrap();
-        window.inner
+        self.inner
     }
 }
 
@@ -125,7 +124,7 @@ pub trait WindowTrait {
     }
 
     /// Launch an overlay window.
-    fn overlay<T>(&self, parent: &T)
+    fn overlay<T>(&self, parent: T)
     where
         T: WindowTrait,
     {
@@ -135,7 +134,7 @@ pub trait WindowTrait {
     }
 
     /// Launch a window in modal mode.
-    fn modal<T>(&self, parent: &T) -> GuiClose
+    fn modal<T>(&self, parent: T) -> GuiClose
     where
         T: WindowTrait,
     {

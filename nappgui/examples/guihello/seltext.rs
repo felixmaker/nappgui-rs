@@ -26,6 +26,7 @@ fn text_controls(data: Rc<RefCell<SelData>>) -> Layout {
     let data1 = data.clone();
     button1.on_click(move |_| {
         if let Some(window) = &data1.borrow().window {
+            let window = window.upgrade().unwrap();
             if let Some(control) = window.get_focus() {
                 if let Ok(edit) = <&Edit>::try_from(control) {
                     edit.copy();
@@ -39,6 +40,7 @@ fn text_controls(data: Rc<RefCell<SelData>>) -> Layout {
     let data2 = data.clone();
     button2.on_click(move |_| {
         if let Some(window) = &data2.borrow().window {
+            let window = window.upgrade().unwrap();
             if let Some(control) = window.get_focus() {
                 if let Ok(edit) = <&Edit>::try_from(control) {
                     edit.paste();
@@ -52,6 +54,7 @@ fn text_controls(data: Rc<RefCell<SelData>>) -> Layout {
     let data3 = data.clone();
     button3.on_click(move |_| {
         if let Some(window) = &data3.borrow().window {
+            let window = window.upgrade().unwrap();
             if let Some(control) = window.get_focus() {
                 if let Ok(edit) = <&Edit>::try_from(control) {
                     edit.cut();
@@ -66,6 +69,7 @@ fn text_controls(data: Rc<RefCell<SelData>>) -> Layout {
     button4.on_click(move |_| {
         let data = data4.borrow();
         if let Some(window) = &data.window {
+            let window = window.upgrade().unwrap();
             if let Some(range) = &data.edit_range {
                 let text = range.get_text();
                 let group: Vec<usize> = text

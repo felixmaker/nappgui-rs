@@ -10,6 +10,8 @@ pub trait AppHandler {
     fn create() -> Self;
     /// Destroy the application.
     fn destroy(&mut self) {}
+    /// Update the application.
+    fn update(&mut self, _prtime: f64, _ctime: f64) {}
 }
 
 /// Start a desktop application.
@@ -22,15 +24,24 @@ where
         T: AppHandler,
     {
         let app = T::create();
-        Box::into_raw(Box::new(app)) as *mut c_void
+        let app = Box::into_raw(Box::new(app));
+        app as *mut c_void
     }
 
-    unsafe extern "C" fn on_destory<T>(_obj: *mut *mut c_void)
+    unsafe extern "C" fn on_destory<T>(obj: *mut *mut c_void)
     where
         T: AppHandler,
     {
-        let mut app = Box::from_raw(*_obj as *mut T);
+        let mut app = Box::from_raw(*obj as *mut T);
         app.destroy();
+    }
+
+    unsafe extern "C" fn on_update<T>(obj: *mut c_void, prtime: f64, ctime: f64)
+    where
+        T: AppHandler,
+    {
+        let app = obj as *mut T;
+        (*app).update(prtime, ctime);
     }
 
     unsafe {
@@ -40,7 +51,7 @@ where
             std::ptr::null_mut(),
             0.0,
             Some(on_create::<T>),
-            None,
+            Some(on_update::<T>),
             Some(on_destory::<T>),
             std::ptr::null(),
         );

@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 use std::process::Command;
+use std::env;
 
 fn main() {
     let out = build();
@@ -31,7 +32,7 @@ fn build() -> PathBuf {
         dst.define("CMAKE_OSX_SYSROOT", &sysroot);
     }
 
-    dst.profile("Release");
+    dst.profile(&env::var("PROFILE").unwrap());
     dst.build()
 }
 

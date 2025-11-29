@@ -1,4 +1,6 @@
 use std::path::PathBuf;
+use std::process::Command;
+use std::env;
 
 fn main() {
     let out = build();
@@ -15,7 +17,22 @@ fn build() -> PathBuf {
         dst.define("NAPPGUI_WEB", "YES");
     }
 
-    dst.profile("Release");
+    if cfg!(target_os = "macos") {
+        // Get sysroot from xcrun
+        let output = Command::new("xcrun")
+            .args(&["--sdk", "macosx", "--show-sdk-path"])
+            .output()
+            .expect("failed to run xcrun");
+
+        let sysroot = String::from_utf8(output.stdout)
+            .expect("invalid utf8")
+            .trim()
+            .to_string();
+
+        dst.define("CMAKE_OSX_SYSROOT", &sysroot);
+    }
+
+    dst.profile(&env::var("PROFILE").unwrap());
     dst.build()
 }
 
@@ -50,5 +67,13 @@ fn link(out: &std::path::PathBuf) {
         println!("cargo:rustc-link-lib=gdiplus");
         println!("cargo:rustc-link-lib=UxTheme");
         println!("cargo:rustc-link-lib=Shlwapi");
+    }
+
+    if cfg!(target_os = "macos") {
+        println!("cargo:rustc-link-lib=framework=Foundation");
+        println!("cargo:rustc-link-lib=framework=CoreGraphics");
+        println!("cargo:rustc-link-lib=framework=AppKit");
+        println!("cargo:rustc-link-lib=framework=UniformTypeIdentifiers");
+        println!("cargo:rustc-link-lib=dylib=objc");
     }
 }

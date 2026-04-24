@@ -12,8 +12,9 @@ use crate::{
 
 use nappgui_sys::{
     button_OnClick, button_check, button_check3, button_flat, button_flatgle, button_font, button_get_font,
-    button_get_height, button_get_state, button_get_text, button_hpadding, button_image, button_image_alt, button_push,
-    button_radio, button_state, button_text, button_text_alt, button_tooltip, button_vpadding, button_width,
+    button_get_height, button_get_image, button_get_image_alt, button_get_state, button_get_text, button_hpadding,
+    button_image, button_image_alt, button_push, button_radio, button_state, button_text, button_text_alt,
+    button_tooltip, button_vpadding, button_width,
 };
 
 pub(crate) struct ButtonInner {
@@ -111,8 +112,7 @@ impl Button {
     ///
     /// # Remarks
     /// Not applicable in checkbox or radiobutton. In flat buttons, the size of the control will be adjusted to the image.
-    pub fn set_image(&self, image: &Image)
-    {
+    pub fn set_image(&self, image: &Image) {
         unsafe { button_image(self.as_ptr(), image.as_ptr()) }
     }
 
@@ -120,8 +120,7 @@ impl Button {
     ///
     /// # Remarks
     /// Only applicable on flat buttons with status button_flatgle. It will be displayed when the button is in ekGUI_ON status.
-    pub fn set_image_alt(&self, image: &Image)
-    {
+    pub fn set_image_alt(&self, image: &Image) {
         unsafe { button_image_alt(self.as_ptr(), image.as_ptr()) }
     }
 
@@ -175,12 +174,22 @@ impl Button {
 
     /// Gets the button icon.
     pub fn image(&self) -> Option<Image> {
-        todo!()
+        let image = unsafe { button_get_image(self.as_ptr()) };
+        if image.is_null() {
+            return None;
+        }
+        let image = unsafe { nappgui_sys::image_copy(image as *const _) };
+        Some(Image { inner: image })
     }
 
     /// Gets the alternative icon for the button.
     pub fn image_alt(&self) -> Option<Image> {
-        todo!()
+        let image = unsafe { button_get_image_alt(self.as_ptr()) };
+        if image.is_null() {
+            return None;
+        }
+        let image = unsafe { nappgui_sys::image_copy(image as *const _) };
+        Some(Image { inner: image })
     }
 
     /// Gets the current height of the control.

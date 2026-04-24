@@ -32,7 +32,11 @@ fn build() -> PathBuf {
         dst.define("CMAKE_OSX_SYSROOT", &sysroot);
     }
 
-    dst.profile(&env::var("PROFILE").unwrap());
+    if cfg!(target_os = "windows") {
+        dst.profile("release"); // Always set to Release on Windows in order to prevent link to _CrtDumpMemoryLeaks ...
+    } else {
+        dst.profile(&env::var("PROFILE").unwrap());
+    }
     dst.build()
 }
 

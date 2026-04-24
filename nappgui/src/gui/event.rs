@@ -558,6 +558,7 @@ impl crate::core::event::NappGUIEventResult for EvTbCell {
         text.replace(CString::new(&*self.text).unwrap());
         let text = text.as_ref().unwrap();
         nappgui_sys::EvTbCell {
+            icon: std::ptr::null(), // TODO!
             text: text.as_ptr(),
             align: self.align as _,
         }

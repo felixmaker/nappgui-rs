@@ -1,6 +1,6 @@
 [package]
 name = "nappgui"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 authors = ["felixmaker"]
 description = "Rust bindings to NAppGUI"
@@ -12,5 +12,5 @@ exclude = ["examples"]
 
 [dependencies]
 libc = "0.2"
-nappgui-sys = { path = "../nappgui-sys", version = "=0.2" }
+nappgui-sys = { path = "../nappgui-sys", version = "=0.3" }
 nappgui-macros = { path = "../nappgui-macros", version = "=0.1" }

@@ -1,17 +1,39 @@
+use std::sync::Arc;
+
 use crate::{draw_2d::ImageTrait, types::Scale, util::macros::callback};
 
 use nappgui_sys::{
-    imageview_OnClick, imageview_OnOverDraw, imageview_create, imageview_image, imageview_scale,
-    imageview_size,
+    imageview_OnClick, imageview_OnOverDraw, imageview_create, imageview_image, imageview_scale, imageview_size,
 };
 
-/// The image view trait.
-pub trait ImageViewTrait {
-    /// Returns a raw pointer to the image view object.
-    fn as_ptr(&self) -> *mut nappgui_sys::ImageView;
+pub(crate) struct ImageViewInner {
+    inner: *mut nappgui_sys::ImageView,
+}
+
+/// ImageView are specialized views in visualizing images and GIF animations.
+///
+/// # Remark
+/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
+/// components assciated with it will be automatically released.
+#[repr(transparent)]
+pub struct ImageView {
+    pub(crate) inner: Arc<ImageViewInner>,
+}
+
+impl ImageView {
+    /// Create a image view.
+    pub fn new(width: f32, height: f32) -> Self {
+        let imageview = unsafe { imageview_create() };
+        assert!(!imageview.is_null());
+        let imageview = ImageView {
+            inner: Arc::new(ImageViewInner { inner: imageview }),
+        };
+        imageview.set_size(width, height);
+        imageview
+    }
 
     /// Set the default control size.
-    fn size(&self, width: f32, height: f32) {
+    pub fn set_size(&self, width: f32, height: f32) {
         let size = nappgui_sys::S2Df { width, height };
         unsafe {
             imageview_size(self.as_ptr(), size);
@@ -19,14 +41,14 @@ pub trait ImageViewTrait {
     }
 
     /// Set the scaling to apply to the image.
-    fn scale(&self, scale: Scale) {
+    pub fn set_scale(&self, scale: Scale) {
         unsafe {
             imageview_scale(self.as_ptr(), scale as _);
         }
     }
 
     /// Set the image to be displayed in the control.
-    fn image<T>(&self, image: &T)
+    pub fn set_image<T>(&self, image: &T)
     where
         T: ImageTrait,
     {
@@ -37,37 +59,14 @@ pub trait ImageViewTrait {
 
     callback! {
         /// Set a handle for the event click on the image.
-         on_click() => imageview_OnClick;
+        pub on_click() => imageview_OnClick;
 
         /// Allows you to draw an overlay on the image when the mouse is over it.
-         on_over_draw() => imageview_OnOverDraw;
+        pub on_over_draw() => imageview_OnOverDraw;
+    }
+
+    /// Returns a raw pointer to the image view object.
+    pub fn as_ptr(&self) -> *mut nappgui_sys::ImageView {
+        self.inner.inner
     }
 }
-
-/// ImageView are specialized views in visualizing images and GIF animations.
-///
-/// # Remark
-/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
-/// components assciated with it will be automatically released.
-#[repr(transparent)]
-#[derive(Clone, Copy, Debug)]
-pub struct ImageView {
-    pub(crate) inner: *mut nappgui_sys::ImageView,
-}
-
-impl ImageViewTrait for ImageView {
-    fn as_ptr(&self) -> *mut nappgui_sys::ImageView {
-        self.inner
-    }
-}
-
-impl ImageView {
-    /// Create a image view.
-    pub fn new(width: f32, height: f32) -> Self {
-        let imageview = unsafe { imageview_create() };
-        let imageview = Self { inner: imageview };
-        imageview.size(width, height);
-        imageview
-    }
-}
-

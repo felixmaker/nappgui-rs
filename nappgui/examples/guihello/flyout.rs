@@ -145,7 +145,7 @@ fn create_flywin() -> Window {
     let nrows = 4;
     let layout = Layout::new(2, nrows);
     let panel = Panel::new();
-    let window = Window::new(WindowFlags {
+    let mut window = Window::new(WindowFlags {
         process_return_key: true,
         process_escape_key: true,
         has_outer_border: false,

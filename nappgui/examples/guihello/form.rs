@@ -13,7 +13,7 @@ struct FormData {
 fn modal_window(edit: &mut Edit, text: &str, focus_info: &FocusInfo) -> Window {
     let message = format!("Do you want to validate the text '{}' of the EditBox '{:?}'? The focus will be moved to the 'todo!' control using the '{:?}' action.", text, edit.as_ptr(), focus_info.action);
 
-    let window = Window::new(WindowFlags {
+    let mut window = Window::new(WindowFlags {
         process_escape_key: true,
         ..Default::default()
     });

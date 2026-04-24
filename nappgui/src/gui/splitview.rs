@@ -1,88 +1,19 @@
+use std::sync::Arc;
+
 use nappgui_sys::{
-    splitview_get_pos, splitview_horizontal, splitview_minsize0, splitview_minsize1,
-    splitview_panel, splitview_pos, splitview_splitview, splitview_textview, splitview_vertical,
-    splitview_view, splitview_visible0, splitview_visible1, splitview_webview,
+    splitview_get_pos, splitview_horizontal, splitview_minsize0, splitview_minsize1, splitview_panel, splitview_pos,
+    splitview_splitview, splitview_textview, splitview_vertical, splitview_view, splitview_visible0,
+    splitview_visible1, splitview_webview,
 };
 
 use crate::{
-    gui::{PanelTrait, TextViewTrait, ViewTrait, WebViewTrait},
+    gui::{Panel, TextView, View, WebView},
     types::SplitMode,
 };
 
-/// The splitview trait.
-pub trait SplitViewTrait {
-    /// Returns a raw pointer to the splitview object.
-    fn as_ptr(&self) -> *mut nappgui_sys::SplitView;
-
-    /// Add a custom view to the splitview.
-    fn view<T>(&self, view: T, tabstop: bool)
-    where
-        T: ViewTrait,
-    {
-        unsafe { splitview_view(self.as_ptr(), view.as_ptr(), tabstop as _) }
-    }
-
-    /// Add a text view to the splitview.
-    fn textview<T>(&self, view: T, tabstop: bool)
-    where
-        T: TextViewTrait,
-    {
-        unsafe { splitview_textview(self.as_ptr(), view.as_ptr(), tabstop as _) }
-    }
-
-    /// Add a web view to SplitView.
-    fn webview<T>(&self, view: T, tabstop: bool)
-    where
-        T: WebViewTrait,
-    {
-        unsafe { splitview_webview(self.as_ptr(), view.as_ptr(), tabstop as _) }
-    }
-
-    /// Add a splitview (child) to the splitview.
-    fn splitview<T>(&self, child: T)
-    where
-        T: SplitViewTrait,
-    {
-        unsafe { splitview_splitview(self.as_ptr(), child.as_ptr()) }
-    }
-
-    /// Add a panel to the splitview.
-    fn panel<T>(&self, panel: T)
-    where
-        T: PanelTrait,
-    {
-        unsafe { splitview_panel(self.as_ptr(), panel.as_ptr()) }
-    }
-
-    /// Sets the position of the view separator.
-    fn position(&self, mode: SplitMode, pos: f32) {
-        unsafe { splitview_pos(self.as_ptr(), mode as _, pos) }
-    }
-
-    /// Get the current divider position.
-    fn get_position(&self, mode: SplitMode) -> f32 {
-        unsafe { splitview_get_pos(self.as_ptr(), mode as _) }
-    }
-
-    /// Show/hide the left/upper child.
-    fn visible_front(&self, visible: bool) {
-        unsafe { splitview_visible0(self.as_ptr(), visible as _) }
-    }
-
-    /// Show/hide the right/bottom child.
-    fn visible_back(&self, visible: bool) {
-        unsafe { splitview_visible1(self.as_ptr(), visible as _) }
-    }
-
-    /// Set the minimum size of the left/upper child.
-    fn min_size_front(&self, size: f32) {
-        unsafe { splitview_minsize0(self.as_ptr(), size) }
-    }
-
-    /// Set the minimum size of the right/bottom child.
-    fn min_size_back(&self, size: f32) {
-        unsafe { splitview_minsize1(self.as_ptr(), size) }
-    }
+/// The split view type.
+pub(crate) struct SplitViewInner {
+    pub(crate) inner: *mut nappgui_sys::SplitView,
 }
 
 /// The SplitView are views divided into two parts, where in each of them we place another view or
@@ -93,27 +24,111 @@ pub trait SplitViewTrait {
 /// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
-#[derive(Clone, Copy, Debug)]
 pub struct SplitView {
-    pub(crate) inner: *mut nappgui_sys::SplitView,
-}
-
-impl SplitViewTrait for SplitView {
-    fn as_ptr(&self) -> *mut nappgui_sys::SplitView {
-        self.inner
-    }
+    pub(crate) inner: Arc<SplitViewInner>,
 }
 
 impl SplitView {
     /// Create a splitview with horizontal split.
     pub fn new_horizontal() -> Self {
         let splitview = unsafe { splitview_horizontal() };
-        Self { inner: splitview }
+        assert!(!splitview.is_null());
+        Self {
+            inner: Arc::new(SplitViewInner { inner: splitview }),
+        }
     }
 
     /// Create a splitview with vertical split.
     pub fn new_vertical() -> Self {
         let splitview = unsafe { splitview_vertical() };
-        Self { inner: splitview }
+        assert!(!splitview.is_null());
+        Self {
+            inner: Arc::new(SplitViewInner { inner: splitview }),
+        }
+    }
+
+    /// Add a view or panel into the splitview as its split child.
+    ///
+    /// # Remark
+    /// For splitview and panel, the tabstop parameter is always set to TRUE even if tabstop is set
+    /// to false.
+    pub fn add<T>(&self, control: &T, tabstop: bool)
+    where
+        T: SplitViewInsertChildTrait,
+    {
+        control.insert_into_splitview(self, tabstop);
+    }
+
+    /// Sets the position of the view separator.
+    pub fn set_position(&self, mode: SplitMode, pos: f32) {
+        unsafe { splitview_pos(self.as_ptr(), mode as _, pos) }
+    }
+
+    /// Get the current divider position.
+    pub fn position(&self, mode: SplitMode) -> f32 {
+        unsafe { splitview_get_pos(self.as_ptr(), mode as _) }
+    }
+
+    /// Show or hide the left/upper child.
+    pub fn set_first_child_visible(&self, visible: bool) {
+        unsafe { splitview_visible0(self.as_ptr(), visible as _) }
+    }
+
+    /// Show or hide the right/bottom child.
+    pub fn set_last_child_visible(&self, visible: bool) {
+        unsafe { splitview_visible1(self.as_ptr(), visible as _) }
+    }
+
+    /// Set the minimum size of the left/upper child.
+    pub fn set_first_child_min_size(&self, size: f32) {
+        unsafe { splitview_minsize0(self.as_ptr(), size) }
+    }
+
+    /// Set the minimum size of the right/bottom child.
+    pub fn set_last_child_min_size(&self, size: f32) {
+        unsafe { splitview_minsize1(self.as_ptr(), size) }
+    }
+
+    /// Returns a raw pointer to the splitview object.
+    pub fn as_ptr(&self) -> *mut nappgui_sys::SplitView {
+        self.inner.inner
+    }
+}
+
+/// Define how a control insert into splitview.
+pub trait SplitViewInsertChildTrait {
+    /// Insert into split view as its child.
+    fn insert_into_splitview(&self, split_view: &SplitView, tabstop: bool);
+}
+
+impl SplitViewInsertChildTrait for View {
+    fn insert_into_splitview(&self, split_view: &SplitView, tabstop: bool) {
+        unsafe { splitview_view(split_view.as_ptr(), self.as_ptr(), tabstop as _) }
+    }
+}
+
+impl SplitViewInsertChildTrait for TextView {
+    fn insert_into_splitview(&self, split_view: &SplitView, tabstop: bool) {
+        unsafe { splitview_textview(split_view.as_ptr(), self.as_ptr(), tabstop as _) }
+    }
+}
+
+impl SplitViewInsertChildTrait for WebView {
+    fn insert_into_splitview(&self, split_view: &SplitView, tabstop: bool) {
+        unsafe { splitview_webview(split_view.as_ptr(), self.as_ptr(), tabstop as _) }
+    }
+}
+
+impl SplitViewInsertChildTrait for SplitView {
+    /// Tabstop is set to TRUE by default.
+    fn insert_into_splitview(&self, split_view: &SplitView, _tabstop: bool) {
+        unsafe { splitview_splitview(split_view.as_ptr(), self.as_ptr()) }
+    }
+}
+
+impl SplitViewInsertChildTrait for Panel {
+    /// Tabstop is set to TRUE by default.
+    fn insert_into_splitview(&self, split_view: &SplitView, _tabstop: bool) {
+        unsafe { splitview_panel(split_view.as_ptr(), self.as_ptr()) }
     }
 }

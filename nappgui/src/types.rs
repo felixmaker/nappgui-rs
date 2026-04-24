@@ -696,4 +696,68 @@ pub enum EventType {
 
 impl_i32_to_enum!(EventType, 1024..=1063);
 
+#[repr(i32)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+/// The type of a control.
+pub enum GuiType {
+    /// Label.
+    Label = 0,
+    /// Button.
+    Button = 1,
+    /// Popup.
+    Popup = 2,
+    /// EditBox.
+    EditBox = 3,
+    /// ComboBox.
+    ComboBox = 4,
+    /// Slider.
+    Slider = 5,
+    /// UpDown.
+    UpDown = 6,
+    /// Progress.
+    Progress = 7,
+
+    /// TextView.
+    TextView = 8,
+    /// WebView.
+    WebView = 9,
+    /// TreeView.
+    TreeView = 10,
+    /// BoxView.
+    BoxView = 11,
+    /// SplitView.
+    SplitView = 12,
+    /// CustomView.
+    CustomView = 13,
+
+    /// Panel.
+    Panel = 14,
+    /// Line.
+    Line = 15,
+    /// Header.
+    Header = 16,
+
+    /// Window.
+    Window = 17,
+    /// Toolbar.
+    Toolbar = 18
+}
+
+impl_i32_to_enum!(GuiType, 0..=18);
+
 pub use crate::gui::event::*;
+
+
+
+/// The button style.
+#[repr(i32)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[allow(missing_docs)]
+pub enum ButtonStyle {
+    Push = 0,
+    Check2 = 1,
+    Check3 = 2,
+    Radio = 3,
+    Flat = 4,
+    Flatgle = 5,
+}

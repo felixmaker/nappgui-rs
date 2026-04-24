@@ -1,13 +1,34 @@
-use std::ffi::CString;
+use std::ffi::{CStr, CString};
 
-use nappgui_sys::{comwin_color, comwin_open_file, comwin_save_file};
+use nappgui_sys::{comwin_color, comwin_open_file, comwin_save_file, comwin_select_dir};
 
-use crate::{draw_2d::Color, gui::WindowTrait, types::Align, util::macros::listener};
+use crate::{draw_2d::Color, gui::Window, types::Align, util::macros::listener};
+
+/// Launches the directory selection dialog.
+///
+/// # Remarks
+/// It will be launched in modal. parent will remain locked until the dialog is accepted.
+pub fn select_dir(window: &Window, caption: &str, start_dir: &str) -> Option<String> {
+    let caption = CString::new(caption).unwrap();
+    let start_dir = CString::new(start_dir).unwrap();
+    let dir = unsafe { comwin_select_dir(window.as_ptr(), caption.as_ptr(), start_dir.as_ptr()) };
+    if dir.is_null() {
+        return None;
+    }
+    let dir = unsafe { CStr::from_ptr(dir) };
+    Some(dir.to_string_lossy().into_owned())
+}
 
 /// Launch the open file dialog.
-pub fn open_file<T, I, S>(window: &T, ftypes: I, size: u32, start_dir: &str) -> String
+pub fn open_file<I, S>(
+    window: &Window,
+    caption: &str,
+    ftypes: I,
+    size: u32,
+    start_dir: &str,
+    filename: &str,
+) -> Option<String>
 where
-    T: WindowTrait,
     I: IntoIterator<Item = S>,
     S: AsRef<str>,
 {
@@ -16,23 +37,36 @@ where
         let cstr = CString::new(ftype.as_ref()).unwrap();
         types.push(cstr.as_ptr());
     }
+    let caption = CString::new(caption).unwrap();
     let start_dir = CString::new(start_dir).unwrap();
+    let filename = CString::new(filename).unwrap();
     let file = unsafe {
         comwin_open_file(
             window.as_ptr(),
+            caption.as_ptr(),
             types.as_mut_ptr(),
             size,
             start_dir.as_ptr(),
+            filename.as_ptr(),
         )
     };
+    if file.is_null() {
+        return None;
+    }
     let file = unsafe { std::ffi::CStr::from_ptr(file) };
-    file.to_string_lossy().into_owned()
+    Some(file.to_string_lossy().into_owned())
 }
 
 /// Launch the save file dialog.
-pub fn save_file<T, I, S>(window: &T, ftypes: I, size: u32, start_dir: &str) -> String
+pub fn save_file<I, S>(
+    window: &Window,
+    caption: &str,
+    ftypes: I,
+    size: u32,
+    start_dir: &str,
+    filename: &str,
+) -> Option<String>
 where
-    T: WindowTrait,
     I: IntoIterator<Item = S>,
     S: AsRef<str>,
 {
@@ -41,22 +75,30 @@ where
         let cstr = CString::new(ftype.as_ref()).unwrap();
         types.push(cstr.as_ptr());
     }
+    let caption = CString::new(caption).unwrap();
     let start_dir = CString::new(start_dir).unwrap();
+    let filename = CString::new(filename).unwrap();
+
     let file = unsafe {
         comwin_save_file(
             window.as_ptr(),
+            caption.as_ptr(),
             types.as_mut_ptr(),
             size,
             start_dir.as_ptr(),
+            filename.as_ptr(),
         )
     };
+    if file.is_null() {
+        return None;
+    }
     let file = unsafe { std::ffi::CStr::from_ptr(file) };
-    file.to_string_lossy().into_owned()
+    Some(file.to_string_lossy().into_owned())
 }
 
 /// Launch the color selection dialog.
 pub fn color<T, F>(
-    window: &T,
+    window: &Window,
     title: &str,
     x: f32,
     y: f32,
@@ -67,7 +109,6 @@ pub fn color<T, F>(
     n: u32,
     on_change: F,
 ) where
-    T: WindowTrait,
     F: FnMut() + 'static,
 {
     let listener = listener!(on_change, ());

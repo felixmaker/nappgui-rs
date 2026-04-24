@@ -82,7 +82,7 @@ fn modal_window(data: &Rc<RefCell<Data>>) {
     {
         let parent = parent.upgrade().unwrap();
         let pos = parent.get_origin();
-        let window = Window::new(window_flags(*type_));
+        let mut window = Window::new(window_flags(*type_));
         let panel = Panel::new();
         let layout1 = Layout::new(2, 1);
         let data = Rc::new(RefCell::new(Data::default()));
@@ -128,7 +128,7 @@ fn modal_layout(data: &Rc<RefCell<Data>>) -> Layout {
     layout.set(0, 3, button4);
     layout.set(0, 4, label);
     layout.horizontal_align(0, 4, Align::Justify); // make label shown full.
-    
+
     layout.vertical_margin(0, 5.0);
     layout.vertical_margin(1, 5.0);
     layout.vertical_margin(2, 5.0);
@@ -146,6 +146,7 @@ pub fn modal_windows(parent: WeakWindow) -> Panel {
     }));
     let panel = Panel::new();
     let layout = modal_layout(&data);
+
     panel.layout(layout);
     panel
 }

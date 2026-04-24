@@ -1,37 +1,38 @@
-use std::sync::Arc;
-
 use nappgui_sys::{
-    codec_t, image_codec, image_copy, image_destroy, image_format, image_frame_length, image_from_data,
-    image_from_file, image_from_pixbuf, image_from_pixels, image_get_codec, image_height, image_num_frames,
-    image_pixels, image_rotate, image_scale, image_to_file, image_trim, image_width, pixformat_t,
+    codec_t, image_codec, image_destroy, image_format, image_frame_length, image_from_data, image_from_file,
+    image_from_pixbuf, image_from_pixels, image_get_codec, image_height, image_num_frames, image_pixels, image_rotate,
+    image_scale, image_to_file, image_trim, image_width, pixformat_t,
 };
 
 use super::{color::Color, palette::Palette, pixbuf::PixBuf};
 
 /// The image type.
-pub(crate) struct ImageInner {
+#[repr(transparent)]
+pub struct Image {
     pub(crate) inner: *mut nappgui_sys::Image,
 }
 
-impl Drop for ImageInner {
-    fn drop(&mut self) {
-        unsafe { image_destroy(&mut self.inner) }
+impl Clone for Image {
+    fn clone(&self) -> Self {
+        unsafe {
+            Self {
+                inner: nappgui_sys::image_copy(self.inner as *const _),
+            }
+        }
     }
 }
 
-/// The image type.
-#[repr(transparent)]
-pub struct Image {
-    pub(crate) inner: Arc<ImageInner>,
+impl Drop for Image {
+    fn drop(&mut self) {
+        unsafe { image_destroy(&mut self.inner) }
+    }
 }
 
 /// The image trait.
 impl Image {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Image) -> Self {
         assert!(!ptr.is_null());
-        Self {
-            inner: Arc::new(ImageInner { inner: ptr }),
-        }
+        Self { inner: ptr }
     }
 
     /// Create an image from an array of pixels.
@@ -156,13 +157,6 @@ impl Image {
 
     /// Returns the raw pointer of Image object
     pub fn as_ptr(&self) -> *mut nappgui_sys::Image {
-        self.inner.inner
-    }
-}
-
-impl Clone for Image {
-    fn clone(&self) -> Self {
-        let image = unsafe { image_copy(self.as_ptr()) };
-        unsafe { Image::from_raw(image) }
+        self.inner
     }
 }

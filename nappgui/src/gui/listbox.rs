@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::{
-    draw_2d::{Color, Font, ImageTrait},
+    draw_2d::{Color, Font, Image},
     gui::event::{EvButton, EvMouse},
     util::macros::callback,
 };
@@ -84,9 +84,7 @@ impl ListBox {
     }
 
     /// Adds a new element with image.
-    pub fn add_image_element<T>(&self, text: &str, image: &T)
-    where
-        T: ImageTrait,
+    pub fn add_image_element(&self, text: &str, image: &Image)
     {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
@@ -103,9 +101,7 @@ impl ListBox {
     }
 
     /// Edit a list item with image.
-    pub fn set_image_element<T>(&self, index: u32, text: &str, image: &T)
-    where
-        T: ImageTrait,
+    pub fn set_image_element(&self, index: u32, text: &str, image: &Image)
     {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {

@@ -4,7 +4,7 @@ use std::{
 };
 
 use crate::{
-    draw_2d::{Font, Image, ImageTrait},
+    draw_2d::{Font, Image},
     gui::event::EvButton,
     types::{ButtonStyle, GuiState},
     util::macros::callback,
@@ -111,9 +111,7 @@ impl Button {
     ///
     /// # Remarks
     /// Not applicable in checkbox or radiobutton. In flat buttons, the size of the control will be adjusted to the image.
-    pub fn set_image<T>(&self, image: &T)
-    where
-        T: ImageTrait,
+    pub fn set_image(&self, image: &Image)
     {
         unsafe { button_image(self.as_ptr(), image.as_ptr()) }
     }
@@ -122,9 +120,7 @@ impl Button {
     ///
     /// # Remarks
     /// Only applicable on flat buttons with status button_flatgle. It will be displayed when the button is in ekGUI_ON status.
-    pub fn set_image_alt<T>(&self, image: &T)
-    where
-        T: ImageTrait,
+    pub fn set_image_alt(&self, image: &Image)
     {
         unsafe { button_image_alt(self.as_ptr(), image.as_ptr()) }
     }

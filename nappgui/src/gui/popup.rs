@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{draw_2d::ImageTrait, gui::event::EvButton, util::macros::callback};
+use crate::{draw_2d::Image, gui::event::EvButton, util::macros::callback};
 
 use nappgui_sys::{
     popup_OnSelect, popup_add_elem, popup_clear, popup_count, popup_create, popup_get_selected, popup_get_text,
@@ -56,9 +56,7 @@ impl PopUp {
     }
 
     /// Add a new item with image to the popup list.
-    pub fn add_image_element<T>(&self, text: &str, image: &T)
-    where
-        T: ImageTrait,
+    pub fn add_image_element(&self, text: &str, image: &Image)
     {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
@@ -75,9 +73,7 @@ impl PopUp {
     }
 
     /// Edit an item with image from the drop-down list.
-    pub fn set_image_element<T>(&self, index: u32, text: &str, image: &T)
-    where
-        T: ImageTrait,
+    pub fn set_image_element(&self, index: u32, text: &str, image: &Image)
     {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {

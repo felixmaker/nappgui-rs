@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{draw_2d::ImageTrait, types::Scale, util::macros::callback};
+use crate::{draw_2d::Image, types::Scale, util::macros::callback};
 
 use nappgui_sys::{
     imageview_OnClick, imageview_OnOverDraw, imageview_create, imageview_image, imageview_scale, imageview_size,
@@ -48,10 +48,7 @@ impl ImageView {
     }
 
     /// Set the image to be displayed in the control.
-    pub fn set_image<T>(&self, image: &T)
-    where
-        T: ImageTrait,
-    {
+    pub fn set_image(&self, image: &Image) {
         unsafe {
             imageview_image(self.as_ptr(), image.as_ptr());
         }

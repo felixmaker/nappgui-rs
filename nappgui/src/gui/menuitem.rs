@@ -1,10 +1,7 @@
 use std::sync::Arc;
 
 use crate::{
-    draw_2d::ImageTrait,
-    gui::{event::EvMenu, Menu},
-    types::{GuiState, KeyCode, ModifierKey},
-    util::macros::callback,
+    draw_2d::Image, gui::{Menu, event::EvMenu}, types::{GuiState, KeyCode, ModifierKey}, util::macros::callback
 };
 
 use nappgui_sys::{
@@ -68,9 +65,7 @@ impl MenuItem {
     }
 
     /// Set the icon that will display the item.
-    pub fn set_image<T>(&self, image: &T)
-    where
-        T: ImageTrait,
+    pub fn set_image(&self, image: &Image)
     {
         unsafe { menuitem_image(self.as_ptr(), image.as_ptr()) };
     }

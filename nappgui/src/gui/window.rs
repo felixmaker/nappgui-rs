@@ -1,50 +1,31 @@
 use nappgui_sys::{
     window_OnClose, window_OnMoved, window_OnResize, window_clear_hotkeys, window_client_to_screen,
     window_control_frame, window_create, window_cursor, window_cycle_tabstop, window_defbutton, window_destroy,
-    window_focus, window_focus_info, window_get_client_size, window_get_focus, window_get_origin, window_get_size,
-    window_hide, window_hotkey, window_modal, window_next_tabstop, window_origin, window_overlay, window_panel,
+    window_focus, window_focus_info, window_get_client_size, window_get_origin, window_get_size, window_hide,
+    window_hotkey, window_modal, window_next_tabstop, window_origin, window_overlay, window_panel,
     window_previous_tabstop, window_show, window_stop_modal, window_title, window_update, V2Df,
 };
 use std::ffi::CString;
-use std::sync::Arc;
 
 use crate::draw_2d::Image;
 use crate::gui::event::{EvPos, EvSize, EvWinClose};
-use crate::gui::{Button, Control, Panel};
+use crate::gui::{Button, Object, ObjectType, Panel, WeakObject};
 use crate::types::{
     FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D, Size2D, WindowFlags,
 };
 use crate::util::macros::{callback, listener};
 
-/// Wrappers to Window object.
-#[repr(transparent)]
-pub(crate) struct WindowInner {
-    pub(crate) inner: *mut nappgui_sys::Window,
-}
-
-impl Drop for WindowInner {
-    /// Destroy the window and all its contents.
-    ///
-    /// # Remarks
-    /// Panels, layouts and components will be recursively destroyed.
-    fn drop(&mut self) {
-        unsafe { window_destroy(&mut self.inner) }
-    }
-}
-
 /// Window objects are the highest-level containers within the user interface.
-pub struct Window {
-    pub(crate) inner: Arc<WindowInner>,
-}
+#[repr(transparent)]
+#[derive(Clone)]
+pub struct Window(WeakObject);
 
 impl Window {
     /// Create a new window.
     pub fn new(flag: WindowFlags) -> Self {
         let result = flag.to_window_flag_t();
         let window = unsafe { window_create(result as u32) };
-        Window {
-            inner: Arc::new(WindowInner { inner: window }),
-        }
+        Window(Object::new(window, ObjectType::Window))
     }
 
     callback! {
@@ -65,8 +46,7 @@ impl Window {
     ///
     /// # Panics
     /// The window object can only have one panel. Setting this function twice or above will panic!
-    pub fn set_panel(&self, panel: &Panel)
-    {
+    pub fn set_panel(&self, panel: &Panel) {
         unsafe { window_panel(self.as_ptr(), panel.as_ptr()) };
     }
 
@@ -140,23 +120,25 @@ impl Window {
         GuiFocus::try_from(focus).unwrap()
     }
 
-    /// Set keyboard focus to a specific control.
-    pub fn focus<T>(&self, control: T) -> GuiFocus
-    where
-        T: AsRef<Control>,
-    {
-        let focus = unsafe { window_focus(self.as_ptr(), control.as_ref().as_ptr()) };
-        GuiFocus::try_from(focus).unwrap()
-    }
+    // /// Set keyboard focus to a specific control.
+    // pub fn focus<T>(&self, control: &T) -> GuiFocus
+    // where
+    //     T: AsControl,
+    // {
+    //     let control = control.as_control();
+    //     let focus = unsafe { window_focus(self.as_ptr(), control.as_ptr()) };
+    //     GuiFocus::try_from(focus).unwrap()
+    // }
 
     /// Gets the control that keyboard focus has.
-    pub fn get_focus(&self) -> Option<&Control> {
-        let control = Box::leak(Box::new(unsafe { window_get_focus(self.as_ptr()) }));
-        if control.is_null() {
-            None
-        } else {
-            Some(unsafe { std::mem::transmute(control) })
-        }
+    pub fn get_focus<T>(&self) -> Option<T> {
+        // let control = Box::leak(Box::new(unsafe { window_get_focus(self.as_ptr()) }));
+        // if control.is_null() {
+        //     None
+        // } else {
+        //     Some(unsafe { std::mem::transmute(control) })
+        // }
+        todo!()
     }
 
     /// Gets additional information about a keyboard focus change operation.
@@ -215,20 +197,21 @@ impl Window {
         }
     }
 
-    /// Gets the position and size of a control in window coordinates.
-    ///
-    /// # Remarks
-    ///
-    /// control must belong to the window, be active and visible. The point (0,0) corresponds to the upper left vertex of the client area of the window.
-    pub fn control_frame<T>(&self, control: T) -> Rect2D
-    where
-        T: AsRef<Control>,
-    {
-        unsafe {
-            let rect = window_control_frame(self.as_ptr(), control.as_ref().as_ptr());
-            std::mem::transmute(rect)
-        }
-    }
+    // /// Gets the position and size of a control in window coordinates.
+    // ///
+    // /// # Remarks
+    // ///
+    // /// control must belong to the window, be active and visible. The point (0,0) corresponds to the upper left vertex of the client area of the window.
+    // pub fn control_frame<T>(&self, control: &T) -> Rect2D
+    // where
+    //     T: AsControl,
+    // {
+    //     let control = control.as_control();
+    //     unsafe {
+    //         let rect = window_control_frame(self.as_ptr(), control.as_ptr());
+    //         std::mem::transmute(rect)
+    //     }
+    // }
 
     /// Transforms a point expressed in window coordinates to screen coordinates.
     pub fn client_to_screen(&self, x: f32, y: f32) -> Point2D {
@@ -255,14 +238,13 @@ impl Window {
     /// # Remarks
     ///
     /// hot_x, hot_y indicate the "sensitive" point within the image, which will indicate the exact position of the mouse.
-    pub fn cursor(&self, cursor: GuiCursor, image: &Image, hot_x: f32, hot_y: f32)
-    {
+    pub fn cursor(&self, cursor: GuiCursor, image: &Image, hot_x: f32, hot_y: f32) {
         unsafe { window_cursor(self.as_ptr(), cursor as i32, image.as_ptr(), hot_x, hot_y) }
     }
 
     /// Returns the raw pointer of Window object
     pub fn as_ptr(&self) -> *mut nappgui_sys::Window {
-        self.inner.inner
+        self.0.as_mut_ptr_or_panic()
     }
 }
 

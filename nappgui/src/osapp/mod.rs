@@ -2,7 +2,7 @@ use std::ffi::{c_void, CString};
 
 use nappgui_sys::{osapp_finish, osapp_menubar, osapp_open_url, osmain_imp};
 
-use crate::gui::{Menu, Window};
+use crate::gui::{GLOBAL_OBJECTS, GLOBAL_POINTERS, Menu, ObjectType, Window};
 
 /// Application handler.
 pub trait AppHandler {
@@ -34,6 +34,18 @@ where
     {
         let mut app = Box::from_raw(*obj as *mut T);
         app.destroy();
+        GLOBAL_OBJECTS.with_borrow_mut(|objs| {
+            for (_id, obj) in objs.iter() {
+                if obj.0.object_type == ObjectType::Window {
+                    let mut window = obj.0.pointer as *mut nappgui_sys::Window;
+                    unsafe {
+                        nappgui_sys::window_destroy(&mut window);
+                    }
+                }
+            }
+            objs.clear();
+        });
+        GLOBAL_POINTERS.with_borrow_mut(|pointer| pointer.clear())
     }
 
     unsafe extern "C" fn on_update<T>(obj: *mut c_void, prtime: f64, ctime: f64)

@@ -1,9 +1,9 @@
-use std::sync::Arc;
-
 use crate::{
     core::Stream,
     draw_2d::Color,
-    gui::event::{EvText, EvTextFilter},
+    gui::{
+        Object, ObjectType, WeakObject, event::{EvText, EvTextFilter}
+    },
     types::{Align, FontStyle},
     util::macros::callback,
 };
@@ -17,29 +17,20 @@ use nappgui_sys::{
     textview_writef, S2Df,
 };
 
-/// The text view type.
-pub(crate) struct TextViewInner {
-    pub(crate) inner: *mut nappgui_sys::TextView,
-}
-
 /// TextView are views designed to work with rich text blocks, where fonts, sizes and colors can be combined.
 ///
 /// # Remark
 /// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
-pub struct TextView {
-    pub(crate) inner: Arc<TextViewInner>,
-}
+#[derive(Clone)]
+pub struct TextView(WeakObject);
 
 impl TextView {
     /// Create a text view.
     pub fn new() -> Self {
         let textview = unsafe { textview_create() };
-        assert!(!textview.is_null());
-        Self {
-            inner: Arc::new(TextViewInner { inner: textview }),
-        }
+        Self(Object::new(textview, ObjectType::TextView))
     }
 
     callback! {
@@ -264,6 +255,6 @@ impl TextView {
 
     /// Returns a raw pointer to the text view object.
     pub fn as_ptr(&self) -> *mut nappgui_sys::TextView {
-        self.inner.inner
+        self.0.as_mut_ptr_or_panic()
     }
 }

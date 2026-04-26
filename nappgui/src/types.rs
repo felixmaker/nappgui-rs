@@ -1,5 +1,3 @@
-use crate::gui::Control;
-
 macro_rules! impl_i32_to_enum {
     ($type: ty, $range: expr) => {
         impl TryFrom<i32> for $type {
@@ -194,13 +192,14 @@ pub struct FocusInfo {
 
 impl FocusInfo {
     /// Control that has received the focus.
-    pub fn next(&self) -> Option<&Control> {
-        if self.next.is_null() {
-            None
-        } else {
-            let next = &self.next;
-            Some(unsafe { std::mem::transmute(next) })
-        }
+    pub fn next<T>(&self) -> Option<T> {
+        // if self.next.is_null() {
+        //     None
+        // } else {
+        //     let next = &self.next;
+        //     Some(unsafe { std::mem::transmute(next) })
+        // }
+        todo!()
     }
 }
 
@@ -740,14 +739,12 @@ pub enum GuiType {
     /// Window.
     Window = 17,
     /// Toolbar.
-    Toolbar = 18
+    Toolbar = 18,
 }
 
 impl_i32_to_enum!(GuiType, 0..=18);
 
 pub use crate::gui::event::*;
-
-
 
 /// The button style.
 #[repr(i32)]

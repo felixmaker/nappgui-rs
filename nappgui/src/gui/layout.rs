@@ -1,11 +1,11 @@
-use std::sync::Arc;
+use std::rc::Rc;
 
 use nappgui_sys::{
-    layout_bgcolor, layout_cell, layout_control, layout_create, layout_halign, layout_hexpand, layout_hexpand2,
-    layout_hexpand3, layout_hmargin, layout_hsize, layout_insert_col, layout_insert_row, layout_margin, layout_margin2,
-    layout_margin4, layout_ncols, layout_nrows, layout_panel_replace, layout_remove_col, layout_remove_row,
-    layout_show_col, layout_show_row, layout_skcolor, layout_taborder, layout_tabstop, layout_update, layout_valign,
-    layout_vexpand, layout_vexpand2, layout_vexpand3, layout_vmargin, layout_vsize,
+    layout_bgcolor, layout_cell, layout_create, layout_halign, layout_hexpand, layout_hexpand2, layout_hexpand3,
+    layout_hmargin, layout_hsize, layout_insert_col, layout_insert_row, layout_margin, layout_margin2, layout_margin4,
+    layout_ncols, layout_nrows, layout_panel_replace, layout_remove_col, layout_remove_row, layout_show_col,
+    layout_show_row, layout_skcolor, layout_taborder, layout_tabstop, layout_update, layout_valign, layout_vexpand,
+    layout_vexpand2, layout_vexpand3, layout_vmargin, layout_vsize,
 };
 
 use crate::{
@@ -15,10 +15,6 @@ use crate::{
 
 use super::*;
 
-pub(crate) struct LayoutInner {
-    inner: *mut nappgui_sys::Layout,
-}
-
 /// A Layout is a virtual and transparent grid always linked with a Panel which serves to locate the different
 /// interface elements.
 ///
@@ -26,18 +22,14 @@ pub(crate) struct LayoutInner {
 /// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
-pub struct Layout {
-    pub(crate) inner: Arc<LayoutInner>,
-}
+#[derive(Clone)]
+pub struct Layout(WeakObject);
 
 impl Layout {
     /// Creates a new layout.
     pub fn new(ncols: u32, nrows: u32) -> Self {
-        let layout = unsafe { layout_create(ncols as _, nrows as _) };
-        assert!(!layout.is_null());
-        Self {
-            inner: Arc::new(LayoutInner { inner: layout }),
-        }
+        let layout = unsafe { layout_create(ncols, nrows) };
+        Layout(Object::new(layout, ObjectType::Layout))
     }
 
     /// Gets the number of columns in the layout.
@@ -51,19 +43,20 @@ impl Layout {
     }
 
     /// Get a layout cell.
-    pub fn get_cell<'ctx>(&self, col: u32, row: u32) -> Cell {
-        let cell = unsafe { layout_cell(self.as_ptr(), col, row) };
-        unsafe { Cell::from_raw(cell) }
-    }
+    // pub fn get_cell(&self, col: u32, row: u32) -> LayoutCell {
+    //     let cell = global_expect(self.inner.id, || unsafe { layout_cell(self.as_ptr(), col, row) });
+    //     unsafe { LayoutCell::from_raw(cell) }
+    // }
 
     /// Gets the control assigned to a cell in the layout.
-    pub fn get_control(&self, col: u32, row: u32) -> Option<Control> {
-        let control = unsafe { layout_control(self.as_ptr(), col, row) };
-        if control.is_null() {
-            None
-        } else {
-            Some(unsafe { Control::from_raw(control) })
-        }
+    pub fn get_control<T>(&self, _col: u32, _row: u32) -> Option<T> {
+        // let control = unsafe { layout_control(self.as_ptr(), col, row) };
+        // if control.is_null() {
+        //     None
+        // } else {
+        //     Some(unsafe { Control::from_raw(control) })
+        // }
+        todo!()
     }
 
     /// Insert a control to the layout.
@@ -71,9 +64,9 @@ impl Layout {
     /// # Panics
     ///
     /// Panics if col or row is out of bounds.
-    pub fn set_control<'ctx, T>(&self, col: u32, row: u32, control: &'ctx T)
+    pub fn set_control<T>(&self, col: u32, row: u32, control: &T)
     where
-        T: ControlLayoutTrait,
+        T: LayoutControl,
     {
         assert!(col < self.ncols());
         assert!(row < self.nrows());
@@ -87,14 +80,14 @@ impl Layout {
     /// In cell (col,row) there must previously exist a panel that will be destroyed,
     /// without the possibility of recovering it. See Replacing panels.
     ///
+    /// TODO!
+    ///
     /// # Panics
     ///
     /// Panics if col or row is out of bounds.
     pub fn panel_replace<T>(&self, panel: &Panel, col: u32, row: u32) {
         assert!(col < self.ncols());
         assert!(row < self.nrows());
-
-        unsafe { layout_panel_replace(self.as_ptr(), panel.as_ptr(), col, row) };
     }
 
     /// Insert a new column into the layout.
@@ -383,7 +376,7 @@ impl Layout {
 
     /// Returns a raw pointer to the layout object.
     pub fn as_ptr(&self) -> *mut nappgui_sys::Layout {
-        self.inner.inner
+        self.0.as_mut_ptr_or_panic()
     }
 
     // /// Associate a type struct with a layout.
@@ -453,14 +446,14 @@ impl Layout {
 // }
 
 /// Define how controls are laid out in a layout.
-pub trait ControlLayoutTrait {
+pub trait LayoutControl {
     /// Insert the control to the layout
     fn insert_in_layout(&self, layout: &Layout, col: u32, row: u32);
 }
 
 macro_rules! impl_layout {
     ($type: ty, $func: ident) => {
-        impl crate::gui::ControlLayoutTrait for $type {
+        impl crate::gui::LayoutControl for $type {
             fn insert_in_layout(&self, layout: &Layout, col: u32, row: u32) {
                 unsafe {
                     nappgui_sys::$func(layout.as_ptr(), self.as_ptr(), col, row);

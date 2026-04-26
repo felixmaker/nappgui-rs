@@ -2,10 +2,8 @@ use std::sync::Arc;
 
 use nappgui_sys::{cell_empty, cell_enabled, cell_padding, cell_padding2, cell_padding4, cell_visible};
 
-use crate::gui::Control;
-
 /// The cell type.
-pub(crate) struct CellInner {
+pub(crate) struct LayoutCellInner {
     inner: *mut nappgui_sys::Cell,
 }
 
@@ -15,17 +13,18 @@ pub(crate) struct CellInner {
 /// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
-pub struct Cell {
-    pub(crate) inner: Arc<CellInner>,
+#[derive(Clone)]
+pub struct LayoutCell {
+    pub(crate) inner: Arc<LayoutCellInner>,
 }
 
 /// The cell trait.
-impl Cell {
+impl LayoutCell {
     /// Create a cell from a pointer.
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Cell) -> Self {
         assert!(!ptr.is_null());
         Self {
-            inner: Arc::new(CellInner { inner: ptr }),
+            inner: Arc::new(LayoutCellInner { inner: ptr }),
         }
     }
 
@@ -38,7 +37,7 @@ impl Cell {
     ///
     /// # Remarks
     /// If the cell is empty or contains a sublayout, this function will return `None`.
-    pub fn control(&self) -> Option<&Control> {
+    pub fn control<T>(&self) -> Option<T> {
         // let ptr = unsafe { cell_control(self.as_ptr()) };
         // if ptr.is_null() {
         //     None

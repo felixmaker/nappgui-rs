@@ -20,6 +20,7 @@ pub(crate) struct MenuItemInner {
 /// This type is managed by nappgui itself. Rust does not have its ownership. When the menu object is dropped, all
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
+#[derive(Clone)]
 pub struct MenuItem {
     pub(crate) inner: Arc<MenuItemInner>,
 }

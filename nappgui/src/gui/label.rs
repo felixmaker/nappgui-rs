@@ -1,8 +1,8 @@
-use std::{ffi::CString, sync::Arc};
+use std::ffi::CString;
 
 use crate::{
     draw_2d::{Color, Font},
-    gui::event::EvMouse,
+    gui::{event::EvMouse, Object, ObjectType, WeakObject},
     types::{Align, FontStyle},
     util::macros::callback,
 };
@@ -11,11 +11,6 @@ use nappgui_sys::{
     label_OnClick, label_align, label_bgcolor, label_bgcolor_over, label_color, label_color_over, label_create,
     label_font, label_multiline, label_size_text, label_style_over, label_text,
 };
-
-/// The label type.
-pub(crate) struct LabelInner {
-    inner: *mut nappgui_sys::Label,
-}
 
 /// Label controls are used to insert small blocks of text into windows and forms. They are of uniform format,
 /// that is, the font and color attributes will be applied to the entire text. In most cases the content will
@@ -26,18 +21,14 @@ pub(crate) struct LabelInner {
 /// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
-pub struct Label {
-    pub(crate) inner: Arc<LabelInner>,
-}
+#[derive(Clone)]
+pub struct Label(WeakObject);
 
 impl Label {
     /// Create a text control.
     pub fn new(text: &str) -> Label {
         let label = unsafe { label_create() };
-        assert!(!label.is_null());
-        let label = Label {
-            inner: Arc::new(LabelInner { inner: label }),
-        };
+        let label = Label(Object::new(label, ObjectType::Label));
         label.set_text(text);
         label
     }
@@ -134,13 +125,12 @@ impl Label {
     }
 
     /// Returns a raw pointer to the label object.
+    ///
+    /// # Panics
+    /// Panics if the object no longer able to access!
     pub fn as_ptr(&self) -> *mut nappgui_sys::Label {
-        self.inner.inner
-    }
-}
-
-impl AsRef<Label> for Label {
-    fn as_ref(&self) -> &Label {
-        self
+        self.0
+            .as_mut_ptr()
+            .expect("NAppGUI Panic: Object no longer able to access!")
     }
 }

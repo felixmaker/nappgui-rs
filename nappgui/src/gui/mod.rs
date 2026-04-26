@@ -1,25 +1,26 @@
-pub(crate) mod button;
-pub(crate) mod cell;
-pub(crate) mod combo;
-pub(crate) mod control;
-pub(crate) mod edit;
-pub(crate) mod imageview;
-pub(crate) mod label;
-pub(crate) mod layout;
-pub(crate) mod listbox;
-pub(crate) mod menu;
-pub(crate) mod menuitem;
-pub(crate) mod panel;
-pub(crate) mod popup;
-pub(crate) mod progress;
-pub(crate) mod slider;
-pub(crate) mod splitview;
-pub(crate) mod tableview;
-pub(crate) mod textview;
-pub(crate) mod updown;
-pub(crate) mod view;
-pub(crate) mod webview;
-pub(crate) mod window;
+mod button;
+mod cell;
+mod combo;
+mod control;
+mod edit;
+mod imageview;
+mod label;
+mod layout;
+mod listbox;
+mod menu;
+mod menuitem;
+mod panel;
+mod popup;
+mod progress;
+mod slider;
+mod splitview;
+mod tableview;
+mod textview;
+mod updown;
+mod view;
+mod webview;
+mod window;
+mod object;
 
 /// Common dialogs are default windows provided by the operating system to perform daily tasks such
 /// as: Open files, select colors, fonts, etc.
@@ -31,7 +32,7 @@ use crate::{draw_2d::Image, types::Point2D};
 pub use {
     button::*, cell::*, combo::*, control::*, edit::*, imageview::*, label::*, layout::*,
     listbox::*, menu::*, menuitem::*, panel::*, popup::*, progress::*, slider::*, splitview::*,
-    tableview::*, textview::*, updown::*, view::*, webview::*, window::*,
+    tableview::*, textview::*, updown::*, view::*, webview::*, window::*, object::*
 };
 
 /// Get image from resource

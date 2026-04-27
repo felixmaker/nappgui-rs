@@ -32,7 +32,7 @@ use nappgui_sys::{
 ///   provided [checks/wrappers] to ensure the window is still alive.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Button(WeakObject);
+pub struct Button(WeakObject<nappgui_sys::Button>);
 
 impl Button {
     /// Create a button from a poniter.
@@ -204,10 +204,10 @@ impl Button {
     }
 
     /// Returns a raw pointer to the button object.
-    /// 
+    ///
     /// # Panics
     /// Panics if the object no longer able to access!
     pub fn as_ptr(&self) -> *mut nappgui_sys::Button {
-        self.0.as_mut_ptr_or_panic()
+        self.0.as_ptr().expect("error: object no longer able to access!")
     }
 }

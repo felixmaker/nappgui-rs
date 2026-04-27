@@ -2,7 +2,7 @@ use std::ffi::{c_void, CString};
 
 use nappgui_sys::{osapp_finish, osapp_menubar, osapp_open_url, osmain_imp};
 
-use crate::gui::{GLOBAL_OBJECTS, GLOBAL_POINTERS, Menu, ObjectType, Window};
+use crate::gui::{Menu, ObjectType, Window, GLOBAL_OBJECTS, GLOBAL_POINTERS};
 
 /// Application handler.
 pub trait AppHandler {
@@ -36,8 +36,8 @@ where
         app.destroy();
         GLOBAL_OBJECTS.with_borrow_mut(|objs| {
             for (_id, obj) in objs.iter() {
-                if obj.0.object_type == ObjectType::Window {
-                    let mut window = obj.0.pointer as *mut nappgui_sys::Window;
+                if obj.as_object_type() == ObjectType::Window {
+                    let mut window = obj.as_ptr() as *mut nappgui_sys::Window;
                     unsafe {
                         nappgui_sys::window_destroy(&mut window);
                     }

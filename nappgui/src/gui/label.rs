@@ -22,7 +22,7 @@ use nappgui_sys::{
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Label(WeakObject);
+pub struct Label(WeakObject<nappgui_sys::Label>);
 
 impl Label {
     /// Create a text control.
@@ -129,8 +129,6 @@ impl Label {
     /// # Panics
     /// Panics if the object no longer able to access!
     pub fn as_ptr(&self) -> *mut nappgui_sys::Label {
-        self.0
-            .as_mut_ptr()
-            .expect("NAppGUI Panic: Object no longer able to access!")
+        self.0.as_ptr().expect("error: object no longer able to access!")
     }
 }

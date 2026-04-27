@@ -18,7 +18,7 @@ use crate::util::macros::{callback, listener};
 /// Window objects are the highest-level containers within the user interface.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Window(WeakObject);
+pub struct Window(pub(crate) WeakObject<nappgui_sys::Window>);
 
 impl Window {
     /// Create a new window.
@@ -244,7 +244,7 @@ impl Window {
 
     /// Returns the raw pointer of Window object
     pub fn as_ptr(&self) -> *mut nappgui_sys::Window {
-        self.0.as_mut_ptr_or_panic()
+        self.0.as_ptr().expect("error: object no longer able to access!")
     }
 }
 

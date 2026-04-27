@@ -1,11 +1,7 @@
 use std::rc::Rc;
 
 use nappgui_sys::{
-    layout_bgcolor, layout_cell, layout_create, layout_halign, layout_hexpand, layout_hexpand2, layout_hexpand3,
-    layout_hmargin, layout_hsize, layout_insert_col, layout_insert_row, layout_margin, layout_margin2, layout_margin4,
-    layout_ncols, layout_nrows, layout_panel_replace, layout_remove_col, layout_remove_row, layout_show_col,
-    layout_show_row, layout_skcolor, layout_taborder, layout_tabstop, layout_update, layout_valign, layout_vexpand,
-    layout_vexpand2, layout_vexpand3, layout_vmargin, layout_vsize,
+    layout_bgcolor, layout_cell, layout_control, layout_create, layout_halign, layout_hexpand, layout_hexpand2, layout_hexpand3, layout_hmargin, layout_hsize, layout_insert_col, layout_insert_row, layout_margin, layout_margin2, layout_margin4, layout_ncols, layout_nrows, layout_panel_replace, layout_remove_col, layout_remove_row, layout_show_col, layout_show_row, layout_skcolor, layout_taborder, layout_tabstop, layout_update, layout_valign, layout_vexpand, layout_vexpand2, layout_vexpand3, layout_vmargin, layout_vsize
 };
 
 use crate::{
@@ -23,7 +19,7 @@ use super::*;
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Layout(WeakObject);
+pub struct Layout(pub(crate) WeakObject<nappgui_sys::Layout>);
 
 impl Layout {
     /// Creates a new layout.
@@ -49,13 +45,10 @@ impl Layout {
     // }
 
     /// Gets the control assigned to a cell in the layout.
-    pub fn get_control<T>(&self, _col: u32, _row: u32) -> Option<T> {
-        // let control = unsafe { layout_control(self.as_ptr(), col, row) };
-        // if control.is_null() {
-        //     None
-        // } else {
-        //     Some(unsafe { Control::from_raw(control) })
-        // }
+    pub fn get_control<T>(&self, col: u32, row: u32) -> Option<T> {
+        let control = unsafe { layout_control(self.as_ptr(), col, row) };
+        let _object = global_object(control as _)?.upgrade()?;
+        // object.as_object_type().is_control().then()
         todo!()
     }
 
@@ -376,7 +369,7 @@ impl Layout {
 
     /// Returns a raw pointer to the layout object.
     pub fn as_ptr(&self) -> *mut nappgui_sys::Layout {
-        self.0.as_mut_ptr_or_panic()
+        self.0.as_ptr().expect("error: object no longer able to access!")
     }
 
     // /// Associate a type struct with a layout.

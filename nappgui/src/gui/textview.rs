@@ -24,7 +24,7 @@ use nappgui_sys::{
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct TextView(WeakObject);
+pub struct TextView(pub(crate) WeakObject<nappgui_sys::TextView>);
 
 impl TextView {
     /// Create a text view.
@@ -255,6 +255,6 @@ impl TextView {
 
     /// Returns a raw pointer to the text view object.
     pub fn as_ptr(&self) -> *mut nappgui_sys::TextView {
-        self.0.as_mut_ptr_or_panic()
+        self.0.as_ptr().expect("error: object no longer able to access!")
     }
 }

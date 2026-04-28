@@ -1,11 +1,6 @@
-use std::sync::Arc;
-
 use nappgui_sys::{cell_empty, cell_enabled, cell_padding, cell_padding2, cell_padding4, cell_visible};
 
-/// The cell type.
-pub(crate) struct LayoutCellInner {
-    inner: *mut nappgui_sys::Cell,
-}
+use crate::gui::{Object, ObjectType};
 
 /// Cells are the inner elements of a Layout and will house a control or a sublayout.
 ///
@@ -14,18 +9,13 @@ pub(crate) struct LayoutCellInner {
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct LayoutCell {
-    pub(crate) inner: Arc<LayoutCellInner>,
-}
+pub struct LayoutCell(pub(crate) Object<nappgui_sys::Cell>); //todo()
 
 /// The cell trait.
 impl LayoutCell {
     /// Create a cell from a pointer.
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Cell) -> Self {
-        assert!(!ptr.is_null());
-        Self {
-            inner: Arc::new(LayoutCellInner { inner: ptr }),
-        }
+        LayoutCell(Object::new(ptr, ObjectType::Cell))
     }
 
     /// Check if the cell is empty.
@@ -83,7 +73,7 @@ impl LayoutCell {
 
     /// Returns a raw pointer to the cell object.
     pub fn as_ptr(&self) -> *mut nappgui_sys::Cell {
-        self.inner.inner
+        self.0.0.pointer
     }
 
     // /// Associates a cell with the field of a struct.

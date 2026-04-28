@@ -8,23 +8,18 @@ use super::{color::Color, palette::Palette, pixbuf::PixBuf};
 
 /// The image type.
 #[repr(transparent)]
-pub struct Image {
-    pub(crate) inner: *mut nappgui_sys::Image,
-}
+pub struct Image(*mut nappgui_sys::Image);
 
 impl Clone for Image {
     fn clone(&self) -> Self {
-        unsafe {
-            Self {
-                inner: nappgui_sys::image_copy(self.inner as *const _),
-            }
-        }
+        let image = unsafe { nappgui_sys::image_copy(self.as_ptr() as *const _) };
+        unsafe { Self::from_raw(image) }
     }
 }
 
 impl Drop for Image {
     fn drop(&mut self) {
-        unsafe { image_destroy(&mut self.inner) }
+        unsafe { image_destroy(&mut self.as_ptr()) }
     }
 }
 
@@ -32,7 +27,18 @@ impl Drop for Image {
 impl Image {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Image) -> Self {
         assert!(!ptr.is_null());
-        Self { inner: ptr }
+        Self(ptr)
+    }
+
+    /// Create a cloned image from pointer.
+    pub(crate) unsafe fn from_raw_cloned(ptr: *const nappgui_sys::Image) -> Self {
+        assert!(!ptr.is_null());
+        let image = unsafe { nappgui_sys::image_copy(ptr) };
+        Self(image)
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Image {
+        self.0
     }
 
     /// Create an image from an array of pixels.
@@ -153,10 +159,5 @@ impl Image {
     pub fn scale(&self, width: u32, height: u32) -> Self {
         let image = unsafe { image_scale(self.as_ptr(), width, height) };
         unsafe { Image::from_raw(image) }
-    }
-
-    /// Returns the raw pointer of Image object
-    pub fn as_ptr(&self) -> *mut nappgui_sys::Image {
-        self.inner
     }
 }

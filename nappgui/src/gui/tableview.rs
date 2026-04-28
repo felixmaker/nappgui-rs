@@ -97,7 +97,7 @@ impl TableView {
 
     /// Sets the general font for the entire table.
     pub fn set_font(&mut self, font: &Font) {
-        unsafe { tableview_font(self.as_ptr(), font.inner) }
+        unsafe { tableview_font(self.as_ptr(), font.as_ptr()) }
     }
 
     /// Sets the default size of the table control.

@@ -19,7 +19,7 @@ pub struct Panel(WeakObject<nappgui_sys::Panel>);
 impl Panel {
     fn from_raw(panel: *mut nappgui_sys::Panel) -> Self {
         assert!(!panel.is_null());
-        Self(Object::new(panel, crate::gui::ObjectType::Panel))
+        Self(Object::global_new(panel, crate::gui::ObjectType::Panel))
     }
 
     /// Create a panel.

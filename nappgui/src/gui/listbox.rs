@@ -85,8 +85,7 @@ impl ListBox {
     }
 
     /// Adds a new element with image.
-    pub fn add_image_element(&self, text: &str, image: &Image)
-    {
+    pub fn add_image_element(&self, text: &str, image: &Image) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
             listbox_add_elem(self.as_ptr(), text.as_ptr(), image.as_ptr());
@@ -102,8 +101,7 @@ impl ListBox {
     }
 
     /// Edit a list item with image.
-    pub fn set_image_element(&self, index: u32, text: &str, image: &Image)
-    {
+    pub fn set_image_element(&self, index: u32, text: &str, image: &Image) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
             listbox_set_elem(self.as_ptr(), index, text.as_ptr(), image.as_ptr());
@@ -119,9 +117,7 @@ impl ListBox {
 
     /// Sets the font of the list.
     pub fn set_font(&self, font: &Font) {
-        unsafe {
-            listbox_font(self.as_ptr(), font.inner);
-        }
+        unsafe { listbox_font(self.as_ptr(), font.as_ptr()) }
     }
 
     /// Remove all items from the list.

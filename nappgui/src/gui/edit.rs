@@ -70,9 +70,7 @@ impl Edit {
 
     /// Set the font of the edit control.
     pub fn set_font(&self, font: &Font) {
-        unsafe {
-            edit_font(self.as_ptr(), font.inner);
-        }
+        unsafe { edit_font(self.as_ptr(), font.as_ptr()) }
     }
 
     /// Set text alignment.

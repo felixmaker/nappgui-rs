@@ -28,7 +28,7 @@ impl Label {
     /// Create a text control.
     pub fn new(text: &str) -> Label {
         let label = unsafe { label_create() };
-        let label = Label(Object::new(label, ObjectType::Label));
+        let label = Label(Object::global_new(label, ObjectType::Label));
         label.set_text(text);
         label
     }
@@ -60,9 +60,7 @@ impl Label {
 
     /// Set the text font.
     pub fn set_font(&self, font: &Font) {
-        unsafe {
-            label_font(self.as_ptr(), font.inner);
-        }
+        unsafe { label_font(self.as_ptr(), font.as_ptr()) }
     }
 
     /// Set the font modifiers, when the mouse is over the control.

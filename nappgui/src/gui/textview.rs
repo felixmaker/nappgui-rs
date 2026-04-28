@@ -30,7 +30,7 @@ impl TextView {
     /// Create a text view.
     pub fn new() -> Self {
         let textview = unsafe { textview_create() };
-        Self(Object::new(textview, ObjectType::TextView))
+        Self(Object::global_new(textview, ObjectType::TextView))
     }
 
     callback! {

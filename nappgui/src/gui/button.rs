@@ -2,7 +2,7 @@ use std::ffi::{CStr, CString};
 
 use crate::{
     draw_2d::{Font, Image},
-    gui::{event::EvButton, Object, ObjectType, WeakObject},
+    gui::{event::EvButton, global_object, Object, ObjectType, WeakObject},
     types::GuiState,
     util::macros::callback,
 };
@@ -40,7 +40,11 @@ impl Button {
     /// # Panics
     /// If the button is null, the func panic
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Button) -> Self {
-        Button(Object::new(ptr, ObjectType::Button))
+        if let Some(button) = global_object(ptr) {
+            Button(button)
+        } else {
+            Button(Object::global_new(ptr, ObjectType::Button))
+        }
     }
 
     /// Create a push button, the typical [Accept], [Cancel], etc.
@@ -113,7 +117,7 @@ impl Button {
 
     /// Set the button font.
     pub fn set_font(&self, font: &Font) {
-        unsafe { button_font(self.as_ptr(), font.inner) };
+        unsafe { button_font(self.as_ptr(), font.as_ptr()) };
     }
 
     /// Set the icon that will show the button.
@@ -173,9 +177,9 @@ impl Button {
     }
 
     /// Get the button font.
-    pub fn font(&self) -> Font {
+    pub fn font<'a>(&'a self) -> Font {
         let font = unsafe { button_get_font(self.as_ptr()) };
-        Font { inner: font as _ }
+        unsafe { Font::from_raw_cloned(font as _) }
     }
 
     /// Gets the button icon.
@@ -184,8 +188,7 @@ impl Button {
         if image.is_null() {
             return None;
         }
-        let image = unsafe { nappgui_sys::image_copy(image as *const _) };
-        Some(Image { inner: image })
+        Some(unsafe { Image::from_raw_cloned(image) })
     }
 
     /// Gets the alternative icon for the button.
@@ -194,8 +197,7 @@ impl Button {
         if image.is_null() {
             return None;
         }
-        let image = unsafe { nappgui_sys::image_copy(image as *const _) };
-        Some(Image { inner: image })
+        Some(unsafe { Image::from_raw_cloned(image) })
     }
 
     /// Gets the current height of the control.

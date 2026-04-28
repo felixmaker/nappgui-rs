@@ -1,9 +1,9 @@
 use nappgui_sys::{
     window_OnClose, window_OnMoved, window_OnResize, window_clear_hotkeys, window_client_to_screen,
-    window_control_frame, window_create, window_cursor, window_cycle_tabstop, window_defbutton, window_destroy,
-    window_focus, window_focus_info, window_get_client_size, window_get_origin, window_get_size, window_hide,
-    window_hotkey, window_modal, window_next_tabstop, window_origin, window_overlay, window_panel,
-    window_previous_tabstop, window_show, window_stop_modal, window_title, window_update, V2Df,
+    window_control_frame, window_create, window_cursor, window_cycle_tabstop, window_defbutton, window_focus,
+    window_focus_info, window_get_client_size, window_get_origin, window_get_size, window_hide, window_hotkey,
+    window_modal, window_next_tabstop, window_origin, window_overlay, window_panel, window_previous_tabstop,
+    window_show, window_stop_modal, window_title, window_update, V2Df,
 };
 use std::ffi::CString;
 
@@ -25,7 +25,7 @@ impl Window {
     pub fn new(flag: WindowFlags) -> Self {
         let result = flag.to_window_flag_t();
         let window = unsafe { window_create(result as u32) };
-        Window(Object::new(window, ObjectType::Window))
+        Window(Object::global_new(window, ObjectType::Window))
     }
 
     callback! {

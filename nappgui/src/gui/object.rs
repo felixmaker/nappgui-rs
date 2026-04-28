@@ -18,6 +18,16 @@ fn global_free_id() -> u32 {
     UID.fetch_add(1, Ordering::AcqRel)
 }
 
+// #[derive(Hash, PartialEq, Eq, Clone, Copy, Debug)]
+// pub(crate) struct Pointer {
+//     object_type: ObjectType,
+//     pointer: *mut (),
+// }
+
+pub(crate) fn global_id(pointer: *mut ()) -> Option<ObjectID> {
+    GLOBAL_POINTERS.with_borrow(|pointers| pointers.get(&(pointer as _)).cloned())
+}
+
 pub(crate) fn global_object<T>(pointer: *mut T) -> Option<WeakObject<T>>
 where
     T: 'static,
@@ -25,7 +35,7 @@ where
     if pointer.is_null() {
         return None;
     }
-    let id = GLOBAL_POINTERS.with_borrow(|pointers| pointers.get(&(pointer as _)).cloned())?;
+    let id = global_id(pointer as _)?;
     let object = GLOBAL_OBJECTS.with_borrow(|objects| objects.get(&id).cloned())?;
     let object_t = object.as_any().downcast_ref::<Rc<ObjectInner<T>>>()?;
     Some(WeakObject(Rc::downgrade(object_t)))
@@ -89,25 +99,31 @@ where
     T: 'static,
 {
     /// Create a object on global static area and return a weak object to it.
-    pub fn new(pointer: *mut T, object_type: ObjectType) -> WeakObject<T> {
+    pub fn global_new(pointer: *mut T, object_type: ObjectType) -> WeakObject<T> {
         assert!(!pointer.is_null());
-        let id = global_free_id();
-        let pointer = pointer;
-        let object = ObjectInner {
-            pointer,
-            id,
-            object_type,
-        };
-        let object = Object(object.into());
+        let object = Object::new(pointer, object_type);
+        let id = object.0.id;
         let weak_object = Rc::downgrade(&object.0);
         GLOBAL_OBJECTS.with_borrow_mut(|objs| objs.insert(id, object.0));
         GLOBAL_POINTERS.with_borrow_mut(|pointers| pointers.insert(pointer as _, id));
         WeakObject(weak_object)
     }
+
+    /// Create a object.
+    pub fn new(pointer: *mut T, object_type: ObjectType) -> Object<T> {
+        assert!(!pointer.is_null());
+        let id = global_free_id();
+        let object = ObjectInner {
+            pointer,
+            id,
+            object_type,
+        };
+        Object(object.into())
+    }
 }
 
 #[repr(u32)]
-#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+#[derive(Hash, PartialEq, Eq, Clone, Copy, Debug)]
 pub(crate) enum ObjectType {
     Button = 0,
     Combo,

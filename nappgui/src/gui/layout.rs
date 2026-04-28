@@ -1,7 +1,9 @@
-use std::rc::Rc;
-
 use nappgui_sys::{
-    layout_bgcolor, layout_cell, layout_control, layout_create, layout_halign, layout_hexpand, layout_hexpand2, layout_hexpand3, layout_hmargin, layout_hsize, layout_insert_col, layout_insert_row, layout_margin, layout_margin2, layout_margin4, layout_ncols, layout_nrows, layout_panel_replace, layout_remove_col, layout_remove_row, layout_show_col, layout_show_row, layout_skcolor, layout_taborder, layout_tabstop, layout_update, layout_valign, layout_vexpand, layout_vexpand2, layout_vexpand3, layout_vmargin, layout_vsize
+    layout_bgcolor, layout_cell, layout_control, layout_create, layout_halign, layout_hexpand, layout_hexpand2,
+    layout_hexpand3, layout_hmargin, layout_hsize, layout_insert_col, layout_insert_row, layout_margin, layout_margin2,
+    layout_margin4, layout_ncols, layout_nrows, layout_panel_replace, layout_remove_col, layout_remove_row,
+    layout_show_col, layout_show_row, layout_skcolor, layout_taborder, layout_tabstop, layout_update, layout_valign,
+    layout_vexpand, layout_vexpand2, layout_vexpand3, layout_vmargin, layout_vsize,
 };
 
 use crate::{
@@ -25,7 +27,7 @@ impl Layout {
     /// Creates a new layout.
     pub fn new(ncols: u32, nrows: u32) -> Self {
         let layout = unsafe { layout_create(ncols, nrows) };
-        Layout(Object::new(layout, ObjectType::Layout))
+        Layout(Object::global_new(layout, ObjectType::Layout))
     }
 
     /// Gets the number of columns in the layout.
@@ -39,10 +41,14 @@ impl Layout {
     }
 
     /// Get a layout cell.
-    // pub fn get_cell(&self, col: u32, row: u32) -> LayoutCell {
-    //     let cell = global_expect(self.inner.id, || unsafe { layout_cell(self.as_ptr(), col, row) });
-    //     unsafe { LayoutCell::from_raw(cell) }
-    // }
+    pub fn cell(&self, col: u32, row: u32) -> Option<LayoutCell> {
+        let cell = unsafe { layout_cell(self.as_ptr(), col, row) };
+        if cell.is_null() {
+            None
+        } else {
+            unsafe { Some(LayoutCell::from_raw(cell)) }
+        }
+    }
 
     /// Gets the control assigned to a cell in the layout.
     pub fn get_control<T>(&self, col: u32, row: u32) -> Option<T> {
@@ -81,6 +87,8 @@ impl Layout {
     pub fn panel_replace<T>(&self, panel: &Panel, col: u32, row: u32) {
         assert!(col < self.ncols());
         assert!(row < self.nrows());
+
+        unsafe { layout_panel_replace(self.as_ptr(), panel.as_ptr(), col, row) }
     }
 
     /// Insert a new column into the layout.

@@ -6,8 +6,7 @@ struct App {}
 impl AppHandler for App {
     fn create() -> Self {
         let layout = Layout::new(1, 3);
-        let button = Button::new_push();
-        button.set_text("Click Me!");
+        let button = Button::new("Click Me!");
         let text = TextView::new();
         let panel = Panel::new();
 

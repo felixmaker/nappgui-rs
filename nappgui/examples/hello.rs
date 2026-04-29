@@ -12,8 +12,7 @@ impl AppHandler for App {
         let panel = Panel::new();
         let layout = Layout::new(1, 3);
         let label = Label::new("Hello, I'm a label");
-        let button = Button::new_push();
-        button.set_text("Click Me!");
+        let button = Button::new("Click Me!");
         let text = TextView::new();
 
         layout.set_control(0, 0, &label);

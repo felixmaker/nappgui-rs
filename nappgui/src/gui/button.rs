@@ -44,21 +44,24 @@ impl Button {
     }
 
     /// Create a push button, the typical [Accept], [Cancel], etc.
-    pub fn new_push() -> Self {
-        let button = unsafe { button_push() };
-        unsafe { Self::from_raw(button) }
+    pub fn new(text: &str) -> Self {
+        let button = unsafe { Self::from_raw(button_push()) };
+        button.set_text(text);
+        button
     }
 
     /// Create a checkbox.
-    pub fn new_check2() -> Self {
-        let button = unsafe { button_check() };
-        unsafe { Self::from_raw(button) }
+    pub fn new_check2(text: &str) -> Self {
+        let button = unsafe { Self::from_raw(button_check()) };
+        button.set_text(text);
+        button
     }
 
     /// Create a checkbox with three states.
-    pub fn new_check3() -> Self {
-        let button = unsafe { button_check3() };
-        unsafe { Self::from_raw(button) }
+    pub fn new_check3(text: &str) -> Self {
+        let button = unsafe { Self::from_raw(button_check3()) };
+        button.set_text(text);
+        button
     }
 
     /// Create a radio button.
@@ -173,7 +176,7 @@ impl Button {
     }
 
     /// Get the button font.
-    pub fn font<'a>(&'a self) -> Font {
+    pub fn font(&self) -> Font {
         let font = unsafe { button_get_font(self.as_ptr()) };
         unsafe { Font::from_raw_cloned(font as _) }
     }

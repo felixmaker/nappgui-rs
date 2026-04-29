@@ -1,6 +1,6 @@
-use nappgui_sys::{cell_empty, cell_enabled, cell_padding, cell_padding2, cell_padding4, cell_visible};
+use std::ptr::NonNull;
 
-use crate::gui::{Object, ObjectType};
+use nappgui_sys::{cell_empty, cell_enabled, cell_padding, cell_padding2, cell_padding4, cell_visible};
 
 /// Cells are the inner elements of a Layout and will house a control or a sublayout.
 ///
@@ -9,13 +9,18 @@ use crate::gui::{Object, ObjectType};
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct LayoutCell(pub(crate) Object<nappgui_sys::Cell>); //todo()
+pub struct LayoutCell(NonNull<nappgui_sys::Cell>); //todo()
 
 /// The cell trait.
 impl LayoutCell {
     /// Create a cell from a pointer.
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Cell) -> Self {
-        LayoutCell(Object::new(ptr, ObjectType::Cell))
+        Self(NonNull::new(ptr).expect("Null pointer passed to LayoutCell::from_raw"))
+    }
+
+    /// Returns a raw pointer to the cell object.
+    pub fn as_ptr(&self) -> *mut nappgui_sys::Cell {
+        self.0.as_ptr()
     }
 
     /// Check if the cell is empty.
@@ -69,11 +74,6 @@ impl LayoutCell {
         unsafe {
             cell_padding4(self.as_ptr(), pleft, ptop, pright, pbottom);
         }
-    }
-
-    /// Returns a raw pointer to the cell object.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::Cell {
-        self.0.0.pointer
     }
 
     // /// Associates a cell with the field of a struct.

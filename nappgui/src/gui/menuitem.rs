@@ -1,18 +1,16 @@
-use std::sync::Arc;
+use std::ptr::NonNull;
 
 use crate::{
-    draw_2d::Image, gui::{Menu, event::EvMenu}, types::{GuiState, KeyCode, ModifierKey}, util::macros::callback
+    draw_2d::Image,
+    gui::{event::EvMenu, Menu},
+    types::{GuiState, KeyCode, ModifierKey},
+    util::macros::callback,
 };
 
 use nappgui_sys::{
     menuitem_OnClick, menuitem_create, menuitem_enabled, menuitem_image, menuitem_key, menuitem_separator,
     menuitem_state, menuitem_submenu, menuitem_text, menuitem_visible,
 };
-
-/// The menu item type.
-pub(crate) struct MenuItemInner {
-    inner: *mut nappgui_sys::MenuItem,
-}
 
 /// Represents an option within a Menu. They will always have an associated action that will be executed when activated.
 ///
@@ -21,27 +19,27 @@ pub(crate) struct MenuItemInner {
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct MenuItem {
-    pub(crate) inner: Arc<MenuItemInner>,
-}
+pub struct MenuItem(NonNull<nappgui_sys::MenuItem>);
 
 impl MenuItem {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::MenuItem) -> Self {
+        Self(NonNull::new(ptr).expect("Null pointer passed to MenuItem::from_raw"))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::MenuItem {
+        self.0.as_ptr()
+    }
+
     /// Create a new item for a menu.
     pub fn new() -> Self {
         let menu_item = unsafe { menuitem_create() };
-        assert!(!menu_item.is_null());
-        Self {
-            inner: Arc::new(MenuItemInner { inner: menu_item }),
-        }
+        unsafe { Self::from_raw(menu_item) }
     }
 
     /// Create a new separator for a menu.
     pub fn new_separator() -> Self {
         let menu_item = unsafe { menuitem_separator() };
-        assert!(!menu_item.is_null());
-        Self {
-            inner: Arc::new(MenuItemInner { inner: menu_item }),
-        }
+        unsafe { Self::from_raw(menu_item) }
     }
 
     callback! {
@@ -66,8 +64,7 @@ impl MenuItem {
     }
 
     /// Set the icon that will display the item.
-    pub fn set_image(&self, image: &Image)
-    {
+    pub fn set_image(&self, image: &Image) {
         unsafe { menuitem_image(self.as_ptr(), image.as_ptr()) };
     }
 
@@ -77,18 +74,12 @@ impl MenuItem {
     }
 
     /// Assign a drop-down submenu when selecting the item.
-    pub fn set_submenu<T>(&self, menu: &Menu)
-    {
+    pub fn set_submenu<T>(&self, menu: &Menu) {
         unsafe { menuitem_submenu(self.as_ptr(), &mut menu.as_ptr()) };
     }
 
     /// Set the status of the item, which will be reflected with a mark next to the text.
     pub fn set_state(&self, state: GuiState) {
         unsafe { menuitem_state(self.as_ptr(), state as _) };
-    }
-
-    /// Returns a raw pointer to the menu item object.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::MenuItem {
-        self.inner.inner
     }
 }

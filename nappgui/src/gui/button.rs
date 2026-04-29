@@ -1,8 +1,8 @@
-use std::ffi::{CStr, CString};
+use std::{ffi::{CStr, CString}, ptr::NonNull};
 
 use crate::{
     draw_2d::{Font, Image},
-    gui::{event::EvButton, global_object, Object, ObjectType, WeakObject},
+    gui::event::EvButton,
     types::GuiState,
     util::macros::callback,
 };
@@ -32,19 +32,15 @@ use nappgui_sys::{
 ///   provided [checks/wrappers] to ensure the window is still alive.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Button(WeakObject<nappgui_sys::Button>);
+pub struct Button(NonNull<nappgui_sys::Button>);
 
 impl Button {
-    /// Create a button from a poniter.
-    ///
-    /// # Panics
-    /// If the button is null, the func panic
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Button) -> Self {
-        if let Some(button) = global_object(ptr) {
-            Button(button)
-        } else {
-            Button(Object::global_new(ptr, ObjectType::Button))
-        }
+        Self(NonNull::new(ptr).expect("Null pointer passed to Button::from_raw"))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Button {
+        self.0.as_ptr()
     }
 
     /// Create a push button, the typical [Accept], [Cancel], etc.
@@ -203,13 +199,5 @@ impl Button {
     /// Gets the current height of the control.
     pub fn height(&self) -> f32 {
         unsafe { button_get_height(self.as_ptr()) }
-    }
-
-    /// Returns a raw pointer to the button object.
-    ///
-    /// # Panics
-    /// Panics if the object no longer able to access!
-    pub fn as_ptr(&self) -> *mut nappgui_sys::Button {
-        self.0.as_ptr().expect("error: object no longer able to access!")
     }
 }

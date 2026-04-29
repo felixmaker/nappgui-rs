@@ -1,20 +1,13 @@
-use std::sync::Arc;
+use std::ptr::NonNull;
 
 use nappgui_sys::{
-    menu_add_item, menu_count, menu_create, menu_del_item, menu_destroy, menu_get_item, menu_ins_item, menu_is_menubar,
-    menu_launch, menu_off_items, V2Df,
+    menu_add_item, menu_count, menu_create, menu_del_item, menu_get_item, menu_ins_item, menu_is_menubar, menu_launch,
+    menu_off_items, V2Df,
 };
 
 use crate::gui::Window;
 
 use super::MenuItem;
-
-/// The inner type of menu.
-#[doc(hidden)]
-#[repr(transparent)]
-pub(crate) struct MenuInner {
-    inner: *mut nappgui_sys::Menu,
-}
 
 /// A Menu is a type of control that integrates a series of options, also called items or Menuitems.
 /// Each of them consists of a short text, optionally an icon and optionally also a keyboard shortcut,
@@ -22,18 +15,27 @@ pub(crate) struct MenuInner {
 /// forming a hierarchy with different levels of depth. In Products you have an application that uses
 /// menus and in Hello dynamic Menu! an example of adding or eliminating items at runtime.
 #[derive(Clone)]
-pub struct Menu {
-    pub(crate) inner: Arc<MenuInner>,
-}
+pub struct Menu(NonNull<nappgui_sys::Menu>);
 
 impl Menu {
+    /// Creates a `Menu` from a raw pointer.
+    ///
+    /// # Safety
+    ///
+    /// The pointer must be non-null and point to a valid `Menu` instance
+    /// managed by the C library.
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Menu) -> Self {
+        Menu(NonNull::new(ptr).expect("Null pointer passed to Menu::from_raw"))
+    }
+
+    /// Returns the underlying raw pointer.
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Menu {
+        self.0.as_ptr()
+    }
+
     /// Create a new menu.
     pub fn new() -> Self {
-        let menu = unsafe { menu_create() };
-        assert!(!menu.is_null());
-        Self {
-            inner: Arc::new(MenuInner { inner: menu }),
-        }
+        unsafe { Self::from_raw(menu_create()) }
     }
 
     /// Add an item at the end of the menu.
@@ -90,16 +92,5 @@ impl Menu {
     /// Returns TRUE if the menu is currently established as a menu bar.
     pub fn is_menubar(&self) -> bool {
         (unsafe { menu_is_menubar(self.as_ptr()) }) != 0
-    }
-
-    /// Returns a raw pointer to the menu object.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::Menu {
-        self.inner.inner
-    }
-}
-
-impl Drop for MenuInner {
-    fn drop(&mut self) {
-        unsafe { menu_destroy(&mut self.inner) };
     }
 }

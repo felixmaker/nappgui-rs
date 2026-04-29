@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::ptr::NonNull;
 
 use nappgui_sys::{
     edit_OnChange, edit_OnFilter, edit_OnFocus, edit_align, edit_autoselect, edit_bgcolor, edit_bgcolor_focus,
@@ -14,10 +14,6 @@ use crate::{
     util::macros::callback,
 };
 
-pub(crate) struct EditInner {
-    pub(crate) inner: *mut nappgui_sys::Edit,
-}
-
 /// EditBox are small text boxes with editing capabilities. Like the Label they are of uniform format:
 /// The typeface and colors will affect the entire text
 ///
@@ -26,27 +22,28 @@ pub(crate) struct EditInner {
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Edit {
-    pub(crate) inner: Arc<EditInner>,
-}
+pub struct Edit(NonNull<nappgui_sys::Edit>);
 
 impl Edit {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Edit) -> Self {
+        Self(NonNull::new(ptr).expect("Null pointer passed to Edit::from_raw"))
+    }
+
+    /// Returns a raw pointer to the combo object.
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Edit {
+        self.0.as_ptr()
+    }
+
     /// Create a text edit control.
     pub fn new() -> Self {
         let edit = unsafe { edit_create() };
-        assert!(!edit.is_null());
-        Self {
-            inner: Arc::new(EditInner { inner: edit }),
-        }
+        unsafe { Self::from_raw(edit) }
     }
 
     /// Create a multiline text edit control.
     pub fn new_multiline() -> Self {
         let edit = unsafe { edit_multiline() };
-        assert!(!edit.is_null());
-        Self {
-            inner: Arc::new(EditInner { inner: edit }),
-        }
+        unsafe { Self::from_raw(edit) }
     }
 
     callback! {
@@ -210,10 +207,5 @@ impl Edit {
         unsafe {
             edit_paste(self.as_ptr());
         }
-    }
-
-    /// Returns a raw pointer to the combo object.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::Edit {
-        self.inner.inner
     }
 }

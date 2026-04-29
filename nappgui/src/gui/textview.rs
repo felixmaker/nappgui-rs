@@ -1,9 +1,9 @@
+use std::ptr::NonNull;
+
 use crate::{
     core::Stream,
     draw_2d::Color,
-    gui::{
-        Object, ObjectType, WeakObject, event::{EvText, EvTextFilter}
-    },
+    gui::event::{EvText, EvTextFilter},
     types::{Align, FontStyle},
     util::macros::callback,
 };
@@ -24,13 +24,19 @@ use nappgui_sys::{
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct TextView(pub(crate) WeakObject<nappgui_sys::TextView>);
+pub struct TextView(NonNull<nappgui_sys::TextView>);
 
 impl TextView {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::TextView) -> Self {
+        TextView(NonNull::new(ptr).expect("Null pointer passed to TextView::from_raw"))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::TextView {
+        self.0.as_ptr()
+    }
     /// Create a text view.
     pub fn new() -> Self {
-        let textview = unsafe { textview_create() };
-        Self(Object::global_new(textview, ObjectType::TextView))
+        unsafe { TextView::from_raw(textview_create()) }
     }
 
     callback! {
@@ -251,10 +257,5 @@ impl TextView {
         unsafe {
             textview_wrap(self.as_ptr(), wrap as _);
         }
-    }
-
-    /// Returns a raw pointer to the text view object.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::TextView {
-        self.0.as_ptr().expect("error: object no longer able to access!")
     }
 }

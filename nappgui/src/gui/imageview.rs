@@ -1,14 +1,10 @@
-use std::sync::Arc;
+use std::ptr::NonNull;
 
 use crate::{draw_2d::Image, types::Scale, util::macros::callback};
 
 use nappgui_sys::{
     imageview_OnClick, imageview_OnOverDraw, imageview_create, imageview_image, imageview_scale, imageview_size,
 };
-
-pub(crate) struct ImageViewInner {
-    inner: *mut nappgui_sys::ImageView,
-}
 
 /// ImageView are specialized views in visualizing images and GIF animations.
 ///
@@ -17,18 +13,22 @@ pub(crate) struct ImageViewInner {
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct ImageView {
-    pub(crate) inner: Arc<ImageViewInner>,
-}
+pub struct ImageView(NonNull<nappgui_sys::ImageView>);
 
 impl ImageView {
+    pub(crate) unsafe  fn from_raw(ptr: *mut nappgui_sys::ImageView) -> Self {
+        Self(NonNull::new(ptr).expect("Null pointer passed to ImageView::from_raw"))
+    }
+    
+    /// Returns a raw pointer to the image view object.
+    pub fn as_ptr(&self) -> *mut nappgui_sys::ImageView {
+        self.0.as_ptr()
+    }
+
     /// Create a image view.
     pub fn new(width: f32, height: f32) -> Self {
         let imageview = unsafe { imageview_create() };
-        assert!(!imageview.is_null());
-        let imageview = ImageView {
-            inner: Arc::new(ImageViewInner { inner: imageview }),
-        };
+        let imageview = unsafe { ImageView::from_raw(imageview) };
         imageview.set_size(width, height);
         imageview
     }
@@ -63,8 +63,4 @@ impl ImageView {
         pub on_over_draw() => imageview_OnOverDraw;
     }
 
-    /// Returns a raw pointer to the image view object.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::ImageView {
-        self.inner.inner
-    }
 }

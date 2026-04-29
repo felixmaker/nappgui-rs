@@ -1,8 +1,8 @@
-use std::ffi::CString;
+use std::{ffi::CString, ptr::NonNull};
 
 use crate::{
     draw_2d::{Color, Font},
-    gui::{event::EvMouse, Object, ObjectType, WeakObject},
+    gui::event::EvMouse,
     types::{Align, FontStyle},
     util::macros::callback,
 };
@@ -22,13 +22,21 @@ use nappgui_sys::{
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Label(WeakObject<nappgui_sys::Label>);
+pub struct Label(NonNull<nappgui_sys::Label>);
 
 impl Label {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Label) -> Self {
+        Self(NonNull::new(ptr).expect("Null pointer passed to Label::from_raw"))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Label {
+        self.0.as_ptr()
+    }
+
     /// Create a text control.
     pub fn new(text: &str) -> Label {
         let label = unsafe { label_create() };
-        let label = Label(Object::global_new(label, ObjectType::Label));
+        let label = unsafe { Label::from_raw(label) };
         label.set_text(text);
         label
     }
@@ -120,13 +128,5 @@ impl Label {
         unsafe {
             label_bgcolor_over(self.as_ptr(), color.inner);
         }
-    }
-
-    /// Returns a raw pointer to the label object.
-    ///
-    /// # Panics
-    /// Panics if the object no longer able to access!
-    pub fn as_ptr(&self) -> *mut nappgui_sys::Label {
-        self.0.as_ptr().expect("error: object no longer able to access!")
     }
 }

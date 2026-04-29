@@ -1,13 +1,9 @@
-use std::sync::Arc;
+use std::{ptr::NonNull};
 
 use nappgui_sys::{webview_OnFocus, webview_back, webview_create, webview_forward, webview_navigate, webview_size};
 
 use crate::util::macros::callback;
 
-/// The webview type.
-pub(crate) struct WebViewInner {
-    pub(crate) inner: *mut nappgui_sys::WebView,
-}
 
 /// A WebView control will allow us to embed Web content in our application. It will behave in the same way
 /// as other view controls such as View or TextView in terms of layout or resizing, displaying a fully
@@ -18,18 +14,20 @@ pub(crate) struct WebViewInner {
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct WebView {
-    pub(crate) inner: Arc<WebViewInner>,
-}
+pub struct WebView(NonNull<nappgui_sys::WebView>);
 
 impl WebView {
+    pub(crate) unsafe  fn from_raw(ptr: *mut nappgui_sys::WebView) -> Self {
+        Self(NonNull::new(ptr).expect("Null pointer passed to WebView::from_raw"))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::WebView {
+        self.0.as_ptr()
+    }
+
     /// Create a Web View.
     pub fn new() -> Self {
-        let webview = unsafe { webview_create() };
-        assert!(!webview.is_null());
-        Self {
-            inner: Arc::new(WebViewInner { inner: webview }),
-        }
+        unsafe { Self::from_raw(webview_create()) }
     }
 
     callback! {
@@ -57,10 +55,5 @@ impl WebView {
     /// Moves to the next page in the browser stack.
     pub fn forward(&self) {
         unsafe { webview_forward(self.as_ptr()) }
-    }
-
-    /// Returns a raw pointer to the webview object.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::WebView {
-        self.inner.inner
     }
 }

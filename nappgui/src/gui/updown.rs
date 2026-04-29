@@ -1,12 +1,8 @@
-use std::sync::Arc;
+use std::ptr::NonNull;
 
 use nappgui_sys::{updown_OnClick, updown_create, updown_tooltip};
 
 use crate::{gui::event::EvButton, util::macros::callback};
-
-pub(crate) struct UpDownInner {
-    inner: *mut nappgui_sys::UpDown,
-}
 
 /// UpDown are two-part horizontally divided button controls.
 ///
@@ -15,18 +11,21 @@ pub(crate) struct UpDownInner {
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct UpDown {
-    pub(crate) inner: Arc<UpDownInner>,
-}
+pub struct UpDown(NonNull<nappgui_sys::UpDown>);
 
 impl UpDown {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::UpDown) -> Self {
+        UpDown(NonNull::new(ptr).expect("Null pointer passed to UpDown::from_raw"))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::UpDown {
+        self.0.as_ptr()
+    }
+
     /// Create an updown control.
     pub fn new() -> Self {
         let updown = unsafe { updown_create() };
-        assert!(!updown.is_null());
-        Self {
-            inner: Arc::new(UpDownInner { inner: updown }),
-        }
+        unsafe { UpDown::from_raw(updown) }
     }
 
     callback! {
@@ -38,10 +37,5 @@ impl UpDown {
     pub fn set_tooltip(&self, tooltip: &str) {
         let tooltip = std::ffi::CString::new(tooltip).unwrap();
         unsafe { updown_tooltip(self.as_ptr(), tooltip.as_ptr()) }
-    }
-
-    /// Returns a raw pointer to the updown object.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::UpDown {
-        self.inner.inner
     }
 }

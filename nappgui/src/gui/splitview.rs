@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::ptr::NonNull;
 
 use nappgui_sys::{
     splitview_get_pos, splitview_horizontal, splitview_minsize0, splitview_minsize1, splitview_panel, splitview_pos,
@@ -11,11 +11,6 @@ use crate::{
     types::SplitMode,
 };
 
-/// The split view type.
-pub(crate) struct SplitViewInner {
-    pub(crate) inner: *mut nappgui_sys::SplitView,
-}
-
 /// The SplitView are views divided into two parts, where in each of them we place another view or
 /// a panel. The dividing line is scrollable, which allows resizing both halves, dividing the total
 /// size of the control between the children.
@@ -25,27 +20,25 @@ pub(crate) struct SplitViewInner {
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct SplitView {
-    pub(crate) inner: Arc<SplitViewInner>,
-}
+pub struct SplitView(NonNull<nappgui_sys::SplitView>);
 
 impl SplitView {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::SplitView) -> Self {
+        SplitView(NonNull::new(ptr).expect("Null pointer passed to SplitView::from_raw"))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::SplitView {
+        self.0.as_ptr()
+    }
+
     /// Create a splitview with horizontal split.
     pub fn new_horizontal() -> Self {
-        let splitview = unsafe { splitview_horizontal() };
-        assert!(!splitview.is_null());
-        Self {
-            inner: Arc::new(SplitViewInner { inner: splitview }),
-        }
+        unsafe { SplitView::from_raw(splitview_horizontal()) }
     }
 
     /// Create a splitview with vertical split.
     pub fn new_vertical() -> Self {
-        let splitview = unsafe { splitview_vertical() };
-        assert!(!splitview.is_null());
-        Self {
-            inner: Arc::new(SplitViewInner { inner: splitview }),
-        }
+        unsafe { SplitView::from_raw(splitview_vertical()) }
     }
 
     /// Add a view or panel into the splitview as its split child.
@@ -88,11 +81,6 @@ impl SplitView {
     /// Set the minimum size of the right/bottom child.
     pub fn set_last_child_min_size(&self, size: f32) {
         unsafe { splitview_minsize1(self.as_ptr(), size) }
-    }
-
-    /// Returns a raw pointer to the splitview object.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::SplitView {
-        self.inner.inner
     }
 }
 

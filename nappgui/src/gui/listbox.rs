@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::{
     draw_2d::{Color, Font, Image},
     gui::event::{EvButton, EvMouse},
@@ -11,11 +9,6 @@ use nappgui_sys::{
     listbox_select, listbox_selected, listbox_set_elem, listbox_size, S2Df,
 };
 
-/// The list box type.
-pub(crate) struct ListBoxInner {
-    pub(crate) inner: *mut nappgui_sys::ListBox,
-}
-
 /// The ListBox are controls that display a series of elements as a list.
 ///
 /// # Remark
@@ -23,18 +16,22 @@ pub(crate) struct ListBoxInner {
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct ListBox {
-    pub(crate) inner: Arc<ListBoxInner>,
-}
+pub struct ListBox(*mut nappgui_sys::ListBox);
 
 impl ListBox {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::ListBox) -> Self {
+        assert!(!ptr.is_null());
+        Self(ptr)
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::ListBox {
+        self.0
+    }
+
     /// Create a new list control.
     pub fn new() -> Self {
         let listbox = unsafe { listbox_create() };
-        assert!(!listbox.is_null());
-        Self {
-            inner: Arc::new(ListBoxInner { inner: listbox }),
-        }
+        unsafe { Self::from_raw(listbox) }
     }
 
     callback! {
@@ -175,10 +172,5 @@ impl ListBox {
     /// visible. See listbox_checkbox.
     pub fn checked(&self, index: u32) -> bool {
         unsafe { listbox_checked(self.as_ptr(), index) != 0 }
-    }
-
-    /// Returns a raw pointer to the list box object.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::ListBox {
-        self.inner.inner
     }
 }

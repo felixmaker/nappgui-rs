@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::ptr::NonNull;
 
 use crate::{
     draw_2d::{Color, Image},
@@ -13,10 +13,6 @@ use nappgui_sys::{
     combo_phstyle, combo_phtext, combo_set_elem, combo_text, combo_tooltip,
 };
 
-pub(crate) struct ComboInner {
-    pub(crate) inner: *mut nappgui_sys::Combo,
-}
-
 /// ComboBox are text editing boxes with drop-down list.
 ///
 /// # Remark
@@ -24,18 +20,22 @@ pub(crate) struct ComboInner {
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Combo {
-    pub(crate) inner: Arc<ComboInner>,
-}
+pub struct Combo(NonNull<nappgui_sys::Combo>);
+
 
 impl Combo {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Combo) -> Self {
+        Self(NonNull::new(ptr).expect("Null pointer passed to Combo::from_raw"))
+    }
+
+    pub(crate) unsafe fn as_ptr(&self) -> *mut nappgui_sys::Combo {
+        self.0.as_ptr()
+    }
+
     /// Create a combo control.
     pub fn new() -> Self {
         let combo = unsafe { combo_create() };
-        assert!(!combo.is_null());
-        Self {
-            inner: Arc::new(ComboInner { inner: combo }),
-        }
+        unsafe { Self::from_raw(combo) }
     }
 
     callback! {
@@ -189,10 +189,5 @@ impl Combo {
         unsafe {
             combo_del_elem(self.as_ptr(), index);
         }
-    }
-
-    /// Returns a raw pointer to the combo object.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::Combo {
-        self.inner.inner
     }
 }

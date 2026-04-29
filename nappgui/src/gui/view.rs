@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::ptr::NonNull;
 
 use nappgui_sys::{
     view_OnAcceptFocus, view_OnClick, view_OnDown, view_OnDrag, view_OnDraw, view_OnEnter, view_OnExit, view_OnFocus,
@@ -13,11 +13,6 @@ use crate::{
     util::macros::callback,
 };
 
-/// The view type.
-pub(crate) struct ViewInner {
-    pub(crate) inner: *mut nappgui_sys::View,
-}
-
 /// The View controls or custom views are blank areas within the window that allow us
 /// to implement our own components.
 ///
@@ -26,36 +21,30 @@ pub(crate) struct ViewInner {
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct View {
-    pub(crate) inner: Arc<ViewInner>,
-}
+pub struct View(NonNull<nappgui_sys::View>);
 
 impl View {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::View) -> Self {
+        View(NonNull::new(ptr).expect("Null pointer passed to View::from_raw"))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::View {
+        self.0.as_ptr()
+    }
+
     /// Create a new custom view.
     pub fn new() -> Self {
-        let view = unsafe { view_create() };
-        assert!(!view.is_null());
-        Self {
-            inner: Arc::new(ViewInner { inner: view }),
-        }
+        unsafe { View::from_raw(view_create()) }
     }
 
     /// Create a new custom view with scrollbars.
     pub fn new_scroll() -> Self {
-        let view = unsafe { view_scroll() };
-        assert!(!view.is_null());
-        Self {
-            inner: Arc::new(ViewInner { inner: view }),
-        }
+        unsafe { View::from_raw(view_scroll()) }
     }
 
     /// Create a new view with all the options.
     pub fn new_custom(hscroll: bool, vscroll: bool) -> Self {
-        let view = unsafe { view_custom(hscroll as _, vscroll as _) };
-        assert!(!view.is_null());
-        Self {
-            inner: Arc::new(ViewInner { inner: view }),
-        }
+        unsafe { View::from_raw(view_custom(hscroll as _, vscroll as _)) }
     }
 
     /// Set the default view size.
@@ -214,10 +203,5 @@ impl View {
     /// Do not use this function if you do not know very well what you are doing.
     pub fn native(&self) -> *mut std::ffi::c_void {
         unsafe { view_native(self.as_ptr()) }
-    }
-
-    /// Returns a raw pointer to the view object.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::View {
-        self.inner.inner
     }
 }

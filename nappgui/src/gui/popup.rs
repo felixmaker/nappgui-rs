@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{ptr::NonNull};
 
 use crate::{draw_2d::Image, gui::event::EvButton, util::macros::callback};
 
@@ -6,11 +6,6 @@ use nappgui_sys::{
     popup_OnSelect, popup_add_elem, popup_clear, popup_count, popup_create, popup_get_selected, popup_get_text,
     popup_list_height, popup_selected, popup_set_elem, popup_tooltip,
 };
-
-/// The popup type.
-pub(crate) struct PopupInner {
-    inner: *mut nappgui_sys::PopUp,
-}
 
 /// PopUps are buttons that have a drop-down menu associated with them. Apparently they
 /// look like pushbuttons that when pressed show a list of options. In Hello PopUp and PopUp!
@@ -21,18 +16,22 @@ pub(crate) struct PopupInner {
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct PopUp {
-    pub(crate) inner: Arc<PopupInner>,
-}
+pub struct PopUp(NonNull<nappgui_sys::PopUp>);
 
 impl PopUp {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::PopUp) -> Self {
+        Self(NonNull::new(ptr).expect("Null pointer passed to PopUp::from_raw"))
+    }
+
+    /// Returns the underlying raw pointer.
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::PopUp {
+        self.0.as_ptr()
+    }
+
     /// Create a new popup control (PopUp button).
     pub fn new() -> Self {
         let popup = unsafe { popup_create() };
-        assert!(!popup.is_null());
-        Self {
-            inner: Arc::new(PopupInner { inner: popup }),
-        }
+        unsafe { Self::from_raw(popup) }
     }
 
     callback! {
@@ -57,8 +56,7 @@ impl PopUp {
     }
 
     /// Add a new item with image to the popup list.
-    pub fn add_image_element(&self, text: &str, image: &Image)
-    {
+    pub fn add_image_element(&self, text: &str, image: &Image) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
             popup_add_elem(self.as_ptr(), text.as_ptr(), image.as_ptr());
@@ -74,8 +72,7 @@ impl PopUp {
     }
 
     /// Edit an item with image from the drop-down list.
-    pub fn set_image_element(&self, index: u32, text: &str, image: &Image)
-    {
+    pub fn set_image_element(&self, index: u32, text: &str, image: &Image) {
         let text = std::ffi::CString::new(text).unwrap();
         unsafe {
             popup_set_elem(self.as_ptr(), index, text.as_ptr(), image.as_ptr());
@@ -118,10 +115,5 @@ impl PopUp {
         let text = unsafe { popup_get_text(self.as_ptr(), index) };
         let text = unsafe { std::ffi::CStr::from_ptr(text) };
         text.to_string_lossy().into_owned()
-    }
-
-    /// Returns a raw pointer to the popup object.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::PopUp {
-        self.inner.inner
     }
 }

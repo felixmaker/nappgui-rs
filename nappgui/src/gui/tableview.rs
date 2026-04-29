@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::ptr::NonNull;
 
 use crate::{
     draw_2d::Font,
@@ -16,11 +16,6 @@ use nappgui_sys::{
     tableview_scroll_visible, tableview_select, tableview_selected, tableview_size, tableview_update, S2Df,
 };
 
-/// The table view type.
-pub(crate) struct TableViewInner {
-    pub(crate) inner: *mut nappgui_sys::TableView,
-}
-
 /// TableViews are data views that display tabulated information arranged in rows and columns.
 ///
 /// # Remark
@@ -28,18 +23,27 @@ pub(crate) struct TableViewInner {
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct TableView {
-    pub(crate) inner: Arc<TableViewInner>,
-}
+pub struct TableView(NonNull<nappgui_sys::TableView>);
 
 impl TableView {
+    /// Creates a `TableView` from a raw pointer.
+    ///
+    /// # Safety
+    ///
+    /// The pointer must be non-null and point to a valid `TableView` instance
+    /// managed by the C library.
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::TableView) -> Self {
+        TableView(NonNull::new(ptr).expect("Null pointer passed to TableView::from_raw"))
+    }
+
+    /// Returns the underlying raw pointer.
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::TableView {
+        self.0.as_ptr()
+    }
+
     /// Create an table view control.
     pub fn new() -> Self {
-        let table = unsafe { tableview_create() };
-        assert!(!table.is_null());
-        Self {
-            inner: Arc::new(TableViewInner { inner: table }),
-        }
+        unsafe { TableView::from_raw(tableview_create()) }
     }
 
     callback! {
@@ -253,10 +257,5 @@ impl TableView {
     /// Show or hide scroll bars.
     pub fn set_scroll_visible(&self, hscroll: bool, vscroll: bool) {
         unsafe { tableview_scroll_visible(self.as_ptr(), hscroll as _, vscroll as _) }
-    }
-
-    /// Returns a raw pointer to the tableview object.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::TableView {
-        self.inner.inner
     }
 }

@@ -21,13 +21,22 @@ use super::*;
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Layout(pub(crate) WeakObject<nappgui_sys::Layout>);
+pub struct Layout(*mut nappgui_sys::Layout);
 
 impl Layout {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Layout) -> Self {
+        assert!(!ptr.is_null());
+        Self(ptr)
+    }
+
+    pub(crate) unsafe fn as_ptr(&self) -> *mut nappgui_sys::Layout {
+        self.0
+    }
+
     /// Creates a new layout.
     pub fn new(ncols: u32, nrows: u32) -> Self {
         let layout = unsafe { layout_create(ncols, nrows) };
-        Layout(Object::global_new(layout, ObjectType::Layout))
+        unsafe { Self::from_raw(layout) }
     }
 
     /// Gets the number of columns in the layout.
@@ -373,11 +382,6 @@ impl Layout {
     /// Update the window associated with the layout.
     pub fn update(&self) {
         unsafe { layout_update(self.as_ptr()) };
-    }
-
-    /// Returns a raw pointer to the layout object.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::Layout {
-        self.0.as_ptr().expect("error: object no longer able to access!")
     }
 
     // /// Associate a type struct with a layout.

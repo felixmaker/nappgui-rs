@@ -51,7 +51,7 @@ impl Button {
     }
 
     /// Create a checkbox.
-    pub fn new_check2(text: &str) -> Self {
+    pub fn new_check(text: &str) -> Self {
         let button = unsafe { Self::from_raw(button_check()) };
         button.set_text(text);
         button

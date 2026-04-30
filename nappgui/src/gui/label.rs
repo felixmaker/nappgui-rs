@@ -1,15 +1,19 @@
-use std::{ffi::CString, ptr::NonNull};
+use std::{
+    ffi::{CStr, CString},
+    ptr::NonNull,
+};
 
 use crate::{
     draw_2d::{Color, Font},
     gui::event::EvMouse,
-    types::{Align, FontStyle},
+    types::{Align, Ellipsis, FontStyle},
     util::macros::callback,
 };
 
 use nappgui_sys::{
     label_OnClick, label_align, label_bgcolor, label_bgcolor_over, label_color, label_color_over, label_create,
-    label_font, label_multiline, label_size_text, label_style_over, label_text,
+    label_font, label_get_font, label_get_text, label_multiline, label_size_text, label_style_over, label_text,
+    label_trim,
 };
 
 /// Label controls are used to insert small blocks of text into windows and forms. They are of uniform format,
@@ -128,5 +132,26 @@ impl Label {
         unsafe {
             label_bgcolor_over(self.as_ptr(), color.inner);
         }
+    }
+
+    /// Sets how the text will be clipped when it does not fit inside the control entirety.
+    ///
+    /// #Remarks
+    /// This does not apply if it is a multiline label.
+    pub fn trim(&self, ellipsis: Ellipsis) {
+        unsafe { label_trim(self.as_ptr(), ellipsis as _) };
+    }
+
+    /// Get the label text.
+    pub fn text(&self) -> String {
+        let text = unsafe { label_get_text(self.as_ptr()) };
+        let text = unsafe { CStr::from_ptr(text) };
+        text.to_string_lossy().into_owned()
+    }
+
+    /// Get the font associated with control.
+    pub fn font(&self) -> Font {
+        let font = unsafe { label_get_font(self.as_ptr()) };
+        unsafe { Font::from_raw_cloned(font as _) }
     }
 }

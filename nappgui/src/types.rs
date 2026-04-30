@@ -36,10 +36,10 @@ impl_i32_to_enum!(Align, 1..=4);
 #[repr(i32)]
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub enum GuiState {
-    /// On
-    On = 1,
     /// Off
     Off = 0,
+    /// On
+    On = 1,
     /// Medium/undetermined.
     Mixed = 2,
 }
@@ -757,4 +757,16 @@ pub enum ButtonStyle {
     Radio = 3,
     Flat = 4,
     Flatgle = 5,
+}
+
+/// The ellipsis(trimming) style.
+#[repr(i32)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[allow(missing_docs)]
+pub enum Ellipsis {
+    None = 1,
+    Begin,
+    Middle,
+    End,
+    Mline,
 }

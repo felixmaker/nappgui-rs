@@ -1,6 +1,8 @@
 use std::ptr::NonNull;
 
-use nappgui_sys::{cell_empty, cell_enabled, cell_padding, cell_padding2, cell_padding4, cell_visible};
+use nappgui_sys::{cell_control, cell_empty, cell_enabled, cell_padding, cell_padding2, cell_padding4, cell_visible};
+
+use crate::gui::AsControl;
 
 /// Cells are the inner elements of a Layout and will house a control or a sublayout.
 ///
@@ -32,14 +34,16 @@ impl LayoutCell {
     ///
     /// # Remarks
     /// If the cell is empty or contains a sublayout, this function will return `None`.
-    pub fn control<T>(&self) -> Option<T> {
-        // let ptr = unsafe { cell_control(self.as_ptr()) };
-        // if ptr.is_null() {
-        //     None
-        // } else {
-        //     Some(unsafe { std::mem::transmute(ptr) })
-        // }
-        todo!()
+    pub fn control<T>(&self) -> Option<T>
+    where
+        T: AsControl,
+    {
+        let ptr = unsafe { cell_control(self.as_ptr()) };
+        if ptr.is_null() {
+            None
+        } else {
+            Some(unsafe { T::from_control_ptr(ptr) })
+        }
     }
 
     /// Activate or deactivate a cell.

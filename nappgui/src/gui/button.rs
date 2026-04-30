@@ -1,8 +1,11 @@
-use std::{ffi::{CStr, CString}, ptr::NonNull};
+use std::{
+    ffi::{CStr, CString},
+    ptr::NonNull,
+};
 
 use crate::{
     draw_2d::{Font, Image},
-    gui::event::EvButton,
+    gui::{event::EvButton, Control},
     types::GuiState,
     util::macros::callback,
 };
@@ -35,14 +38,6 @@ use nappgui_sys::{
 pub struct Button(NonNull<nappgui_sys::Button>);
 
 impl Button {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Button) -> Self {
-        Self(NonNull::new(ptr).expect("Null pointer passed to Button::from_raw"))
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Button {
-        self.0.as_ptr()
-    }
-
     /// Create a push button, the typical [Accept], [Cancel], etc.
     pub fn new(text: &str) -> Self {
         let button = unsafe { Self::from_raw(button_push()) };
@@ -202,5 +197,24 @@ impl Button {
     /// Gets the current height of the control.
     pub fn height(&self) -> f32 {
         unsafe { button_get_height(self.as_ptr()) }
+    }
+}
+
+impl Control for Button {
+    type CControlType = nappgui_sys::Button;
+
+    fn control_type(&self) -> super::ControlType {
+        super::ControlType::Button
+    }
+
+    fn as_ptr(&self) -> *mut Self::CControlType {
+        self.0.as_ptr()
+    }
+
+    unsafe fn from_raw(ptr: *mut Self::CControlType) -> Self
+    where
+        Self: Sized,
+    {
+        Self(NonNull::new(ptr).expect("Null pointer passed to Button::from_raw"))
     }
 }

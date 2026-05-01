@@ -3,7 +3,8 @@ use std::ptr::NonNull;
 use crate::{draw_2d::Image, types::Scale, util::macros::callback};
 
 use nappgui_sys::{
-    imageview_OnClick, imageview_OnOverDraw, imageview_create, imageview_image, imageview_scale, imageview_size,
+    imageview_OnClick, imageview_OnOverDraw, imageview_create, imageview_get_image, imageview_image, imageview_scale,
+    imageview_size,
 };
 
 /// ImageView are specialized views in visualizing images and GIF animations.
@@ -16,10 +17,10 @@ use nappgui_sys::{
 pub struct ImageView(NonNull<nappgui_sys::ImageView>);
 
 impl ImageView {
-    pub(crate) unsafe  fn from_raw(ptr: *mut nappgui_sys::ImageView) -> Self {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::ImageView) -> Self {
         Self(NonNull::new(ptr).expect("Null pointer passed to ImageView::from_raw"))
     }
-    
+
     /// Returns a raw pointer to the image view object.
     pub fn as_ptr(&self) -> *mut nappgui_sys::ImageView {
         self.0.as_ptr()
@@ -63,4 +64,13 @@ impl ImageView {
         pub on_over_draw() => imageview_OnOverDraw;
     }
 
+    /// Gets the image.
+    pub fn image(&self) -> Option<Image> {
+        let image = unsafe { imageview_get_image(self.as_ptr()) };
+        if image.is_null() {
+            None
+        } else {
+            Some(unsafe { Image::from_raw_cloned(image) })
+        }
+    }
 }

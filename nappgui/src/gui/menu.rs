@@ -39,19 +39,13 @@ impl Menu {
     }
 
     /// Add an item at the end of the menu.
-    pub fn add_item<T>(&self, item: &T)
-    where
-        T: AsRef<MenuItem>,
-    {
-        unsafe { menu_add_item(self.as_ptr(), item.as_ref().as_ptr()) };
+    pub fn add_item<T>(&self, item: &MenuItem) {
+        unsafe { menu_add_item(self.as_ptr(), item.as_ptr()) };
     }
 
     /// Insert an item in an arbitrary position of the menu.
-    pub fn insert_item<T>(&self, index: u32, item: &T)
-    where
-        T: AsRef<MenuItem>,
-    {
-        unsafe { menu_ins_item(self.as_ptr(), index, item.as_ref().as_ptr()) };
+    pub fn insert_item<T>(&self, index: u32, item: &MenuItem) {
+        unsafe { menu_ins_item(self.as_ptr(), index, item.as_ptr()) };
     }
 
     /// Remove an item from the menu.
@@ -80,17 +74,22 @@ impl Menu {
     }
 
     /// Get an item from the menu.
-    pub fn get_item(&self, index: u32) -> Option<&MenuItem> {
+    pub fn get_item(&self, index: u32) -> Option<MenuItem> {
         let item = unsafe { menu_get_item(self.as_ptr(), index) };
         if item.is_null() {
             None
         } else {
-            Some(unsafe { &*(item as *mut MenuItem) })
+            Some(unsafe { MenuItem::from_raw(item) })
         }
     }
 
     /// Returns TRUE if the menu is currently established as a menu bar.
     pub fn is_menubar(&self) -> bool {
         (unsafe { menu_is_menubar(self.as_ptr()) }) != 0
+    }
+
+    /// Returns the native implementation of the menu.
+    pub fn native(&self) -> *mut () {
+        (unsafe { nappgui_sys::menu_imp(self.0.as_ptr() as _) }) as _
     }
 }

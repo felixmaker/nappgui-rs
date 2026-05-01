@@ -1,4 +1,4 @@
-use std::ptr::NonNull;
+use std::{ffi::CStr, ptr::NonNull};
 
 use crate::{
     draw_2d::Image,
@@ -8,8 +8,10 @@ use crate::{
 };
 
 use nappgui_sys::{
-    menuitem_OnClick, menuitem_create, menuitem_enabled, menuitem_image, menuitem_key, menuitem_separator,
-    menuitem_state, menuitem_submenu, menuitem_text, menuitem_visible,
+    menuitem_OnClick, menuitem_create, menuitem_enabled, menuitem_get_enabled, menuitem_get_image,
+    menuitem_get_separator, menuitem_get_state, menuitem_get_submenu, menuitem_get_text, menuitem_get_visible,
+    menuitem_image, menuitem_key, menuitem_separator, menuitem_state, menuitem_submenu, menuitem_text,
+    menuitem_visible,
 };
 
 /// Represents an option within a Menu. They will always have an associated action that will be executed when activated.
@@ -81,5 +83,52 @@ impl MenuItem {
     /// Set the status of the item, which will be reflected with a mark next to the text.
     pub fn set_state(&self, state: GuiState) {
         unsafe { menuitem_state(self.as_ptr(), state as _) };
+    }
+
+    /// Get the current text of an item.
+    pub fn text(&self) -> String {
+        let text = unsafe { menuitem_get_text(self.as_ptr()) };
+        unsafe { CStr::from_ptr(text).to_string_lossy().into_owned() }
+    }
+
+    /// Get the current icon of an item.
+    pub fn image(&self) -> Option<Image> {
+        let image = unsafe { menuitem_get_image(self.as_ptr()) };
+        if image.is_null() {
+            None
+        } else {
+            Some(unsafe { Image::from_raw_cloned(image) })
+        }
+    }
+
+    /// Get if an item is a separator.
+    pub fn is_separator(&self) -> bool {
+        (unsafe { menuitem_get_separator(self.as_ptr()) } != 0)
+    }
+
+    /// Get if an item is enabled or not.
+    pub fn is_enabled(&self) -> bool {
+        (unsafe { menuitem_get_enabled(self.as_ptr()) } != 0)
+    }
+
+    /// Get if an item is visible or not.
+    pub fn is_visible(&self) -> bool {
+        (unsafe { menuitem_get_visible(self.as_ptr()) } != 0)
+    }
+
+    /// Gets the state of an item.
+    pub fn state(&self) -> GuiState {
+        let state = unsafe { menuitem_get_state(self.as_ptr()) };
+        GuiState::try_from(state).unwrap()
+    }
+
+    /// Gets the submenu associated with item.
+    pub fn submenu(&self) -> Option<Menu> {
+        let submenu = unsafe { menuitem_get_submenu(self.as_ptr()) };
+        if submenu.is_null() {
+            None
+        } else {
+            Some(unsafe { Menu::from_raw(submenu) })
+        }
     }
 }

@@ -199,6 +199,9 @@ impl View {
 
     /// Gets a pointer to the native control.
     ///
+    /// # Returns
+    /// HWND in Windows, GtkWidget in Linux and NSView in macOS.
+    ///
     /// # Remarks
     /// Do not use this function if you do not know very well what you are doing.
     pub fn native(&self) -> *mut std::ffi::c_void {

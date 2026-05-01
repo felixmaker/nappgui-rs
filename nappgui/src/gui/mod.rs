@@ -6,9 +6,11 @@ mod edit;
 mod imageview;
 mod label;
 mod layout;
+mod line;
 mod listbox;
 mod menu;
 mod menuitem;
+mod object;
 mod panel;
 mod popup;
 mod progress;
@@ -20,7 +22,6 @@ mod updown;
 mod view;
 mod webview;
 mod window;
-mod object;
 
 /// Common dialogs are default windows provided by the operating system to perform daily tasks such
 /// as: Open files, select colors, fonts, etc.
@@ -30,9 +31,9 @@ pub mod event;
 
 use crate::{draw_2d::Image, types::Point2D};
 pub use {
-    button::*, cell::*, combo::*, control::*, edit::*, imageview::*, label::*, layout::*,
-    listbox::*, menu::*, menuitem::*, panel::*, popup::*, progress::*, slider::*, splitview::*,
-    tableview::*, textview::*, updown::*, view::*, webview::*, window::*, object::*
+    button::*, cell::*, combo::*, control::*, edit::*, imageview::*, label::*, layout::*, line::*, listbox::*, menu::*,
+    menuitem::*, object::*, panel::*, popup::*, progress::*, slider::*, splitview::*, tableview::*, textview::*,
+    updown::*, view::*, webview::*, window::*,
 };
 
 /// Get image from resource
@@ -62,8 +63,7 @@ pub fn gui_file(rid: &str) -> (&[u8], usize) {
 }
 
 /// Nappgui resource handler.
-pub type NappguiResourceHandler =
-    unsafe extern "C" fn(locale: *const std::ffi::c_char) -> *mut nappgui_sys::ResPack;
+pub type NappguiResourceHandler = unsafe extern "C" fn(locale: *const std::ffi::c_char) -> *mut nappgui_sys::ResPack;
 
 /// Register a resource package.
 pub fn gui_respack(handler: NappguiResourceHandler) {

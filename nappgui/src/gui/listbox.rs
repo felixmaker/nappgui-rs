@@ -1,3 +1,5 @@
+use std::ffi::CStr;
+
 use crate::{
     draw_2d::{Color, Font, Image},
     gui::event::{EvButton, EvMouse},
@@ -5,8 +7,9 @@ use crate::{
 };
 use nappgui_sys::{
     listbox_OnDown, listbox_OnSelect, listbox_add_elem, listbox_check, listbox_checkbox, listbox_checked,
-    listbox_clear, listbox_color, listbox_count, listbox_create, listbox_del_elem, listbox_font, listbox_multisel,
-    listbox_select, listbox_selected, listbox_set_elem, listbox_size, S2Df,
+    listbox_clear, listbox_color, listbox_count, listbox_create, listbox_del_elem, listbox_font, listbox_get_image,
+    listbox_get_selected, listbox_get_text, listbox_multisel, listbox_select, listbox_selected, listbox_set_elem,
+    listbox_size, S2Df,
 };
 
 /// The ListBox are controls that display a series of elements as a list.
@@ -161,7 +164,7 @@ impl ListBox {
     }
 
     /// Returns whether or not an element is selected.
-    pub fn selected(&self, index: u32) -> bool {
+    pub fn is_selected(&self, index: u32) -> bool {
         unsafe { listbox_selected(self.as_ptr(), index) != 0 }
     }
 
@@ -170,7 +173,36 @@ impl ListBox {
     /// # Remarks
     /// Checking an item is independent of selecting it. Items can be marked even if checkboxes are not
     /// visible. See listbox_checkbox.
-    pub fn checked(&self, index: u32) -> bool {
+    pub fn is_checked(&self, index: u32) -> bool {
         unsafe { listbox_checked(self.as_ptr(), index) != 0 }
+    }
+
+    /// Returns the text of an element.
+    pub fn text(&self, index: u32) -> String {
+        let text = unsafe { listbox_get_text(self.as_ptr(), index) };
+        unsafe { CStr::from_ptr(text).to_string_lossy().into_owned() }
+    }
+
+    /// Gets the icon of an element.
+    pub fn image(&self, index: u32) -> Option<Image> {
+        let image = unsafe { listbox_get_image(self.as_ptr(), index) };
+        if image.is_null() {
+            None
+        } else {
+            Some(unsafe { Image::from_raw_cloned(image) })
+        }
+    }
+
+    /// Gets the selected element.
+    ///
+    /// # Remarks
+    /// This function is not valid for multiple selection lists.
+    pub fn selected(&self) -> Option<u32> {
+        let index = unsafe { listbox_get_selected(self.as_ptr()) };
+        if index == u32::MAX {
+            None
+        } else {
+            Some(index as _)
+        }
     }
 }

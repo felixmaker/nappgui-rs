@@ -170,6 +170,11 @@ impl Edit {
     }
 
     /// Set the inner vertical margin.
+    /// 
+    /// # Remarks
+    /// 
+    /// padding: If 0 there will be no margin between the text and the border of the control. 
+    /// If <0 the default margin will be set.
     pub fn set_vpadding(&self, padding: f32) {
         unsafe {
             edit_vpadding(self.as_ptr(), padding);

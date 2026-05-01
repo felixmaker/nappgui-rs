@@ -1,10 +1,10 @@
-use std::{ptr::NonNull};
+use std::ptr::NonNull;
 
 use crate::{draw_2d::Image, gui::event::EvButton, util::macros::callback};
 
 use nappgui_sys::{
-    popup_OnSelect, popup_add_elem, popup_clear, popup_count, popup_create, popup_get_selected, popup_get_text,
-    popup_list_height, popup_selected, popup_set_elem, popup_tooltip,
+    popup_OnSelect, popup_add_elem, popup_clear, popup_count, popup_create, popup_get_image, popup_get_selected,
+    popup_get_text, popup_list_height, popup_selected, popup_set_elem, popup_tooltip,
 };
 
 /// PopUps are buttons that have a drop-down menu associated with them. Apparently they
@@ -115,5 +115,14 @@ impl PopUp {
         let text = unsafe { popup_get_text(self.as_ptr(), index) };
         let text = unsafe { std::ffi::CStr::from_ptr(text) };
         text.to_string_lossy().into_owned()
+    }
+
+    /// Gets the icon of a popup element.
+    pub fn image(&self, index: u32) -> Option<Image> {
+        let image = unsafe { popup_get_image(self.as_ptr(), index) };
+        if image.is_null() {
+            return None;
+        }
+        Some(unsafe { Image::from_raw_cloned(image) })
     }
 }

@@ -9,7 +9,7 @@ use std::ffi::CString;
 
 use crate::draw_2d::Image;
 use crate::gui::event::{EvPos, EvSize, EvWinClose};
-use crate::gui::{Button, Object, ObjectType, Panel, WeakObject};
+use crate::gui::{Button, Control, Object, ObjectType, Panel, WeakObject};
 use crate::types::{
     FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D, Size2D, WindowFlags,
 };

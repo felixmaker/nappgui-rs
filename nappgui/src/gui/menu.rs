@@ -1,11 +1,11 @@
-use std::ptr::NonNull;
+use std::rc::Weak;
 
 use nappgui_sys::{
     menu_add_item, menu_count, menu_create, menu_del_item, menu_get_item, menu_ins_item, menu_is_menubar, menu_launch,
     menu_off_items, V2Df,
 };
 
-use crate::gui::Window;
+use crate::gui::{global_new, Object, ObjectType, Window};
 
 use super::MenuItem;
 
@@ -15,7 +15,7 @@ use super::MenuItem;
 /// forming a hierarchy with different levels of depth. In Products you have an application that uses
 /// menus and in Hello dynamic Menu! an example of adding or eliminating items at runtime.
 #[derive(Clone)]
-pub struct Menu(NonNull<nappgui_sys::Menu>);
+pub struct Menu(Weak<Object>);
 
 impl Menu {
     /// Creates a `Menu` from a raw pointer.
@@ -25,12 +25,18 @@ impl Menu {
     /// The pointer must be non-null and point to a valid `Menu` instance
     /// managed by the C library.
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Menu) -> Self {
-        Menu(NonNull::new(ptr).expect("Null pointer passed to Menu::from_raw"))
+        let object = global_new(ptr as _, ObjectType::Menu);
+        Self(object)
     }
 
     /// Returns the underlying raw pointer.
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Menu {
-        self.0.as_ptr()
+        if let Some(object) = self.0.upgrade() {
+            if object.object_type == ObjectType::Menu {
+                return object.pointer.as_ptr() as *mut nappgui_sys::Menu
+            }
+        }
+        panic!("Menu pointer is not valid");
     }
 
     /// Create a new menu.
@@ -39,12 +45,12 @@ impl Menu {
     }
 
     /// Add an item at the end of the menu.
-    pub fn add_item<T>(&self, item: &MenuItem) {
+    pub fn add_item(&self, item: &MenuItem) {
         unsafe { menu_add_item(self.as_ptr(), item.as_ptr()) };
     }
 
     /// Insert an item in an arbitrary position of the menu.
-    pub fn insert_item<T>(&self, index: u32, item: &MenuItem) {
+    pub fn insert_item(&self, index: u32, item: &MenuItem) {
         unsafe { menu_ins_item(self.as_ptr(), index, item.as_ptr()) };
     }
 
@@ -58,7 +64,7 @@ impl Menu {
     }
 
     /// Launch a menu as secondary or PopUp.
-    pub fn launch<T>(&self, window: &Window, x: f32, y: f32) {
+    pub fn launch(&self, window: &Window, x: f32, y: f32) {
         let position = V2Df { x, y };
         unsafe { menu_launch(self.as_ptr(), window.as_ptr(), position) };
     }

@@ -6,10 +6,11 @@ use nappgui_sys::{
     window_show, window_stop_modal, window_title, window_update, V2Df,
 };
 use std::ffi::CString;
+use std::rc::Weak;
 
 use crate::draw_2d::Image;
 use crate::gui::event::{EvPos, EvSize, EvWinClose};
-use crate::gui::{Button, Control, Object, ObjectType, Panel, WeakObject};
+use crate::gui::{global_new, AsControl, Button, Control, Object, ObjectType, Panel};
 use crate::types::{
     FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D, Size2D, WindowFlags,
 };
@@ -18,14 +19,14 @@ use crate::util::macros::{callback, listener};
 /// Window objects are the highest-level containers within the user interface.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Window(pub(crate) WeakObject<nappgui_sys::Window>);
+pub struct Window(pub(crate) Weak<Object>);
 
 impl Window {
     /// Create a new window.
     pub fn new(flag: WindowFlags) -> Self {
         let result = flag.to_window_flag_t();
         let window = unsafe { window_create(result as u32) };
-        Window(Object::global_new(window, ObjectType::Window))
+        Window(global_new(window as _, ObjectType::Window))
     }
 
     callback! {
@@ -197,21 +198,20 @@ impl Window {
         }
     }
 
-    // /// Gets the position and size of a control in window coordinates.
-    // ///
-    // /// # Remarks
-    // ///
-    // /// control must belong to the window, be active and visible. The point (0,0) corresponds to the upper left vertex of the client area of the window.
-    // pub fn control_frame<T>(&self, control: &T) -> Rect2D
-    // where
-    //     T: AsControl,
-    // {
-    //     let control = control.as_control();
-    //     unsafe {
-    //         let rect = window_control_frame(self.as_ptr(), control.as_ptr());
-    //         std::mem::transmute(rect)
-    //     }
-    // }
+    /// Gets the position and size of a control in window coordinates.
+    ///
+    /// # Remarks
+    ///
+    /// control must belong to the window, be active and visible. The point (0,0) corresponds to the upper left vertex of the client area of the window.
+    pub fn control_frame<T>(&self, control: &T) -> Rect2D
+    where
+        T: AsControl,
+    {
+        unsafe {
+            let rect = window_control_frame(self.as_ptr(), control.as_control_ptr());
+            std::mem::transmute(rect)
+        }
+    }
 
     /// Transforms a point expressed in window coordinates to screen coordinates.
     pub fn client_to_screen(&self, x: f32, y: f32) -> Point2D {
@@ -244,7 +244,12 @@ impl Window {
 
     /// Returns the raw pointer of Window object
     pub fn as_ptr(&self) -> *mut nappgui_sys::Window {
-        self.0.as_ptr().expect("error: object no longer able to access!")
+        if let Some(object) = self.0.upgrade() {
+            if object.object_type == ObjectType::Window {
+                return object.pointer.as_ptr() as *mut nappgui_sys::Window;
+            }
+        }
+        panic!("Window pointer is not valid");
     }
 }
 

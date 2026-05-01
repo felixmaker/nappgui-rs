@@ -62,7 +62,6 @@ impl Layout {
     /// Gets the control assigned to a cell in the layout.
     pub fn get_control<T>(&self, col: u32, row: u32) -> Option<T> {
         let control = unsafe { layout_control(self.as_ptr(), col, row) };
-        let _object = global_object(control as _)?.upgrade()?;
         // object.as_object_type().is_control().then()
         todo!()
     }

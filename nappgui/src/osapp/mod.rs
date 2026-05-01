@@ -2,7 +2,7 @@ use std::ffi::{c_void, CString};
 
 use nappgui_sys::{osapp_finish, osapp_menubar, osapp_open_url, osmain_imp};
 
-use crate::gui::{Menu, ObjectType, Window, GLOBAL_OBJECTS, GLOBAL_POINTERS};
+use crate::gui::{Menu, ObjectType, Window, GLOBAL_OBJECTS};
 
 /// Application handler.
 pub trait AppHandler {
@@ -35,17 +35,19 @@ where
         let mut app = Box::from_raw(*obj as *mut T);
         app.destroy();
         GLOBAL_OBJECTS.with_borrow_mut(|objs| {
-            for (_id, obj) in objs.iter() {
-                if obj.as_object_type() == ObjectType::Window {
-                    let mut window = obj.as_ptr() as *mut nappgui_sys::Window;
-                    unsafe {
-                        nappgui_sys::window_destroy(&mut window);
+            for (_, obj) in objs.iter() {
+                if let Some(obj) = obj.upgrade() {
+                    if obj.object_type == ObjectType::Window {
+                        let mut ptr = obj.pointer.as_ptr() as *mut nappgui_sys::Window;
+                        unsafe { nappgui_sys::window_destroy(&mut ptr) }
+                    } else if obj.object_type == ObjectType::Menu {
+                        let mut ptr = obj.pointer.as_ptr() as *mut nappgui_sys::Menu;
+                        unsafe { nappgui_sys::menu_destroy(&mut ptr) }
                     }
                 }
             }
             objs.clear();
         });
-        GLOBAL_POINTERS.with_borrow_mut(|pointer| pointer.clear())
     }
 
     unsafe extern "C" fn on_update<T>(obj: *mut c_void, prtime: f64, ctime: f64)
@@ -79,12 +81,10 @@ pub fn finish() -> bool {
 }
 
 /// Set the general menu bar of the application.
-pub fn menubar<M, T>(menu: &M, win: &Window)
-where
-    M: AsRef<Menu>,
+pub fn menubar(menu: &Menu, win: &Window)
 {
     unsafe {
-        osapp_menubar(menu.as_ref().as_ptr(), win.as_ptr());
+        osapp_menubar(menu.as_ptr(), win.as_ptr());
     }
 }
 

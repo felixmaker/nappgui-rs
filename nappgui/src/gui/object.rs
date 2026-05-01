@@ -1,129 +1,78 @@
 use std::{
-    any::Any,
-    cell::RefCell,
-    collections::HashMap,
-    rc::{Rc, Weak},
-    sync::atomic::{AtomicU32, Ordering},
+    cell::RefCell, collections::HashMap, ptr::NonNull, rc::{Rc, Weak}
 };
 
-pub(crate) type ObjectID = u32;
-pub(crate) static UID: AtomicU32 = AtomicU32::new(0);
+#[derive(Clone)]
+pub(crate) enum GlobalObject {
+    Object(Rc<Object>),
+    WeakObject(Weak<Object>),
+}
+
+pub(crate) struct Object {
+    pub(crate) pointer: NonNull<()>,
+    pub(crate) object_type: ObjectType,
+    pub(crate) children: RefCell<Vec<Rc<Object>>>,
+}
+
+impl GlobalObject {
+    pub(crate) fn upgrade(&self) -> Option<Rc<Object>> {
+        match self {
+            GlobalObject::Object(object) => Some(object.clone()),
+            GlobalObject::WeakObject(weak_object) => weak_object.upgrade(),
+        }
+    }
+
+    pub(crate) fn downgrade(&self) -> Weak<Object> {
+        match self {
+            GlobalObject::Object(object) => Rc::downgrade(&object),
+            GlobalObject::WeakObject(weak_object) => weak_object.clone(),
+        }
+    }
+}
 
 thread_local! {
-    pub(crate) static GLOBAL_OBJECTS: RefCell<HashMap<ObjectID, Rc<dyn AsObject >>> = Default::default();
-    pub(crate) static GLOBAL_POINTERS: RefCell<HashMap<*mut (), ObjectID>> = Default::default();
+    pub(crate) static GLOBAL_OBJECTS: RefCell<HashMap<*mut (), GlobalObject>> = Default::default();
 }
 
-fn global_free_id() -> u32 {
-    UID.fetch_add(1, Ordering::AcqRel)
+pub(crate) fn global_set(pointer: *mut (), object: GlobalObject) {
+    GLOBAL_OBJECTS.with_borrow_mut(|objs| objs.insert(pointer, object));
 }
 
-// #[derive(Hash, PartialEq, Eq, Clone, Copy, Debug)]
-// pub(crate) struct Pointer {
-//     object_type: ObjectType,
-//     pointer: *mut (),
-// }
-
-pub(crate) fn global_id(pointer: *mut ()) -> Option<ObjectID> {
-    GLOBAL_POINTERS.with_borrow(|pointers| pointers.get(&(pointer as _)).cloned())
+pub(crate) fn global_new(pointer: *mut (), object_type: ObjectType) -> Weak<Object> {
+    if let Some(object) = global_upgrade(pointer) {
+        return Rc::downgrade(&object);
+    }
+    let object = Object {
+        pointer: NonNull::new(pointer).unwrap(),
+        object_type,
+        children: RefCell::new(Vec::new()),
+    };
+    let object = GlobalObject::Object(Rc::new(object));
+    let weak_object = object.downgrade();
+    GLOBAL_OBJECTS.with_borrow_mut(|objs| objs.insert(pointer, object));
+    weak_object
 }
 
-pub(crate) fn global_object<T>(pointer: *mut T) -> Option<WeakObject<T>>
-where
-    T: 'static,
-{
+pub(crate) fn global_upgrade(pointer: *mut ()) -> Option<Rc<Object>> {
     if pointer.is_null() {
         return None;
     }
-    let id = global_id(pointer as _)?;
-    let object = GLOBAL_OBJECTS.with_borrow(|objects| objects.get(&id).cloned())?;
-    let object_t = object.as_any().downcast_ref::<Rc<ObjectInner<T>>>()?;
-    Some(WeakObject(Rc::downgrade(object_t)))
+    let object = GLOBAL_OBJECTS.with_borrow(|objects| objects.get(&pointer).cloned())?;
+    object.upgrade()
 }
 
-pub(crate) struct ObjectInner<T> {
-    pub(crate) pointer: *mut T,
-    pub(crate) id: ObjectID,
-    pub(crate) object_type: ObjectType,
-}
-
-pub(crate) trait AsObject {
-    fn as_ptr(&self) -> *mut ();
-    fn as_id(&self) -> ObjectID;
-    fn as_object_type(&self) -> ObjectType;
-    fn as_any(&self) -> &dyn Any;
-}
-
-impl<T> AsObject for ObjectInner<T>
-where
-    T: 'static,
-{
-    fn as_ptr(&self) -> *mut () {
-        self.pointer as _
-    }
-
-    fn as_id(&self) -> ObjectID {
-        self.id
-    }
-
-    fn as_object_type(&self) -> ObjectType {
-        self.object_type
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-}
-
-#[repr(transparent)]
-#[derive(Clone)]
-pub(crate) struct WeakObject<T>(pub(crate) Weak<ObjectInner<T>>);
-
-impl<T> WeakObject<T> {
-    pub(crate) fn upgrade(&self) -> Option<Object<T>> {
-        let object = self.0.upgrade();
-        object.and_then(|x| Some(Object(x)))
-    }
-
-    pub(crate) fn as_ptr(&self) -> Option<*mut T> {
-        self.upgrade().map(|x| x.0.pointer)
-    }
-}
-
-#[repr(transparent)]
-#[derive(Clone)]
-pub(crate) struct Object<T>(pub(crate) Rc<ObjectInner<T>>);
-
-impl<T> Object<T>
-where
-    T: 'static,
-{
-    /// Create a object on global static area and return a weak object to it.
-    pub fn global_new(pointer: *mut T, object_type: ObjectType) -> WeakObject<T> {
-        assert!(!pointer.is_null());
-        let object = Object::new(pointer, object_type);
-        let id = object.0.id;
-        let weak_object = Rc::downgrade(&object.0);
-        GLOBAL_OBJECTS.with_borrow_mut(|objs| objs.insert(id, object.0));
-        GLOBAL_POINTERS.with_borrow_mut(|pointers| pointers.insert(pointer as _, id));
-        WeakObject(weak_object)
-    }
-
-    /// Create a object.
-    pub fn new(pointer: *mut T, object_type: ObjectType) -> Object<T> {
-        assert!(!pointer.is_null());
-        let id = global_free_id();
-        let object = ObjectInner {
-            pointer,
-            id,
-            object_type,
-        };
-        Object(object.into())
-    }
+pub(crate) fn global_set_parent(this: *mut (), parent: *mut ()) -> Option<()> {
+    let this_object = global_upgrade(this)?;
+    let parent_object = global_upgrade(parent)?;
+    let this_weak_object = Rc::downgrade(&this_object);
+    parent_object.children.borrow_mut().push(this_object);
+    global_set(this, GlobalObject::WeakObject(this_weak_object));
+    Some(())
 }
 
 #[repr(u32)]
 #[derive(Hash, PartialEq, Eq, Clone, Copy, Debug)]
+#[allow(dead_code)]
 pub(crate) enum ObjectType {
     Button = 0,
     Combo,
@@ -141,7 +90,10 @@ pub(crate) enum ObjectType {
     UpDown,
     View,
     WebView,
+    Line,
     Window = 64,
+    Menu,
+    MenuItem,
     Layout,
     Cell,
     Image,
@@ -149,7 +101,7 @@ pub(crate) enum ObjectType {
 }
 
 impl ObjectType {
-    pub fn is_control(&self) -> bool {
+    pub(crate) fn is_control(&self) -> bool {
         (*self as u32) < ObjectType::Window as _
     }
 }

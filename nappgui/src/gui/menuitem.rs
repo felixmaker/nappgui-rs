@@ -33,9 +33,10 @@ impl MenuItem {
     }
 
     /// Create a new item for a menu.
-    pub fn new() -> Self {
-        let menu_item = unsafe { menuitem_create() };
-        unsafe { Self::from_raw(menu_item) }
+    pub fn new(text: &str) -> Self {
+        let menu_item = unsafe { Self::from_raw(menuitem_create()) };
+        menu_item.set_text(text);
+        menu_item
     }
 
     /// Create a new separator for a menu.
@@ -76,7 +77,7 @@ impl MenuItem {
     }
 
     /// Assign a drop-down submenu when selecting the item.
-    pub fn set_submenu<T>(&self, menu: &Menu) {
+    pub fn set_submenu(&self, menu: &Menu) {
         unsafe { menuitem_submenu(self.as_ptr(), &mut menu.as_ptr()) };
     }
 

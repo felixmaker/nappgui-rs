@@ -80,7 +80,7 @@ macro_rules! impl_control {
                 if c_ptr.is_null() {
                     None
                 } else {
-                    Some(unsafe { Self::from_raw(c_ptr) })
+                    Some(unsafe { Self::from_ptr(c_ptr) })
                 }
             }
 

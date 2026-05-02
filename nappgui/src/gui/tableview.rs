@@ -7,7 +7,7 @@ use crate::{
     draw_2d::Font,
     gui::{
         event::{EvTbDataParams, EvTbDataResult},
-        global_record,
+        global_get, global_record,
     },
     types::{Align, EventType},
     util::macros::callback,
@@ -41,13 +41,18 @@ impl TableViewInner {
 /// The table view control.
 ///
 /// # Remarks
-/// If the object is not attached to a window, it causes a memory leak.
+/// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
 pub struct TableView(Weak<TableViewInner>);
 
 impl TableView {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::TableView) -> Self {
         let object = global_record(ptr as _, TableViewInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::TableView) -> Self {
+        let object = global_get(ptr as _).unwrap();
         Self(Rc::downgrade(&object))
     }
 

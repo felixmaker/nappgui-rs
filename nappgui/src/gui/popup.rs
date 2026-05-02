@@ -5,7 +5,7 @@ use std::{
 
 use crate::{
     draw_2d::Image,
-    gui::{event::EvButton, global_record},
+    gui::{event::EvButton, global_get, global_record},
     util::macros::callback,
 };
 
@@ -32,14 +32,19 @@ impl PopUpInner {
 
 /// The popup control.
 ///
-/// # Remark
-/// If the object is not attached to a window, it causes a memory leak.
+/// # Remarks
+/// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
 pub struct PopUp(Weak<PopUpInner>);
 
 impl PopUp {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::PopUp) -> Self {
         let object = global_record(ptr as _, PopUpInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::PopUp) -> Self {
+        let object = global_get(ptr as _).unwrap();
         Self(Rc::downgrade(&object))
     }
 

@@ -48,13 +48,18 @@ impl ButtonInner {
 /// The button control.
 ///
 /// # Remarks
-/// If the object is not attached to a window, it causes a memory leak.
+/// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
 pub struct Button(Weak<ButtonInner>);
 
 impl Button {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Button) -> Self {
         let object = global_record(ptr as _, ButtonInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::Button) -> Self {
+        let object = global_get(ptr as _).unwrap();
         Self(Rc::downgrade(&object))
     }
 

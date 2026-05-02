@@ -6,8 +6,7 @@ use std::{
 use crate::{
     draw_2d::{Color, Image},
     gui::{
-        event::{EvText, EvTextFilter},
-        global_record,
+        event::{EvText, EvTextFilter}, global_get, global_record
     },
     types::{Align, FontStyle},
     util::macros::callback,
@@ -39,19 +38,22 @@ impl ComboInner {
 /// The combo control.
 ///
 /// # Remarks
-/// If the object is not attached to a window, it causes a memory leak.
+/// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
 pub struct Combo(Weak<ComboInner>);
 
 impl Combo {
-    /// Create a cell from a pointer.
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Combo) -> Self {
         let object = global_record(ptr as _, ComboInner::from_raw(ptr));
         Self(Rc::downgrade(&object))
     }
 
-    /// Returns a raw pointer to the cell object.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::Combo {
+    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::Combo) -> Self {
+        let object = global_get(ptr as _).unwrap();
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Combo {
         self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
     }
 

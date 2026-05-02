@@ -10,7 +10,7 @@ use nappgui_sys::{
 };
 
 use crate::{
-    gui::{global_record, Panel, TextView, View, WebView},
+    gui::{Panel, TextView, View, WebView, global_get, global_record},
     types::SplitMode,
 };
 
@@ -33,13 +33,18 @@ impl SplitViewInner {
 /// The splitview control.
 ///
 /// # Remarks
-/// If the object is not attached to a window, it causes a memory leak.
+/// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
 pub struct SplitView(Weak<SplitViewInner>);
 
 impl SplitView {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::SplitView) -> Self {
         let object = global_record(ptr as _, SplitViewInner::from_raw(ptr));
+        SplitView(Rc::downgrade(&object))
+    }
+
+    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::SplitView) -> Self {
+        let object = global_get(ptr as _).unwrap();
         SplitView(Rc::downgrade(&object))
     }
 

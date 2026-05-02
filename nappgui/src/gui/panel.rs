@@ -8,7 +8,7 @@ use nappgui_sys::{
     panel_visible_layout,
 };
 
-use crate::gui::{global_record, Layout};
+use crate::gui::{global_get, global_record, Layout};
 
 pub(crate) struct PanelInner {
     ptr: NonNull<nappgui_sys::Panel>,
@@ -29,13 +29,18 @@ impl PanelInner {
 /// The panel control.
 ///
 /// # Remark
-/// If the object is not attached to a window, it causes a memory leak.
+/// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
 pub struct Panel(Weak<PanelInner>);
 
 impl Panel {
     pub(crate) unsafe fn from_raw(panel: *mut nappgui_sys::Panel) -> Self {
         let object = global_record(panel as _, PanelInner::from_raw(panel));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) unsafe fn from_ptr(panel: *mut nappgui_sys::Panel) -> Self {
+        let object = global_get(panel as _).unwrap();
         Self(Rc::downgrade(&object))
     }
 

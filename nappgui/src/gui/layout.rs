@@ -13,12 +13,10 @@ use crate::{
 
 use super::*;
 
-/// A Layout is a virtual and transparent grid always linked with a Panel which serves to locate the different
-/// interface elements.
+/// The layout.
 ///
-/// # Remark
-/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
-/// components assciated with it will be automatically released.
+/// # Remarks
+/// If the layout is not attached to a panel, it will cause a memory leak.
 #[repr(transparent)]
 pub struct Layout(*mut nappgui_sys::Layout);
 

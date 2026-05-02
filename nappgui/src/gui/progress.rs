@@ -5,7 +5,7 @@ use std::{
 
 use nappgui_sys::{progress_create, progress_undefined, progress_value};
 
-use crate::gui::global_record;
+use crate::gui::{global_get, global_record};
 
 pub(crate) struct ProgressInner {
     ptr: NonNull<nappgui_sys::Progress>,
@@ -26,13 +26,18 @@ impl ProgressInner {
 /// The progress bar control.
 ///
 /// # Remark
-/// If the object is not attached to a window, it causes a memory leak.
+/// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
 pub struct Progress(Weak<ProgressInner>);
 
 impl Progress {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Progress) -> Self {
         let object = global_record(ptr as _, ProgressInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::Progress) -> Self {
+        let object = global_get(ptr as _).unwrap();
         Self(Rc::downgrade(&object))
     }
 

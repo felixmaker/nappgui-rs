@@ -4,7 +4,7 @@ use nappgui_sys::{cell_control, cell_empty, cell_enabled, cell_padding, cell_pad
 
 use crate::gui::Control;
 
-/// Cells are the inner elements of a Layout and will house a control or a sublayout.
+/// The cell in a layout.
 #[repr(transparent)]
 pub struct LayoutCell(NonNull<nappgui_sys::Cell>);
 

@@ -22,14 +22,12 @@ pub(crate) struct WindowInner {
 }
 
 impl WindowInner {
-    /// Creates a `WindowInner` from a raw pointer.
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Window) -> Self {
         Self {
             ptr: NonNull::new(ptr).expect("Null pointer passed to WindowInner::from_raw"),
         }
     }
 
-    /// Returns the underlying raw pointer.
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Window {
         self.ptr.as_ptr()
     }
@@ -41,7 +39,7 @@ impl Drop for WindowInner {
     }
 }
 
-/// Window object.
+/// The window object.
 #[repr(transparent)]
 #[derive(Clone)]
 pub struct Window(Weak<WindowInner>);

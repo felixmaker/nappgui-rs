@@ -8,7 +8,7 @@ use nappgui_sys::{
 };
 
 use crate::{
-    gui::{event::EvSlider, global_record},
+    gui::{event::EvSlider, global_get, global_record},
     util::macros::callback,
 };
 
@@ -31,13 +31,18 @@ impl SliderInner {
 /// The slider control.
 ///
 /// # Remarks
-/// If the object is not attached to a window, it causes a memory leak.
+/// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
 pub struct Slider(Weak<SliderInner>);
 
 impl Slider {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Slider) -> Self {
         let object = global_record(ptr as _, SliderInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::Slider) -> Self {
+        let object = global_get(ptr as _).unwrap();
         Self(Rc::downgrade(&object))
     }
 

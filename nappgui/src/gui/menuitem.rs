@@ -6,7 +6,7 @@ use std::{
 
 use crate::{
     draw_2d::Image,
-    gui::{event::EvMenu, global_move_ownership, global_record, Menu},
+    gui::{event::EvMenu, global_get, global_move_ownership, global_record, Menu},
     types::{GuiState, KeyCode, ModifierKey},
     util::macros::callback,
 };
@@ -36,8 +36,8 @@ impl MenuItemInner {
 
 /// The menu item control.
 ///
-/// # Remark
-/// If the object is not attached to a menu, it causes a memory leak.
+/// # Remarks
+/// If the object is not attached to a menu, it will cause a memory leak.
 #[repr(transparent)]
 pub struct MenuItem(Weak<MenuItemInner>);
 
@@ -46,6 +46,7 @@ impl MenuItem {
         let object = global_record(ptr as _, MenuItemInner::from_raw(ptr));
         Self(Rc::downgrade(&object))
     }
+
 
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::MenuItem {
         self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()

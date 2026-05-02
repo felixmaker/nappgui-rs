@@ -41,17 +41,12 @@ impl Drop for MenuInner {
     }
 }
 
-/// A Menu is a type of control that integrates a series of options, also called items or Menuitems.
-/// Each of them consists of a short text, optionally an icon and optionally also a keyboard shortcut,
-/// such as the classic Ctrl+C/Ctrl+V to copy and paste. Additionally, an item can house a submenu
-/// forming a hierarchy with different levels of depth. In Products you have an application that uses
-/// menus and in Hello dynamic Menu! an example of adding or eliminating items at runtime.
+/// The menu control.
 #[repr(transparent)]
 #[derive(Clone)]
 pub struct Menu(Weak<MenuInner>);
 
 impl Menu {
-    /// Creates a `Menu` from a raw pointer.
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Menu) -> Self {
         assert!(!ptr.is_null());
         if !global_exists(ptr as _) {
@@ -66,7 +61,6 @@ impl Menu {
         panic!("Menu object has been destroyed already.");
     }
 
-    /// Returns the underlying raw pointer.
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Menu {
         self.0.upgrade().map(|x| x.as_ptr()).unwrap()
     }

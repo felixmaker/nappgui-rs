@@ -6,7 +6,7 @@ use std::{
 use nappgui_sys::{updown_OnClick, updown_create, updown_tooltip};
 
 use crate::{
-    gui::{event::EvButton, global_record},
+    gui::{event::EvButton, global_get, global_record},
     util::macros::callback,
 };
 
@@ -29,13 +29,18 @@ impl UpDownInner {
 /// The updown control.
 ///
 /// # Remark
-/// If the object is not attached to a window, it causes a memory leak.
+/// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
 pub struct UpDown(Weak<UpDownInner>);
 
 impl UpDown {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::UpDown) -> Self {
         let object = global_record(ptr as _, UpDownInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::UpDown) -> Self {
+        let object = global_get(ptr as _).unwrap();
         Self(Rc::downgrade(&object))
     }
 

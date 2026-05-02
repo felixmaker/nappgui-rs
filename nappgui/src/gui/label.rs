@@ -6,7 +6,7 @@ use std::{
 
 use crate::{
     draw_2d::{Color, Font},
-    gui::{event::EvMouse, global_record},
+    gui::{event::EvMouse, global_get, global_record},
     types::{Align, Ellipsis, FontStyle},
     util::macros::callback,
 };
@@ -36,13 +36,18 @@ impl LabelInner {
 /// The label control.
 ///
 /// # Remark
-/// If the object is not attached to a window, it causes a memory leak.
+/// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
 pub struct Label(Weak<LabelInner>);
 
 impl Label {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Label) -> Self {
         let object = global_record(ptr as _, LabelInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::Label) -> Self {
+        let object = global_get(ptr as _).unwrap();
         Self(Rc::downgrade(&object))
     }
 

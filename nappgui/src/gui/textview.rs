@@ -7,8 +7,7 @@ use crate::{
     core::Stream,
     draw_2d::Color,
     gui::{
-        event::{EvText, EvTextFilter},
-        global_record,
+        event::{EvText, EvTextFilter}, global_get, global_record
     },
     types::{Align, FontStyle},
     util::macros::callback,
@@ -41,14 +40,19 @@ impl TextViewInner {
 
 /// The text view control.
 ///
-/// # Remark
-/// If the object is not attached to a window, it causes a memory leak.
+/// # Remarks
+/// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
 pub struct TextView(Weak<TextViewInner>);
 
 impl TextView {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::TextView) -> Self {
         let object = global_record(ptr as _, TextViewInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::TextView) -> Self {
+        let object = global_get(ptr as _).unwrap();
         Self(Rc::downgrade(&object))
     }
 

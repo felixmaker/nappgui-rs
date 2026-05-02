@@ -7,8 +7,7 @@ use std::{
 use crate::{
     draw_2d::{Color, Font, Image},
     gui::{
-        event::{EvButton, EvMouse},
-        global_record,
+        event::{EvButton, EvMouse}, global_get, global_record
     },
     util::macros::callback,
 };
@@ -37,14 +36,19 @@ impl ListBoxInner {
 
 /// The list box control.
 ///
-/// # Remark
-/// If the object is not attached to a window, it causes a memory leak.
+/// # Remarks
+/// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
 pub struct ListBox(Weak<ListBoxInner>);
 
 impl ListBox {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::ListBox) -> Self {
         let object = global_record(ptr as _, ListBoxInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::ListBox) -> Self {
+        let object = global_get(ptr as _).unwrap();
         Self(Rc::downgrade(&object))
     }
 

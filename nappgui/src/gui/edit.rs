@@ -14,7 +14,7 @@ use crate::{
     draw_2d::{font::Font, Color},
     gui::{
         event::{EvText, EvTextFilter},
-        global_record,
+        global_get, global_record,
     },
     types::{Align, FontStyle},
     util::macros::callback,
@@ -39,19 +39,22 @@ impl EditInner {
 /// The edit control.
 ///
 /// # Remarks
-/// If the object is not attached to a window, it causes a memory leak.
+/// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
 pub struct Edit(Weak<EditInner>);
 
 impl Edit {
-    /// Create a cell from a pointer.
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Edit) -> Self {
         let object = global_record(ptr as _, EditInner::from_raw(ptr));
         Self(Rc::downgrade(&object))
     }
 
-    /// Returns a raw pointer to the cell object.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::Edit {
+    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::Edit) -> Self {
+        let object = global_get(ptr as _).unwrap();
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Edit {
         self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
     }
 

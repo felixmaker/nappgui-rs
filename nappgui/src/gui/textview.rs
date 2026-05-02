@@ -1,9 +1,15 @@
-use std::ptr::NonNull;
+use std::{
+    ptr::NonNull,
+    rc::{Rc, Weak},
+};
 
 use crate::{
     core::Stream,
     draw_2d::Color,
-    gui::event::{EvText, EvTextFilter},
+    gui::{
+        event::{EvText, EvTextFilter},
+        global_record,
+    },
     types::{Align, FontStyle},
     util::macros::callback,
 };
@@ -17,21 +23,37 @@ use nappgui_sys::{
     textview_writef, S2Df,
 };
 
-/// TextView are views designed to work with rich text blocks, where fonts, sizes and colors can be combined.
-///
-/// # Remark
-/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
-/// components assciated with it will be automatically released.
-#[repr(transparent)]
-pub struct TextView(NonNull<nappgui_sys::TextView>);
+pub(crate) struct TextViewInner {
+    ptr: NonNull<nappgui_sys::TextView>,
+}
 
-impl TextView {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::TextView) -> Self {
-        TextView(NonNull::new(ptr).expect("Null pointer passed to TextView::from_raw"))
+impl TextViewInner {
+    pub(crate) fn from_raw(ptr: *mut nappgui_sys::TextView) -> Self {
+        Self {
+            ptr: NonNull::new(ptr).expect("Null pointer passed to TextViewInner::from_raw"),
+        }
     }
 
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::TextView {
-        self.0.as_ptr()
+        self.ptr.as_ptr()
+    }
+}
+
+/// The text view control.
+///
+/// # Remark
+/// If the object is not attached to a window, it causes a memory leak.
+#[repr(transparent)]
+pub struct TextView(Weak<TextViewInner>);
+
+impl TextView {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::TextView) -> Self {
+        let object = global_record(ptr as _, TextViewInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::TextView {
+        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
     }
     /// Create a text view.
     pub fn new() -> Self {

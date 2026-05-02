@@ -5,22 +5,17 @@ use nappgui_sys::{cell_control, cell_empty, cell_enabled, cell_padding, cell_pad
 use crate::gui::Control;
 
 /// Cells are the inner elements of a Layout and will house a control or a sublayout.
-///
-/// # Remark
-/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
-/// components assciated with it will be automatically released.
 #[repr(transparent)]
 pub struct LayoutCell(NonNull<nappgui_sys::Cell>);
 
-/// The cell trait.
 impl LayoutCell {
     /// Create a cell from a pointer.
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Cell) -> Self {
-        Self(NonNull::new(ptr).unwrap())
+        Self(NonNull::new(ptr).expect("Null pointer passed to LayoutCell::from_raw"))
     }
 
     /// Returns a raw pointer to the cell object.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::Cell {
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Cell {
         self.0.as_ptr()
     }
 

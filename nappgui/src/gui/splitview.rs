@@ -1,4 +1,7 @@
-use std::ptr::NonNull;
+use std::{
+    ptr::NonNull,
+    rc::{Rc, Weak},
+};
 
 use nappgui_sys::{
     splitview_get_pos, splitview_horizontal, splitview_minsize0, splitview_minsize1, splitview_panel, splitview_pos,
@@ -7,27 +10,41 @@ use nappgui_sys::{
 };
 
 use crate::{
-    gui::{Panel, TextView, View, WebView},
+    gui::{global_record, Panel, TextView, View, WebView},
     types::SplitMode,
 };
 
-/// The SplitView are views divided into two parts, where in each of them we place another view or
-/// a panel. The dividing line is scrollable, which allows resizing both halves, dividing the total
-/// size of the control between the children.
-///
-/// # Remark
-/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
-/// components assciated with it will be automatically released.
-#[repr(transparent)]
-pub struct SplitView(NonNull<nappgui_sys::SplitView>);
+pub(crate) struct SplitViewInner {
+    ptr: NonNull<nappgui_sys::SplitView>,
+}
 
-impl SplitView {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::SplitView) -> Self {
-        SplitView(NonNull::new(ptr).expect("Null pointer passed to SplitView::from_raw"))
+impl SplitViewInner {
+    pub(crate) fn from_raw(ptr: *mut nappgui_sys::SplitView) -> Self {
+        Self {
+            ptr: NonNull::new(ptr).expect("Null pointer passed to SplitViewInner::from_raw"),
+        }
     }
 
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::SplitView {
-        self.0.as_ptr()
+        self.ptr.as_ptr()
+    }
+}
+
+/// The splitview control.
+///
+/// # Remarks
+/// If the object is not attached to a window, it causes a memory leak.
+#[repr(transparent)]
+pub struct SplitView(Weak<SplitViewInner>);
+
+impl SplitView {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::SplitView) -> Self {
+        let object = global_record(ptr as _, SplitViewInner::from_raw(ptr));
+        SplitView(Rc::downgrade(&object))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::SplitView {
+        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
     }
 
     /// Create a splitview with horizontal split.

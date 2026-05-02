@@ -6,7 +6,8 @@ use nappgui_sys::{
     window_previous_tabstop, window_show, window_stop_modal, window_title, window_update, V2Df,
 };
 use std::ffi::CString;
-use std::rc::Rc;
+use std::ptr::NonNull;
+use std::rc::{Rc, Weak};
 
 use crate::draw_2d::Image;
 use crate::gui::event::{EvPos, EvSize, EvWinClose};
@@ -16,42 +17,45 @@ use crate::types::{
 };
 use crate::util::macros::{callback, listener};
 
-pub(crate) struct WindowInner(*mut nappgui_sys::Window);
+pub(crate) struct WindowInner {
+    ptr: NonNull<nappgui_sys::Window>,
+}
 
 impl WindowInner {
     /// Creates a `WindowInner` from a raw pointer.
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Window) -> Self {
-        assert!(!ptr.is_null());
-        Self(ptr)
+        Self {
+            ptr: NonNull::new(ptr).expect("Null pointer passed to WindowInner::from_raw"),
+        }
     }
 
     /// Returns the underlying raw pointer.
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Window {
-        self.0
+        self.ptr.as_ptr()
     }
 }
 
 impl Drop for WindowInner {
     fn drop(&mut self) {
-        unsafe { window_destroy(&mut self.0) };
+        unsafe { window_destroy(&mut self.as_ptr()) };
     }
 }
 
 /// Window object.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Window(Rc<WindowInner>);
+pub struct Window(Weak<WindowInner>);
 
 impl Window {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Window) -> Self {
         assert!(!ptr.is_null());
         if !global_exists(ptr as _) {
-            let window = global_record(ptr as _, WindowInner::from_raw(ptr), true);
-            return Self(window);
+            let window = global_record(ptr as _, WindowInner::from_raw(ptr));
+            return Self(Rc::downgrade(&window));
         }
 
         if let Some(window) = global_get(ptr as _) {
-            return Self(window);
+            return Self(Rc::downgrade(&window));
         }
 
         panic!("Window object has been destroyed already.");
@@ -59,7 +63,7 @@ impl Window {
 
     /// Returns the raw pointer of Window object
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Window {
-        self.0.as_ptr()
+        self.0.upgrade().map(|x| x.as_ptr()).unwrap()
     }
 
     /// Create a new window.

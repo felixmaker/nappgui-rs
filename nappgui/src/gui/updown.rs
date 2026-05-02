@@ -1,24 +1,46 @@
-use std::ptr::NonNull;
+use std::{
+    ptr::NonNull,
+    rc::{Rc, Weak},
+};
 
 use nappgui_sys::{updown_OnClick, updown_create, updown_tooltip};
 
-use crate::{gui::event::EvButton, util::macros::callback};
+use crate::{
+    gui::{event::EvButton, global_record},
+    util::macros::callback,
+};
 
-/// UpDown are two-part horizontally divided button controls.
-///
-/// # Remark
-/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
-/// components assciated with it will be automatically released.
-#[repr(transparent)]
-pub struct UpDown(NonNull<nappgui_sys::UpDown>);
+pub(crate) struct UpDownInner {
+    ptr: NonNull<nappgui_sys::UpDown>,
+}
 
-impl UpDown {
+impl UpDownInner {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::UpDown) -> Self {
-        UpDown(NonNull::new(ptr).expect("Null pointer passed to UpDown::from_raw"))
+        Self {
+            ptr: NonNull::new(ptr).expect("Null pointer passed to UpDownInner::from_raw"),
+        }
     }
 
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::UpDown {
-        self.0.as_ptr()
+        self.ptr.as_ptr()
+    }
+}
+
+/// The updown control.
+///
+/// # Remark
+/// If the object is not attached to a window, it causes a memory leak.
+#[repr(transparent)]
+pub struct UpDown(Weak<UpDownInner>);
+
+impl UpDown {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::UpDown) -> Self {
+        let object = global_record(ptr as _, UpDownInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::UpDown {
+        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
     }
 
     /// Create an updown control.

@@ -1,4 +1,7 @@
-use std::ptr::NonNull;
+use std::{
+    ptr::NonNull,
+    rc::{Rc, Weak},
+};
 
 use nappgui_sys::{
     view_OnAcceptFocus, view_OnClick, view_OnDown, view_OnDrag, view_OnDraw, view_OnEnter, view_OnExit, view_OnFocus,
@@ -9,26 +12,44 @@ use nappgui_sys::{
 };
 
 use crate::{
-    gui::event::{EvDraw, EvKey, EvMouse, EvScroll, EvSize},
+    gui::{
+        event::{EvDraw, EvKey, EvMouse, EvScroll, EvSize},
+        global_record,
+    },
     util::macros::callback,
 };
 
-/// The View controls or custom views are blank areas within the window that allow us
-/// to implement our own components.
-///
-/// # Remark
-/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
-/// components assciated with it will be automatically released.
-#[repr(transparent)]
-pub struct View(NonNull<nappgui_sys::View>);
+pub(crate) struct ViewInner {
+    ptr: NonNull<nappgui_sys::View>,
+}
 
-impl View {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::View) -> Self {
-        View(NonNull::new(ptr).expect("Null pointer passed to View::from_raw"))
+impl ViewInner {
+    pub(crate) fn from_raw(ptr: *mut nappgui_sys::View) -> Self {
+        Self {
+            ptr: NonNull::new(ptr).expect("Null pointer passed to ViewInner::from_raw"),
+        }
     }
 
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::View {
-        self.0.as_ptr()
+        self.ptr.as_ptr()
+    }
+}
+
+/// The view control.
+///
+/// # Remarks
+/// If the object is not attached to a window, it causes a memory leak.
+#[repr(transparent)]
+pub struct View(Weak<ViewInner>);
+
+impl View {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::View) -> Self {
+        let object = global_record(ptr as _, ViewInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::View {
+        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
     }
 
     /// Create a new custom view.

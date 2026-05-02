@@ -1,29 +1,48 @@
-use std::ptr::NonNull;
+use std::{
+    ptr::NonNull,
+    rc::{Rc, Weak},
+};
 
-use crate::{draw_2d::Image, types::Scale, util::macros::callback};
+use crate::{draw_2d::Image, gui::global_record, types::Scale, util::macros::callback};
 
 use nappgui_sys::{
     imageview_OnClick, imageview_OnOverDraw, imageview_create, imageview_get_image, imageview_image, imageview_scale,
     imageview_size,
 };
 
-/// ImageView are specialized views in visualizing images and GIF animations.
+pub(crate) struct ImageViewInner {
+    ptr: NonNull<nappgui_sys::ImageView>,
+}
+
+impl ImageViewInner {
+    pub(crate) fn from_raw(ptr: *mut nappgui_sys::ImageView) -> Self {
+        Self {
+            ptr: NonNull::new(ptr).expect("Null pointer passed to ImageViewInner::from_raw"),
+        }
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::ImageView {
+        self.ptr.as_ptr()
+    }
+}
+
+/// The image view control.
 ///
 /// # Remark
-/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
-/// components assciated with it will be automatically released.
+/// If the object is not attached to a window, it causes a memory leak.
 #[repr(transparent)]
-pub struct ImageView(NonNull<nappgui_sys::ImageView>);
+pub struct ImageView(Weak<ImageViewInner>);
 
 impl ImageView {
     /// Create a cell from a pointer.
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::ImageView) -> Self {
-        Self(NonNull::new(ptr).unwrap())
+        let object = global_record(ptr as _, ImageViewInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
     }
 
     /// Returns a raw pointer to the cell object.
     pub fn as_ptr(&self) -> *mut nappgui_sys::ImageView {
-        self.0.as_ptr()
+        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
     }
 
     /// Create a image view.

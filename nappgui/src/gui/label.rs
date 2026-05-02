@@ -1,11 +1,12 @@
 use std::{
     ffi::{CStr, CString},
     ptr::NonNull,
+    rc::{Rc, Weak},
 };
 
 use crate::{
     draw_2d::{Color, Font},
-    gui::event::EvMouse,
+    gui::{event::EvMouse, global_record},
     types::{Align, Ellipsis, FontStyle},
     util::macros::callback,
 };
@@ -16,24 +17,37 @@ use nappgui_sys::{
     label_trim,
 };
 
-/// Label controls are used to insert small blocks of text into windows and forms. They are of uniform format,
-/// that is, the font and color attributes will be applied to the entire text. In most cases the content will
-/// be limited to a single line, although it is possible to show blocks that extend in several lines. The control
-/// size will be adjusted to the text it contains
-///
-/// # Remark
-/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
-/// components assciated with it will be automatically released.
-#[repr(transparent)]
-pub struct Label(NonNull<nappgui_sys::Label>);
+pub(crate) struct LabelInner {
+    ptr: NonNull<nappgui_sys::Label>,
+}
 
-impl Label {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Label) -> Self {
-        Self(NonNull::new(ptr).expect("Null pointer passed to Label::from_raw"))
+impl LabelInner {
+    pub(crate) fn from_raw(ptr: *mut nappgui_sys::Label) -> Self {
+        Self {
+            ptr: NonNull::new(ptr).expect("Null pointer passed to LabelInner::from_raw"),
+        }
     }
 
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Label {
-        self.0.as_ptr()
+        self.ptr.as_ptr()
+    }
+}
+
+/// The label control.
+///
+/// # Remark
+/// If the object is not attached to a window, it causes a memory leak.
+#[repr(transparent)]
+pub struct Label(Weak<LabelInner>);
+
+impl Label {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Label) -> Self {
+        let object = global_record(ptr as _, LabelInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Label {
+        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
     }
 
     /// Create a text control.

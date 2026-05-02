@@ -1,8 +1,12 @@
-use std::{ffi::CStr, ptr::NonNull};
+use std::{
+    ffi::CStr,
+    ptr::NonNull,
+    rc::{Rc, Weak},
+};
 
 use crate::{
     draw_2d::Image,
-    gui::{event::EvMenu, global_move_ownership, Menu},
+    gui::{event::EvMenu, global_move_ownership, global_record, Menu},
     types::{GuiState, KeyCode, ModifierKey},
     util::macros::callback,
 };
@@ -14,21 +18,37 @@ use nappgui_sys::{
     menuitem_visible,
 };
 
-/// Represents an option within a Menu. They will always have an associated action that will be executed when activated.
-///
-/// # Remark
-/// This type is managed by nappgui itself. Rust does not have its ownership. When the menu object is dropped, all
-/// components assciated with it will be automatically released.
-#[repr(transparent)]
-pub struct MenuItem(NonNull<nappgui_sys::MenuItem>);
+pub(crate) struct MenuItemInner {
+    ptr: NonNull<nappgui_sys::MenuItem>,
+}
 
-impl MenuItem {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::MenuItem) -> Self {
-        Self(NonNull::new(ptr).expect("Null pointer passed to MenuItem::from_raw"))
+impl MenuItemInner {
+    pub(crate) fn from_raw(ptr: *mut nappgui_sys::MenuItem) -> Self {
+        Self {
+            ptr: NonNull::new(ptr).expect("Null pointer passed to MenuItemInner::from_raw"),
+        }
     }
 
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::MenuItem {
-        self.0.as_ptr()
+        self.ptr.as_ptr()
+    }
+}
+
+/// The menu item control.
+///
+/// # Remark
+/// If the object is not attached to a menu, it causes a memory leak.
+#[repr(transparent)]
+pub struct MenuItem(Weak<MenuItemInner>);
+
+impl MenuItem {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::MenuItem) -> Self {
+        let object = global_record(ptr as _, MenuItemInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::MenuItem {
+        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
     }
 
     /// Create a new item for a menu.

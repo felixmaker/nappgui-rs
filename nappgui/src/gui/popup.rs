@@ -1,30 +1,51 @@
-use std::ptr::NonNull;
+use std::{
+    ptr::NonNull,
+    rc::{Rc, Weak},
+};
 
-use crate::{draw_2d::Image, gui::event::EvButton, util::macros::callback};
+use crate::{
+    draw_2d::Image,
+    gui::{event::EvButton, global_record},
+    util::macros::callback,
+};
 
 use nappgui_sys::{
     popup_OnSelect, popup_add_elem, popup_clear, popup_count, popup_create, popup_get_image, popup_get_selected,
     popup_get_text, popup_list_height, popup_selected, popup_set_elem, popup_tooltip,
 };
 
-/// PopUps are buttons that have a drop-down menu associated with them. Apparently they
-/// look like pushbuttons that when pressed show a list of options. In Hello PopUp and PopUp!
-/// you have an example of use.
+pub(crate) struct PopUpInner {
+    ptr: NonNull<nappgui_sys::PopUp>,
+}
+
+impl PopUpInner {
+    pub(crate) fn from_raw(ptr: *mut nappgui_sys::PopUp) -> Self {
+        Self {
+            ptr: NonNull::new(ptr).expect("Null pointer passed to PopUpInner::from_raw"),
+        }
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::PopUp {
+        self.ptr.as_ptr()
+    }
+}
+
+/// The popup control.
 ///
 /// # Remark
-/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
-/// components assciated with it will be automatically released.
+/// If the object is not attached to a window, it causes a memory leak.
 #[repr(transparent)]
-pub struct PopUp(NonNull<nappgui_sys::PopUp>);
+pub struct PopUp(Weak<PopUpInner>);
 
 impl PopUp {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::PopUp) -> Self {
-        Self(NonNull::new(ptr).expect("Null pointer passed to PopUp::from_raw"))
+        let object = global_record(ptr as _, PopUpInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
     }
 
     /// Returns the underlying raw pointer.
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::PopUp {
-        self.0.as_ptr()
+        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
     }
 
     /// Create a new popup control (PopUp button).

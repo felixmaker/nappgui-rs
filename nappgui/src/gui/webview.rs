@@ -1,27 +1,43 @@
-use std::{ptr::NonNull};
+use std::{
+    ptr::NonNull,
+    rc::{Rc, Weak},
+};
 
 use nappgui_sys::{webview_OnFocus, webview_back, webview_create, webview_forward, webview_navigate, webview_size};
 
-use crate::util::macros::callback;
+use crate::{gui::global_record, util::macros::callback};
 
+pub(crate) struct WebViewInner {
+    ptr: NonNull<nappgui_sys::WebView>,
+}
 
-/// A WebView control will allow us to embed Web content in our application. It will behave in the same way
-/// as other view controls such as View or TextView in terms of layout or resizing, displaying a fully
-/// functional browser in its client area.
-///
-/// # Remark
-/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
-/// components assciated with it will be automatically released.
-#[repr(transparent)]
-pub struct WebView(NonNull<nappgui_sys::WebView>);
-
-impl WebView {
-    pub(crate) unsafe  fn from_raw(ptr: *mut nappgui_sys::WebView) -> Self {
-        Self(NonNull::new(ptr).expect("Null pointer passed to WebView::from_raw"))
+impl WebViewInner {
+    pub(crate) fn from_raw(ptr: *mut nappgui_sys::WebView) -> Self {
+        Self {
+            ptr: NonNull::new(ptr).expect("Null pointer passed to WebViewInner::from_raw"),
+        }
     }
 
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::WebView {
-        self.0.as_ptr()
+        self.ptr.as_ptr()
+    }
+}
+
+/// The web view control.
+///
+/// # Remarks
+/// If the object is not attached to a window, it causes a memory leak.
+#[repr(transparent)]
+pub struct WebView(Weak<WebViewInner>);
+
+impl WebView {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::WebView) -> Self {
+        let object = global_record(ptr as _, WebViewInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::WebView {
+        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
     }
 
     /// Create a Web View.

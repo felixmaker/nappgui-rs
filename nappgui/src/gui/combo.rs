@@ -1,8 +1,14 @@
-use std::ptr::NonNull;
+use std::{
+    ptr::NonNull,
+    rc::{Rc, Weak},
+};
 
 use crate::{
     draw_2d::{Color, Image},
-    gui::event::{EvText, EvTextFilter},
+    gui::{
+        event::{EvText, EvTextFilter},
+        global_record,
+    },
     types::{Align, FontStyle},
     util::macros::callback,
 };
@@ -14,23 +20,39 @@ use nappgui_sys::{
     combo_set_elem, combo_text, combo_tooltip,
 };
 
-/// ComboBox are text editing boxes with drop-down list.
+pub(crate) struct ComboInner {
+    ptr: NonNull<nappgui_sys::Combo>,
+}
+
+impl ComboInner {
+    pub(crate) fn from_raw(ptr: *mut nappgui_sys::Combo) -> Self {
+        Self {
+            ptr: NonNull::new(ptr).expect("Null pointer passed to ComboInner::from_raw"),
+        }
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Combo {
+        self.ptr.as_ptr()
+    }
+}
+
+/// The combo control.
 ///
-/// # Remark
-/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
-/// components assciated with it will be automatically released.
+/// # Remarks
+/// If the object is not attached to a window, it causes a memory leak.
 #[repr(transparent)]
-pub struct Combo(NonNull<nappgui_sys::Combo>);
+pub struct Combo(Weak<ComboInner>);
 
 impl Combo {
     /// Create a cell from a pointer.
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Combo) -> Self {
-        Self(NonNull::new(ptr).unwrap())
+        let object = global_record(ptr as _, ComboInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
     }
 
     /// Returns a raw pointer to the cell object.
     pub fn as_ptr(&self) -> *mut nappgui_sys::Combo {
-        self.0.as_ptr()
+        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
     }
 
     /// Create a combo control.

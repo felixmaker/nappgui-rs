@@ -1,8 +1,14 @@
-use std::ptr::NonNull;
+use std::{
+    ptr::NonNull,
+    rc::{Rc, Weak},
+};
 
 use crate::{
     draw_2d::Font,
-    gui::event::{EvTbDataParams, EvTbDataResult},
+    gui::{
+        event::{EvTbDataParams, EvTbDataResult},
+        global_record,
+    },
     types::{Align, EventType},
     util::macros::callback,
 };
@@ -16,28 +22,37 @@ use nappgui_sys::{
     tableview_scroll_visible, tableview_select, tableview_selected, tableview_size, tableview_update, S2Df,
 };
 
-/// TableViews are data views that display tabulated information arranged in rows and columns.
-///
-/// # Remark
-/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
-/// components assciated with it will be automatically released.
-#[repr(transparent)]
-pub struct TableView(NonNull<nappgui_sys::TableView>);
+pub(crate) struct TableViewInner {
+    ptr: NonNull<nappgui_sys::TableView>,
+}
 
-impl TableView {
-    /// Creates a `TableView` from a raw pointer.
-    ///
-    /// # Safety
-    ///
-    /// The pointer must be non-null and point to a valid `TableView` instance
-    /// managed by the C library.
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::TableView) -> Self {
-        TableView(NonNull::new(ptr).expect("Null pointer passed to TableView::from_raw"))
+impl TableViewInner {
+    pub(crate) fn from_raw(ptr: *mut nappgui_sys::TableView) -> Self {
+        Self {
+            ptr: NonNull::new(ptr).expect("Null pointer passed to TableViewInner::from_raw"),
+        }
     }
 
-    /// Returns the underlying raw pointer.
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::TableView {
-        self.0.as_ptr()
+        self.ptr.as_ptr()
+    }
+}
+
+/// The table view control.
+///
+/// # Remarks
+/// If the object is not attached to a window, it causes a memory leak.
+#[repr(transparent)]
+pub struct TableView(Weak<TableViewInner>);
+
+impl TableView {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::TableView) -> Self {
+        let object = global_record(ptr as _, TableViewInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::TableView {
+        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
     }
 
     /// Create an table view control.

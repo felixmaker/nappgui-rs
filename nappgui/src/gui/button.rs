@@ -1,50 +1,65 @@
 use std::{
-    ffi::{CStr, CString},
+    cell::RefCell,
+    ffi::{c_void, CStr, CString},
+    panic::{catch_unwind, AssertUnwindSafe},
     ptr::NonNull,
+    rc::{Rc, Weak},
 };
 
 use crate::{
+    core::Event,
     draw_2d::{Font, Image},
-    gui::event::EvButton,
+    gui::{event::EvButton, global_get, global_record},
     types::GuiState,
-    util::macros::callback,
 };
 
 use nappgui_sys::{
     button_OnClick, button_check, button_check3, button_flat, button_flatgle, button_font, button_get_font,
     button_get_height, button_get_image, button_get_image_alt, button_get_state, button_get_text, button_hpadding,
     button_image, button_image_alt, button_push, button_radio, button_state, button_text, button_text_alt,
-    button_tooltip, button_vpadding, button_width,
+    button_tooltip, button_vpadding, button_width, listener_imp,
 };
 
-/// The button widget.
-///
-/// # Ownership and Lifecycle
-/// This type follows the **NAppGUI Managed Lifecycle**. In Rust terms, this object
-/// represents a handle to a resource owned by a `Panel`.
-///
-/// When a `Window` is destroyed, all associated components are recursively
-/// released by the underlying C library.
-///
-/// # Safety Warnings
-/// * **Memory Leaks**: A created button must be attached to a `Window` (its "Parent").
-///   If a button is dropped in Rust before being attached to a window, the C memory
-///   will leak as Rust does not call `button_destroy` automatically.
-/// * **Use-After-Free**: Calling methods on a button after its parent `Window`
-///   has been destroyed will result in a crash or undefined behavior. Use
-///   provided [checks/wrappers] to ensure the window is still alive.
-#[repr(transparent)]
-pub struct Button(NonNull<nappgui_sys::Button>);
+pub(crate) struct ButtonInner {
+    ptr: NonNull<nappgui_sys::Button>,
+    on_click: RefCell<Option<Rc<dyn Fn(&EvButton)>>>,
+}
 
-impl Button {
-    /// Create a cell from a pointer.
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Button) -> Self {
-        Self(NonNull::new(ptr).unwrap())
+impl ButtonInner {
+    pub(crate) fn from_raw(ptr: *mut nappgui_sys::Button) -> Self {
+        Self {
+            ptr: NonNull::new(ptr).expect("Null pointer passed to ButtonInner::from_raw"),
+            on_click: RefCell::new(None),
+        }
     }
 
-    /// Returns a raw pointer to the cell object.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::Button {
-        self.0.as_ptr()
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Button {
+        self.ptr.as_ptr()
+    }
+
+    pub(crate) fn set_on_click_handler<F>(&self, callback: F)
+    where
+        F: Fn(&EvButton) + 'static,
+    {
+        *self.on_click.borrow_mut() = Some(Rc::new(callback));
+    }
+}
+
+/// The button control.
+///
+/// # Remarks
+/// If the object is not attached to a window, it causes a memory leak.
+#[repr(transparent)]
+pub struct Button(Weak<ButtonInner>);
+
+impl Button {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Button) -> Self {
+        let object = global_record(ptr as _, ButtonInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Button {
+        self.0.upgrade().map(|button| button.as_ptr()).unwrap()
     }
 
     /// Create a push button, the typical [Accept], [Cancel], etc.
@@ -86,9 +101,26 @@ impl Button {
         unsafe { Self::from_raw(button) }
     }
 
-    callback! {
-        /// Set a function for pressing the button.
-        pub on_click(EvButton) => button_OnClick;
+    /// Set a function for pressing the button.
+    pub fn on_click<F>(&self, callback: F)
+    where
+        F: Fn(&EvButton) + 'static,
+    {
+        self.0.upgrade().map(|button| button.set_on_click_handler(callback));
+
+        extern "C" fn shim(obj: *mut c_void, event: *mut nappgui_sys::Event) {
+            if let Some(button) = global_get::<ButtonInner>(obj as _) {
+                let callback = button.on_click.borrow().clone();
+                let event = Event::new(event);
+                let params = event.params::<EvButton>().unwrap();
+
+                if let Some(callback) = callback {
+                    let _ = catch_unwind(AssertUnwindSafe(|| callback(&params)));
+                }
+            }
+        }
+        let listener = unsafe { listener_imp(self.as_ptr() as _, Some(shim)) };
+        unsafe { button_OnClick(self.as_ptr(), listener) };
     }
 
     /// Set the default width of a push button.

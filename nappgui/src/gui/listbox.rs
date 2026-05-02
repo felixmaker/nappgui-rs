@@ -1,8 +1,15 @@
-use std::{ffi::CStr, ptr::NonNull};
+use std::{
+    ffi::CStr,
+    ptr::NonNull,
+    rc::{Rc, Weak},
+};
 
 use crate::{
     draw_2d::{Color, Font, Image},
-    gui::event::{EvButton, EvMouse},
+    gui::{
+        event::{EvButton, EvMouse},
+        global_record,
+    },
     util::macros::callback,
 };
 use nappgui_sys::{
@@ -12,21 +19,37 @@ use nappgui_sys::{
     listbox_size, S2Df,
 };
 
-/// The ListBox are controls that display a series of elements as a list.
-///
-/// # Remark
-/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
-/// components assciated with it will be automatically released.
-#[repr(transparent)]
-pub struct ListBox(NonNull<nappgui_sys::ListBox>);
+pub(crate) struct ListBoxInner {
+    ptr: NonNull<nappgui_sys::ListBox>,
+}
 
-impl ListBox {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::ListBox) -> Self {
-        Self(NonNull::new(ptr).unwrap())
+impl ListBoxInner {
+    pub(crate) fn from_raw(ptr: *mut nappgui_sys::ListBox) -> Self {
+        Self {
+            ptr: NonNull::new(ptr).expect("Null pointer passed to ListBoxInner::from_raw"),
+        }
     }
 
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::ListBox {
-        self.0.as_ptr()
+        self.ptr.as_ptr()
+    }
+}
+
+/// The list box control.
+///
+/// # Remark
+/// If the object is not attached to a window, it causes a memory leak.
+#[repr(transparent)]
+pub struct ListBox(Weak<ListBoxInner>);
+
+impl ListBox {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::ListBox) -> Self {
+        let object = global_record(ptr as _, ListBoxInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::ListBox {
+        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
     }
 
     /// Create a new list control.

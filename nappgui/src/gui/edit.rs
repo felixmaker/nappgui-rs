@@ -1,4 +1,7 @@
-use std::ptr::NonNull;
+use std::{
+    ptr::NonNull,
+    rc::{Rc, Weak},
+};
 
 use nappgui_sys::{
     edit_OnChange, edit_OnFilter, edit_OnFocus, edit_align, edit_autoselect, edit_bgcolor, edit_bgcolor_focus,
@@ -9,29 +12,47 @@ use nappgui_sys::{
 
 use crate::{
     draw_2d::{font::Font, Color},
-    gui::event::{EvText, EvTextFilter},
+    gui::{
+        event::{EvText, EvTextFilter},
+        global_record,
+    },
     types::{Align, FontStyle},
     util::macros::callback,
 };
 
-/// EditBox are small text boxes with editing capabilities. Like the Label they are of uniform format:
-/// The typeface and colors will affect the entire text
+pub(crate) struct EditInner {
+    ptr: NonNull<nappgui_sys::Edit>,
+}
+
+impl EditInner {
+    pub(crate) fn from_raw(ptr: *mut nappgui_sys::Edit) -> Self {
+        Self {
+            ptr: NonNull::new(ptr).expect("Null pointer passed to EditInner::from_raw"),
+        }
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Edit {
+        self.ptr.as_ptr()
+    }
+}
+
+/// The edit control.
 ///
-/// # Remark
-/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
-/// components assciated with it will be automatically released.
+/// # Remarks
+/// If the object is not attached to a window, it causes a memory leak.
 #[repr(transparent)]
-pub struct Edit(NonNull<nappgui_sys::Edit>);
+pub struct Edit(Weak<EditInner>);
 
 impl Edit {
     /// Create a cell from a pointer.
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Edit) -> Self {
-        Self(NonNull::new(ptr).unwrap())
+        let object = global_record(ptr as _, EditInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
     }
 
     /// Returns a raw pointer to the cell object.
     pub fn as_ptr(&self) -> *mut nappgui_sys::Edit {
-        self.0.as_ptr()
+        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
     }
 
     /// Create a text edit control.

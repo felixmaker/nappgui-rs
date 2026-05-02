@@ -1,30 +1,46 @@
-use std::ptr::NonNull;
+use std::{
+    ptr::NonNull,
+    rc::{Rc, Weak},
+};
 
 use nappgui_sys::{
     panel_create, panel_custom, panel_get_layout, panel_layout, panel_scroll, panel_size, panel_update,
     panel_visible_layout,
 };
 
-use crate::gui::Layout;
+use crate::gui::{global_record, Layout};
 
-/// A Panel is a control within a window that groups other controls. It defines its own reference system,
-/// that is, if we move a panel all its descendants will move in unison since their locations will be
-/// relative to its origin. It will support other (sub)-panels as descendants, which allows to form a
-/// Window Hierarchy. A Panel is a control within a window that groups other controls.
-///
-/// # Remark
-/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
-/// components assciated with it will be automatically released.
-#[repr(transparent)]
-pub struct Panel(NonNull<nappgui_sys::Panel>);
+pub(crate) struct PanelInner {
+    ptr: NonNull<nappgui_sys::Panel>,
+}
 
-impl Panel {
-    pub(crate) unsafe fn from_raw(panel: *mut nappgui_sys::Panel) -> Self {
-        Self(NonNull::new(panel).expect("Null pointer passed to Panel::from_raw"))
+impl PanelInner {
+    pub(crate) fn from_raw(ptr: *mut nappgui_sys::Panel) -> Self {
+        Self {
+            ptr: NonNull::new(ptr).expect("Null pointer passed to PanelInner::from_raw"),
+        }
     }
 
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Panel {
-        self.0.as_ptr()
+        self.ptr.as_ptr()
+    }
+}
+
+/// The panel control.
+///
+/// # Remark
+/// If the object is not attached to a window, it causes a memory leak.
+#[repr(transparent)]
+pub struct Panel(Weak<PanelInner>);
+
+impl Panel {
+    pub(crate) unsafe fn from_raw(panel: *mut nappgui_sys::Panel) -> Self {
+        let object = global_record(panel as _, PanelInner::from_raw(panel));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Panel {
+        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
     }
 
     /// Create a panel.

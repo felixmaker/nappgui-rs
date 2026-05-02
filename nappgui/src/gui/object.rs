@@ -36,10 +36,7 @@ where
 }
 
 /// Record the object to the global object.
-///
-/// # Remarks
-/// If `global` is `true`, the object will be stored as a strong reference in the global object.
-pub(crate) fn global_record<T>(pointer: *mut (), object: T, global: bool) -> Rc<T>
+pub(crate) fn global_record<T>(pointer: *mut (), object: T) -> Rc<T>
 where
     T: Any + 'static,
 {
@@ -47,7 +44,7 @@ where
     let object = Rc::new(object);
     let weak_object = Rc::downgrade(&object);
     let global_object = GlobalObject {
-        object: if global { Some(object.clone()) } else { None },
+        object: Some(object.clone()),
         weak_object: Some(weak_object.clone()),
         ..Default::default()
     };

@@ -1,4 +1,7 @@
-use std::{cell::Cell, rc::Rc};
+use std::{
+    cell::Cell,
+    rc::{Rc, Weak},
+};
 
 use nappgui_sys::{
     menu_add_item, menu_count, menu_create, menu_del_item, menu_destroy, menu_get_item, menu_ins_item, menu_is_menubar,
@@ -45,19 +48,19 @@ impl Drop for MenuInner {
 /// menus and in Hello dynamic Menu! an example of adding or eliminating items at runtime.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Menu(Rc<MenuInner>);
+pub struct Menu(Weak<MenuInner>);
 
 impl Menu {
     /// Creates a `Menu` from a raw pointer.
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Menu) -> Self {
         assert!(!ptr.is_null());
         if !global_exists(ptr as _) {
-            let menu = global_record(ptr as _, MenuInner::from_raw(ptr), false);
-            return Self(menu);
+            let menu = global_record(ptr as _, MenuInner::from_raw(ptr));
+            return Self(Rc::downgrade(&menu));
         }
 
         if let Some(menu) = global_get(ptr as _) {
-            return Self(menu);
+            return Self(Rc::downgrade(&menu));
         }
 
         panic!("Menu object has been destroyed already.");
@@ -65,11 +68,11 @@ impl Menu {
 
     /// Returns the underlying raw pointer.
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Menu {
-        self.0.as_ptr()
+        self.0.upgrade().map(|x| x.as_ptr()).unwrap()
     }
 
     pub(crate) fn set_c_managed(&self, managed: bool) {
-        self.0.c_managed.set(managed);
+        self.0.upgrade().map(|x| x.c_managed.set(managed));
     }
 
     /// Create a new menu.

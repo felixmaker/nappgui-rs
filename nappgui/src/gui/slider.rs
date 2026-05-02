@@ -1,26 +1,48 @@
-use std::ptr::NonNull;
+use std::{
+    ptr::NonNull,
+    rc::{Rc, Weak},
+};
 
 use nappgui_sys::{
     slider_OnMoved, slider_create, slider_get_value, slider_steps, slider_tooltip, slider_value, slider_vertical,
 };
 
-use crate::{gui::event::EvSlider, util::macros::callback};
+use crate::{
+    gui::{event::EvSlider, global_record},
+    util::macros::callback,
+};
 
-/// Sliders are normally used to edit continuous and bounded numerical values.
-///
-/// # Remark
-/// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
-/// components assciated with it will be automatically released.
-#[repr(transparent)]
-pub struct Slider(NonNull<nappgui_sys::Slider>);
+pub(crate) struct SliderInner {
+    ptr: NonNull<nappgui_sys::Slider>,
+}
 
-impl Slider {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Slider) -> Self {
-        Slider(NonNull::new(ptr).expect("Null pointer passed to Slider::from_raw"))
+impl SliderInner {
+    pub(crate) fn from_raw(ptr: *mut nappgui_sys::Slider) -> Self {
+        Self {
+            ptr: NonNull::new(ptr).expect("Null pointer passed to SliderInner::from_raw"),
+        }
     }
 
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Slider {
-        self.0.as_ptr()
+        self.ptr.as_ptr()
+    }
+}
+
+/// The slider control.
+///
+/// # Remarks
+/// If the object is not attached to a window, it causes a memory leak.
+#[repr(transparent)]
+pub struct Slider(Weak<SliderInner>);
+
+impl Slider {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Slider) -> Self {
+        let object = global_record(ptr as _, SliderInner::from_raw(ptr));
+        Self(Rc::downgrade(&object))
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Slider {
+        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
     }
 
     /// Create a new slider control.

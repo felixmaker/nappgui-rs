@@ -1,8 +1,8 @@
 use std::ffi::{c_void, CString};
 
-use nappgui_sys::{osapp_finish, osapp_menubar, osapp_open_url, osmain_imp};
+use nappgui_sys::{osapp_finish, osapp_open_url, osmain_imp};
 
-use crate::gui::{Menu, Window, GLOBAL_OBJECTS};
+use crate::gui::GLOBAL_OBJECTS;
 
 /// Application handler.
 pub trait AppHandler {

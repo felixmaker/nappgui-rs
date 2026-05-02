@@ -36,7 +36,7 @@ where
         app.destroy();
         GLOBAL_OBJECTS.with_borrow_mut(|objs| {
             for (_, obj) in objs.iter() {
-                if let Some(obj) = obj.upgrade() {
+                if obj.need_destroy.get() {
                     if obj.object_type == ObjectType::Window {
                         let mut ptr = obj.pointer.as_ptr() as *mut nappgui_sys::Window;
                         unsafe { nappgui_sys::window_destroy(&mut ptr) }
@@ -81,8 +81,7 @@ pub fn finish() -> bool {
 }
 
 /// Set the general menu bar of the application.
-pub fn menubar(menu: &Menu, win: &Window)
-{
+pub fn menubar(menu: &Menu, win: &Window) {
     unsafe {
         osapp_menubar(menu.as_ptr(), win.as_ptr());
     }

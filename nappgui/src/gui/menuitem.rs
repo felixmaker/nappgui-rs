@@ -2,7 +2,7 @@ use std::{ffi::CStr, ptr::NonNull};
 
 use crate::{
     draw_2d::Image,
-    gui::{event::EvMenu, Menu},
+    gui::{Menu, event::EvMenu, global_set_need_destroy},
     types::{GuiState, KeyCode, ModifierKey},
     util::macros::callback,
 };
@@ -78,6 +78,7 @@ impl MenuItem {
     /// Assign a drop-down submenu when selecting the item.
     pub fn set_submenu(&self, menu: &Menu) {
         unsafe { menuitem_submenu(self.as_ptr(), &mut menu.as_ptr()) };
+        global_set_need_destroy(menu.as_ptr() as _, false);
     }
 
     /// Set the status of the item, which will be reflected with a mark next to the text.

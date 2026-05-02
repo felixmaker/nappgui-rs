@@ -10,14 +10,14 @@ impl AppHandler for App {
         let text = TextView::new();
         let panel = Panel::new();
 
+        let global_menu =  Menu::new();
         let menu = Menu::new();
         menu.add_item(&MenuItem::new("Edit"));
         menu.add_item(&MenuItem::new("Exit"));
         let submenu = MenuItem::new("File");
         submenu.set_submenu(&menu);
 
-        let menu = Menu::new();
-        menu.add_item(&submenu);
+        global_menu.add_item(&submenu);
 
         layout.set_control(0, 1, &button);
         layout.set_control(0, 2, &text);

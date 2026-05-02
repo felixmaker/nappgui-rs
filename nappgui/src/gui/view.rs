@@ -20,7 +20,6 @@ use crate::{
 /// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
-#[derive(Clone)]
 pub struct View(NonNull<nappgui_sys::View>);
 
 impl View {

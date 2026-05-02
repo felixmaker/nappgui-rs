@@ -20,7 +20,6 @@ use super::*;
 /// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
-#[derive(Clone)]
 pub struct Layout(*mut nappgui_sys::Layout);
 
 impl Layout {
@@ -60,10 +59,13 @@ impl Layout {
     }
 
     /// Gets the control assigned to a cell in the layout.
-    pub fn get_control<T>(&self, col: u32, row: u32) -> Option<T> {
+    pub fn control<T>(&self, col: u32, row: u32) -> Option<T> where T: Control {
         let control = unsafe { layout_control(self.as_ptr(), col, row) };
-        // object.as_object_type().is_control().then()
-        todo!()
+        if control.is_null() {
+            None
+        } else {
+            T::from_control_ptr(control)
+        }
     }
 
     /// Insert a control to the layout.

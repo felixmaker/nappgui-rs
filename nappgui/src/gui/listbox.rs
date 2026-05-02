@@ -1,4 +1,4 @@
-use std::ffi::CStr;
+use std::{ffi::CStr, ptr::NonNull};
 
 use crate::{
     draw_2d::{Color, Font, Image},
@@ -18,17 +18,15 @@ use nappgui_sys::{
 /// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
-#[derive(Clone)]
-pub struct ListBox(*mut nappgui_sys::ListBox);
+pub struct ListBox(NonNull<nappgui_sys::ListBox>);
 
 impl ListBox {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::ListBox) -> Self {
-        assert!(!ptr.is_null());
-        Self(ptr)
+        Self(NonNull::new(ptr).unwrap())
     }
 
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::ListBox {
-        self.0
+        self.0.as_ptr()
     }
 
     /// Create a new list control.

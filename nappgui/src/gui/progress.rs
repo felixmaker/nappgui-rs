@@ -8,7 +8,6 @@ use nappgui_sys::{progress_create, progress_undefined, progress_value};
 /// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
-#[derive(Clone)]
 pub struct Progress(NonNull<nappgui_sys::Progress>);
 
 impl Progress {

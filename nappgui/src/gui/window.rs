@@ -10,7 +10,7 @@ use std::rc::Weak;
 
 use crate::draw_2d::Image;
 use crate::gui::event::{EvPos, EvSize, EvWinClose};
-use crate::gui::{global_new, AsControl, Button, Control, Object, ObjectType, Panel};
+use crate::gui::{global_new, Control, Button, Object, ObjectType, Panel};
 use crate::types::{
     FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D, Size2D, WindowFlags,
 };
@@ -205,7 +205,7 @@ impl Window {
     /// control must belong to the window, be active and visible. The point (0,0) corresponds to the upper left vertex of the client area of the window.
     pub fn control_frame<T>(&self, control: &T) -> Rect2D
     where
-        T: AsControl,
+        T: Control,
     {
         unsafe {
             let rect = window_control_frame(self.as_ptr(), control.as_control_ptr());

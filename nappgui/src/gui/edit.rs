@@ -21,16 +21,16 @@ use crate::{
 /// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
-#[derive(Clone)]
 pub struct Edit(NonNull<nappgui_sys::Edit>);
 
 impl Edit {
+    /// Create a cell from a pointer.
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Edit) -> Self {
-        Self(NonNull::new(ptr).expect("Null pointer passed to Edit::from_raw"))
+        Self(NonNull::new(ptr).unwrap())
     }
 
-    /// Returns a raw pointer to the combo object.
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Edit {
+    /// Returns a raw pointer to the cell object.
+    pub fn as_ptr(&self) -> *mut nappgui_sys::Edit {
         self.0.as_ptr()
     }
 
@@ -170,10 +170,10 @@ impl Edit {
     }
 
     /// Set the inner vertical margin.
-    /// 
+    ///
     /// # Remarks
-    /// 
-    /// padding: If 0 there will be no margin between the text and the border of the control. 
+    ///
+    /// padding: If 0 there will be no margin between the text and the border of the control.
     /// If <0 the default margin will be set.
     pub fn set_vpadding(&self, padding: f32) {
         unsafe {

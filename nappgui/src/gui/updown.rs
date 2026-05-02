@@ -10,7 +10,6 @@ use crate::{gui::event::EvButton, util::macros::callback};
 /// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
-#[derive(Clone)]
 pub struct UpDown(NonNull<nappgui_sys::UpDown>);
 
 impl UpDown {

@@ -18,7 +18,6 @@ impl AppHandler for App {
 
         let menu = Menu::new();
         menu.add_item(&submenu);
-        
 
         layout.set_control(0, 1, &button);
         layout.set_control(0, 2, &text);

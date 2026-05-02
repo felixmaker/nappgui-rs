@@ -20,15 +20,16 @@ use nappgui_sys::{
 /// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
 /// components assciated with it will be automatically released.
 #[repr(transparent)]
-#[derive(Clone)]
 pub struct Combo(NonNull<nappgui_sys::Combo>);
 
 impl Combo {
+    /// Create a cell from a pointer.
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Combo) -> Self {
-        Self(NonNull::new(ptr).expect("Null pointer passed to Combo::from_raw"))
+        Self(NonNull::new(ptr).unwrap())
     }
 
-    pub(crate) unsafe fn as_ptr(&self) -> *mut nappgui_sys::Combo {
+    /// Returns a raw pointer to the cell object.
+    pub fn as_ptr(&self) -> *mut nappgui_sys::Combo {
         self.0.as_ptr()
     }
 

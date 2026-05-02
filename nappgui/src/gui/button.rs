@@ -5,7 +5,7 @@ use std::{
 
 use crate::{
     draw_2d::{Font, Image},
-    gui::{event::EvButton, Control},
+    gui::event::EvButton,
     types::GuiState,
     util::macros::callback,
 };
@@ -34,10 +34,19 @@ use nappgui_sys::{
 ///   has been destroyed will result in a crash or undefined behavior. Use
 ///   provided [checks/wrappers] to ensure the window is still alive.
 #[repr(transparent)]
-#[derive(Clone)]
 pub struct Button(NonNull<nappgui_sys::Button>);
 
 impl Button {
+    /// Create a cell from a pointer.
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Button) -> Self {
+        Self(NonNull::new(ptr).unwrap())
+    }
+
+    /// Returns a raw pointer to the cell object.
+    pub fn as_ptr(&self) -> *mut nappgui_sys::Button {
+        self.0.as_ptr()
+    }
+
     /// Create a push button, the typical [Accept], [Cancel], etc.
     pub fn new(text: &str) -> Self {
         let button = unsafe { Self::from_raw(button_push()) };
@@ -197,24 +206,5 @@ impl Button {
     /// Gets the current height of the control.
     pub fn height(&self) -> f32 {
         unsafe { button_get_height(self.as_ptr()) }
-    }
-}
-
-impl Control for Button {
-    type CControlType = nappgui_sys::Button;
-
-    fn control_type(&self) -> super::ControlType {
-        super::ControlType::Button
-    }
-
-    fn as_ptr(&self) -> *mut Self::CControlType {
-        self.0.as_ptr()
-    }
-
-    unsafe fn from_raw(ptr: *mut Self::CControlType) -> Self
-    where
-        Self: Sized,
-    {
-        Self(NonNull::new(ptr).expect("Null pointer passed to Button::from_raw"))
     }
 }

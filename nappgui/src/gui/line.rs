@@ -10,7 +10,6 @@ use nappgui_sys::{line_horizontal, line_length, line_vertical};
 /// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
 /// components associated with it will be automatically released.
 #[repr(transparent)]
-#[derive(Clone, Copy)]
 pub struct Line(NonNull<nappgui_sys::Line>);
 
 impl Line {

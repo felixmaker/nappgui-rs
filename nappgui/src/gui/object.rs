@@ -1,54 +1,86 @@
 use std::{
-    cell::{Cell, RefCell},
+    any::Any,
+    cell::RefCell,
     collections::HashMap,
-    ptr::NonNull,
     rc::{Rc, Weak},
 };
 
-pub(crate) struct Object {
-    pub(crate) pointer: NonNull<()>,
-    pub(crate) object_type: ObjectType,
-    pub(crate) need_destroy: Cell<bool>,
+#[derive(Default)]
+pub(crate) struct GlobalObject {
+    /// Always points to the object itself if its wrapped with reference count.
+    weak_object: Option<Weak<dyn Any + 'static>>,
+    /// The object itself.
+    object: Option<Rc<dyn Any + 'static>>,
+    /// Objects that this object owns.
+    object_owns: Vec<Rc<dyn Any + 'static>>,
 }
 
 thread_local! {
-    pub(crate) static GLOBAL_OBJECTS: RefCell<HashMap<*mut (), Rc<Object>>> = Default::default();
+    pub(crate) static GLOBAL_OBJECTS: RefCell<HashMap<*mut (), GlobalObject>> = Default::default();
 }
 
-pub(crate) fn global_get(pointer: *mut ()) -> Option<Rc<Object>> {
+pub(crate) fn global_exists(pointer: *mut ()) -> bool {
+    GLOBAL_OBJECTS.with_borrow(|objects| objects.get(&pointer).is_some())
+}
+
+pub(crate) fn global_get<T>(pointer: *mut ()) -> Option<Rc<T>>
+where
+    T: Any + 'static,
+{
     if pointer.is_null() {
         return None;
     }
-    GLOBAL_OBJECTS.with_borrow(|objects| objects.get(&pointer).cloned())
+    let this = GLOBAL_OBJECTS.with_borrow(|objects| objects.get(&pointer).and_then(|x| x.weak_object.clone()))?;
+    let object = this.upgrade()?;
+    object.downcast::<T>().ok()
 }
 
-pub(crate) fn global_set(pointer: *mut (), object: Rc<Object>) {
-    GLOBAL_OBJECTS.with_borrow_mut(|objs| objs.insert(pointer, object));
-}
-
-pub(crate) fn global_new(pointer: *mut (), object_type: ObjectType) -> Weak<Object> {
-    if let Some(object) = global_get(pointer) {
-        return Rc::downgrade(&object);
-    }
-    let object = Rc::new(Object {
-        pointer: NonNull::new(pointer).unwrap(),
-        object_type,
-        need_destroy: Cell::new(true),
-    });
+/// Record the object to the global object.
+///
+/// # Remarks
+/// If `global` is `true`, the object will be stored as a strong reference in the global object.
+pub(crate) fn global_record<T>(pointer: *mut (), object: T, global: bool) -> Rc<T>
+where
+    T: Any + 'static,
+{
+    assert!(!pointer.is_null());
+    let object = Rc::new(object);
     let weak_object = Rc::downgrade(&object);
-    global_set(pointer, object);
-    weak_object
+    let global_object = GlobalObject {
+        object: if global { Some(object.clone()) } else { None },
+        weak_object: Some(weak_object.clone()),
+        ..Default::default()
+    };
+    GLOBAL_OBJECTS.with_borrow_mut(|objects| objects.insert(pointer, global_object));
+    object
 }
 
-pub(crate) fn global_set_need_destroy(this: *mut (), need_destroy: bool) -> Option<()> {
-    let this_object = global_get(this)?;
-    this_object.need_destroy.set(need_destroy);
-    Some(())
-}
-
-#[repr(u32)]
-#[derive(Hash, PartialEq, Eq, Clone, Copy, Debug)]
-pub(crate) enum ObjectType {
-    Window = 64,
-    Menu,
+/// Move the ownership of the object from one pointer to another.
+///
+/// # Remarks
+/// The object that is moved to the `to` pointer will be created if it does not exist.
+pub(crate) fn global_move_ownership(from: *mut (), to: *mut ()) {
+    GLOBAL_OBJECTS.with_borrow_mut(|objects| -> Option<()> {
+        let from_objects: Vec<Rc<dyn Any + 'static>> = {
+            let mut result = Vec::new();
+            let from_object = objects.get_mut(&from)?;
+            if let Some(obj) = from_object.object.take() {
+                result.push(obj);
+            } else if let Some(obj) = from_object.weak_object.as_ref() {
+                if let Some(obj) = obj.upgrade() {
+                    result.push(obj);
+                }
+            }
+            while let Some(obj) = from_object.object_owns.pop() {
+                result.push(obj);
+            }
+            result
+        };
+        if !objects.contains_key(&to) {
+            objects.insert(to, GlobalObject::default());
+        }
+        let to_object = objects.get_mut(&to)?;
+        to_object.object_owns.extend(from_objects);
+        Some(())
+    });
 }

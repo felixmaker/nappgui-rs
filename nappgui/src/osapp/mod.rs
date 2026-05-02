@@ -2,7 +2,7 @@ use std::ffi::{c_void, CString};
 
 use nappgui_sys::{osapp_finish, osapp_menubar, osapp_open_url, osmain_imp};
 
-use crate::gui::{Menu, ObjectType, Window, GLOBAL_OBJECTS};
+use crate::gui::{Menu, Window, GLOBAL_OBJECTS};
 
 /// Application handler.
 pub trait AppHandler {
@@ -35,17 +35,6 @@ where
         let mut app = Box::from_raw(*obj as *mut T);
         app.destroy();
         GLOBAL_OBJECTS.with_borrow_mut(|objs| {
-            for (_, obj) in objs.iter() {
-                if obj.need_destroy.get() {
-                    if obj.object_type == ObjectType::Window {
-                        let mut ptr = obj.pointer.as_ptr() as *mut nappgui_sys::Window;
-                        unsafe { nappgui_sys::window_destroy(&mut ptr) }
-                    } else if obj.object_type == ObjectType::Menu {
-                        let mut ptr = obj.pointer.as_ptr() as *mut nappgui_sys::Menu;
-                        unsafe { nappgui_sys::menu_destroy(&mut ptr) }
-                    }
-                }
-            }
             objs.clear();
         });
     }
@@ -78,13 +67,6 @@ pub fn finish() -> bool {
         osapp_finish();
     }
     true
-}
-
-/// Set the general menu bar of the application.
-pub fn menubar(menu: &Menu, win: &Window) {
-    unsafe {
-        osapp_menubar(menu.as_ptr(), win.as_ptr());
-    }
 }
 
 /// Open an Internet address using the default operating system browser.

@@ -1,13 +1,42 @@
-use std::rc::Weak;
+use std::{cell::Cell, rc::Rc};
 
 use nappgui_sys::{
-    menu_add_item, menu_count, menu_create, menu_del_item, menu_get_item, menu_ins_item, menu_is_menubar, menu_launch,
-    menu_off_items, V2Df,
+    menu_add_item, menu_count, menu_create, menu_del_item, menu_destroy, menu_get_item, menu_ins_item, menu_is_menubar,
+    menu_launch, menu_off_items, V2Df,
 };
 
-use crate::gui::{global_new, Object, ObjectType, Window};
+use crate::gui::{global_exists, global_get, global_move_ownership, global_record, Window};
 
 use super::MenuItem;
+
+pub(crate) struct MenuInner {
+    ptr: *mut nappgui_sys::Menu,
+    c_managed: Cell<bool>,
+}
+
+impl MenuInner {
+    /// Creates a `MenuInner` from a raw pointer.
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Menu) -> Self {
+        assert!(!ptr.is_null());
+        Self {
+            ptr,
+            c_managed: Cell::new(false),
+        }
+    }
+
+    /// Returns the underlying raw pointer.
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Menu {
+        self.ptr
+    }
+}
+
+impl Drop for MenuInner {
+    fn drop(&mut self) {
+        if !self.c_managed.get() {
+            unsafe { menu_destroy(&mut self.as_ptr()) }
+        }
+    }
+}
 
 /// A Menu is a type of control that integrates a series of options, also called items or Menuitems.
 /// Each of them consists of a short text, optionally an icon and optionally also a keyboard shortcut,
@@ -16,28 +45,31 @@ use super::MenuItem;
 /// menus and in Hello dynamic Menu! an example of adding or eliminating items at runtime.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Menu(Weak<Object>);
+pub struct Menu(Rc<MenuInner>);
 
 impl Menu {
     /// Creates a `Menu` from a raw pointer.
-    ///
-    /// # Safety
-    ///
-    /// The pointer must be non-null and point to a valid `Menu` instance
-    /// managed by the C library.
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Menu) -> Self {
-        let object = global_new(ptr as _, ObjectType::Menu);
-        Self(object)
+        assert!(!ptr.is_null());
+        if !global_exists(ptr as _) {
+            let menu = global_record(ptr as _, MenuInner::from_raw(ptr), false);
+            return Self(menu);
+        }
+
+        if let Some(menu) = global_get(ptr as _) {
+            return Self(menu);
+        }
+
+        panic!("Menu object has been destroyed already.");
     }
 
     /// Returns the underlying raw pointer.
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Menu {
-        if let Some(object) = self.0.upgrade() {
-            if object.object_type == ObjectType::Menu {
-                return object.pointer.as_ptr() as *mut nappgui_sys::Menu
-            }
-        }
-        panic!("Menu pointer is not valid");
+        self.0.as_ptr()
+    }
+
+    pub(crate) fn set_c_managed(&self, managed: bool) {
+        self.0.c_managed.set(managed);
     }
 
     /// Create a new menu.
@@ -46,13 +78,15 @@ impl Menu {
     }
 
     /// Add an item at the end of the menu.
-    pub fn add_item(&self, item: &MenuItem) {
+    pub fn add_item(&self, item: MenuItem) {
         unsafe { menu_add_item(self.as_ptr(), item.as_ptr()) };
+        global_move_ownership(item.as_ptr() as _, self.as_ptr() as _);
     }
 
     /// Insert an item in an arbitrary position of the menu.
-    pub fn insert_item(&self, index: u32, item: &MenuItem) {
+    pub fn insert_item(&self, index: u32, item: MenuItem) {
         unsafe { menu_ins_item(self.as_ptr(), index, item.as_ptr()) };
+        global_move_ownership(item.as_ptr() as _, self.as_ptr() as _);
     }
 
     /// Remove an item from the menu.

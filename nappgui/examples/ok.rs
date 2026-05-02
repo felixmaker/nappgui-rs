@@ -10,14 +10,15 @@ impl AppHandler for App {
         let text = TextView::new();
         let panel = Panel::new();
 
-        let global_menu =  Menu::new();
+        let global_menu = Menu::new();
+        
         let menu = Menu::new();
-        menu.add_item(&MenuItem::new("Edit"));
-        menu.add_item(&MenuItem::new("Exit"));
+        menu.add_item(MenuItem::new("Edit"));
+        menu.add_item(MenuItem::new("Exit"));
         let submenu = MenuItem::new("File");
-        submenu.set_submenu(&menu);
+        submenu.set_submenu(menu);
 
-        global_menu.add_item(&submenu);
+        global_menu.add_item(submenu);
 
         layout.set_control(0, 1, &button);
         layout.set_control(0, 2, &text);
@@ -32,12 +33,13 @@ impl AppHandler for App {
         let window = Window::new(WindowFlags::default());
         window.set_panel(&panel);
         window.title("Hello, World!");
+        window.set_menubar(global_menu);
         window.origin(500.0, 200.0);
         window.on_close(|_| finish());
 
         window.show();
 
-        menubar(&menu, &window);
+        
 
         Self {}
     }

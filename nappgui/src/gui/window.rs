@@ -1,32 +1,70 @@
 use nappgui_sys::{
-    window_OnClose, window_OnMoved, window_OnResize, window_clear_hotkeys, window_client_to_screen,
-    window_control_frame, window_create, window_cursor, window_cycle_tabstop, window_defbutton, window_focus,
-    window_focus_info, window_get_client_size, window_get_origin, window_get_size, window_hide, window_hotkey,
-    window_modal, window_next_tabstop, window_origin, window_overlay, window_panel, window_previous_tabstop,
-    window_show, window_stop_modal, window_title, window_update, V2Df,
+    osapp_menubar, window_OnClose, window_OnMoved, window_OnResize, window_clear_hotkeys, window_client_to_screen,
+    window_control_frame, window_create, window_cursor, window_cycle_tabstop, window_defbutton, window_destroy,
+    window_focus, window_focus_info, window_get_client_size, window_get_origin, window_get_size, window_hide,
+    window_hotkey, window_modal, window_next_tabstop, window_origin, window_overlay, window_panel,
+    window_previous_tabstop, window_show, window_stop_modal, window_title, window_update, V2Df,
 };
 use std::ffi::CString;
-use std::rc::Weak;
+use std::rc::Rc;
 
 use crate::draw_2d::Image;
 use crate::gui::event::{EvPos, EvSize, EvWinClose};
-use crate::gui::{global_new, Control, Button, Object, ObjectType, Panel};
+use crate::gui::{global_exists, global_get, global_move_ownership, global_record, Button, Control, Menu, Panel};
 use crate::types::{
     FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D, Size2D, WindowFlags,
 };
 use crate::util::macros::{callback, listener};
 
-/// Window objects are the highest-level containers within the user interface.
+pub(crate) struct WindowInner(*mut nappgui_sys::Window);
+
+impl WindowInner {
+    /// Creates a `WindowInner` from a raw pointer.
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Window) -> Self {
+        assert!(!ptr.is_null());
+        Self(ptr)
+    }
+
+    /// Returns the underlying raw pointer.
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Window {
+        self.0
+    }
+}
+
+impl Drop for WindowInner {
+    fn drop(&mut self) {
+        unsafe { window_destroy(&mut self.0) };
+    }
+}
+
+/// Window object.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Window(pub(crate) Weak<Object>);
+pub struct Window(Rc<WindowInner>);
 
 impl Window {
+    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Window) -> Self {
+        assert!(!ptr.is_null());
+        if !global_exists(ptr as _) {
+            let window = global_record(ptr as _, WindowInner::from_raw(ptr), true);
+            return Self(window);
+        }
+
+        if let Some(window) = global_get(ptr as _) {
+            return Self(window);
+        }
+
+        panic!("Window object has been destroyed already.");
+    }
+
+    /// Returns the raw pointer of Window object
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Window {
+        self.0.as_ptr()
+    }
+
     /// Create a new window.
     pub fn new(flag: WindowFlags) -> Self {
-        let result = flag.to_window_flag_t();
-        let window = unsafe { window_create(result as u32) };
-        Window(global_new(window as _, ObjectType::Window))
+        unsafe { Self::from_raw(window_create(flag.to_window_flag_t() as u32)) }
     }
 
     callback! {
@@ -242,14 +280,12 @@ impl Window {
         unsafe { window_cursor(self.as_ptr(), cursor as i32, image.as_ptr(), hot_x, hot_y) }
     }
 
-    /// Returns the raw pointer of Window object
-    pub fn as_ptr(&self) -> *mut nappgui_sys::Window {
-        if let Some(object) = self.0.upgrade() {
-            if object.object_type == ObjectType::Window {
-                return object.pointer.as_ptr() as *mut nappgui_sys::Window;
-            }
+    /// Set the general menu bar of the application.
+    pub fn set_menubar(&self, menu: Menu) {
+        unsafe {
+            osapp_menubar(menu.as_ptr(), self.as_ptr());
         }
-        panic!("Window pointer is not valid");
+        global_move_ownership(menu.as_ptr() as _, self.as_ptr() as _);
     }
 }
 

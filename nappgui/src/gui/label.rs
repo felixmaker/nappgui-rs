@@ -1,4 +1,5 @@
 use std::{
+    cell::RefCell,
     ffi::{CStr, CString},
     ptr::NonNull,
     rc::{Rc, Weak},
@@ -8,7 +9,7 @@ use crate::{
     draw_2d::{Color, Font},
     gui::{event::EvMouse, global_get, global_record},
     types::{Align, Ellipsis, FontStyle},
-    util::macros::callback,
+    util::macros::listener,
 };
 
 use nappgui_sys::{
@@ -19,12 +20,14 @@ use nappgui_sys::{
 
 pub(crate) struct LabelInner {
     ptr: NonNull<nappgui_sys::Label>,
+    on_click: RefCell<Option<Rc<dyn Fn(&EvMouse) + 'static>>>,
 }
 
 impl LabelInner {
     pub(crate) fn from_raw(ptr: *mut nappgui_sys::Label) -> Self {
         Self {
             ptr: NonNull::new(ptr).expect("Null pointer passed to LabelInner::from_raw"),
+            on_click: RefCell::new(None),
         }
     }
 
@@ -63,9 +66,16 @@ impl Label {
         label
     }
 
-    callback! {
-        /// Set the OnClick event handler.
-        pub on_click(EvMouse) => label_OnClick;
+    /// Set the OnClick event handler.
+    pub fn set_on_click_handler<F>(&self, callback: F)
+    where
+        F: Fn(&EvMouse) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), LabelInner, on_click(EvMouse));
+        unsafe { label_OnClick(self.as_ptr(), listener) };
     }
 
     /// Set the text that the label will display.

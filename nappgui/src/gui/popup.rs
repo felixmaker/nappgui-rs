@@ -1,12 +1,11 @@
 use std::{
-    ptr::NonNull,
-    rc::{Rc, Weak},
+    cell::RefCell, ptr::NonNull, rc::{Rc, Weak}
 };
 
 use crate::{
     draw_2d::Image,
     gui::{event::EvButton, global_get, global_record},
-    util::macros::callback,
+    util::macros::{ listener},
 };
 
 use nappgui_sys::{
@@ -16,12 +15,14 @@ use nappgui_sys::{
 
 pub(crate) struct PopUpInner {
     ptr: NonNull<nappgui_sys::PopUp>,
+    on_select: RefCell<Option<Rc<dyn Fn(&EvButton) + 'static>>>,
 }
 
 impl PopUpInner {
     pub(crate) fn from_raw(ptr: *mut nappgui_sys::PopUp) -> Self {
         Self {
             ptr: NonNull::new(ptr).expect("Null pointer passed to PopUpInner::from_raw"),
+            on_select: RefCell::new(None),
         }
     }
 
@@ -59,10 +60,16 @@ impl PopUp {
         unsafe { Self::from_raw(popup) }
     }
 
-    callback! {
         /// Set an event handler for the selection of a new item.
-        pub on_select(EvButton) => popup_OnSelect;
-    }
+        pub fn set_on_select_handler<F>(&self, callback: F)
+        where
+            F: Fn(&EvButton) + 'static,
+        {
+            self.0.upgrade().map(|inner| *inner.on_select.borrow_mut() = Some(Rc::new(callback)));
+            let listener = listener!(self.as_ptr(), PopUpInner, on_select(EvButton));
+            unsafe { popup_OnSelect(self.as_ptr(), listener) };
+        }
+
 
     /// Assign a tooltip to the popup control.
     pub fn set_tooltip(&self, text: &str) {

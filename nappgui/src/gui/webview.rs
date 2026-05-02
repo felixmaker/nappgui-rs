@@ -1,4 +1,5 @@
 use std::{
+    cell::RefCell,
     ptr::NonNull,
     rc::{Rc, Weak},
 };
@@ -7,17 +8,19 @@ use nappgui_sys::{webview_OnFocus, webview_back, webview_create, webview_forward
 
 use crate::{
     gui::{global_get, global_record},
-    util::macros::callback,
+    util::macros::listener,
 };
 
 pub(crate) struct WebViewInner {
     ptr: NonNull<nappgui_sys::WebView>,
+    on_focus: RefCell<Option<Rc<dyn Fn(&bool) + 'static>>>,
 }
 
 impl WebViewInner {
     pub(crate) fn from_raw(ptr: *mut nappgui_sys::WebView) -> Self {
         Self {
             ptr: NonNull::new(ptr).expect("Null pointer passed to WebViewInner::from_raw"),
+            on_focus: RefCell::new(None),
         }
     }
 
@@ -53,9 +56,16 @@ impl WebView {
         unsafe { Self::from_raw(webview_create()) }
     }
 
-    callback! {
-        /// Sets a handler for keyboard focus.
-        pub on_focus(bool) => webview_OnFocus;
+    /// Set an event handler for keyboard focus.
+    pub fn set_on_focus_handler<F>(&self, handler: F)
+    where
+        F: Fn(&bool) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_focus.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), WebViewInner, on_focus(bool));
+        unsafe { webview_OnFocus(self.as_ptr(), listener) }
     }
 
     /// Sets the default size of the view.

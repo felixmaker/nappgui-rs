@@ -111,7 +111,7 @@ pub fn color<T, F>(
 ) where
     F: FnMut() + 'static,
 {
-    let listener = listener!(on_change, ());
+    let listener = todo!();
 
     let title = CString::new(title).unwrap();
     let mut colors: Vec<u32> = colors.iter().map(|color| color.inner).collect();

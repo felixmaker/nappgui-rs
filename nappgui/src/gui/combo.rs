@@ -1,4 +1,5 @@
 use std::{
+    cell::RefCell,
     ptr::NonNull,
     rc::{Rc, Weak},
 };
@@ -6,10 +7,11 @@ use std::{
 use crate::{
     draw_2d::{Color, Image},
     gui::{
-        event::{EvText, EvTextFilter}, global_get, global_record
+        event::{EvText, EvTextFilter},
+        global_get, global_record,
     },
     types::{Align, FontStyle},
-    util::macros::callback,
+    util::macros::listener,
 };
 
 use nappgui_sys::{
@@ -21,12 +23,16 @@ use nappgui_sys::{
 
 pub(crate) struct ComboInner {
     ptr: NonNull<nappgui_sys::Combo>,
+    on_filter: RefCell<Option<Rc<dyn Fn(&EvText) -> EvTextFilter + 'static>>>,
+    on_change: RefCell<Option<Rc<dyn Fn(&EvText) -> bool + 'static>>>,
 }
 
 impl ComboInner {
     pub(crate) fn from_raw(ptr: *mut nappgui_sys::Combo) -> Self {
         Self {
             ptr: NonNull::new(ptr).expect("Null pointer passed to ComboInner::from_raw"),
+            on_filter: RefCell::new(None),
+            on_change: RefCell::new(None),
         }
     }
 
@@ -63,16 +69,28 @@ impl Combo {
         unsafe { Self::from_raw(combo) }
     }
 
-    callback! {
-        /// Set a function to filter the text while editing.
-        pub on_filter(EvText) -> EvTextFilter => combo_OnFilter;
+    /// Set a function to filter the text while editing.
+    pub fn set_on_filter_handler<F>(&self, callback: F)
+    where
+        F: Fn(&EvText) -> EvTextFilter + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_filter.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), ComboInner, on_filter(EvText) -> EvTextFilter);
+        unsafe { combo_OnFilter(self.as_ptr(), listener) };
+    }
 
-        /// Set a function to be called when the text has changed.
-        ///
-        /// # Remarks
-        /// This event will also be launched when you select an item from the list, a sign that the text has changed
-        /// in the edit box. See Validate texts and GUI Events.
-        pub on_change(EvText) -> bool => combo_OnChange;
+    /// Set a function to be called when the text has changed.
+    pub fn set_on_change_handler<F>(&self, callback: F)
+    where
+        F: Fn(&EvText) -> bool + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_change.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), ComboInner, on_change(EvText) -> bool);
+        unsafe { combo_OnChange(self.as_ptr(), listener) };
     }
 
     /// Set the combo edit text.

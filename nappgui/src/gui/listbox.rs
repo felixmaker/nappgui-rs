@@ -1,4 +1,5 @@
 use std::{
+    cell::RefCell,
     ffi::CStr,
     ptr::NonNull,
     rc::{Rc, Weak},
@@ -7,9 +8,10 @@ use std::{
 use crate::{
     draw_2d::{Color, Font, Image},
     gui::{
-        event::{EvButton, EvMouse}, global_get, global_record
+        event::{EvButton, EvMouse},
+        global_get, global_record,
     },
-    util::macros::callback,
+    util::macros::listener,
 };
 use nappgui_sys::{
     listbox_OnDown, listbox_OnSelect, listbox_add_elem, listbox_check, listbox_checkbox, listbox_checked,
@@ -20,12 +22,16 @@ use nappgui_sys::{
 
 pub(crate) struct ListBoxInner {
     ptr: NonNull<nappgui_sys::ListBox>,
+    on_down: RefCell<Option<Rc<dyn Fn(&EvMouse) -> bool + 'static>>>,
+    on_select: RefCell<Option<Rc<dyn Fn(&EvButton) + 'static>>>,
 }
 
 impl ListBoxInner {
     pub(crate) fn from_raw(ptr: *mut nappgui_sys::ListBox) -> Self {
         Self {
             ptr: NonNull::new(ptr).expect("Null pointer passed to ListBoxInner::from_raw"),
+            on_down: RefCell::new(None),
+            on_select: RefCell::new(None),
         }
     }
 
@@ -62,18 +68,34 @@ impl ListBox {
         unsafe { Self::from_raw(listbox) }
     }
 
-    callback! {
-        /// Sets a handler for a mouse button press.
-        ///
-        /// # Remarks
-        /// This event is processed before listbox_OnSelect. In the tag field of Event the number of the
-        /// element clicked will be received or UINT32_MAX if it corresponds to an empty area of the ListBox.
-        /// If the event returns FALSE on event_result, the element will be prevented from being selected
-        /// (TRUE by default). See GUI Events.
-        pub on_down(EvMouse) -> bool => listbox_OnDown;
+    /// Sets a handler for a mouse button press.
+    ///
+    /// # Remarks
+    /// This event is processed before listbox_OnSelect. In the tag field of Event the number of the
+    /// element clicked will be received or UINT32_MAX if it corresponds to an empty area of the ListBox.
+    /// If the event returns FALSE on event_result, the element will be prevented from being selected
+    /// (TRUE by default). See GUI Events.
+    pub fn set_on_down_handler<F>(&self, callback: F)
+    where
+        F: Fn(&EvMouse) -> bool + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_down.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), ListBoxInner, on_down(EvMouse) -> bool);
+        unsafe { listbox_OnDown(self.as_ptr(), listener) };
+    }
 
-        /// Set an event handler for the selection of a new item.
-        pub on_select(EvButton) => listbox_OnSelect;
+    /// Set an event handler for the selection of a new item.
+    pub fn set_on_select_handler<F>(&self, callback: F)
+    where
+        F: Fn(&EvButton) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_select.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), ListBoxInner, on_select(EvButton));
+        unsafe { listbox_OnSelect(self.as_ptr(), listener) };
     }
 
     /// Set the default size of the list.

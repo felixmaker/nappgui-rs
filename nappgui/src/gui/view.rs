@@ -1,4 +1,5 @@
 use std::{
+    cell::RefCell,
     ptr::NonNull,
     rc::{Rc, Weak},
 };
@@ -16,17 +17,51 @@ use crate::{
         event::{EvDraw, EvKey, EvMouse, EvScroll, EvSize},
         global_get, global_record,
     },
-    util::macros::callback,
+    util::macros::listener,
 };
 
 pub(crate) struct ViewInner {
     ptr: NonNull<nappgui_sys::View>,
+    on_draw: RefCell<Option<Rc<dyn Fn(&EvDraw) + 'static>>>,
+    on_overlay: RefCell<Option<Rc<dyn Fn(&EvDraw) + 'static>>>,
+    on_size: RefCell<Option<Rc<dyn Fn(&EvSize) + 'static>>>,
+    on_enter: RefCell<Option<Rc<dyn Fn(&EvMouse) + 'static>>>,
+    on_exit: RefCell<Option<Rc<dyn Fn(&EvMouse) + 'static>>>,
+    on_move: RefCell<Option<Rc<dyn Fn(&EvMouse) + 'static>>>,
+    on_down: RefCell<Option<Rc<dyn Fn(&EvMouse) + 'static>>>,
+    on_up: RefCell<Option<Rc<dyn Fn(&EvMouse) + 'static>>>,
+    on_click: RefCell<Option<Rc<dyn Fn(&EvMouse) + 'static>>>,
+    on_drag: RefCell<Option<Rc<dyn Fn(&EvMouse) + 'static>>>,
+    on_wheel: RefCell<Option<Rc<dyn Fn(&EvMouse) + 'static>>>,
+    on_key_down: RefCell<Option<Rc<dyn Fn(&EvKey) + 'static>>>,
+    on_key_up: RefCell<Option<Rc<dyn Fn(&EvKey) + 'static>>>,
+    on_focus: RefCell<Option<Rc<dyn Fn(&bool) + 'static>>>,
+    on_accept_focus: RefCell<Option<Rc<dyn Fn() -> bool + 'static>>>,
+    on_resign_focus: RefCell<Option<Rc<dyn Fn() -> bool + 'static>>>,
+    on_scroll: RefCell<Option<Rc<dyn Fn(&EvScroll) -> f32 + 'static>>>,
 }
 
 impl ViewInner {
     pub(crate) fn from_raw(ptr: *mut nappgui_sys::View) -> Self {
         Self {
             ptr: NonNull::new(ptr).expect("Null pointer passed to ViewInner::from_raw"),
+            on_draw: RefCell::new(None),
+            on_overlay: RefCell::new(None),
+            on_size: RefCell::new(None),
+            on_enter: RefCell::new(None),
+            on_exit: RefCell::new(None),
+            on_move: RefCell::new(None),
+            on_down: RefCell::new(None),
+            on_up: RefCell::new(None),
+            on_click: RefCell::new(None),
+            on_drag: RefCell::new(None),
+            on_wheel: RefCell::new(None),
+            on_key_down: RefCell::new(None),
+            on_key_up: RefCell::new(None),
+            on_focus: RefCell::new(None),
+            on_accept_focus: RefCell::new(None),
+            on_resign_focus: RefCell::new(None),
+            on_scroll: RefCell::new(None),
         }
     }
 
@@ -78,57 +113,208 @@ impl View {
         unsafe { view_size(self.as_ptr(), size) }
     }
 
-    callback! {
-        /// Set an event handler to draw in the view.
-        pub on_draw(EvDraw) => view_OnDraw;
+    /// Set an event handler to draw in the view.
+    pub fn set_on_draw_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvDraw) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_draw.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_draw(EvDraw));
+        unsafe { view_OnDraw(self.as_ptr(), listener) }
+    }
 
-        /// Sets an event handler to draw the overlay.
-        pub on_overlay(EvDraw) => view_OnOverlay;
+    /// Set an event handler to draw the overlay.
+    pub fn set_on_overlay_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvDraw) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_overlay.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_overlay(EvDraw));
+        unsafe { view_OnOverlay(self.as_ptr(), listener) }
+    }
 
-        /// Set an event handler for resizing.
-        pub on_size(EvSize) => view_OnSize;
+    /// Set an event handler for resizing.
+    pub fn set_on_size_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvSize) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_size.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_size(EvSize));
+        unsafe { view_OnSize(self.as_ptr(), listener) }
+    }
 
-        /// Set an event handler for mouse enter.
-        pub on_enter(EvMouse) => view_OnEnter;
+    /// Set an event handler for mouse enter.
+    pub fn set_on_enter_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvMouse) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_enter.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_enter(EvMouse));
+        unsafe { view_OnEnter(self.as_ptr(), listener) }
+    }
 
-        /// Set an event handle for mouse exit.
-        pub on_exit(EvMouse) => view_OnExit;
+    /// Set an event handler for mouse exit.
+    pub fn set_on_exit_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvMouse) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_exit.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_exit(EvMouse));
+        unsafe { view_OnExit(self.as_ptr(), listener) }
+    }
 
-        /// Set an event handler for mouse movement.
-        pub on_move(EvMouse) => view_OnMove;
+    /// Set an event handler for mouse movement.
+    pub fn set_on_move_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvMouse) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_move.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_move(EvMouse));
+        unsafe { view_OnMove(self.as_ptr(), listener) }
+    }
 
-        /// Sets an event handler for a mouse button down.
-        pub on_down(EvMouse) => view_OnDown;
+    /// Set an event handler for a mouse button down.
+    pub fn set_on_down_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvMouse) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_down.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_down(EvMouse));
+        unsafe { view_OnDown(self.as_ptr(), listener) }
+    }
 
-        /// Sets an event handler for a mouse button up.
-        pub on_up(EvMouse) => view_OnUp;
+    /// Set an event handler for a mouse button up.
+    pub fn set_on_up_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvMouse) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_up.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_up(EvMouse));
+        unsafe { view_OnUp(self.as_ptr(), listener) }
+    }
 
-        /// Set an event handler for mouse click.
-        pub on_click(EvMouse) => view_OnClick;
+    /// Set an event handler for mouse click.
+    pub fn set_on_click_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvMouse) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_click(EvMouse));
+        unsafe { view_OnClick(self.as_ptr(), listener) }
+    }
 
-        /// Set an event handler for mouse drag.
-        pub on_drag(EvMouse) => view_OnDrag;
+    /// Set an event handler for mouse drag.
+    pub fn set_on_drag_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvMouse) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_drag.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_drag(EvMouse));
+        unsafe { view_OnDrag(self.as_ptr(), listener) }
+    }
 
-        /// Set an event handler for mouse wheel.
-        pub on_wheel(EvMouse) => view_OnWheel;
+    /// Set an event handler for mouse wheel.
+    pub fn set_on_wheel_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvMouse) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_wheel.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_wheel(EvMouse));
+        unsafe { view_OnWheel(self.as_ptr(), listener) }
+    }
 
-        /// Set an event handler for a keystroke.
-        pub on_key_down(EvKey) => view_OnKeyDown;
+    /// Set an event handler for a keystroke.
+    pub fn set_on_key_down_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvKey) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_key_down.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_key_down(EvKey));
+        unsafe { view_OnKeyDown(self.as_ptr(), listener) }
+    }
 
-        /// Set an event handler for releasing a key.
-        pub on_key_up(EvKey) => view_OnKeyUp;
+    /// Set an event handler for releasing a key.
+    pub fn set_on_key_up_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvKey) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_key_up.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_key_up(EvKey));
+        unsafe { view_OnKeyUp(self.as_ptr(), listener) }
+    }
 
-        /// Sets an event handler for keyboard focus.
-        pub on_focus(bool) => view_OnFocus;
+    /// Set an event handler for keyboard focus.
+    pub fn set_on_focus_handler<F>(&self, handler: F)
+    where
+        F: Fn(&bool) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_focus.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_focus(bool));
+        unsafe { view_OnFocus(self.as_ptr(), listener) }
+    }
 
-        /// Set a handler to avoid losing keyboard focus.
-        pub on_accept_focus() -> bool => view_OnAcceptFocus;
+    /// Set a handler to avoid losing keyboard focus.
+    pub fn set_on_accept_focus_handler<F>(&self, handler: F)
+    where
+        F: Fn() -> bool + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_accept_focus.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_accept_focus());
+        unsafe { view_OnAcceptFocus(self.as_ptr(), listener) }
+    }
 
-        /// Set a handler to prevent getting keyboard focus.
-        pub on_resign_focus() -> bool => view_OnResignFocus;
+    /// Set a handler to prevent getting keyboard focus.
+    pub fn set_on_resign_focus_handler<F>(&self, handler: F)
+    where
+        F: Fn() -> bool + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_resign_focus.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_resign_focus());
+        unsafe { view_OnResignFocus(self.as_ptr(), listener) }
+    }
 
-        /// Set an event handler for the scroll bars.
-        pub on_scroll(EvScroll) -> f32 => view_OnScroll;
+    /// Set an event handler for the scroll bars.
+    pub fn set_on_scroll_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvScroll) -> f32 + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_scroll.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_scroll(EvScroll));
+        unsafe { view_OnScroll(self.as_ptr(), listener) }
     }
 
     /// Allows to capture the press of the \[TAB\] key.

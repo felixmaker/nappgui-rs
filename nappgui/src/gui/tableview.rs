@@ -1,4 +1,5 @@
 use std::{
+    cell::RefCell,
     ptr::NonNull,
     rc::{Rc, Weak},
 };
@@ -10,7 +11,7 @@ use crate::{
         global_get, global_record,
     },
     types::{Align, EventType},
-    util::macros::callback,
+    util::macros::listener,
 };
 
 use nappgui_sys::{
@@ -24,12 +25,20 @@ use nappgui_sys::{
 
 pub(crate) struct TableViewInner {
     ptr: NonNull<nappgui_sys::TableView>,
+    on_select: RefCell<Option<Rc<dyn Fn() + 'static>>>,
+    on_row_click: RefCell<Option<Rc<dyn Fn() + 'static>>>,
+    on_header_click: RefCell<Option<Rc<dyn Fn() + 'static>>>,
+    on_data: RefCell<Option<Rc<dyn Fn(&EvTbDataParams) -> EvTbDataResult + 'static>>>,
 }
 
 impl TableViewInner {
     pub(crate) fn from_raw(ptr: *mut nappgui_sys::TableView) -> Self {
         Self {
             ptr: NonNull::new(ptr).expect("Null pointer passed to TableViewInner::from_raw"),
+            on_select: RefCell::new(None),
+            on_row_click: RefCell::new(None),
+            on_header_click: RefCell::new(None),
+            on_data: RefCell::new(None),
         }
     }
 
@@ -65,27 +74,58 @@ impl TableView {
         unsafe { TableView::from_raw(tableview_create()) }
     }
 
-    callback! {
-        /// Notifies that the selection has changed.
-        pub on_select() => tableview_OnSelect;
+    /// Notifies that the selection has changed.
+    pub fn set_on_select_handler<F>(&self, handler: F)
+    where
+        F: Fn() + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_select.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), TableViewInner, on_select());
+        unsafe { tableview_OnSelect(self.as_ptr(), listener) }
+    }
 
-        /// Notify each time a row is clicked.
-        pub on_row_click() => tableview_OnRowClick;
+    /// Notify each time a row is clicked.
+    pub fn set_on_row_click_handler<F>(&self, handler: F)
+    where
+        F: Fn() + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_row_click.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), TableViewInner, on_row_click());
+        unsafe { tableview_OnRowClick(self.as_ptr(), listener) }
+    }
 
-        /// Notifies each time a header is clicked.
-        pub on_header_click()  => tableview_OnHeaderClick;
+    /// Notify each time a header is clicked.
+    pub fn set_on_header_click_handler<F>(&self, handler: F)
+    where
+        F: Fn() + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_header_click.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), TableViewInner, on_header_click());
+        unsafe { tableview_OnHeaderClick(self.as_ptr(), listener) }
     }
 
     /// Sets up a handler to read data from the application.
-    pub fn on_data<F>(&self, handler: F)
+    pub fn set_on_data_handler<F>(&self, handler: F)
     where
-        F: FnMut(&EvTbDataParams) -> EvTbDataResult + 'static,
+        F: Fn(&EvTbDataParams) -> EvTbDataResult + 'static,
     {
-        use std::ffi::c_void;
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_data.borrow_mut() = Some(Rc::new(handler)));
 
-        unsafe extern "C" fn shim(data: *mut c_void, event: *mut nappgui_sys::Event) {
-            let data = data as *mut Box<dyn FnMut(&EvTbDataParams) -> EvTbDataResult>;
-            let f = &mut *data;
+        unsafe extern "C" fn shim(data: *mut std::ffi::c_void, event: *mut nappgui_sys::Event) {
+            let Some(object) = global_get::<TableViewInner>(data as _) else {
+                return;
+            };
+            let Some(f) = object.on_data.borrow().clone() else {
+                return;
+            };
             let event = crate::core::event::Event::new(event);
             match event.type_() {
                 EventType::TableNRows => {
@@ -108,14 +148,9 @@ impl TableView {
             }
         }
 
-        let cb: Box<dyn FnMut(&EvTbDataParams) -> EvTbDataResult> = Box::new(handler);
-        let data: *mut Box<dyn FnMut(&EvTbDataParams) -> EvTbDataResult> = Box::into_raw(Box::new(cb));
+        let listener = unsafe { nappgui_sys::listener_imp(self.as_ptr() as _, Some(shim)) };
 
-        let listener = unsafe { nappgui_sys::listener_imp(data as *mut c_void, Some(shim)) };
-
-        unsafe {
-            tableview_OnData(self.as_ptr(), listener);
-        }
+        unsafe { tableview_OnData(self.as_ptr(), listener) }
     }
 
     /// Sets the general font for the entire table.

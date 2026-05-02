@@ -1,25 +1,52 @@
+// macro_rules! listener {
+//     ($handler:expr, ($($params: ty)?) $(-> $return:ty)?) => {{
+//         use std::ffi::c_void;
+
+//         unsafe extern "C" fn shim(data: *mut c_void, event: *mut nappgui_sys::Event) {
+//             let data = data as *mut Box<dyn FnMut($(& $params)?) $(-> $return)?>;
+//             let f = &mut *data;
+//             #[allow(unused)]
+//             let event = crate::core::event::Event::new(event);
+//             $(
+//                 let params = event.params::<$params>().unwrap();
+//             )?
+//             #[allow(unused)]
+//             if let Ok(r) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f($(&(params as $params))?))) {
+//                 $( event.result(r as $return); )?
+//             }
+//         }
+
+//         let cb: Box<dyn FnMut($(& $params)?) $(-> $return)?> = Box::new($handler);
+//         let data: *mut Box<dyn FnMut($(& $params)?) $(-> $return)?> = Box::into_raw(Box::new(cb));
+
+//         let listener = unsafe { nappgui_sys::listener_imp(data as *mut c_void, Some(shim)) };
+//         listener
+//     }};
+// }
+
 macro_rules! listener {
-    ($handler:expr, ($($params: ty)?) $(-> $return:ty)?) => {{
+    ($ptr: expr, $inner_type:ty, $member:ident($($params: ty)?) $(-> $return:ty)?) => {{
         use std::ffi::c_void;
 
-        unsafe extern "C" fn shim(data: *mut c_void, event: *mut nappgui_sys::Event) {
-            let data = data as *mut Box<dyn FnMut($(& $params)?) $(-> $return)?>;
-            let f = &mut *data;
-            #[allow(unused)]
-            let event = crate::core::event::Event::new(event);
-            $(
-                let params = event.params::<$params>().unwrap();
-            )?
-            #[allow(unused)]
-            if let Ok(r) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f($(&(params as $params))?))) {
-                $( event.result(r as $return); )?
+        extern "C" fn shim(obj: *mut c_void, event: *mut nappgui_sys::Event) {
+            if let Some(obj) = global_get::<$inner_type>(obj as _) {
+                let callback = obj.$member.borrow().clone();
+                #[allow(unused)]
+                let event = crate::core::event::Event::new(event);
+                $(
+                    let params = event.params::<$params>().unwrap();
+                )?
+
+                #[allow(unused)]
+                if let Some(f) = callback {
+                    if let Ok(r) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f($(&(params as $params))?))) {
+                        unsafe { $( event.result(r as $return); )? }
+                    }
+                }
             }
         }
 
-        let cb: Box<dyn FnMut($(& $params)?) $(-> $return)?> = Box::new($handler);
-        let data: *mut Box<dyn FnMut($(& $params)?) $(-> $return)?> = Box::into_raw(Box::new(cb));
-
-        let listener = unsafe { nappgui_sys::listener_imp(data as *mut c_void, Some(shim)) };
+        let listener = unsafe { nappgui_sys::listener_imp($ptr as _, Some(shim)) };
         listener
     }};
 }
@@ -55,56 +82,56 @@ macro_rules! listener {
 //     }
 // }
 
-macro_rules! callback {
-    (
-        $(#[$meta:meta])*
-        $vis:vis $func:ident($($params: ty)?) $(-> $return:ty)? => $c_func:ident
-    ) => {
-        $(#[$meta])*
-        $vis fn $func<F>(&self, handler: F)
-        where
-            F: FnMut($(& $params)?) $(-> $return)? + 'static,
-        {
-            use std::ffi::c_void;
+// macro_rules! callback {
+//     (
+//         $(#[$meta:meta])*
+//         $vis:vis $func:ident($($params: ty)?) $(-> $return:ty)? => $c_func:ident
+//     ) => {
+//         $(#[$meta])*
+//         $vis fn $func<F>(&self, handler: F)
+//         where
+//             F: FnMut($(& $params)?) $(-> $return)? + 'static,
+//         {
+//             use std::ffi::c_void;
 
-            unsafe extern "C" fn shim(data: *mut c_void, event: *mut nappgui_sys::Event) {
-                let data = data as *mut Box<dyn FnMut($(& $params)?) $(-> $return)?>;
-                let f = &mut *data;
-                #[allow(unused)]
-                let event = crate::core::event::Event::new(event);
-                $(
-                    let params = event.params::<$params>().unwrap();
-                )?
-                #[allow(unused)]
-                if let Ok(r) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f($(&(params as $params))?))) {
-                    $( event.result(r as $return); )?
-                }
-            }
+//             unsafe extern "C" fn shim(data: *mut c_void, event: *mut nappgui_sys::Event) {
+//                 let data = data as *mut Box<dyn FnMut($(& $params)?) $(-> $return)?>;
+//                 let f = &mut *data;
+//                 #[allow(unused)]
+//                 let event = crate::core::event::Event::new(event);
+//                 $(
+//                     let params = event.params::<$params>().unwrap();
+//                 )?
+//                 #[allow(unused)]
+//                 if let Ok(r) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f($(&(params as $params))?))) {
+//                     $( event.result(r as $return); )?
+//                 }
+//             }
 
-            let cb: Box<dyn FnMut($(& $params)?) $(-> $return)?> = Box::new(handler);
-            let data: *mut Box<dyn FnMut($(& $params)?) $(-> $return)?> = Box::into_raw(Box::new(cb));
+//             let cb: Box<dyn FnMut($(& $params)?) $(-> $return)?> = Box::new(handler);
+//             let data: *mut Box<dyn FnMut($(& $params)?) $(-> $return)?> = Box::into_raw(Box::new(cb));
 
-            let listener = unsafe { nappgui_sys::listener_imp(data as *mut c_void, Some(shim)) };
+//             let listener = unsafe { nappgui_sys::listener_imp(data as *mut c_void, Some(shim)) };
 
-            unsafe {
-                $c_func(self.as_ptr(), listener);
-            }
-        }
-    };
-    (
-        $(
-            $(#[$meta:meta])*
-            $vis:vis $func:ident($($params: ty)?) $(-> $return:ty)? => $c_func:ident
-        );*$(;)?
-    ) => {
-        $(
-            callback!(
-                $(#[$meta])*
-                $vis $func($($params)?) $(-> $return)? => $c_func
-            );
-        )*
-    }
-}
+//             unsafe {
+//                 $c_func(self.as_ptr(), listener);
+//             }
+//         }
+//     };
+//     (
+//         $(
+//             $(#[$meta:meta])*
+//             $vis:vis $func:ident($($params: ty)?) $(-> $return:ty)? => $c_func:ident
+//         );*$(;)?
+//     ) => {
+//         $(
+//             callback!(
+//                 $(#[$meta])*
+//                 $vis $func($($params)?) $(-> $return)? => $c_func
+//             );
+//         )*
+//     }
+// }
 
 // macro_rules! pub_crate_ptr_ops {
 //     ($pointer: ty) => {
@@ -156,6 +183,7 @@ macro_rules! callback {
 //     };
 // }
 
-pub(crate) use callback;
+// pub(crate) use callback;
+// pub(crate) use listener;
 pub(crate) use listener;
 // pub(crate) use pub_crate_ptr_ops;

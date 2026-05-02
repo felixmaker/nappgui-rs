@@ -1,4 +1,5 @@
 use std::{
+    cell::RefCell,
     ptr::NonNull,
     rc::{Rc, Weak},
 };
@@ -17,22 +18,49 @@ use crate::{
         global_get, global_record,
     },
     types::{Align, FontStyle},
-    util::macros::callback,
+    util::macros::listener,
 };
 
 pub(crate) struct EditInner {
     ptr: NonNull<nappgui_sys::Edit>,
+    on_filter: RefCell<Option<Rc<dyn Fn(&EvText) -> EvTextFilter + 'static>>>,
+    on_change: RefCell<Option<Rc<dyn Fn(&EvText) -> bool + 'static>>>,
+    on_focus: RefCell<Option<Rc<dyn Fn(&bool) + 'static>>>,
 }
 
 impl EditInner {
     pub(crate) fn from_raw(ptr: *mut nappgui_sys::Edit) -> Self {
         Self {
             ptr: NonNull::new(ptr).expect("Null pointer passed to EditInner::from_raw"),
+            on_filter: RefCell::new(None),
+            on_change: RefCell::new(None),
+            on_focus: RefCell::new(None),
         }
     }
 
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Edit {
         self.ptr.as_ptr()
+    }
+
+    pub(crate) fn set_on_filter_handler<F>(&self, callback: F)
+    where
+        F: Fn(&EvText) -> EvTextFilter + 'static,
+    {
+        *self.on_filter.borrow_mut() = Some(Rc::new(callback));
+    }
+
+    pub(crate) fn set_on_change_handler<F>(&self, callback: F)
+    where
+        F: Fn(&EvText) -> bool + 'static,
+    {
+        *self.on_change.borrow_mut() = Some(Rc::new(callback));
+    }
+
+    pub(crate) fn set_on_focus_handler<F>(&self, callback: F)
+    where
+        F: Fn(&bool) + 'static,
+    {
+        *self.on_focus.borrow_mut() = Some(Rc::new(callback));
     }
 }
 
@@ -70,15 +98,34 @@ impl Edit {
         unsafe { Self::from_raw(edit) }
     }
 
-    callback! {
-        /// Set a function to filter the text while editing.
-        pub on_filter(EvText) -> EvTextFilter => edit_OnFilter;
+    /// Set a function to filter the text while editing.
+    pub fn set_on_filter_handler<F>(&self, callback: F)
+    where
+        F: Fn(&EvText) -> EvTextFilter + 'static,
+    {
+        self.0.upgrade().unwrap().set_on_filter_handler(callback);
+        let listener = listener!(self.as_ptr(), EditInner, on_filter(EvText) -> EvTextFilter);
+        unsafe { edit_OnFilter(self.as_ptr(), listener) };
+    }
 
-        /// Set a function to detect when the text has changed.
-        pub on_change(EvText) -> bool => edit_OnChange;
+    /// Set a function to detect when the text has changed.
+    pub fn set_on_change_handler<F>(&self, callback: F)
+    where
+        F: Fn(&EvText) -> bool + 'static,
+    {
+        self.0.upgrade().unwrap().set_on_change_handler(callback);
+        let listener = listener!(self.as_ptr(), EditInner, on_change(EvText) -> bool);
+        unsafe { edit_OnChange(self.as_ptr(), listener) };
+    }
 
-        /// Sets a handler for keyboard focus.
-        pub on_focus(bool) => edit_OnFocus;
+    /// Sets a handler for keyboard focus.
+    pub fn set_on_focus_handler<F>(&self, callback: F)
+    where
+        F: Fn(&bool) + 'static,
+    {
+        self.0.upgrade().unwrap().set_on_focus_handler(callback);
+        let listener = listener!(self.as_ptr(), EditInner, on_focus(bool));
+        unsafe { edit_OnFocus(self.as_ptr(), listener) };
     }
 
     /// Set the edit control text.

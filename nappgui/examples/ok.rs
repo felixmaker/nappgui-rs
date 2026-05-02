@@ -13,7 +13,9 @@ impl AppHandler for App {
         let global_menu = Menu::new();
         
         let menu = Menu::new();
-        menu.add_item(MenuItem::new("Edit"));
+        let item = MenuItem::new("Edit");
+        item.on_click(|params| println!("{} is clicked!", params.text));
+        menu.add_item(item);
         menu.add_item(MenuItem::new("Exit"));
         let submenu = MenuItem::new("File");
         submenu.set_submenu(menu);
@@ -35,7 +37,7 @@ impl AppHandler for App {
         window.title("Hello, World!");
         window.set_menubar(global_menu);
         window.origin(500.0, 200.0);
-        window.on_close(|_| finish());
+        window.set_on_close_handler(|_| finish());
 
         window.show();
 

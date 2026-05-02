@@ -24,7 +24,7 @@ impl AppHandler for App {
         layout.set_vertical_margin(0, 5.0);
         layout.set_vertical_margin(1, 5.0);
 
-        button.on_click(move |_params| {
+        button.set_on_click_handler(move |_params| {
             text.write(&format!("Button click {}\n", clicks.borrow()));
             *clicks.borrow_mut() += 1;
         });
@@ -35,7 +35,7 @@ impl AppHandler for App {
         window.set_panel(&panel);
         window.title("Hello, World!");
         window.origin(500.0, 200.0);
-        window.on_close(|_| finish());
+        window.set_on_close_handler(|_| finish());
 
         window.show();
 

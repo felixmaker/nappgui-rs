@@ -1,4 +1,5 @@
 use std::{
+    cell::RefCell,
     ptr::NonNull,
     rc::{Rc, Weak},
 };
@@ -9,17 +10,19 @@ use nappgui_sys::{
 
 use crate::{
     gui::{event::EvSlider, global_get, global_record},
-    util::macros::callback,
+    util::macros::listener,
 };
 
 pub(crate) struct SliderInner {
     ptr: NonNull<nappgui_sys::Slider>,
+    on_moved: RefCell<Option<Rc<dyn Fn(&EvSlider) + 'static>>>,
 }
 
 impl SliderInner {
     pub(crate) fn from_raw(ptr: *mut nappgui_sys::Slider) -> Self {
         Self {
             ptr: NonNull::new(ptr).expect("Null pointer passed to SliderInner::from_raw"),
+            on_moved: RefCell::new(None),
         }
     }
 
@@ -60,9 +63,16 @@ impl Slider {
         unsafe { Slider::from_raw(slider_vertical()) }
     }
 
-    callback! {
-        /// Set an event handler for slider movement.
-        pub on_moved(EvSlider) => slider_OnMoved;
+    /// Set an event handler for slider movement.
+    pub fn set_on_moved_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvSlider) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_moved.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), SliderInner, on_moved(EvSlider));
+        unsafe { slider_OnMoved(self.as_ptr(), listener) }
     }
 
     /// Set a tooltip for the slider. It is a small explanatory text that will appear when the mouse is over the control.

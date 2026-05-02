@@ -1,28 +1,27 @@
 use std::{
     cell::RefCell,
-    ffi::{c_void, CStr, CString},
-    panic::{catch_unwind, AssertUnwindSafe},
+    ffi::{CStr, CString},
     ptr::NonNull,
     rc::{Rc, Weak},
 };
 
 use crate::{
-    core::Event,
     draw_2d::{Font, Image},
     gui::{event::EvButton, global_get, global_record},
     types::GuiState,
+    util::macros::listener,
 };
 
 use nappgui_sys::{
     button_OnClick, button_check, button_check3, button_flat, button_flatgle, button_font, button_get_font,
     button_get_height, button_get_image, button_get_image_alt, button_get_state, button_get_text, button_hpadding,
     button_image, button_image_alt, button_push, button_radio, button_state, button_text, button_text_alt,
-    button_tooltip, button_vpadding, button_width, listener_imp,
+    button_tooltip, button_vpadding, button_width,
 };
 
 pub(crate) struct ButtonInner {
     ptr: NonNull<nappgui_sys::Button>,
-    on_click: RefCell<Option<Rc<dyn Fn(&EvButton)>>>,
+    on_click: RefCell<Option<Rc<dyn Fn(&EvButton) + 'static>>>,
 }
 
 impl ButtonInner {
@@ -35,13 +34,6 @@ impl ButtonInner {
 
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Button {
         self.ptr.as_ptr()
-    }
-
-    pub(crate) fn set_on_click_handler<F>(&self, callback: F)
-    where
-        F: Fn(&EvButton) + 'static,
-    {
-        *self.on_click.borrow_mut() = Some(Rc::new(callback));
     }
 }
 
@@ -107,24 +99,14 @@ impl Button {
     }
 
     /// Set a function for pressing the button.
-    pub fn on_click<F>(&self, callback: F)
+    pub fn set_on_click_handler<F>(&self, callback: F)
     where
         F: Fn(&EvButton) + 'static,
     {
-        self.0.upgrade().map(|button| button.set_on_click_handler(callback));
-
-        extern "C" fn shim(obj: *mut c_void, event: *mut nappgui_sys::Event) {
-            if let Some(button) = global_get::<ButtonInner>(obj as _) {
-                let callback = button.on_click.borrow().clone();
-                let event = Event::new(event);
-                let params = event.params::<EvButton>().unwrap();
-
-                if let Some(callback) = callback {
-                    let _ = catch_unwind(AssertUnwindSafe(|| callback(&params)));
-                }
-            }
-        }
-        let listener = unsafe { listener_imp(self.as_ptr() as _, Some(shim)) };
+        self.0
+            .upgrade()
+            .map(|button| *button.on_click.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), ButtonInner, on_click(EvButton));
         unsafe { button_OnClick(self.as_ptr(), listener) };
     }
 

@@ -1,10 +1,12 @@
 use nappgui_sys::{
-    osapp_menubar, window_OnClose, window_OnMoved, window_OnResize, window_clear_hotkeys, window_client_to_screen,
-    window_control_frame, window_create, window_cursor, window_cycle_tabstop, window_defbutton, window_destroy,
-    window_focus, window_focus_info, window_get_client_size, window_get_origin, window_get_size, window_hide,
-    window_hotkey, window_modal, window_next_tabstop, window_origin, window_overlay, window_panel,
-    window_previous_tabstop, window_show, window_stop_modal, window_title, window_update, V2Df,
+    listener_imp, osapp_menubar, window_OnClose, window_OnMoved, window_OnResize, window_clear_hotkeys,
+    window_client_to_screen, window_control_frame, window_create, window_cursor, window_cycle_tabstop,
+    window_defbutton, window_destroy, window_focus, window_focus_info, window_get_client_size, window_get_origin,
+    window_get_size, window_hide, window_hotkey, window_modal, window_next_tabstop, window_origin, window_overlay,
+    window_panel, window_previous_tabstop, window_show, window_stop_modal, window_title, window_update, V2Df,
 };
+use std::cell::RefCell;
+use std::collections::HashMap;
 use std::ffi::CString;
 use std::ptr::NonNull;
 use std::rc::{Rc, Weak};
@@ -15,16 +17,32 @@ use crate::gui::{global_exists, global_get, global_move_ownership, global_record
 use crate::types::{
     FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D, Size2D, WindowFlags,
 };
-use crate::util::macros::{callback, listener};
+use crate::util::macros::listener;
+
+struct HotkeyContext {
+    key: KeyCode,
+    modifiers: ModifierKey,
+    window: Weak<WindowInner>,
+}
 
 pub(crate) struct WindowInner {
     ptr: NonNull<nappgui_sys::Window>,
+    on_close: RefCell<Option<Rc<dyn Fn(&EvWinClose) -> bool + 'static>>>,
+    on_moved: RefCell<Option<Rc<dyn Fn(&EvPos) + 'static>>>,
+    on_resize: RefCell<Option<Rc<dyn Fn(&EvSize) + 'static>>>,
+    on_hotkey: RefCell<HashMap<(KeyCode, ModifierKey), Rc<dyn Fn() + 'static>>>,
+    on_hotkey_context: RefCell<Vec<*mut HotkeyContext>>,
 }
 
 impl WindowInner {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Window) -> Self {
         Self {
             ptr: NonNull::new(ptr).expect("Null pointer passed to WindowInner::from_raw"),
+            on_close: RefCell::new(None),
+            on_moved: RefCell::new(None),
+            on_resize: RefCell::new(None),
+            on_hotkey: RefCell::new(HashMap::new()),
+            on_hotkey_context: RefCell::new(Vec::new()),
         }
     }
 
@@ -36,6 +54,11 @@ impl WindowInner {
 impl Drop for WindowInner {
     fn drop(&mut self) {
         unsafe { window_destroy(&mut self.as_ptr()) };
+        for context in self.on_hotkey_context.borrow().iter() {
+            unsafe {
+                let _ = Box::from_raw(*context);
+            };
+        }
     }
 }
 
@@ -69,15 +92,31 @@ impl Window {
         unsafe { Self::from_raw(window_create(flag.to_window_flag_t() as u32)) }
     }
 
-    callback! {
-        /// Set an event handler for the window closing.
-        pub on_close(EvWinClose) -> bool => window_OnClose;
+    /// Set an event handler for the window closing.
+    pub fn set_on_close_handler<F>(&self, handler: F) where F: Fn(&EvWinClose) -> bool + 'static {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_close.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), WindowInner, on_close(EvWinClose));
+        unsafe { window_OnClose(self.as_ptr(), listener) }
+    }
 
-        /// Set an event handler for moving the window on the desktop.
-        pub on_moved(EvPos) => window_OnMoved;
+    /// Set an event handler for moving the window on the desktop.
+    pub fn set_on_moved_handler<F>(&self, handler: F) where F: Fn(&EvPos) + 'static {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_moved.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), WindowInner, on_moved(EvPos));
+        unsafe { window_OnMoved(self.as_ptr(), listener) }
+    }
 
-        /// Set an event handler for window resizing.
-        pub on_resize(EvSize) => window_OnResize;
+    /// Set an event handler for window resizing.
+    pub fn set_on_resize_handler<F>(&self, handler: F) where F: Fn(&EvSize) + 'static {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_resize.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), WindowInner, on_resize(EvSize));
+        unsafe { window_OnResize(self.as_ptr(), listener) }
     }
 
     /// Associate the main panel with a window.
@@ -128,11 +167,38 @@ impl Window {
     }
 
     /// Sets an action associated with pressing a key.
-    pub fn hotkey<F>(&self, key: KeyCode, modifiers: ModifierKey, handler: F)
+    pub fn set_on_hotkey_handler<F>(&self, key: KeyCode, modifiers: ModifierKey, handler: F)
     where
-        F: FnMut() + 'static,
+        F: Fn() + 'static,
     {
-        let listener = listener!(handler, ());
+        let id = (key, modifiers);
+        self.0
+            .upgrade()
+            .map(|inner| inner.on_hotkey.borrow_mut().insert(id, Rc::new(handler)));
+
+        extern "C" fn shim(obj: *mut std::ffi::c_void, _event: *mut nappgui_sys::Event) {
+            let context = unsafe { &*(obj as *mut HotkeyContext) };
+            let id = (context.key, context.modifiers);
+            if let Some(obj) = context.window.upgrade() {
+                let callback = obj.on_hotkey.borrow().get(&id).cloned();
+
+                if let Some(f) = callback {
+                    let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f()));
+                }
+            }
+        }
+
+        let context = Box::into_raw(Box::new(HotkeyContext {
+            key,
+            modifiers,
+            window: self.0.clone(),
+        }));
+
+        self.0
+            .upgrade()
+            .map(|inner| inner.on_hotkey_context.borrow_mut().push(context));
+
+        let listener = unsafe { listener_imp(context as _, Some(shim)) };
         unsafe {
             window_hotkey(self.as_ptr(), key as _, modifiers as _, listener);
         }

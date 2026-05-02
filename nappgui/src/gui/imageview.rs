@@ -1,4 +1,5 @@
 use std::{
+    cell::RefCell,
     ptr::NonNull,
     rc::{Rc, Weak},
 };
@@ -7,7 +8,7 @@ use crate::{
     draw_2d::Image,
     gui::{global_get, global_record},
     types::Scale,
-    util::macros::callback,
+    util::macros::listener,
 };
 
 use nappgui_sys::{
@@ -17,12 +18,16 @@ use nappgui_sys::{
 
 pub(crate) struct ImageViewInner {
     ptr: NonNull<nappgui_sys::ImageView>,
+    on_click: RefCell<Option<Rc<dyn Fn() + 'static>>>,
+    on_over_draw: RefCell<Option<Rc<dyn Fn() + 'static>>>,
 }
 
 impl ImageViewInner {
     pub(crate) fn from_raw(ptr: *mut nappgui_sys::ImageView) -> Self {
         Self {
             ptr: NonNull::new(ptr).expect("Null pointer passed to ImageViewInner::from_raw"),
+            on_click: RefCell::new(None),
+            on_over_draw: RefCell::new(None),
         }
     }
 
@@ -83,12 +88,29 @@ impl ImageView {
         }
     }
 
-    callback! {
-        /// Set a handle for the event click on the image.
-        pub on_click() => imageview_OnClick;
+    /// Set a handle for the event click on the image.
+    pub fn set_on_click_handler<F>(&self, callback: F)
+    where
+        F: Fn() + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(callback)));
 
-        /// Allows you to draw an overlay on the image when the mouse is over it.
-        pub on_over_draw() => imageview_OnOverDraw;
+        let listener = listener!(self.as_ptr(), ImageViewInner, on_click());
+        unsafe { imageview_OnClick(self.as_ptr(), listener) };
+    }
+
+    /// Allows you to draw an overlay on the image when the mouse is over it.
+    pub fn set_on_over_draw_handler<F>(&self, callback: F)
+    where
+        F: Fn() + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_over_draw.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), ImageViewInner, on_over_draw());
+        unsafe { imageview_OnOverDraw(self.as_ptr(), listener) };
     }
 
     /// Gets the image.

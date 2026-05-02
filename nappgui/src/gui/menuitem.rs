@@ -1,4 +1,5 @@
 use std::{
+    cell::RefCell,
     ffi::CStr,
     ptr::NonNull,
     rc::{Rc, Weak},
@@ -8,7 +9,7 @@ use crate::{
     draw_2d::Image,
     gui::{event::EvMenu, global_get, global_move_ownership, global_record, Menu},
     types::{GuiState, KeyCode, ModifierKey},
-    util::macros::callback,
+    util::macros::listener,
 };
 
 use nappgui_sys::{
@@ -20,12 +21,14 @@ use nappgui_sys::{
 
 pub(crate) struct MenuItemInner {
     ptr: NonNull<nappgui_sys::MenuItem>,
+    on_click: RefCell<Option<Rc<dyn Fn(&EvMenu) + 'static>>>,
 }
 
 impl MenuItemInner {
     pub(crate) fn from_raw(ptr: *mut nappgui_sys::MenuItem) -> Self {
         Self {
             ptr: NonNull::new(ptr).expect("Null pointer passed to MenuItemInner::from_raw"),
+            on_click: RefCell::new(None),
         }
     }
 
@@ -39,6 +42,7 @@ impl MenuItemInner {
 /// # Remarks
 /// If the object is not attached to a menu, it will cause a memory leak.
 #[repr(transparent)]
+#[derive(Clone)]
 pub struct MenuItem(Weak<MenuItemInner>);
 
 impl MenuItem {
@@ -46,7 +50,6 @@ impl MenuItem {
         let object = global_record(ptr as _, MenuItemInner::from_raw(ptr));
         Self(Rc::downgrade(&object))
     }
-
 
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::MenuItem {
         self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
@@ -65,9 +68,17 @@ impl MenuItem {
         unsafe { Self::from_raw(menu_item) }
     }
 
-    callback! {
-        /// Set an event handle for item click.
-        pub on_click(EvMenu) => menuitem_OnClick
+    /// Set an event handle for item click.
+    pub fn on_click<F>(&self, callback: F)
+    where
+        F: Fn(&EvMenu) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(callback)));
+
+        let listener = listener!(self.as_ptr(), MenuItemInner, on_click(EvMenu));
+        unsafe { menuitem_OnClick(self.as_ptr(), listener) };
     }
 
     /// Enables or disables a menu item.

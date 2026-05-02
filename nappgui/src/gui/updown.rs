@@ -1,4 +1,5 @@
 use std::{
+    cell::RefCell,
     ptr::NonNull,
     rc::{Rc, Weak},
 };
@@ -7,17 +8,19 @@ use nappgui_sys::{updown_OnClick, updown_create, updown_tooltip};
 
 use crate::{
     gui::{event::EvButton, global_get, global_record},
-    util::macros::callback,
+    util::macros::listener,
 };
 
 pub(crate) struct UpDownInner {
     ptr: NonNull<nappgui_sys::UpDown>,
+    on_click: RefCell<Option<Rc<dyn Fn(&EvButton) + 'static>>>,
 }
 
 impl UpDownInner {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::UpDown) -> Self {
         Self {
             ptr: NonNull::new(ptr).expect("Null pointer passed to UpDownInner::from_raw"),
+            on_click: RefCell::new(None),
         }
     }
 
@@ -54,9 +57,16 @@ impl UpDown {
         unsafe { UpDown::from_raw(updown) }
     }
 
-    callback! {
-        /// Set an event handler for pressing the button.
-        pub on_click(EvButton) => updown_OnClick;
+    /// Set an event handler for pressing the button.
+    pub fn set_on_click_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvButton) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), UpDownInner, on_click(EvButton));
+        unsafe { updown_OnClick(self.as_ptr(), listener) }
     }
 
     /// Set a tooltip for the button. It is a small explanatory text that will appear when the mouse is over the control.

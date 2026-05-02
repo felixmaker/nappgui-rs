@@ -1,4 +1,5 @@
 use std::{
+    cell::RefCell,
     ptr::NonNull,
     rc::{Rc, Weak},
 };
@@ -7,10 +8,11 @@ use crate::{
     core::Stream,
     draw_2d::Color,
     gui::{
-        event::{EvText, EvTextFilter}, global_get, global_record
+        event::{EvText, EvTextFilter},
+        global_get, global_record,
     },
     types::{Align, FontStyle},
-    util::macros::callback,
+    util::macros::{ listener},
 };
 
 use nappgui_sys::{
@@ -24,12 +26,16 @@ use nappgui_sys::{
 
 pub(crate) struct TextViewInner {
     ptr: NonNull<nappgui_sys::TextView>,
+    on_filter: RefCell<Option<Rc<dyn Fn(&EvText) -> EvTextFilter + 'static>>>,
+    on_focus: RefCell<Option<Rc<dyn Fn(&bool) + 'static>>>,
 }
 
 impl TextViewInner {
     pub(crate) fn from_raw(ptr: *mut nappgui_sys::TextView) -> Self {
         Self {
             ptr: NonNull::new(ptr).expect("Null pointer passed to TextViewInner::from_raw"),
+            on_filter: RefCell::new(None),
+            on_focus: RefCell::new(None),
         }
     }
 
@@ -59,20 +65,34 @@ impl TextView {
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::TextView {
         self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
     }
+
     /// Create a text view.
     pub fn new() -> Self {
         unsafe { TextView::from_raw(textview_create()) }
     }
 
-    callback! {
-        /// Set a handler to filter text while editing.
-        ///
-        /// # Remarks
-        /// It works the same way as in Edit controls. See Filter texts and GUI Events.
-        pub on_filter(EvText) -> EvTextFilter => textview_OnFilter;
+    /// Set a handler to filter text while editing.
+    pub fn set_on_filter_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvText) -> EvTextFilter + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_filter.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), TextViewInner, on_filter(EvText)->EvTextFilter);
+        unsafe { textview_OnFilter(self.as_ptr(), listener) }
+    }
 
-        /// Set a handler for keyboard focus.
-        pub on_focus(bool) => textview_OnFocus;
+    /// Set a handler for keyboard focus.
+    pub fn set_on_focus_handler<F>(&self, handler: F)
+    where
+        F: Fn(&bool) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_focus.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), TextViewInner, on_focus(bool));
+        unsafe { textview_OnFocus(self.as_ptr(), listener) }
     }
 
     /// Sets the default size of the view.

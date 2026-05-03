@@ -1,9 +1,10 @@
 use nappgui_sys::{
     listener_imp, osapp_menubar, window_OnClose, window_OnMoved, window_OnResize, window_clear_hotkeys,
     window_client_to_screen, window_control_frame, window_create, window_cursor, window_cycle_tabstop,
-    window_defbutton, window_destroy, window_focus, window_focus_info, window_get_client_size, window_get_origin,
-    window_get_size, window_hide, window_hotkey, window_modal, window_next_tabstop, window_origin, window_overlay,
-    window_panel, window_previous_tabstop, window_show, window_stop_modal, window_title, window_update, V2Df,
+    window_defbutton, window_destroy, window_focus, window_focus_info, window_get_client_size, window_get_focus,
+    window_get_origin, window_get_size, window_hide, window_hotkey, window_modal, window_next_tabstop, window_origin,
+    window_overlay, window_panel, window_previous_tabstop, window_show, window_stop_modal, window_title, window_update,
+    V2Df,
 };
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -27,6 +28,8 @@ struct HotkeyContext {
 
 pub(crate) struct WindowInner {
     ptr: NonNull<nappgui_sys::Window>,
+    default_button: RefCell<Option<Button>>,
+    panel: RefCell<Option<Panel>>,
     on_close: RefCell<Option<Rc<dyn Fn(&EvWinClose) -> bool + 'static>>>,
     on_moved: RefCell<Option<Rc<dyn Fn(&EvPos) + 'static>>>,
     on_resize: RefCell<Option<Rc<dyn Fn(&EvSize) + 'static>>>,
@@ -38,6 +41,8 @@ impl WindowInner {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Window) -> Self {
         Self {
             ptr: NonNull::new(ptr).expect("Null pointer passed to WindowInner::from_raw"),
+            default_button: RefCell::new(None),
+            panel: RefCell::new(None),
             on_close: RefCell::new(None),
             on_moved: RefCell::new(None),
             on_resize: RefCell::new(None),
@@ -93,7 +98,10 @@ impl Window {
     }
 
     /// Set an event handler for the window closing.
-    pub fn set_on_close_handler<F>(&self, handler: F) where F: Fn(&EvWinClose) -> bool + 'static {
+    pub fn set_on_close_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvWinClose) -> bool + 'static,
+    {
         self.0
             .upgrade()
             .map(|inner| *inner.on_close.borrow_mut() = Some(Rc::new(handler)));
@@ -102,7 +110,10 @@ impl Window {
     }
 
     /// Set an event handler for moving the window on the desktop.
-    pub fn set_on_moved_handler<F>(&self, handler: F) where F: Fn(&EvPos) + 'static {
+    pub fn set_on_moved_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvPos) + 'static,
+    {
         self.0
             .upgrade()
             .map(|inner| *inner.on_moved.borrow_mut() = Some(Rc::new(handler)));
@@ -111,7 +122,10 @@ impl Window {
     }
 
     /// Set an event handler for window resizing.
-    pub fn set_on_resize_handler<F>(&self, handler: F) where F: Fn(&EvSize) + 'static {
+    pub fn set_on_resize_handler<F>(&self, handler: F)
+    where
+        F: Fn(&EvSize) + 'static,
+    {
         self.0
             .upgrade()
             .map(|inner| *inner.on_resize.borrow_mut() = Some(Rc::new(handler)));
@@ -123,11 +137,11 @@ impl Window {
     ///
     /// # Remarks
     /// The size of the window will be adjusted based on the Natural sizing of the main panel.
-    ///
-    /// # Panics
-    /// The window object can only have one panel. Setting this function twice or above will panic!
     pub fn set_panel(&self, panel: &Panel) {
         unsafe { window_panel(self.as_ptr(), panel.as_ptr()) };
+        self.0
+            .upgrade()
+            .map(|inner| *inner.panel.borrow_mut() = Some(panel.clone()));
     }
 
     /// Set the text that will display the window in the title bar.
@@ -227,25 +241,22 @@ impl Window {
         GuiFocus::try_from(focus).unwrap()
     }
 
-    // /// Set keyboard focus to a specific control.
-    // pub fn focus<T>(&self, control: &T) -> GuiFocus
-    // where
-    //     T: AsControl,
-    // {
-    //     let control = control.as_control();
-    //     let focus = unsafe { window_focus(self.as_ptr(), control.as_ptr()) };
-    //     GuiFocus::try_from(focus).unwrap()
-    // }
+    /// Set keyboard focus to a specific control.
+    pub fn set_focus<T>(&self, control: &T) -> GuiFocus
+    where
+        T: Control,
+    {
+        let focus = unsafe { window_focus(self.as_ptr(), control.as_control_ptr()) };
+        GuiFocus::try_from(focus).unwrap()
+    }
 
     /// Gets the control that keyboard focus has.
-    pub fn get_focus<T>(&self) -> Option<T> {
-        // let control = Box::leak(Box::new(unsafe { window_get_focus(self.as_ptr()) }));
-        // if control.is_null() {
-        //     None
-        // } else {
-        //     Some(unsafe { std::mem::transmute(control) })
-        // }
-        todo!()
+    pub fn focus<T>(&self) -> Option<T>
+    where
+        T: Control,
+    {
+        let control = unsafe { window_get_focus(self.as_ptr()) };
+        T::from_control_ptr(control)
     }
 
     /// Gets additional information about a keyboard focus change operation.
@@ -332,10 +343,14 @@ impl Window {
     /// # Remarks
     ///
     /// This function disables the possible previous default button. For the new button to be set,
-    /// it must exist in the active layout, which requires this function to be called after window_panel
+    /// it must exist in the active layout.
     pub fn default_button(&self, button: &Button) {
-        unsafe {
-            window_defbutton(self.as_ptr(), button.as_ptr());
+        if let Some(window) = self.0.upgrade() {
+            if let Some(_panel) = window.panel.borrow().clone() {
+                // todo: check if button is in the panel
+                unsafe { window_defbutton(window.as_ptr(), button.as_ptr()) };
+                *window.default_button.borrow_mut() = Some(button.clone());
+            }
         }
     }
 

@@ -42,6 +42,7 @@ impl ButtonInner {
 /// # Remarks
 /// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
+#[derive(Clone)]
 pub struct Button(Weak<ButtonInner>);
 
 impl Button {

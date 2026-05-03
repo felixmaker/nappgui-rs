@@ -15,7 +15,7 @@ use crate::{
 use nappgui_sys::{
     label_OnClick, label_align, label_bgcolor, label_bgcolor_over, label_color, label_color_over, label_create,
     label_font, label_get_font, label_get_text, label_multiline, label_size_text, label_style_over, label_text,
-    label_trim,
+    label_trim, label_width,
 };
 
 pub(crate) struct LabelInner {
@@ -41,6 +41,7 @@ impl LabelInner {
 /// # Remark
 /// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
+#[derive(Clone)]
 pub struct Label(Weak<LabelInner>);
 
 impl Label {
@@ -64,6 +65,15 @@ impl Label {
         let label = unsafe { Label::from_raw(label) };
         label.set_text(text);
         label
+    }
+
+    /// Set the control default width.
+    ///
+    /// # Remarks
+    /// By default, a label control adjusts its size to the text it contains. Use this function along
+    /// with the label_multiline or when you want to force a default width.
+    pub fn set_width(&self, width: f32) {
+        unsafe { label_width(self.as_ptr(), width) };
     }
 
     /// Set the OnClick event handler.

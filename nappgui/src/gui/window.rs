@@ -14,7 +14,7 @@ use std::rc::{Rc, Weak};
 
 use crate::draw_2d::Image;
 use crate::gui::event::{EvPos, EvSize, EvWinClose};
-use crate::gui::{global_exists, global_get, global_move_ownership, global_record, Button, Control, Menu, Panel};
+use crate::gui::{global_exists, global_get, global_record, Button, Control, Menu, Panel};
 use crate::types::{
     FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D, Size2D, WindowFlags,
 };
@@ -28,6 +28,7 @@ struct HotkeyContext {
 
 pub(crate) struct WindowInner {
     ptr: NonNull<nappgui_sys::Window>,
+    menu_bar: RefCell<Option<Menu>>,
     default_button: RefCell<Option<Button>>,
     panel: RefCell<Option<Panel>>,
     on_close: RefCell<Option<Rc<dyn Fn(&EvWinClose) -> bool + 'static>>>,
@@ -41,6 +42,7 @@ impl WindowInner {
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Window) -> Self {
         Self {
             ptr: NonNull::new(ptr).expect("Null pointer passed to WindowInner::from_raw"),
+            menu_bar: RefCell::new(None),
             default_button: RefCell::new(None),
             panel: RefCell::new(None),
             on_close: RefCell::new(None),
@@ -364,11 +366,11 @@ impl Window {
     }
 
     /// Set the general menu bar of the application.
-    pub fn set_menubar(&self, menu: Menu) {
-        unsafe {
-            osapp_menubar(menu.as_ptr(), self.as_ptr());
+    pub fn set_menubar(&self, menu: &Menu) {
+        if let Some(window) = self.0.upgrade() {
+            *window.menu_bar.borrow_mut() = Some(menu.clone());
+            unsafe { osapp_menubar(menu.as_ptr(), self.as_ptr()) }
         }
-        global_move_ownership(menu.as_ptr() as _, self.as_ptr() as _);
     }
 }
 

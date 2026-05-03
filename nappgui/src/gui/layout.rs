@@ -18,6 +18,7 @@ use super::*;
 /// # Remarks
 /// If the layout is not attached to a panel, it will cause a memory leak.
 #[repr(transparent)]
+#[derive(Clone)]
 pub struct Layout(*mut nappgui_sys::Layout);
 
 impl Layout {
@@ -26,7 +27,7 @@ impl Layout {
         Self(ptr)
     }
 
-    pub(crate) unsafe fn as_ptr(&self) -> *mut nappgui_sys::Layout {
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Layout {
         self.0
     }
 
@@ -47,23 +48,18 @@ impl Layout {
     }
 
     /// Get a layout cell.
-    pub fn cell(&self, col: u32, row: u32) -> Option<LayoutCell> {
+    pub fn cell(&self, col: u32, row: u32) -> LayoutCell<'_> {
         let cell = unsafe { layout_cell(self.as_ptr(), col, row) };
-        if cell.is_null() {
-            None
-        } else {
-            unsafe { Some(LayoutCell::from_raw(cell)) }
-        }
+        unsafe { LayoutCell::from_raw(cell) }
     }
 
     /// Gets the control assigned to a cell in the layout.
-    pub fn control<T>(&self, col: u32, row: u32) -> Option<T> where T: Control {
+    pub fn control<T>(&self, col: u32, row: u32) -> Option<T>
+    where
+        T: Control,
+    {
         let control = unsafe { layout_control(self.as_ptr(), col, row) };
-        if control.is_null() {
-            None
-        } else {
-            T::from_control_ptr(control)
-        }
+        T::from_control_ptr(control)
     }
 
     /// Insert a control to the layout.
@@ -73,12 +69,13 @@ impl Layout {
     /// Panics if col or row is out of bounds.
     pub fn set_control<T>(&self, col: u32, row: u32, control: &T)
     where
-        T: LayoutControl,
+        T: LayoutControl + Control,
     {
         assert!(col < self.ncols());
         assert!(row < self.nrows());
 
         control.insert_in_layout(self, col, row);
+        global_move_ownership(control.as_control_ptr() as _, self.as_ptr() as _);
     }
 
     /// Replaces one Panel in a layout with another.

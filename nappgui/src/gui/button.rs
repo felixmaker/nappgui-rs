@@ -82,21 +82,24 @@ impl Button {
     }
 
     /// Create a radio button.
-    pub fn new_radio() -> Self {
-        let button = unsafe { button_radio() };
-        unsafe { Self::from_raw(button) }
+    pub fn new_radio(text: &str) -> Self {
+        let button = unsafe { Self::from_raw(button_radio()) };
+        button.set_text(text);
+        button
     }
 
     /// Create a flat button, to which an image can be assigned. It is the typical toolbar button.
-    pub fn new_flat() -> Self {
-        let button = unsafe { button_flat() };
-        unsafe { Self::from_raw(button) }
+    pub fn new_flat(icon: &Image) -> Self {
+        let button = unsafe { Self::from_raw(button_flat()) };
+        button.set_image(icon);
+        button
     }
 
     /// Create a flat button with status. The button will alternate between pressed/released each time you click on it.
-    pub fn new_flatgle() -> Self {
-        let button = unsafe { button_flatgle() };
-        unsafe { Self::from_raw(button) }
+    pub fn new_flatgle(icon: &Image) -> Self {
+        let button = unsafe { Self::from_raw(button_flatgle()) };
+        button.set_image(icon);
+        button
     }
 
     /// Set a function for pressing the button.

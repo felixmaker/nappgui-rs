@@ -1,22 +1,22 @@
 use nappgui_sys::{
-    listener_imp, osapp_menubar, window_OnClose, window_OnMoved, window_OnResize, window_clear_hotkeys,
-    window_client_to_screen, window_control_frame, window_create, window_cursor, window_cycle_tabstop,
-    window_defbutton, window_destroy, window_focus, window_focus_info, window_get_client_size, window_get_focus,
-    window_get_origin, window_get_size, window_hide, window_hotkey, window_modal, window_next_tabstop, window_origin,
-    window_overlay, window_panel, window_previous_tabstop, window_show, window_stop_modal, window_title, window_update,
-    V2Df,
+    comwin_color, comwin_open_file, comwin_save_file, comwin_select_dir, listener_imp, osapp_menubar, window_OnClose,
+    window_OnMoved, window_OnResize, window_clear_hotkeys, window_client_size, window_client_to_screen,
+    window_control_frame, window_create, window_cursor, window_cycle_tabstop, window_defbutton, window_destroy,
+    window_focus, window_focus_info, window_get_client_size, window_get_focus, window_get_origin, window_get_size,
+    window_hide, window_hotkey, window_modal, window_next_tabstop, window_origin, window_overlay, window_panel,
+    window_previous_tabstop, window_show, window_stop_modal, window_title, window_update, S2Df, V2Df,
 };
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::ffi::CString;
+use std::ffi::{CStr, CString};
 use std::ptr::NonNull;
 use std::rc::{Rc, Weak};
 
-use crate::draw_2d::Image;
+use crate::draw_2d::{Color, Image};
 use crate::gui::event::{EvPos, EvSize, EvWinClose};
 use crate::gui::{global_exists, global_get, global_record, Button, Control, Menu, Panel};
 use crate::types::{
-    FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D, Size2D, WindowFlags,
+    Align, FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D, Size2D, WindowFlags,
 };
 use crate::util::macros::listener;
 
@@ -309,6 +309,14 @@ impl Window {
         }
     }
 
+    /// Set the size of the client area of the window.
+    ///
+    /// # Remarks
+    /// The final size will depend on the window frame and desktop theme settings. This measure only refers to the interior area.
+    pub fn set_client_size(&self, width: f32, height: f32) {
+        unsafe { window_client_size(self.as_ptr(), S2Df { width, height }) }
+    }
+
     /// Get the dimensions of the client area of the window.
     pub fn client_size(&self) -> Size2D {
         unsafe {
@@ -370,6 +378,140 @@ impl Window {
         if let Some(window) = self.0.upgrade() {
             *window.menu_bar.borrow_mut() = Some(menu.clone());
             unsafe { osapp_menubar(menu.as_ptr(), self.as_ptr()) }
+        }
+    }
+
+    /// Launches the directory selection dialog.
+    ///
+    /// # Remarks
+    /// It will be launched in modal. parent will remain locked until the dialog is accepted.
+    pub fn launch_select_dir_dialog(&self, caption: &str, start_dir: &str) -> Option<String> {
+        let caption = CString::new(caption).unwrap();
+        let start_dir = CString::new(start_dir).unwrap();
+        let dir = unsafe { comwin_select_dir(self.as_ptr(), caption.as_ptr(), start_dir.as_ptr()) };
+        if dir.is_null() {
+            return None;
+        }
+        let dir = unsafe { CStr::from_ptr(dir) };
+        Some(dir.to_string_lossy().into_owned())
+    }
+
+    /// Launch the open file dialog.
+    pub fn launch_open_file_dialog<I, S>(
+        &self,
+        caption: &str,
+        ftypes: I,
+        start_dir: &str,
+        filename: &str,
+    ) -> Option<String>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        let mut types: Vec<*const i8> = Vec::new();
+        for ftype in ftypes.into_iter() {
+            let cstr = CString::new(ftype.as_ref()).unwrap();
+            types.push(cstr.as_ptr());
+        }
+        let caption = CString::new(caption).unwrap();
+        let start_dir = CString::new(start_dir).unwrap();
+        let filename = CString::new(filename).unwrap();
+        let file = unsafe {
+            comwin_open_file(
+                self.as_ptr(),
+                caption.as_ptr(),
+                types.as_mut_ptr(),
+                types.len() as _,
+                start_dir.as_ptr(),
+                filename.as_ptr(),
+            )
+        };
+        if file.is_null() {
+            return None;
+        }
+        let file = unsafe { std::ffi::CStr::from_ptr(file) };
+        Some(file.to_string_lossy().into_owned())
+    }
+
+    /// Launch the save file dialog.
+    pub fn launch_save_file_dialog<I, S>(
+        &self,
+        caption: &str,
+        ftypes: I,
+        start_dir: &str,
+        filename: &str,
+    ) -> Option<String>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        let mut types: Vec<*const i8> = Vec::new();
+        for ftype in ftypes.into_iter() {
+            let cstr = CString::new(ftype.as_ref()).unwrap();
+            types.push(cstr.as_ptr());
+        }
+        let caption = CString::new(caption).unwrap();
+        let start_dir = CString::new(start_dir).unwrap();
+        let filename = CString::new(filename).unwrap();
+
+        let file = unsafe {
+            comwin_save_file(
+                self.as_ptr(),
+                caption.as_ptr(),
+                types.as_mut_ptr(),
+                types.len() as _,
+                start_dir.as_ptr(),
+                filename.as_ptr(),
+            )
+        };
+        if file.is_null() {
+            return None;
+        }
+        let file = unsafe { std::ffi::CStr::from_ptr(file) };
+        Some(file.to_string_lossy().into_owned())
+    }
+
+    /// Launch the color selection dialog.
+    pub fn launch_color_dialog<F>(
+        &self,
+        title: &str,
+        x: f32,
+        y: f32,
+        halign: Align,
+        valign: Align,
+        current: Color,
+        colors: &[Color],
+        on_change: F,
+    ) where
+        F: FnOnce(&Color) + 'static,
+    {
+        let on_change: *mut Box<dyn FnOnce(&Color) + 'static> = Box::into_raw(Box::new(Box::new(on_change)));
+
+        extern "C" fn shim(obj: *mut std::ffi::c_void, event: *mut nappgui_sys::Event) {
+            let on_change = unsafe { Box::from_raw(obj as *mut Box<dyn FnOnce(&Color) + 'static>) };
+            let color =
+                unsafe { *(nappgui_sys::event_params_imp(event, c"color_t".as_ptr()) as *const nappgui_sys::color_t) };
+            let color = Color::new(color);
+            let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| on_change(&color)));
+        }
+
+        let listener = unsafe { nappgui_sys::listener_imp(on_change as _, Some(shim)) };
+        let title = CString::new(title).unwrap();
+        let mut colors: Vec<u32> = colors.iter().map(|color| color.inner).collect();
+
+        unsafe {
+            comwin_color(
+                self.as_ptr(),
+                title.as_ptr(),
+                x,
+                y,
+                halign as _,
+                valign as _,
+                current.inner,
+                colors.as_mut_ptr(),
+                colors.len() as _,
+                listener,
+            );
         }
     }
 }

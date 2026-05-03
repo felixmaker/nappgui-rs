@@ -349,14 +349,14 @@ impl View {
     }
 
     /// Move the horizontal scroll bar to the indicated position.
-    pub fn scroll_horizontal(&self, pos: f32) {
+    pub fn set_scroll_horizontal(&self, pos: f32) {
         unsafe {
             view_scroll_x(self.as_ptr(), pos);
         }
     }
 
     /// Move the vertical scroll bar to the indicated position.
-    pub fn scroll_vertical(&self, pos: f32) {
+    pub fn set_scroll_vertical(&self, pos: f32) {
         unsafe {
             view_scroll_y(self.as_ptr(), pos);
         }
@@ -415,7 +415,7 @@ impl View {
     ///
     /// # Remarks
     /// Do not use this function if you do not know very well what you are doing.
-    pub fn native(&self) -> *mut std::ffi::c_void {
-        unsafe { view_native(self.as_ptr()) }
+    pub fn native(&self) -> *mut () {
+        unsafe { view_native(self.as_ptr()) as _ }
     }
 }

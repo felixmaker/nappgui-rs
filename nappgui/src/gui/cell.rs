@@ -1,26 +1,32 @@
-use std::ptr::NonNull;
+use std::{marker::PhantomData, ptr::NonNull};
 
 use nappgui_sys::{cell_control, cell_empty, cell_enabled, cell_padding, cell_padding2, cell_padding4, cell_visible};
 
-use crate::gui::Control;
+use crate::gui::{Control, Layout};
 
-/// The cell in a layout.
+/// Represents a cell in a layout.
 #[repr(transparent)]
-pub struct LayoutCell(NonNull<nappgui_sys::Cell>);
+pub struct LayoutCell<'a> {
+    ptr: NonNull<nappgui_sys::Cell>,
+    _marker: PhantomData<&'a Layout>,
+}
 
-impl LayoutCell {
+impl<'a> LayoutCell<'a> {
     /// Create a cell from a pointer.
     pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Cell) -> Self {
-        Self(NonNull::new(ptr).expect("Null pointer passed to LayoutCell::from_raw"))
+        Self {
+            ptr: NonNull::new(ptr).expect("Null pointer passed to LayoutCell::from_raw"),
+            _marker: PhantomData,
+        }
     }
 
     /// Returns a raw pointer to the cell object.
     pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Cell {
-        self.0.as_ptr()
+        self.ptr.as_ptr()
     }
 
     /// Check if the cell is empty.
-    pub fn empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         unsafe { cell_empty(self.as_ptr()) != 0 }
     }
 
@@ -33,11 +39,7 @@ impl LayoutCell {
         T: Control,
     {
         let ptr = unsafe { cell_control(self.as_ptr()) };
-        if ptr.is_null() {
-            None
-        } else {
-            T::from_control_ptr(ptr)
-        }
+        T::from_control_ptr(ptr)
     }
 
     /// Activate or deactivate a cell.
@@ -55,23 +57,17 @@ impl LayoutCell {
 
     /// Set an inner margin.
     pub fn set_padding(&self, pall: f32) {
-        unsafe {
-            cell_padding(self.as_ptr(), pall);
-        }
+        unsafe { cell_padding(self.as_ptr(), pall) }
     }
 
     /// Set an inner margin.
     pub fn set_padding2(&self, pleft: f32, pright: f32) {
-        unsafe {
-            cell_padding2(self.as_ptr(), pleft, pright);
-        }
+        unsafe { cell_padding2(self.as_ptr(), pleft, pright) }
     }
 
     /// Set an inner margin.
     pub fn set_padding4(&self, pleft: f32, ptop: f32, pright: f32, pbottom: f32) {
-        unsafe {
-            cell_padding4(self.as_ptr(), pleft, ptop, pright, pbottom);
-        }
+        unsafe { cell_padding4(self.as_ptr(), pleft, ptop, pright, pbottom) }
     }
 
     // /// Associates a cell with the field of a struct.

@@ -397,22 +397,15 @@ impl Window {
     }
 
     /// Launch the open file dialog.
-    pub fn launch_open_file_dialog<I, S>(
+    pub fn launch_open_file_dialog(
         &self,
         caption: &str,
-        ftypes: I,
+        file_types: &[&str],
         start_dir: &str,
         filename: &str,
-    ) -> Option<String>
-    where
-        I: IntoIterator<Item = S>,
-        S: AsRef<str>,
-    {
-        let mut types: Vec<*const i8> = Vec::new();
-        for ftype in ftypes.into_iter() {
-            let cstr = CString::new(ftype.as_ref()).unwrap();
-            types.push(cstr.as_ptr());
-        }
+    ) -> Option<String> {
+        let types: Box<[CString]> = file_types.iter().map(|x| CString::new(*x).unwrap()).collect();
+        let mut types: Box<[*const std::ffi::c_char]> = types.iter().map(|x| x.as_ptr()).collect();
         let caption = CString::new(caption).unwrap();
         let start_dir = CString::new(start_dir).unwrap();
         let filename = CString::new(filename).unwrap();
@@ -434,22 +427,16 @@ impl Window {
     }
 
     /// Launch the save file dialog.
-    pub fn launch_save_file_dialog<I, S>(
+    pub fn launch_save_file_dialog(
         &self,
         caption: &str,
-        ftypes: I,
+        file_types: &[&str],
         start_dir: &str,
         filename: &str,
     ) -> Option<String>
-    where
-        I: IntoIterator<Item = S>,
-        S: AsRef<str>,
     {
-        let mut types: Vec<*const i8> = Vec::new();
-        for ftype in ftypes.into_iter() {
-            let cstr = CString::new(ftype.as_ref()).unwrap();
-            types.push(cstr.as_ptr());
-        }
+        let types: Box<[CString]> = file_types.iter().map(|x| CString::new(*x).unwrap()).collect();
+        let mut types: Box<[*const std::ffi::c_char]> = types.iter().map(|x| x.as_ptr()).collect();
         let caption = CString::new(caption).unwrap();
         let start_dir = CString::new(start_dir).unwrap();
         let filename = CString::new(filename).unwrap();

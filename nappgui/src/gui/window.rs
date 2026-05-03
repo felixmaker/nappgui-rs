@@ -287,14 +287,14 @@ impl Window {
     }
 
     /// Move the window to specific desktop coordinates.
-    pub fn origin(&self, x: f32, y: f32) {
+    pub fn set_origin(&self, x: f32, y: f32) {
         unsafe {
             window_origin(self.as_ptr(), V2Df { x, y });
         }
     }
 
     /// Get the window position.
-    pub fn get_origin(&self) -> Point2D {
+    pub fn origin(&self) -> Point2D {
         unsafe {
             let origin = window_get_origin(self.as_ptr());
             std::mem::transmute(origin)
@@ -302,7 +302,7 @@ impl Window {
     }
 
     /// Get the total dimensions of the window.
-    pub fn get_size(&self) -> Size2D {
+    pub fn size(&self) -> Size2D {
         unsafe {
             let size = window_get_size(self.as_ptr());
             std::mem::transmute(size)
@@ -310,7 +310,7 @@ impl Window {
     }
 
     /// Get the dimensions of the client area of the window.
-    pub fn get_client_size(&self) -> Size2D {
+    pub fn client_size(&self) -> Size2D {
         unsafe {
             let size = window_get_client_size(self.as_ptr());
             std::mem::transmute(size)
@@ -346,7 +346,7 @@ impl Window {
     ///
     /// This function disables the possible previous default button. For the new button to be set,
     /// it must exist in the active layout.
-    pub fn default_button(&self, button: &Button) {
+    pub fn set_default_button(&self, button: &Button) {
         if let Some(window) = self.0.upgrade() {
             if let Some(_panel) = window.panel.borrow().clone() {
                 // todo: check if button is in the panel
@@ -361,7 +361,7 @@ impl Window {
     /// # Remarks
     ///
     /// hot_x, hot_y indicate the "sensitive" point within the image, which will indicate the exact position of the mouse.
-    pub fn cursor(&self, cursor: GuiCursor, image: &Image, hot_x: f32, hot_y: f32) {
+    pub fn set_cursor(&self, cursor: GuiCursor, image: &Image, hot_x: f32, hot_y: f32) {
         unsafe { window_cursor(self.as_ptr(), cursor as i32, image.as_ptr(), hot_x, hot_y) }
     }
 

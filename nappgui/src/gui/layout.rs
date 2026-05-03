@@ -1,9 +1,11 @@
+use std::ffi::CString;
+
 use nappgui_sys::{
-    layout_bgcolor, layout_cell, layout_control, layout_create, layout_halign, layout_hexpand, layout_hexpand2,
-    layout_hexpand3, layout_hmargin, layout_hsize, layout_insert_col, layout_insert_row, layout_margin, layout_margin2,
-    layout_margin4, layout_ncols, layout_nrows, layout_panel_replace, layout_remove_col, layout_remove_row,
-    layout_show_col, layout_show_row, layout_skcolor, layout_taborder, layout_tabstop, layout_update, layout_valign,
-    layout_vexpand, layout_vexpand2, layout_vexpand3, layout_vmargin, layout_vsize,
+    layout_bgcolor, layout_cell, layout_control, layout_create, layout_group, layout_halign, layout_hexpandn, layout_hmargin, layout_hsize, layout_insert_col,
+    layout_insert_row, layout_margin4, layout_ncols, layout_nrows, layout_panel_replace,
+    layout_remove_col, layout_remove_row, layout_show_col, layout_show_row, layout_skcolor, layout_taborder,
+    layout_tabstop, layout_update, layout_valign, layout_vexpandn,
+    layout_vmargin, layout_vsize,
 };
 
 use crate::{
@@ -89,7 +91,7 @@ impl Layout {
     /// # Panics
     ///
     /// Panics if col or row is out of bounds.
-    pub fn panel_replace<T>(&self, panel: &Panel, col: u32, row: u32) {
+    pub unsafe fn panel_replace<T>(&self, panel: &Panel, col: u32, row: u32) {
         assert!(col < self.ncols());
         assert!(row < self.nrows());
 
@@ -220,86 +222,35 @@ impl Layout {
 
     /// Set the column to expand horizontally.
     ///
-    /// # Panics
-    ///
-    /// Panics if col is out of bounds.
-    pub fn set_horizontal_expand(&self, col: u32) {
-        assert!(col < self.ncols());
-
-        unsafe { layout_hexpand(self.as_ptr(), col) };
-    }
-
-    /// Set the two columns that will expand horizontally.
-    ///
     /// # Remarks
-    /// The expansion of col2 = 1 - exp.
     ///
-    /// # Panics
-    ///
-    /// Panics if col1 or col2 is out of bounds.
-    pub fn set_horizontal_expand2(&self, col1: u32, col2: u32, exp: f32) {
-        assert!(col1 < self.ncols());
-        assert!(col2 < self.ncols());
+    /// cols: The columns to expand horizontally.
+    /// weights: The weights of the columns. len(weights) = len(cols) - 1.
+    pub fn set_horizontal_expand(&self, cols: &[u32], weights: &[f32]) {
+        assert!(cols.len() > 0);
+        assert_eq!(cols.len() - 1, weights.len());
 
-        unsafe { layout_hexpand2(self.as_ptr(), col1 as _, col2 as _, exp) };
-    }
+        for col in cols {
+            assert!(*col < self.ncols());
+        }
 
-    /// Set the three columns that will expand horizontally.
-    ///
-    /// # Remarks
-    /// exp1 + exp2 < = 1. The expansion of col3 = 1 - exp1 - exp2.
-    ///
-    /// # Panics
-    ///
-    /// Panics if col1 or col2 or col3 is out of bounds.
-    pub fn set_horizontal_expand3(&self, col1: u32, col2: u32, col3: u32, exp1: f32, exp2: f32) {
-        assert!(col1 < self.ncols());
-        assert!(col2 < self.ncols());
-        assert!(col3 < self.ncols());
-
-        unsafe { layout_hexpand3(self.as_ptr(), col1 as _, col2 as _, col3 as _, exp1, exp2) };
+        unsafe { layout_hexpandn(self.as_ptr(), cols.len() as _, cols.as_ptr(), weights.as_ptr()) };
     }
 
     /// Set the row that will expand vertically.
     ///
-    /// # Panics
     ///
-    /// Panics if row is out of bounds.
-    pub fn set_vertical_expand(&self, row: u32) {
-        assert!(row < self.nrows());
+    /// rows: The rows to expand vertically.
+    /// weights: The weights of the rows. len(weights) = len(rows) - 1.
+    pub fn set_vertical_expand(&self, rows: &[u32], weights: &[f32]) {
+        assert!(rows.len() > 0);
+        assert_eq!(rows.len() - 1, weights.len());
 
-        unsafe { layout_vexpand(self.as_ptr(), row) };
-    }
+        for row in rows {
+            assert!(*row < self.nrows());
+        }
 
-    /// Set the two rows that will expand vertically.
-    ///
-    /// # Remarks
-    /// The expansion of row2 = 1 - exp.
-    ///
-    /// # Panics
-    ///
-    /// Panics if row1 or row2 is out of bounds.
-    pub fn set_vertical_expand2(&self, row1: u32, row2: u32, exp: f32) {
-        assert!(row1 < self.nrows());
-        assert!(row2 < self.nrows());
-
-        unsafe { layout_vexpand2(self.as_ptr(), row1 as _, row2 as _, exp) };
-    }
-
-    /// Set the three rows that will expand vertically.
-    ///
-    /// # Remarks
-    /// exp1 + exp2 < = 1. The expansion of row3 = 1 - exp1 - exp2.
-    ///
-    /// # Panics
-    ///
-    /// Panics if row1 or row2 or row3 is out of bounds.
-    pub fn set_vertical_expand3(&self, row1: u32, row2: u32, row3: u32, exp1: f32, exp2: f32) {
-        assert!(row1 < self.nrows());
-        assert!(row2 < self.nrows());
-        assert!(row3 < self.nrows());
-
-        unsafe { layout_vexpand3(self.as_ptr(), row1 as _, row2 as _, row3 as _, exp1, exp2) };
+        unsafe { layout_vexpandn(self.as_ptr(), rows.len() as _, rows.as_ptr(), weights.as_ptr()) };
     }
 
     /// Sets the horizontal alignment of a cell. It will take effect when the column is
@@ -350,19 +301,9 @@ impl Layout {
         unsafe { layout_show_row(self.as_ptr(), row, visible as _) };
     }
 
-    /// Set a uniform margin for the layout border.
-    pub fn set_margin(&self, margin: f32) {
-        unsafe { layout_margin(self.as_ptr(), margin) };
-    }
-
-    /// Set a horizontal and vertical margin for the layout edge.
-    pub fn set_margin2(&self, mtb: f32, mlr: f32) {
-        unsafe { layout_margin2(self.as_ptr(), mtb, mlr) };
-    }
-
     /// Set margins for the layout border.
-    pub fn set_margin4(&self, mt: f32, mb: f32, ml: f32, mr: f32) {
-        unsafe { layout_margin4(self.as_ptr(), mt, mb, ml, mr) };
+    pub fn set_margin(&self, top: f32, right: f32, button: f32, left: f32) {
+        unsafe { layout_margin4(self.as_ptr(), top, right, button, left) };
     }
 
     /// Assign a background color to the layout.
@@ -373,6 +314,12 @@ impl Layout {
     /// Assign a color to the edge of the layout.
     pub fn set_border_color(&self, color: Color) {
         unsafe { layout_skcolor(self.as_ptr(), color.inner) };
+    }
+
+    /// Sets a GroupBox type decoration around the layout.
+    pub fn set_group(&self, group: bool, text: &str) {
+        let text = CString::new(text).unwrap();
+        unsafe { layout_group(self.as_ptr(), group as _, text.as_ptr()) };
     }
 
     /// Update the window associated with the layout.

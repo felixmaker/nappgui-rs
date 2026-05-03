@@ -20,7 +20,7 @@ impl AppHandler for App {
         layout.set_control(0, 2, &text);
         layout.set_horizontal_size(0, 250.0);
         layout.set_vertical_size(2, 100.0);
-        layout.set_margin(5.0);
+        layout.set_margin(5.0, 5.0, 5.0, 5.0);
         layout.set_vertical_margin(0, 5.0);
         layout.set_vertical_margin(1, 5.0);
 

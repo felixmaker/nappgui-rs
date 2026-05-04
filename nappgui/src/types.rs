@@ -192,14 +192,11 @@ pub struct FocusInfo {
 
 impl FocusInfo {
     /// Control that has received the focus.
-    pub fn next<T>(&self) -> Option<T> {
-        // if self.next.is_null() {
-        //     None
-        // } else {
-        //     let next = &self.next;
-        //     Some(unsafe { std::mem::transmute(next) })
-        // }
-        todo!()
+    pub fn next<T>(&self) -> Option<T>
+    where
+        T: Control,
+    {
+        T::from_control_ptr(self.next)
     }
 }
 
@@ -745,6 +742,7 @@ pub enum GuiType {
 impl_i32_to_enum!(GuiType, 0..=18);
 
 pub use crate::gui::event::*;
+use crate::gui::Control;
 
 /// The button style.
 #[repr(i32)]

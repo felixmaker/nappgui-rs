@@ -15,8 +15,9 @@ use crate::{
 };
 
 use nappgui_sys::{
-    tableview_OnData, tableview_OnHeaderClick, tableview_OnRowClick, tableview_OnSelect, tableview_column_freeze,
-    tableview_column_limits, tableview_column_resizable, tableview_column_width, tableview_create, tableview_deselect,
+    tableview_OnData, tableview_OnHeaderClick, tableview_OnRowClick, tableview_OnSelect, tableview_add_column_text,
+    tableview_column_align, tableview_column_freeze, tableview_column_icon, tableview_column_limits,
+    tableview_column_resizable, tableview_column_width, tableview_create, tableview_del_column, tableview_deselect,
     tableview_deselect_all, tableview_focus_row, tableview_font, tableview_get_focus_row, tableview_grid,
     tableview_header_align, tableview_header_clickable, tableview_header_height, tableview_header_resizable,
     tableview_header_title, tableview_header_visible, tableview_hkey_scroll, tableview_multisel, tableview_row_height,
@@ -167,6 +168,21 @@ impl TableView {
         unsafe { tableview_size(self.as_ptr(), size) }
     }
 
+    /// Adds a new column to the table.
+    pub fn add_column(&mut self) -> u32 {
+        unsafe { tableview_add_column_text(self.as_ptr()) }
+    }
+
+    /// Deletes a column from the table.
+    pub fn remove_column(&mut self, index: u32) {
+        unsafe { tableview_del_column(self.as_ptr(), index) }
+    }
+
+    /// Indicates that a column will display an icon.
+    pub fn set_column_icon(&mut self, index: u32, icon_height: f32, hmargin: f32) {
+        unsafe { tableview_column_icon(self.as_ptr(), index, icon_height, hmargin) }
+    }
+
     /// Sets the width of a column.
     pub fn set_column_width(&mut self, index: u32, width: f32) {
         unsafe { tableview_column_width(self.as_ptr(), index, width) }
@@ -175,6 +191,11 @@ impl TableView {
     /// Sets the size limits of a column.
     pub fn set_column_limits(&mut self, index: u32, min: f32, max: f32) {
         unsafe { tableview_column_limits(self.as_ptr(), index, min, max) }
+    }
+
+    /// Sets the default text alignment for the column data.
+    pub fn set_column_align(&mut self, index: u32, align: Align) {
+        unsafe { tableview_column_align(self.as_ptr(), index, align as _) }
     }
 
     /// Sets whether a column is resizable or not.

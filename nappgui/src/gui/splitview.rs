@@ -5,12 +5,12 @@ use std::{
 
 use nappgui_sys::{
     splitview_get_pos, splitview_horizontal, splitview_minsize0, splitview_minsize1, splitview_panel, splitview_pos,
-    splitview_splitview, splitview_textview, splitview_vertical, splitview_view, splitview_visible0,
-    splitview_visible1, splitview_webview,
+    splitview_splitview, splitview_tableview, splitview_textview, splitview_vertical, splitview_view,
+    splitview_visible0, splitview_visible1, splitview_webview,
 };
 
 use crate::{
-    gui::{Panel, TextView, View, WebView, global_get, global_record},
+    gui::{global_get, global_record, Panel, TableView, TextView, View, WebView},
     types::SplitMode,
 };
 
@@ -35,6 +35,7 @@ impl SplitViewInner {
 /// # Remarks
 /// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
+#[derive(Clone)]
 pub struct SplitView(Weak<SplitViewInner>);
 
 impl SplitView {
@@ -64,10 +65,10 @@ impl SplitView {
 
     /// Add a view or panel into the splitview as its split child.
     ///
-    /// # Remark
+    /// # Remarks
     /// For splitview and panel, the tabstop parameter is always set to TRUE even if tabstop is set
     /// to false.
-    pub fn add<T>(&self, control: &T, tabstop: bool)
+    pub fn add_control<T>(&self, control: &T, tabstop: bool)
     where
         T: SplitViewInsertChildTrait,
     {
@@ -85,22 +86,22 @@ impl SplitView {
     }
 
     /// Show or hide the left/upper child.
-    pub fn set_first_child_visible(&self, visible: bool) {
+    pub fn set_first_visible(&self, visible: bool) {
         unsafe { splitview_visible0(self.as_ptr(), visible as _) }
     }
 
     /// Show or hide the right/bottom child.
-    pub fn set_last_child_visible(&self, visible: bool) {
+    pub fn set_last_visible(&self, visible: bool) {
         unsafe { splitview_visible1(self.as_ptr(), visible as _) }
     }
 
     /// Set the minimum size of the left/upper child.
-    pub fn set_first_child_min_size(&self, size: f32) {
+    pub fn set_first_min_size(&self, size: f32) {
         unsafe { splitview_minsize0(self.as_ptr(), size) }
     }
 
     /// Set the minimum size of the right/bottom child.
-    pub fn set_last_child_min_size(&self, size: f32) {
+    pub fn set_last_min_size(&self, size: f32) {
         unsafe { splitview_minsize1(self.as_ptr(), size) }
     }
 }
@@ -130,15 +131,19 @@ impl SplitViewInsertChildTrait for WebView {
 }
 
 impl SplitViewInsertChildTrait for SplitView {
-    /// Tabstop is set to TRUE by default.
     fn insert_into_splitview(&self, split_view: &SplitView, _tabstop: bool) {
         unsafe { splitview_splitview(split_view.as_ptr(), self.as_ptr()) }
     }
 }
 
 impl SplitViewInsertChildTrait for Panel {
-    /// Tabstop is set to TRUE by default.
     fn insert_into_splitview(&self, split_view: &SplitView, _tabstop: bool) {
         unsafe { splitview_panel(split_view.as_ptr(), self.as_ptr()) }
+    }
+}
+
+impl SplitViewInsertChildTrait for TableView {
+    fn insert_into_splitview(&self, split_view: &SplitView, tabstop: bool) {
+        unsafe { splitview_tableview(split_view.as_ptr(), self.as_ptr(), tabstop as _) }
     }
 }

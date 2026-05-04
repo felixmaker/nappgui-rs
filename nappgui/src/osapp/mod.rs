@@ -19,35 +19,55 @@ pub fn osmain<T>()
 where
     T: AppHandler,
 {
-    unsafe extern "C" fn on_create<T>() -> *mut c_void
+    extern "C" fn on_create<T>() -> *mut c_void
     where
         T: AppHandler,
     {
-        let app = T::create();
-        let app = Box::into_raw(Box::new(app));
-        app as *mut c_void
+        let app = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let app = T::create();
+            Box::into_raw(Box::new(app)) as *mut c_void
+        }));
+
+        match app {
+            Ok(app) => Box::into_raw(Box::new(app)) as *mut c_void,
+            Err(_) => {
+                std::process::exit(1) // Quit the application if create fails.
+            }
+        }
     }
 
-    unsafe extern "C" fn on_destory<T>(obj: *mut *mut c_void)
+    extern "C" fn on_destory<T>(obj: *mut *mut c_void)
     where
         T: AppHandler,
     {
-        let mut app = Box::from_raw(*obj as *mut T);
-        app.destroy();
-        GLOBAL_OBJECTS.with_borrow_mut(|objs| {
-            objs.clear();
-        });
+        let app = unsafe { *obj as *mut T };
+        if app.is_null() {
+            return;
+        }
+
+        let mut app = unsafe { Box::from_raw(app) };
+        let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            app.destroy();
+            GLOBAL_OBJECTS.with_borrow_mut(|objs| {
+                objs.clear();
+            });
+        }));
     }
 
-    unsafe extern "C" fn on_update<T>(obj: *mut c_void, prtime: f64, ctime: f64)
+    extern "C" fn on_update<T>(obj: *mut c_void, prtime: f64, ctime: f64)
     where
         T: AppHandler,
     {
         let app = obj as *mut T;
-        (*app).update(prtime, ctime);
+        if app.is_null() {
+            return;
+        }
+        unsafe {
+            (*app).update(prtime, ctime);
+        }
     }
 
-    let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| unsafe {
+    unsafe {
         osmain_imp(
             0,
             std::ptr::null_mut(),
@@ -58,7 +78,7 @@ where
             Some(on_destory::<T>),
             std::ptr::null(),
         )
-    }));
+    }
 }
 
 /// End a desktop application, destroying the message cycle and the application object.

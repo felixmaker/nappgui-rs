@@ -28,9 +28,9 @@ impl AppHandler for App {
             text.write(&format!("Button click {}\n", clicks.borrow()));
             *clicks.borrow_mut() += 1;
         });
+        panel.add_layout(&layout);
 
         let window = Window::new(WindowFlags::default());
-        panel.add_layout(&layout);
         window.set_panel(&panel);
 
         window.title("Hello, World!");

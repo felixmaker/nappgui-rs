@@ -1,5 +1,6 @@
 use std::{
     cell::RefCell,
+    ffi::CString,
     ptr::NonNull,
     rc::{Rc, Weak},
 };
@@ -7,9 +8,9 @@ use std::{
 use nappgui_sys::{
     view_OnAcceptFocus, view_OnClick, view_OnDown, view_OnDrag, view_OnDraw, view_OnEnter, view_OnExit, view_OnFocus,
     view_OnKeyDown, view_OnKeyUp, view_OnMove, view_OnOverlay, view_OnResignFocus, view_OnScroll, view_OnSize,
-    view_OnUp, view_OnWheel, view_allow_tab, view_content_size, view_create, view_custom, view_get_size, view_native,
-    view_point_scale, view_scroll, view_scroll_size, view_scroll_visible, view_scroll_x, view_scroll_y, view_size,
-    view_update, view_viewport, S2Df, V2Df,
+    view_OnUp, view_OnWheel, view_allow_tab, view_content_size, view_create, view_custom, view_get_size, view_keybuf,
+    view_native, view_point_scale, view_scroll, view_scroll_size, view_scroll_visible, view_scroll_x, view_scroll_y,
+    view_size, view_tooltip, view_update, view_viewport, S2Df, V2Df,
 };
 
 use crate::{
@@ -315,6 +316,12 @@ impl View {
             .map(|inner| *inner.on_scroll.borrow_mut() = Some(Rc::new(handler)));
         let listener = listener!(self.as_ptr(), ViewInner, on_scroll(EvScroll));
         unsafe { view_OnScroll(self.as_ptr(), listener) }
+    }
+
+    /// Sets a tooltip for the view. It is a small explanatory text that will appear when the mouse is over the control.
+    pub fn set_tooltip(&self, tooltip: &str) {
+        let tooltip = CString::new(tooltip).unwrap();
+        unsafe { view_tooltip(self.as_ptr(), tooltip.as_ptr() as _) };
     }
 
     /// Allows to capture the press of the \[TAB\] key.

@@ -47,7 +47,7 @@ where
         (*app).update(prtime, ctime);
     }
 
-    unsafe {
+    let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| unsafe {
         osmain_imp(
             0,
             std::ptr::null_mut(),
@@ -57,8 +57,8 @@ where
             Some(on_update::<T>),
             Some(on_destory::<T>),
             std::ptr::null(),
-        );
-    }
+        )
+    }));
 }
 
 /// End a desktop application, destroying the message cycle and the application object.

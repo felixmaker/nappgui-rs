@@ -26,21 +26,17 @@
 
 macro_rules! listener {
     ($ptr: expr, $inner_type:ty, $member:ident($($params: ty)?) $(-> $return:ty)?) => {{
-        use std::ffi::c_void;
-
-        extern "C" fn shim(obj: *mut c_void, event: *mut nappgui_sys::Event) {
+        #[allow(unused)]
+        extern "C" fn shim(obj: *mut std::ffi::c_void, event: *mut nappgui_sys::Event) {
             if let Some(obj) = global_get::<$inner_type>(obj as _) {
                 let callback = obj.$member.borrow().clone();
-                #[allow(unused)]
                 let event = crate::core::event::Event::new(event);
                 $(
-                    let params = event.params::<$params>().unwrap();
+                    let params = unsafe { event.params::<$params>() };
                 )?
-
-                #[allow(unused)]
                 if let Some(f) = callback {
                     if let Ok(r) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f($(&(params as $params))?))) {
-                        unsafe { $( event.result(r as $return); )? }
+                        $( unsafe { event.result(r as $return); })?
                     }
                 }
             }

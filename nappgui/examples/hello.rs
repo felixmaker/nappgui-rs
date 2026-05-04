@@ -29,10 +29,10 @@ impl AppHandler for App {
             *clicks.borrow_mut() += 1;
         });
 
-
-
         let window = Window::new(WindowFlags::default());
+        panel.add_layout(&layout);
         window.set_panel(&panel);
+
         window.title("Hello, World!");
         window.set_origin(500.0, 200.0);
         window.set_on_close_handler(|_| finish());

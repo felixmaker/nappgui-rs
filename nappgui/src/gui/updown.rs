@@ -7,13 +7,13 @@ use std::{
 use nappgui_sys::{updown_OnClick, updown_create, updown_tooltip};
 
 use crate::{
-    gui::{event::EvButton, global_get, global_record},
+    gui::{event::ButtonEvent, global_get, global_record},
     util::macros::listener,
 };
 
 pub(crate) struct UpDownInner {
     ptr: NonNull<nappgui_sys::UpDown>,
-    on_click: RefCell<Option<Rc<dyn Fn(&EvButton) + 'static>>>,
+    on_click: RefCell<Option<Rc<dyn Fn(&ButtonEvent) + 'static>>>,
 }
 
 impl UpDownInner {
@@ -60,12 +60,12 @@ impl UpDown {
     /// Set an event handler for pressing the button.
     pub fn set_on_click_handler<F>(&self, handler: F)
     where
-        F: Fn(&EvButton) + 'static,
+        F: Fn(&ButtonEvent) + 'static,
     {
         self.0
             .upgrade()
             .map(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), UpDownInner, on_click(EvButton));
+        let listener = listener!(self.as_ptr(), UpDownInner, on_click(ButtonEvent));
         unsafe { updown_OnClick(self.as_ptr(), listener) }
     }
 

@@ -8,7 +8,7 @@ use crate::{
     core::Stream,
     draw_2d::Color,
     gui::{
-        event::{EvText, EvTextFilter},
+        event::{TextEvent, TextFilterEvent},
         global_get, global_record,
     },
     types::{Align, FontStyle},
@@ -26,7 +26,7 @@ use nappgui_sys::{
 
 pub(crate) struct TextViewInner {
     ptr: NonNull<nappgui_sys::TextView>,
-    on_filter: RefCell<Option<Rc<dyn Fn(&EvText) -> EvTextFilter + 'static>>>,
+    on_filter: RefCell<Option<Rc<dyn Fn(&TextEvent) -> TextFilterEvent + 'static>>>,
     on_focus: RefCell<Option<Rc<dyn Fn(&bool) + 'static>>>,
 }
 
@@ -74,12 +74,12 @@ impl TextView {
     /// Set a handler to filter text while editing.
     pub fn set_on_filter_handler<F>(&self, handler: F)
     where
-        F: Fn(&EvText) -> EvTextFilter + 'static,
+        F: Fn(&TextEvent) -> TextFilterEvent + 'static,
     {
         self.0
             .upgrade()
             .map(|inner| *inner.on_filter.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), TextViewInner, on_filter(EvText)->EvTextFilter);
+        let listener = listener!(self.as_ptr(), TextViewInner, on_filter(TextEvent)->TextFilterEvent);
         unsafe { textview_OnFilter(self.as_ptr(), listener) }
     }
 

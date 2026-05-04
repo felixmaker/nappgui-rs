@@ -8,7 +8,7 @@ use std::{
 use crate::{
     draw_2d::{Color, Font, Image},
     gui::{
-        event::{EvButton, EvMouse},
+        event::{ButtonEvent, MouseEvent},
         global_get, global_record,
     },
     util::macros::listener,
@@ -23,8 +23,8 @@ use nappgui_sys::{
 
 pub(crate) struct ListBoxInner {
     ptr: NonNull<nappgui_sys::ListBox>,
-    on_down: RefCell<Option<Rc<dyn Fn(&EvMouse) -> bool + 'static>>>,
-    on_select: RefCell<Option<Rc<dyn Fn(&EvButton) + 'static>>>,
+    on_down: RefCell<Option<Rc<dyn Fn(&MouseEvent) -> bool + 'static>>>,
+    on_select: RefCell<Option<Rc<dyn Fn(&ButtonEvent) + 'static>>>,
 }
 
 impl ListBoxInner {
@@ -78,24 +78,24 @@ impl ListBox {
     /// (TRUE by default). See GUI Events.
     pub fn set_on_down_handler<F>(&self, callback: F)
     where
-        F: Fn(&EvMouse) -> bool + 'static,
+        F: Fn(&MouseEvent) -> bool + 'static,
     {
         self.0
             .upgrade()
             .map(|inner| *inner.on_down.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.as_ptr(), ListBoxInner, on_down(EvMouse) -> bool);
+        let listener = listener!(self.as_ptr(), ListBoxInner, on_down(MouseEvent) -> bool);
         unsafe { listbox_OnDown(self.as_ptr(), listener) }
     }
 
     /// Set an event handler for the selection of a new item.
     pub fn set_on_select_handler<F>(&self, callback: F)
     where
-        F: Fn(&EvButton) + 'static,
+        F: Fn(&ButtonEvent) + 'static,
     {
         self.0
             .upgrade()
             .map(|inner| *inner.on_select.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.as_ptr(), ListBoxInner, on_select(EvButton));
+        let listener = listener!(self.as_ptr(), ListBoxInner, on_select(ButtonEvent));
         unsafe { listbox_OnSelect(self.as_ptr(), listener) }
     }
 

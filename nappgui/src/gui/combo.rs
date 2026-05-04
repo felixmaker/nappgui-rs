@@ -7,7 +7,7 @@ use std::{
 use crate::{
     draw_2d::{Color, Image},
     gui::{
-        event::{EvText, EvTextFilter},
+        event::{TextEvent, TextFilterEvent},
         global_get, global_record,
     },
     types::{Align, FontStyle},
@@ -24,8 +24,8 @@ use nappgui_sys::{
 
 pub(crate) struct ComboInner {
     ptr: NonNull<nappgui_sys::Combo>,
-    on_filter: RefCell<Option<Rc<dyn Fn(&EvText) -> EvTextFilter + 'static>>>,
-    on_change: RefCell<Option<Rc<dyn Fn(&EvText) -> bool + 'static>>>,
+    on_filter: RefCell<Option<Rc<dyn Fn(&TextEvent) -> TextFilterEvent + 'static>>>,
+    on_change: RefCell<Option<Rc<dyn Fn(&TextEvent) -> bool + 'static>>>,
 }
 
 impl ComboInner {
@@ -74,24 +74,24 @@ impl Combo {
     /// Set a function to filter the text while editing.
     pub fn set_on_filter_handler<F>(&self, callback: F)
     where
-        F: Fn(&EvText) -> EvTextFilter + 'static,
+        F: Fn(&TextEvent) -> TextFilterEvent + 'static,
     {
         self.0
             .upgrade()
             .map(|inner| *inner.on_filter.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.as_ptr(), ComboInner, on_filter(EvText) -> EvTextFilter);
+        let listener = listener!(self.as_ptr(), ComboInner, on_filter(TextEvent) -> TextFilterEvent);
         unsafe { combo_OnFilter(self.as_ptr(), listener) };
     }
 
     /// Set a function to be called when the text has changed.
     pub fn set_on_change_handler<F>(&self, callback: F)
     where
-        F: Fn(&EvText) -> bool + 'static,
+        F: Fn(&TextEvent) -> bool + 'static,
     {
         self.0
             .upgrade()
             .map(|inner| *inner.on_change.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.as_ptr(), ComboInner, on_change(EvText) -> bool);
+        let listener = listener!(self.as_ptr(), ComboInner, on_change(TextEvent) -> bool);
         unsafe { combo_OnChange(self.as_ptr(), listener) };
     }
 

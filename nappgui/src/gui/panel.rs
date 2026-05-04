@@ -14,7 +14,7 @@ use crate::gui::{global_get, global_record, Layout};
 pub(crate) struct PanelInner {
     ptr: NonNull<nappgui_sys::Panel>,
     scroll: Cell<bool>,
-    layouts: RefCell<Vec<Layout>>,
+    pub(crate) layouts: RefCell<Vec<Layout>>,
 }
 
 impl PanelInner {

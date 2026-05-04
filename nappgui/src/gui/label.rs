@@ -7,7 +7,7 @@ use std::{
 
 use crate::{
     draw_2d::{Color, Font},
-    gui::{event::EvMouse, global_get, global_record},
+    gui::{event::MouseEvent, global_get, global_record},
     types::{Align, Ellipsis, FontStyle},
     util::macros::listener,
 };
@@ -20,7 +20,7 @@ use nappgui_sys::{
 
 pub(crate) struct LabelInner {
     ptr: NonNull<nappgui_sys::Label>,
-    on_click: RefCell<Option<Rc<dyn Fn(&EvMouse) + 'static>>>,
+    on_click: RefCell<Option<Rc<dyn Fn(&MouseEvent) + 'static>>>,
 }
 
 impl LabelInner {
@@ -79,12 +79,12 @@ impl Label {
     /// Set the OnClick event handler.
     pub fn set_on_click_handler<F>(&self, callback: F)
     where
-        F: Fn(&EvMouse) + 'static,
+        F: Fn(&MouseEvent) + 'static,
     {
         self.0
             .upgrade()
             .map(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.as_ptr(), LabelInner, on_click(EvMouse));
+        let listener = listener!(self.as_ptr(), LabelInner, on_click(MouseEvent));
         unsafe { label_OnClick(self.as_ptr(), listener) };
     }
 

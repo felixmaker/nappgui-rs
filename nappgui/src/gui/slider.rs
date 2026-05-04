@@ -10,13 +10,13 @@ use nappgui_sys::{
 };
 
 use crate::{
-    gui::{event::EvSlider, global_get, global_record},
+    gui::{event::SliderEvent, global_get, global_record},
     util::macros::listener,
 };
 
 pub(crate) struct SliderInner {
     ptr: NonNull<nappgui_sys::Slider>,
-    on_moved: RefCell<Option<Rc<dyn Fn(&EvSlider) + 'static>>>,
+    on_moved: RefCell<Option<Rc<dyn Fn(&SliderEvent) + 'static>>>,
 }
 
 impl SliderInner {
@@ -72,12 +72,12 @@ impl Slider {
     /// Set an event handler for slider movement.
     pub fn set_on_moved_handler<F>(&self, handler: F)
     where
-        F: Fn(&EvSlider) + 'static,
+        F: Fn(&SliderEvent) + 'static,
     {
         self.0
             .upgrade()
             .map(|inner| *inner.on_moved.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), SliderInner, on_moved(EvSlider));
+        let listener = listener!(self.as_ptr(), SliderInner, on_moved(SliderEvent));
         unsafe { slider_OnMoved(self.as_ptr(), listener) }
     }
 

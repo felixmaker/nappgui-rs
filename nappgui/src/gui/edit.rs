@@ -14,7 +14,7 @@ use nappgui_sys::{
 use crate::{
     draw_2d::{font::Font, Color},
     gui::{
-        event::{EvText, EvTextFilter},
+        event::{TextEvent, TextFilterEvent},
         global_get, global_record,
     },
     types::{Align, FontStyle},
@@ -23,8 +23,8 @@ use crate::{
 
 pub(crate) struct EditInner {
     ptr: NonNull<nappgui_sys::Edit>,
-    on_filter: RefCell<Option<Rc<dyn Fn(&EvText) -> EvTextFilter + 'static>>>,
-    on_change: RefCell<Option<Rc<dyn Fn(&EvText) -> bool + 'static>>>,
+    on_filter: RefCell<Option<Rc<dyn Fn(&TextEvent) -> TextFilterEvent + 'static>>>,
+    on_change: RefCell<Option<Rc<dyn Fn(&TextEvent) -> bool + 'static>>>,
     on_focus: RefCell<Option<Rc<dyn Fn(&bool) + 'static>>>,
 }
 
@@ -44,14 +44,14 @@ impl EditInner {
 
     pub(crate) fn set_on_filter_handler<F>(&self, callback: F)
     where
-        F: Fn(&EvText) -> EvTextFilter + 'static,
+        F: Fn(&TextEvent) -> TextFilterEvent + 'static,
     {
         *self.on_filter.borrow_mut() = Some(Rc::new(callback));
     }
 
     pub(crate) fn set_on_change_handler<F>(&self, callback: F)
     where
-        F: Fn(&EvText) -> bool + 'static,
+        F: Fn(&TextEvent) -> bool + 'static,
     {
         *self.on_change.borrow_mut() = Some(Rc::new(callback));
     }
@@ -101,20 +101,20 @@ impl Edit {
     /// Set a function to filter the text while editing.
     pub fn set_on_filter_handler<F>(&self, callback: F)
     where
-        F: Fn(&EvText) -> EvTextFilter + 'static,
+        F: Fn(&TextEvent) -> TextFilterEvent + 'static,
     {
         self.0.upgrade().unwrap().set_on_filter_handler(callback);
-        let listener = listener!(self.as_ptr(), EditInner, on_filter(EvText) -> EvTextFilter);
+        let listener = listener!(self.as_ptr(), EditInner, on_filter(TextEvent) -> TextFilterEvent);
         unsafe { edit_OnFilter(self.as_ptr(), listener) };
     }
 
     /// Set a function to detect when the text has changed.
     pub fn set_on_change_handler<F>(&self, callback: F)
     where
-        F: Fn(&EvText) -> bool + 'static,
+        F: Fn(&TextEvent) -> bool + 'static,
     {
         self.0.upgrade().unwrap().set_on_change_handler(callback);
-        let listener = listener!(self.as_ptr(), EditInner, on_change(EvText) -> bool);
+        let listener = listener!(self.as_ptr(), EditInner, on_change(TextEvent) -> bool);
         unsafe { edit_OnChange(self.as_ptr(), listener) };
     }
 

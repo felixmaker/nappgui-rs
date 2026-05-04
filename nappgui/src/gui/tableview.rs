@@ -7,10 +7,10 @@ use std::{
 use crate::{
     draw_2d::Font,
     gui::{
-        event::{EvTbDataParams, EvTbDataResult},
+        event::{TableDataParams, TableDataResult},
         global_get, global_record,
     },
-    types::{Align, EventType},
+    types::{Align, EventType, TablePositionEvent},
     util::macros::listener,
 };
 
@@ -29,7 +29,7 @@ pub(crate) struct TableViewInner {
     on_select: RefCell<Option<Rc<dyn Fn() + 'static>>>,
     on_row_click: RefCell<Option<Rc<dyn Fn() + 'static>>>,
     on_header_click: RefCell<Option<Rc<dyn Fn() + 'static>>>,
-    on_data: RefCell<Option<Rc<dyn Fn(&EvTbDataParams) -> EvTbDataResult + 'static>>>,
+    on_data: RefCell<Option<Rc<dyn Fn(&TableDataParams) -> TableDataResult + 'static>>>,
 }
 
 impl TableViewInner {
@@ -114,42 +114,40 @@ impl TableView {
     /// Sets up a handler to read data from the application.
     pub fn set_on_data_handler<F>(&self, handler: F)
     where
-        F: Fn(&EvTbDataParams) -> EvTbDataResult + 'static,
+        F: Fn(&TableDataParams) -> TableDataResult + 'static,
     {
         self.0
             .upgrade()
             .map(|inner| *inner.on_data.borrow_mut() = Some(Rc::new(handler)));
 
-        unsafe extern "C" fn shim(data: *mut std::ffi::c_void, event: *mut nappgui_sys::Event) {
-            let Some(object) = global_get::<TableViewInner>(data as _) else {
-                return;
-            };
-            let Some(f) = object.on_data.borrow().clone() else {
-                return;
-            };
-            let event = crate::core::event::Event::new(event);
-            match event.type_() {
-                EventType::TableNRows => {
-                    let params = EvTbDataParams::TableNCols;
-                    if let Ok(r) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&params))) {
-                        if let EvTbDataResult::TableNCols(nrows) = r {
-                            event.result(nrows);
+        let listener = {
+            use std::ffi::c_void;
+            extern "C" fn shim(obj: *mut c_void, event: *mut nappgui_sys::Event) {
+                if let Some(obj) = global_get::<TableViewInner>(obj as _) {
+                    let Some(f) = obj.on_data.borrow().clone() else { return };
+                    let event = crate::core::event::Event::new(event);
+                    let params = match event.type_() {
+                        EventType::TableNRows => TableDataParams::TableNCols,
+                        EventType::TableCell => {
+                            TableDataParams::TableCell(unsafe { event.params::<TablePositionEvent>() })
+                        }
+                        _ => {
+                            return;
+                        }
+                    };
+                    if let Ok(r) =
+                        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&(params as TableDataParams))))
+                    {
+                        match r {
+                            TableDataResult::TableNCols(n) => unsafe { event.result(n) },
+                            TableDataResult::TableCell(table_cell_event) => unsafe { event.result(table_cell_event) },
                         }
                     }
                 }
-                EventType::TableCell => {
-                    let params = EvTbDataParams::TableCell(event.params().unwrap());
-                    if let Ok(r) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&params))) {
-                        if let EvTbDataResult::TableCell(cell) = r {
-                            event.result(cell);
-                        }
-                    }
-                }
-                _ => {}
             }
-        }
-
-        let listener = unsafe { nappgui_sys::listener_imp(self.as_ptr() as _, Some(shim)) };
+            let listener = unsafe { nappgui_sys::listener_imp((self.as_ptr()) as _, Some(shim)) };
+            listener
+        };
 
         unsafe { tableview_OnData(self.as_ptr(), listener) }
     }

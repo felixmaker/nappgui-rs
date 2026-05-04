@@ -1,15 +1,18 @@
-use std::{
-    ffi::CString,
-    sync::{Arc, LazyLock, Mutex},
+use std::ffi::{CStr, CString};
+
+use nappgui_sys::{
+    EvButton, EvDraw, EvKey, EvMenu, EvMouse, EvPos, EvScroll, EvSize, EvSlider, EvTbCell, EvTbPos, EvTbRect, EvTbRow,
+    EvTbSel, EvText, EvTextFilter, EvWheel, EvWinClose,
 };
 
 use crate::{
-    draw_2d::DCtx,
+    core::{event::NappGUIEventResult, NappGUIEventParams},
+    draw_2d::{DCtx, Image},
     types::{Align, GuiClose, GuiMouse, GuiOrient, GuiScroll, GuiState, KeyCode},
 };
 
 /// Parameters of the OnClick event of a button or OnSelect of a popup.
-pub struct EvButton {
+pub struct ButtonEvent {
     /// Button or item index.
     pub index: u32,
     /// State.
@@ -18,76 +21,69 @@ pub struct EvButton {
     pub text: String,
 }
 
-impl EvButton {
-    pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvButton) -> EvButton {
-        if ptr.is_null() {
-            panic!("EvButton is null");
-        }
-        let evbutton = unsafe { &*ptr };
-        EvButton {
-            index: evbutton.index as _,
-            state: GuiState::try_from(evbutton.state).unwrap(),
-            text: unsafe { std::ffi::CStr::from_ptr(evbutton.text) }
-                .to_string_lossy()
-                .into_owned(),
+impl NappGUIEventParams for ButtonEvent {
+    type CType = EvButton;
+    const TYPE: &'static CStr = c"EvButton";
+
+    fn from(event: &Self::CType) -> ButtonEvent {
+        ButtonEvent {
+            index: event.index as _,
+            state: GuiState::try_from(event.state).unwrap(),
+            text: unsafe { CStr::from_ptr(event.text) }.to_string_lossy().into_owned(),
         }
     }
 }
 
 /// Parameters of the OnMoved event of a slider.
-pub struct EvSlider {
+pub struct SliderEvent {
     /// Normalized slider position (0, 1).
-    pub pos: f32,
+    pub position: f32,
     /// Increase with respect to the previous position.
-    pub incr: f32,
+    pub increase: f32,
     /// Interval index (only for discrete ranges).
     pub step: u32,
 }
 
-impl EvSlider {
-    pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvSlider) -> EvSlider {
-        if ptr.is_null() {
-            panic!("EvSlider is null");
-        }
-        let evslider = unsafe { &*ptr };
-        EvSlider {
-            pos: evslider.pos,
-            incr: evslider.incr,
-            step: evslider.step as _,
+impl NappGUIEventParams for SliderEvent {
+    type CType = EvSlider;
+    const TYPE: &'static CStr = c"EvSlider";
+
+    fn from(event: &Self::CType) -> SliderEvent {
+        SliderEvent {
+            position: event.pos,
+            increase: event.incr,
+            step: event.step as _,
         }
     }
 }
 
 /// Parameters of the OnChange event of the text boxes.
-pub struct EvText {
+pub struct TextEvent {
     /// Text.
     pub text: String,
     /// Cursor position (caret).
-    pub cpos: u32,
+    pub current_position: u32,
     /// Number of characters inserted or deleted.
-    pub len: i32,
+    pub length: i32,
 }
 
-impl EvText {
-    pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvText) -> EvText {
-        if ptr.is_null() {
-            panic!("EvText is null");
-        }
-        let evtext = unsafe { &*ptr };
-        EvText {
-            text: unsafe { std::ffi::CStr::from_ptr(evtext.text) }
-                .to_string_lossy()
-                .into_owned(),
-            cpos: evtext.cpos as _,
-            len: evtext.len,
+impl NappGUIEventParams for TextEvent {
+    type CType = EvText;
+    const TYPE: &'static CStr = c"EvText";
+
+    fn from(event: &Self::CType) -> TextEvent {
+        TextEvent {
+            text: unsafe { CStr::from_ptr(event.text) }.to_string_lossy().into_owned(),
+            current_position: event.cpos as _,
+            length: event.len,
         }
     }
 }
 
 /// OnDraw event parameters.
-pub struct EvDraw {
+pub struct DrawEvent {
     /// 2D drawing context.
-    pub ctx: DCtx,
+    pub context: DCtx,
     /// X coordinate of the drawing area (viewport).
     pub x: f32,
     /// Y coordinate of the drawing area.
@@ -98,24 +94,23 @@ pub struct EvDraw {
     pub height: f32,
 }
 
-impl EvDraw {
-    pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvDraw) -> EvDraw {
-        if ptr.is_null() {
-            panic!("EvDraw is null");
-        }
-        let evdraw = unsafe { &*ptr };
-        EvDraw {
-            ctx: DCtx::new(evdraw.ctx),
-            x: evdraw.x,
-            y: evdraw.y,
-            width: evdraw.width,
-            height: evdraw.height,
+impl NappGUIEventParams for DrawEvent {
+    type CType = EvDraw;
+    const TYPE: &'static CStr = c"EvDraw";
+
+    fn from(event: &Self::CType) -> DrawEvent {
+        DrawEvent {
+            context: DCtx::new(event.ctx),
+            x: event.x,
+            y: event.y,
+            width: event.width,
+            height: event.height,
         }
     }
 }
 
 /// Mouse event parameters.
-pub struct EvMouse {
+pub struct MouseEvent {
     /// X coordinate of the pointer in the drawing area.
     pub x: f32,
     /// Y coordinate of the pointer in the drawing area.
@@ -134,27 +129,26 @@ pub struct EvMouse {
     pub tag: u32,
 }
 
-impl EvMouse {
-    pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvMouse) -> EvMouse {
-        if ptr.is_null() {
-            panic!("EvMouse is null");
-        }
-        let evmouse = unsafe { &*ptr };
-        EvMouse {
-            x: evmouse.x,
-            y: evmouse.y,
-            lx: evmouse.lx,
-            ly: evmouse.ly,
-            button: GuiMouse::try_from(evmouse.button).unwrap(),
-            count: evmouse.count,
-            modifiers: evmouse.modifiers,
-            tag: evmouse.tag,
+impl NappGUIEventParams for MouseEvent {
+    type CType = EvMouse;
+    const TYPE: &'static CStr = c"EvMouse";
+
+    fn from(event: &Self::CType) -> MouseEvent {
+        MouseEvent {
+            x: event.x,
+            y: event.y,
+            lx: event.lx,
+            ly: event.ly,
+            button: GuiMouse::try_from(event.button).unwrap(),
+            count: event.count,
+            modifiers: event.modifiers,
+            tag: event.tag,
         }
     }
 }
 
 /// OnWheel event parameters.
-pub struct EvWheel {
+pub struct WheelEvent {
     /// Pointer x coordinate.
     pub x: f32,
     /// Pointer y coordinate.
@@ -167,105 +161,97 @@ pub struct EvWheel {
     pub dz: f32,
 }
 
-impl EvWheel {
-    pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvWheel) -> EvWheel {
-        if ptr.is_null() {
-            panic!("EvWheel is null");
-        }
-        let evwheel = unsafe { &*ptr };
-        EvWheel {
-            x: evwheel.x,
-            y: evwheel.y,
-            dx: evwheel.dx,
-            dy: evwheel.dy,
-            dz: evwheel.dz,
+impl NappGUIEventParams for WheelEvent {
+    type CType = EvWheel;
+    const TYPE: &'static CStr = c"EvWheel";
+
+    fn from(event: &Self::CType) -> WheelEvent {
+        WheelEvent {
+            x: event.x,
+            y: event.y,
+            dx: event.dx,
+            dy: event.dy,
+            dz: event.dz,
         }
     }
 }
 
 /// Keyboard event parameters.
-pub struct EvKey {
+pub struct KeyEvent {
     /// Referenced key.
     pub key: KeyCode,
     /// Combination of values mkey_t. todo!
     pub modifiers: u32,
 }
 
-impl EvKey {
-    pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvKey) -> EvKey {
-        if ptr.is_null() {
-            panic!("EvKey is null");
-        }
-        let evkey = unsafe { &*ptr };
-        EvKey {
-            key: KeyCode::try_from(evkey.key).unwrap(),
-            modifiers: evkey.modifiers,
+impl NappGUIEventParams for KeyEvent {
+    type CType = EvKey;
+    const TYPE: &'static CStr = c"EvKey";
+
+    fn from(event: &Self::CType) -> KeyEvent {
+        KeyEvent {
+            key: KeyCode::try_from(event.key).unwrap(),
+            modifiers: event.modifiers,
         }
     }
 }
 
 /// Parameters of change of position events.
-pub struct EvPos {
+pub struct PositionEvent {
     /// X coordinate.
     pub x: f32,
     /// Y coordinate.
     pub y: f32,
 }
 
-impl EvPos {
-    pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvPos) -> EvPos {
-        if ptr.is_null() {
-            panic!("EvPos is null");
-        }
-        let evpos = unsafe { &*ptr };
-        EvPos {
-            x: evpos.x,
-            y: evpos.y,
-        }
+impl NappGUIEventParams for PositionEvent {
+    type CType = EvPos;
+    const TYPE: &'static CStr = c"EvPos";
+
+    fn from(event: &Self::CType) -> PositionEvent {
+        PositionEvent { x: event.x, y: event.y }
     }
 }
 
 /// Resize event parameters.
-pub struct EvSize {
+pub struct SizeEvent {
     /// Width (size in x).
     pub width: f32,
     /// Height (size in y).
     pub height: f32,
 }
 
-impl EvSize {
-    pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvSize) -> EvSize {
-        if ptr.is_null() {
-            panic!("EvSize is null");
-        }
-        let evresize = unsafe { &*ptr };
-        EvSize {
-            width: evresize.width,
-            height: evresize.height,
+impl NappGUIEventParams for SizeEvent {
+    type CType = EvSize;
+    const TYPE: &'static CStr = c"EvSize";
+
+    fn from(event: &Self::CType) -> SizeEvent {
+        SizeEvent {
+            width: event.width,
+            height: event.height,
         }
     }
 }
 
 /// Window closing Event Parameters.
-pub struct EvWinClose {
+pub struct WindowCloseEvent {
     /// Origin of the close.
     pub origin: GuiClose,
 }
 
-impl EvWinClose {
-    pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvWinClose) -> EvWinClose {
-        if ptr.is_null() {
-            panic!("EvWinClose is null");
-        }
-        let evclose = unsafe { &*ptr };
-        EvWinClose {
-            origin: GuiClose::from(evclose.origin as u32),
+impl NappGUIEventParams for WindowCloseEvent {
+    type CType = EvWinClose;
+    const TYPE: &'static CStr = c"EvWinClose";
+
+    fn from(event: &Self::CType) -> WindowCloseEvent {
+        WindowCloseEvent {
+            origin: GuiClose::try_from(event.origin as u32).unwrap(),
         }
     }
 }
 
 /// Menu event parameters.
-pub struct EvMenu {
+pub struct MenuEvent {
     /// Menu item index.
     pub index: u32,
     /// Pressed item status.
@@ -274,26 +260,21 @@ pub struct EvMenu {
     pub text: String,
 }
 
-impl EvMenu {
-    pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvMenu) -> EvMenu {
-        if ptr.is_null() {
-            panic!("EvMenu is null");
-        }
-        let evmenu = unsafe { &*ptr };
-        EvMenu {
-            index: evmenu.index,
-            state: GuiState::try_from(evmenu.state).unwrap(),
-            text: unsafe {
-                std::ffi::CStr::from_ptr(evmenu.text)
-                    .to_string_lossy()
-                    .into_owned()
-            },
+impl NappGUIEventParams for MenuEvent {
+    type CType = EvMenu;
+    const TYPE: &'static CStr = c"EvMenu";
+
+    fn from(event: &Self::CType) -> MenuEvent {
+        MenuEvent {
+            index: event.index,
+            state: GuiState::try_from(event.state).unwrap(),
+            text: unsafe { CStr::from_ptr(event.text).to_string_lossy().into_owned() },
         }
     }
 }
 
 /// Scroll event parameters.
-pub struct EvScroll {
+pub struct ScrollEvent {
     /// Scroll bar orientation.
     pub orient: GuiOrient,
     /// Scroll type.
@@ -302,313 +283,240 @@ pub struct EvScroll {
     pub cpos: f32,
 }
 
-impl EvScroll {
-    pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvScroll) -> EvScroll {
-        if ptr.is_null() {
-            panic!("EvScroll is null");
-        }
-        let evscroll = unsafe { &*ptr };
-        EvScroll {
-            orient: GuiOrient::try_from(evscroll.orient).unwrap(),
-            scroll: GuiScroll::try_from(evscroll.scroll).unwrap(),
-            cpos: evscroll.cpos,
+impl NappGUIEventParams for ScrollEvent {
+    type CType = EvScroll;
+    const TYPE: &'static CStr = c"EvScroll";
+
+    fn from(event: &Self::CType) -> ScrollEvent {
+        ScrollEvent {
+            orient: GuiOrient::try_from(event.orient).unwrap(),
+            scroll: GuiScroll::try_from(event.scroll).unwrap(),
+            cpos: event.cpos,
         }
     }
 }
 
 /// Location of a cell in a table.
-pub struct EvTbPos {
-    /// Column index.
-    pub col: u32,
-    /// Row index.
-    pub row: u32,
+pub struct TablePositionEvent {
+    /// X coordinate.
+    pub x: f32,
+    /// Y coordinate.
+    pub y: f32,
 }
 
-impl EvTbPos {
-    pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvTbPos) -> EvTbPos {
-        if ptr.is_null() {
-            panic!("EvTbPos is null");
-        }
-        let evtbpos = unsafe { &*ptr };
-        EvTbPos {
-            col: evtbpos.col as _,
-            row: evtbpos.row as _,
+impl NappGUIEventParams for TablePositionEvent {
+    type CType = EvTbPos;
+    const TYPE: &'static CStr = c"EvTbPos";
+
+    fn from(event: &Self::CType) -> TablePositionEvent {
+        TablePositionEvent {
+            x: event.col as f32,
+            y: event.row as f32,
         }
     }
 }
 
 /// Location of a row in a table.
-pub struct EvTbRow {
+pub struct TablebRowEvent {
     /// Selected or not.
-    pub sel: bool,
+    pub is_selected: bool,
     /// Row index.
     pub row: u32,
 }
 
-impl EvTbRow {
-    pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvTbRow) -> EvTbRow {
-        if ptr.is_null() {
-            panic!("EvTbRow is null");
-        }
-        let evtbrow = unsafe { &*ptr };
-        EvTbRow {
-            sel: evtbrow.sel != 0,
-            row: evtbrow.row as _,
+impl NappGUIEventParams for TablebRowEvent {
+    type CType = EvTbRow;
+    const TYPE: &'static CStr = c"EvTbRow";
+
+    fn from(event: &Self::CType) -> TablebRowEvent {
+        TablebRowEvent {
+            is_selected: event.sel != 0,
+            row: event.row as _,
         }
     }
 }
 
 /// Group of cells in a table.
-pub struct EvTbRect {
+pub struct TablebRectEvent {
     /// Initial column index.
-    pub stcol: u32,
+    pub start_col: u32,
     /// End column index.
-    pub edcol: u32,
+    pub end_col: u32,
     /// Initial row index.
-    pub strow: u32,
+    pub start_row: u32,
     /// End row index.
-    pub edrow: u32,
+    pub end_row: u32,
 }
 
-impl EvTbRect {
-    pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvTbRect) -> EvTbRect {
-        if ptr.is_null() {
-            panic!("EvTbRect is null");
+impl NappGUIEventParams for TablebRectEvent {
+    type CType = EvTbRect;
+    const TYPE: &'static CStr = c"EvTbRect";
+
+    fn from(event: &Self::CType) -> TablebRectEvent {
+        TablebRectEvent {
+            start_col: event.stcol as _,
+            end_col: event.edcol as _,
+            start_row: event.strow as _,
+            end_row: event.edrow as _,
         }
-        let evtbrect = unsafe { &*ptr };
-        EvTbRect {
-            stcol: evtbrect.stcol as _,
-            edcol: evtbrect.edcol as _,
-            strow: evtbrect.strow as _,
-            edrow: evtbrect.edrow as _,
-        }
     }
-}
-
-fn array_usize(array: *mut nappgui_sys::ArrStuint32_t) -> Option<Vec<usize>> {
-    if array.is_null() {
-        return None;
-    }
-
-    let array = unsafe { *array };
-
-    if array.content.is_null() {
-        return None;
-    }
-
-    let content = unsafe { *array.content };
-
-    let elem = &content.elem;
-
-    Some(elem.iter().map(|&x| x as _).collect())
 }
 
 /// Selection in a table.
-pub struct EvTbSel {
+pub struct TableSelectEvent {
     /// Row indices.
-    pub sel: Vec<usize>,
+    pub select: Vec<u32>,
 }
 
-impl EvTbSel {
-    pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvTbSel) -> EvTbSel {
-        if ptr.is_null() {
-            panic!("EvTbSel is null");
+impl NappGUIEventParams for TableSelectEvent {
+    type CType = EvTbSel;
+    const TYPE: &'static CStr = c"EvTbSel";
+
+    fn from(event: &Self::CType) -> TableSelectEvent {
+        fn array_usize(array: *mut nappgui_sys::ArrStuint32_t) -> Option<Vec<u32>> {
+            let array = unsafe { array.as_ref() }?;
+            let content = unsafe { array.content.as_ref() }?;
+            Some(content.elem[..array.size as usize].to_vec())
         }
-        let evtbsel = unsafe { &*ptr };
-        EvTbSel {
-            sel: array_usize(evtbsel.sel).unwrap(),
+        TableSelectEvent {
+            select: array_usize(event.sel).unwrap(),
         }
     }
 }
 
 /// Data from a cell in a table.
-pub struct EvTbCell {
+pub struct TableCellEvent {
     /// Cell text.
     pub text: String,
     /// Text alignment.
     pub align: Align,
+    /// Icon.
+    pub icon: Image,
 }
 
-impl EvTbCell {
-    pub(crate) fn from_ptr(ptr: *mut nappgui_sys::EvTbCell) -> EvTbCell {
-        if ptr.is_null() {
-            panic!("EvTbCell is null");
-        }
-        let evtbcell = unsafe { &*ptr };
-        EvTbCell {
-            text: unsafe {
-                std::ffi::CStr::from_ptr(evtbcell.text)
-                    .to_string_lossy()
-                    .into_owned()
-            },
-            align: Align::try_from(evtbcell.align).unwrap(),
+impl NappGUIEventParams for TableCellEvent {
+    type CType = EvTbCell;
+    const TYPE: &'static CStr = c"EvTbCell";
+
+    fn from(event: &Self::CType) -> TableCellEvent {
+        TableCellEvent {
+            text: unsafe { CStr::from_ptr(event.text).to_string_lossy().into_owned() },
+            align: Align::try_from(event.align).unwrap(),
+            icon: unsafe { Image::from_raw_cloned(event.icon) },
         }
     }
 }
 
-macro_rules! event_params {
-    ($type:ty) => {
-        impl crate::core::event::NappGUIEventParams for $type {
-            fn type_() -> &'static str {
-                stringify!($type)
-            }
+impl NappGUIEventResult for TableCellEvent {
+    type CType = EvTbCell;
+    const TYPE: &'static CStr = c"EvTbCell";
 
-            fn from_ptr(ptr: *mut std::ffi::c_void) -> Option<Self> {
-                if ptr.is_null() {
-                    return None;
-                }
-
-                Some(Self::from_ptr(ptr as _))
-            }
+    fn to(&self) -> Self::CType {
+        let text = CString::new(self.text.as_str()).unwrap();
+        let icon = self.icon.clone();
+        nappgui_sys::EvTbCell {
+            text: text.as_ptr(),
+            align: self.align as _,
+            icon: icon.as_ptr(),
         }
-    };
+    }
 }
 
-event_params!(EvButton);
-event_params!(EvSlider);
-event_params!(EvText);
-event_params!(EvDraw);
-event_params!(EvMouse);
-event_params!(EvWheel);
-event_params!(EvKey);
-event_params!(EvPos);
-event_params!(EvSize);
-event_params!(EvWinClose);
-event_params!(EvMenu);
-event_params!(EvScroll);
-event_params!(EvTbPos);
-event_params!(EvTbRow);
-event_params!(EvTbRect);
-event_params!(EvTbSel);
-event_params!(EvTbCell);
+/// Implement for core types.
+impl NappGUIEventParams for bool {
+    type CType = bool;
+    const TYPE: &'static CStr = c"bool_t";
 
-macro_rules! event_params_core {
-    ($type:ty, $type_name:literal) => {
-        impl crate::core::event::NappGUIEventParams for $type {
-            fn type_() -> &'static str {
-                $type_name
-            }
-
-            fn from_ptr(ptr: *mut std::ffi::c_void) -> Option<Self> {
-                if ptr.is_null() {
-                    return None;
-                }
-
-                Some(unsafe { *(ptr as *mut $type) })
-            }
-        }
-    };
-}
-
-event_params_core!(bool, "bool_t");
-
-fn take_str_4096(text: &str) -> [i8; 4096] {
-    let text = CString::new(text).unwrap();
-    let mut cross_text = [0i8; 4096];
-    let length = if text.as_bytes().len() < 4096 {
-        text.as_bytes().len()
-    } else {
-        4096
-    };
-    cross_text[..length].copy_from_slice(
-        text.as_bytes()
-            .iter()
-            .map(|&x| x as i8)
-            .collect::<Vec<i8>>()
-            .as_slice(),
-    );
-    cross_text
+    fn from(event: &Self::CType) -> bool {
+        *event
+    }
 }
 
 /// Result of the OnFilter event of the text boxes.
-pub struct EvTextFilter {
+pub struct TextFilterEvent {
     /// TRUE if the original control text should be changed.
     pub apply: bool,
     /// New control text, which is a revision (filter) of the original text. len <= 4096usize!
     pub text: String,
     /// Cursor position (caret).
-    pub cpos: u32,
+    pub current_position: u32,
 }
 
-impl crate::core::event::NappGUIEventResult for EvTextFilter {
-    type CrossType = nappgui_sys::EvTextFilter;
+impl NappGUIEventResult for TextFilterEvent {
+    type CType = EvTextFilter;
+    const TYPE: &'static CStr = c"EvTextFilter";
 
-    fn type_() -> &'static str {
-        "EvTextFilter"
-    }
+    fn to(&self) -> Self::CType {
+        use std::ffi::c_char;
+        fn c_char_array<const N: usize>(text: &str) -> [c_char; N] {
+            let mut result = [0 as c_char; N];
 
-    fn to_cross_type(&self) -> Self::CrossType {
-        nappgui_sys::EvTextFilter {
+            let length = text
+                .char_indices()
+                .map(|(idx, _)| idx)
+                .take_while(|&idx| idx <= N)
+                .last()
+                .unwrap_or(0);
+
+            let count = if text.len() <= N { text.len() } else { length };
+
+            unsafe {
+                std::ptr::copy_nonoverlapping(text.as_ptr() as *const c_char, result.as_mut_ptr(), count);
+            }
+
+            result
+        }
+
+        EvTextFilter {
             apply: self.apply as _,
-            text: take_str_4096(&self.text),
-            cpos: self.cpos as _,
+            text: c_char_array(&self.text),
+            cpos: self.current_position as _,
         }
     }
 }
 
-/// Keep the temp text.
-static TEMP_TEXT: LazyLock<Arc<Mutex<Option<CString>>>> =
-    LazyLock::new(|| Arc::new(Mutex::new(None)));
+/// Implement for core types.
+impl NappGUIEventResult for bool {
+    type CType = bool;
 
-impl crate::core::event::NappGUIEventResult for EvTbCell {
-    type CrossType = nappgui_sys::EvTbCell;
+    const TYPE: &'static CStr = c"bool_t";
 
-    fn to_cross_type(&self) -> Self::CrossType {
-        let mut text = TEMP_TEXT.lock().unwrap();
-        text.replace(CString::new(&*self.text).unwrap());
-        let text = text.as_ref().unwrap();
-        nappgui_sys::EvTbCell {
-            icon: std::ptr::null(), // TODO!
-            text: text.as_ptr(),
-            align: self.align as _,
-        }
+    fn to(&self) -> Self::CType {
+        *self
+    }
+}
+impl NappGUIEventResult for f32 {
+    type CType = f32;
+
+    const TYPE: &'static CStr = c"real32_t";
+
+    fn to(&self) -> Self::CType {
+        *self
     }
 }
 
-macro_rules! event_results {
-    ($type:ty, $cross_type:literal) => {
-        impl crate::core::event::NappGUIEventResult for $type {
-            type CrossType = $type;
+impl NappGUIEventResult for u32 {
+    type CType = u32;
 
-            fn type_() -> &'static str {
-                $cross_type
-            }
+    const TYPE: &'static CStr = c"uint32_t";
 
-            fn to_cross_type(&self) -> Self::CrossType {
-                *self
-            }
-        }
-    };
+    fn to(&self) -> Self::CType {
+        *self
+    }
 }
-
-event_results!(bool, "bool_t");
-event_results!(f32, "real32_t");
-event_results!(u32, "u32_t");
 
 /// The params of table on_data handler.
-pub enum EvTbDataParams {
+pub enum TableDataParams {
     /// Column index.
     TableNCols,
     /// Row index.
-    TableCell(EvTbPos),
+    TableCell(TablePositionEvent),
 }
 
 /// The result of table on_data handler.
-pub enum EvTbDataResult {
+pub enum TableDataResult {
     /// The text of the cell.
     TableNCols(u32),
     /// The align of the cell.
-    TableCell(EvTbCell),
-}
-
-impl From<u32> for EvTbDataResult {
-    fn from(value: u32) -> Self {
-        Self::TableNCols(value)
-    }
-}
-
-impl From<EvTbCell> for EvTbDataResult {
-    fn from(value: EvTbCell) -> Self {
-        Self::TableCell(value)
-    }
+    TableCell(TableCellEvent),
 }

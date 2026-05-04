@@ -7,7 +7,7 @@ use std::{
 
 use crate::{
     draw_2d::Image,
-    gui::{event::EvMenu, global_get, global_record, Menu},
+    gui::{event::MenuEvent, global_get, global_record, Menu},
     types::{GuiState, KeyCode, ModifierKey},
     util::macros::listener,
 };
@@ -20,7 +20,7 @@ use nappgui_sys::{
 
 pub(crate) struct MenuItemInner {
     ptr: NonNull<nappgui_sys::MenuItem>,
-    on_click: RefCell<Option<Rc<dyn Fn(&EvMenu) + 'static>>>,
+    on_click: RefCell<Option<Rc<dyn Fn(&MenuEvent) + 'static>>>,
     submenu: RefCell<Option<Menu>>,
 }
 
@@ -72,13 +72,13 @@ impl MenuItem {
     /// Set an event handle for item click.
     pub fn on_click<F>(&self, callback: F)
     where
-        F: Fn(&EvMenu) + 'static,
+        F: Fn(&MenuEvent) + 'static,
     {
         self.0
             .upgrade()
             .map(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(callback)));
 
-        let listener = listener!(self.as_ptr(), MenuItemInner, on_click(EvMenu));
+        let listener = listener!(self.as_ptr(), MenuItemInner, on_click(MenuEvent));
         unsafe { menuitem_OnClick(self.as_ptr(), listener) };
     }
 

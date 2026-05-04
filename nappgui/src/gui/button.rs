@@ -7,7 +7,7 @@ use std::{
 
 use crate::{
     draw_2d::{Font, Image},
-    gui::{event::EvButton, global_get, global_record},
+    gui::{event::ButtonEvent, global_get, global_record},
     types::GuiState,
     util::macros::listener,
 };
@@ -21,7 +21,7 @@ use nappgui_sys::{
 
 pub(crate) struct ButtonInner {
     ptr: NonNull<nappgui_sys::Button>,
-    on_click: RefCell<Option<Rc<dyn Fn(&EvButton) + 'static>>>,
+    on_click: RefCell<Option<Rc<dyn Fn(&ButtonEvent) + 'static>>>,
 }
 
 impl ButtonInner {
@@ -105,12 +105,12 @@ impl Button {
     /// Set a function for pressing the button.
     pub fn set_on_click_handler<F>(&self, callback: F)
     where
-        F: Fn(&EvButton) + 'static,
+        F: Fn(&ButtonEvent) + 'static,
     {
         self.0
             .upgrade()
             .map(|button| *button.on_click.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.as_ptr(), ButtonInner, on_click(EvButton));
+        let listener = listener!(self.as_ptr(), ButtonInner, on_click(ButtonEvent));
         unsafe { button_OnClick(self.as_ptr(), listener) };
     }
 

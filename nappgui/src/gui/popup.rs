@@ -6,7 +6,7 @@ use std::{
 
 use crate::{
     draw_2d::Image,
-    gui::{event::EvButton, global_get, global_record},
+    gui::{event::ButtonEvent, global_get, global_record},
     util::macros::listener,
 };
 
@@ -18,7 +18,7 @@ use nappgui_sys::{
 
 pub(crate) struct PopUpInner {
     ptr: NonNull<nappgui_sys::PopUp>,
-    on_select: RefCell<Option<Rc<dyn Fn(&EvButton) + 'static>>>,
+    on_select: RefCell<Option<Rc<dyn Fn(&ButtonEvent) + 'static>>>,
 }
 
 impl PopUpInner {
@@ -67,12 +67,12 @@ impl PopUp {
     /// Set an event handler for the selection of a new item.
     pub fn set_on_select_handler<F>(&self, callback: F)
     where
-        F: Fn(&EvButton) + 'static,
+        F: Fn(&ButtonEvent) + 'static,
     {
         self.0
             .upgrade()
             .map(|inner| *inner.on_select.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.as_ptr(), PopUpInner, on_select(EvButton));
+        let listener = listener!(self.as_ptr(), PopUpInner, on_select(ButtonEvent));
         unsafe { popup_OnSelect(self.as_ptr(), listener) }
     }
 

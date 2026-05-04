@@ -14,7 +14,7 @@ use std::ptr::NonNull;
 use std::rc::{Rc, Weak};
 
 use crate::draw_2d::{Color, Image};
-use crate::gui::event::{EvPos, EvSize, EvWinClose};
+use crate::gui::event::{PositionEvent, SizeEvent, WindowCloseEvent};
 use crate::gui::{global_exists, global_get, global_record, Button, Control, Menu, Panel};
 use crate::types::{
     Align, FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D, Size2D, WindowFlags,
@@ -32,9 +32,9 @@ pub(crate) struct WindowInner {
     menu_bar: RefCell<Option<Menu>>,
     default_button: RefCell<Option<Button>>,
     panel: RefCell<Option<Panel>>,
-    on_close: RefCell<Option<Rc<dyn Fn(&EvWinClose) -> bool + 'static>>>,
-    on_moved: RefCell<Option<Rc<dyn Fn(&EvPos) + 'static>>>,
-    on_resize: RefCell<Option<Rc<dyn Fn(&EvSize) + 'static>>>,
+    on_close: RefCell<Option<Rc<dyn Fn(&WindowCloseEvent) -> bool + 'static>>>,
+    on_moved: RefCell<Option<Rc<dyn Fn(&PositionEvent) + 'static>>>,
+    on_resize: RefCell<Option<Rc<dyn Fn(&SizeEvent) + 'static>>>,
     on_hotkey: RefCell<HashMap<(KeyCode, ModifierKey), Rc<dyn Fn() + 'static>>>,
     on_hotkey_context: RefCell<Vec<*mut HotkeyContext>>,
 }
@@ -103,36 +103,36 @@ impl Window {
     /// Set an event handler for the window closing.
     pub fn set_on_close_handler<F>(&self, handler: F)
     where
-        F: Fn(&EvWinClose) -> bool + 'static,
+        F: Fn(&WindowCloseEvent) -> bool + 'static,
     {
         self.0
             .upgrade()
             .map(|inner| *inner.on_close.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), WindowInner, on_close(EvWinClose));
+        let listener = listener!(self.as_ptr(), WindowInner, on_close(WindowCloseEvent));
         unsafe { window_OnClose(self.as_ptr(), listener) }
     }
 
     /// Set an event handler for moving the window on the desktop.
     pub fn set_on_moved_handler<F>(&self, handler: F)
     where
-        F: Fn(&EvPos) + 'static,
+        F: Fn(&PositionEvent) + 'static,
     {
         self.0
             .upgrade()
             .map(|inner| *inner.on_moved.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), WindowInner, on_moved(EvPos));
+        let listener = listener!(self.as_ptr(), WindowInner, on_moved(PositionEvent));
         unsafe { window_OnMoved(self.as_ptr(), listener) }
     }
 
     /// Set an event handler for window resizing.
     pub fn set_on_resize_handler<F>(&self, handler: F)
     where
-        F: Fn(&EvSize) + 'static,
+        F: Fn(&SizeEvent) + 'static,
     {
         self.0
             .upgrade()
             .map(|inner| *inner.on_resize.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), WindowInner, on_resize(EvSize));
+        let listener = listener!(self.as_ptr(), WindowInner, on_resize(SizeEvent));
         unsafe { window_OnResize(self.as_ptr(), listener) }
     }
 
@@ -140,7 +140,12 @@ impl Window {
     ///
     /// # Remarks
     /// The size of the window will be adjusted based on the Natural sizing of the main panel.
+    /// 
+    /// # Panics
+    /// This method will panic if the panel has no layout in it.
     pub fn set_panel(&self, panel: &Panel) {
+        assert!(panel.layout(0).is_some(), "Panel has no layout in it.");
+
         unsafe { window_panel(self.as_ptr(), panel.as_ptr()) };
         self.0
             .upgrade()

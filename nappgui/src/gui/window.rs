@@ -2,8 +2,9 @@ use nappgui_sys::{
     comwin_color, comwin_open_file, comwin_save_file, comwin_select_dir, listener_imp, osapp_menubar, window_OnClose,
     window_OnMoved, window_OnResize, window_clear_hotkeys, window_client_size, window_client_to_screen,
     window_control_frame, window_create, window_cursor, window_cycle_tabstop, window_defbutton, window_destroy,
-    window_focus, window_focus_info, window_get_client_size, window_get_focus, window_get_origin, window_get_size,
-    window_hide, window_hotkey, window_modal, window_next_tabstop, window_origin, window_overlay, window_panel,
+    window_focus, window_focus_info, window_get_client_size, window_get_focus, window_get_maximize,
+    window_get_minimize, window_get_origin, window_get_size, window_get_visible, window_hide, window_hotkey,
+    window_maximize, window_minimize, window_modal, window_next_tabstop, window_origin, window_overlay, window_panel,
     window_previous_tabstop, window_show, window_stop_modal, window_title, window_update, S2Df, V2Df,
 };
 use std::cell::RefCell;
@@ -220,6 +221,11 @@ impl Window {
         }
     }
 
+    /// Returns whether or not the window is visible.
+    pub fn is_visible(&self) -> bool {
+        unsafe { window_get_visible(self.as_ptr()) != 0 }
+    }
+
     /// Removes all keyboard shortcuts associated with the window.
     pub fn clear_hotkeys(&self) {
         unsafe { window_clear_hotkeys(self.as_ptr()) }
@@ -284,6 +290,32 @@ impl Window {
     /// Recalculate the position and size of the controls after modifying any Layout.
     pub fn update(&self) {
         unsafe { window_update(self.as_ptr()) }
+    }
+
+    /// Gets if the window is maximized.
+    pub fn is_maximized(&self) -> bool {
+        unsafe { window_get_maximize(self.as_ptr()) != 0 }
+    }
+
+    /// Maximizes the window.
+    ///
+    /// # Remarks
+    /// This function will NOT take effect if the window has been created without ekWINDOW_RESIZE flag.
+    pub fn maximize(&self) {
+        unsafe { window_maximize(self.as_ptr()) }
+    }
+
+    /// Gets if the window is minimized.
+    pub fn is_minimized(&self) -> bool {
+        unsafe { window_get_minimize(self.as_ptr()) != 0 }
+    }
+
+    /// Minimizes the window.
+    ///
+    /// # Remarks
+    /// This function will NOT take effect if the window has been created without ekWINDOW_RESIZE flag.
+    pub fn minimize(&self) {
+        unsafe { window_minimize(self.as_ptr()) }
     }
 
     /// Move the window to specific desktop coordinates.
@@ -433,8 +465,7 @@ impl Window {
         file_types: &[&str],
         start_dir: &str,
         filename: &str,
-    ) -> Option<String>
-    {
+    ) -> Option<String> {
         let types: Box<[CString]> = file_types.iter().map(|x| CString::new(*x).unwrap()).collect();
         let mut types: Box<[*const std::ffi::c_char]> = types.iter().map(|x| x.as_ptr()).collect();
         let caption = CString::new(caption).unwrap();

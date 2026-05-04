@@ -8,9 +8,9 @@ use std::{
 use nappgui_sys::{
     view_OnAcceptFocus, view_OnClick, view_OnDown, view_OnDrag, view_OnDraw, view_OnEnter, view_OnExit, view_OnFocus,
     view_OnKeyDown, view_OnKeyUp, view_OnMove, view_OnOverlay, view_OnResignFocus, view_OnScroll, view_OnSize,
-    view_OnUp, view_OnWheel, view_allow_tab, view_content_size, view_create, view_custom, view_get_size, view_keybuf,
-    view_native, view_point_scale, view_scroll, view_scroll_size, view_scroll_visible, view_scroll_x, view_scroll_y,
-    view_size, view_tooltip, view_update, view_viewport, S2Df, V2Df,
+    view_OnUp, view_OnWheel, view_allow_tab, view_content_size, view_create, view_custom, view_get_size, view_native,
+    view_point_scale, view_scroll, view_scroll_size, view_scroll_visible, view_scroll_x, view_scroll_y, view_size,
+    view_tooltip, view_update, view_viewport, S2Df, V2Df,
 };
 
 use crate::{

@@ -1,6 +1,6 @@
 use std::{
     cell::RefCell,
-    ffi::CStr,
+    ffi::{CStr, CString},
     ptr::NonNull,
     rc::{Rc, Weak},
 };
@@ -13,11 +13,12 @@ use crate::{
     },
     util::macros::listener,
 };
+
 use nappgui_sys::{
     listbox_OnDown, listbox_OnSelect, listbox_add_elem, listbox_check, listbox_checkbox, listbox_checked,
     listbox_clear, listbox_color, listbox_count, listbox_create, listbox_del_elem, listbox_font, listbox_get_image,
-    listbox_get_selected, listbox_get_text, listbox_multisel, listbox_select, listbox_selected, listbox_set_elem,
-    listbox_size, S2Df,
+    listbox_get_row_height, listbox_get_selected, listbox_get_text, listbox_multisel, listbox_select, listbox_selected,
+    listbox_set_elem, listbox_size, S2Df,
 };
 
 pub(crate) struct ListBoxInner {
@@ -83,7 +84,7 @@ impl ListBox {
             .upgrade()
             .map(|inner| *inner.on_down.borrow_mut() = Some(Rc::new(callback)));
         let listener = listener!(self.as_ptr(), ListBoxInner, on_down(EvMouse) -> bool);
-        unsafe { listbox_OnDown(self.as_ptr(), listener) };
+        unsafe { listbox_OnDown(self.as_ptr(), listener) }
     }
 
     /// Set an event handler for the selection of a new item.
@@ -95,7 +96,7 @@ impl ListBox {
             .upgrade()
             .map(|inner| *inner.on_select.borrow_mut() = Some(Rc::new(callback)));
         let listener = listener!(self.as_ptr(), ListBoxInner, on_select(EvButton));
-        unsafe { listbox_OnSelect(self.as_ptr(), listener) };
+        unsafe { listbox_OnSelect(self.as_ptr(), listener) }
     }
 
     /// Set the default size of the list.
@@ -104,62 +105,36 @@ impl ListBox {
     /// It corresponds to Natural sizing of control Default 128x128.
     pub fn size(&self, width: f32, height: f32) {
         let size = S2Df { width, height };
-        unsafe {
-            listbox_size(self.as_ptr(), size);
-        }
+        unsafe { listbox_size(self.as_ptr(), size) }
     }
 
     /// Show or hide checkboxes to the left of items.
     pub fn set_checkbox(&self, show: bool) {
-        unsafe {
-            listbox_checkbox(self.as_ptr(), show as _);
-        }
+        unsafe { listbox_checkbox(self.as_ptr(), show as _) }
     }
 
     /// Enable multiple selection.
     pub fn set_multiselect(&self, enable: bool) {
-        unsafe {
-            listbox_multisel(self.as_ptr(), enable as _);
-        }
+        unsafe { listbox_multisel(self.as_ptr(), enable as _) }
     }
 
     /// Adds a new element.
-    pub fn add_element(&self, text: &str) {
-        let text = std::ffi::CString::new(text).unwrap();
-        unsafe {
-            listbox_add_elem(self.as_ptr(), text.as_ptr(), std::ptr::null());
-        }
-    }
-
-    /// Adds a new element with image.
-    pub fn add_image_element(&self, text: &str, image: &Image) {
-        let text = std::ffi::CString::new(text).unwrap();
-        unsafe {
-            listbox_add_elem(self.as_ptr(), text.as_ptr(), image.as_ptr());
-        }
+    pub fn add_element(&self, text: &str, image: Option<&Image>) {
+        let text = CString::new(text).unwrap();
+        let image = image.map(|x| x.as_ptr()).unwrap_or(std::ptr::null_mut());
+        unsafe { listbox_add_elem(self.as_ptr(), text.as_ptr(), image) }
     }
 
     /// Edit a list item.
-    pub fn set_element(&self, index: u32, text: &str) {
-        let text = std::ffi::CString::new(text).unwrap();
-        unsafe {
-            listbox_set_elem(self.as_ptr(), index, text.as_ptr(), std::ptr::null());
-        }
-    }
-
-    /// Edit a list item with image.
-    pub fn set_image_element(&self, index: u32, text: &str, image: &Image) {
-        let text = std::ffi::CString::new(text).unwrap();
-        unsafe {
-            listbox_set_elem(self.as_ptr(), index, text.as_ptr(), image.as_ptr());
-        }
+    pub fn set_element(&self, index: u32, text: &str, image: Option<&Image>) {
+        let text = CString::new(text).unwrap();
+        let image = image.map(|x| x.as_ptr()).unwrap_or(std::ptr::null_mut());
+        unsafe { listbox_set_elem(self.as_ptr(), index, text.as_ptr(), image) }
     }
 
     /// Delete an item from the list.
     pub fn delete_element(&self, index: u32) {
-        unsafe {
-            listbox_del_elem(self.as_ptr(), index);
-        }
+        unsafe { listbox_del_elem(self.as_ptr(), index) }
     }
 
     /// Sets the font of the list.
@@ -169,16 +144,12 @@ impl ListBox {
 
     /// Remove all items from the list.
     pub fn clear(&self) {
-        unsafe {
-            listbox_clear(self.as_ptr());
-        }
+        unsafe { listbox_clear(self.as_ptr()) }
     }
 
     /// Sets the text color of an element.
     pub fn set_color(&self, index: u32, color: Color) {
-        unsafe {
-            listbox_color(self.as_ptr(), index, color.inner);
-        }
+        unsafe { listbox_color(self.as_ptr(), index, color.inner) }
     }
 
     /// Select an item from the program code.
@@ -186,9 +157,7 @@ impl ListBox {
     /// # Remarks
     /// If multiple selection is not enabled, selecting one item implies de-selecting all the others.
     pub fn select(&self, index: u32, select: bool) {
-        unsafe {
-            listbox_select(self.as_ptr(), index, select as _);
-        }
+        unsafe { listbox_select(self.as_ptr(), index, select as _) }
     }
 
     /// Check or uncheck the checkbox of the element from the program code.
@@ -197,9 +166,7 @@ impl ListBox {
     /// Checking an item is independent of selecting it. Items can be marked even if checkboxes are not
     /// visible. See listbox_checkbox.
     pub fn check(&self, index: u32, check: bool) {
-        unsafe {
-            listbox_check(self.as_ptr(), index, check as _);
-        }
+        unsafe { listbox_check(self.as_ptr(), index, check as _) }
     }
 
     /// Returns the number of elements in the list.
@@ -251,5 +218,10 @@ impl ListBox {
         } else {
             Some(index as _)
         }
+    }
+
+    /// Get the height in pixels of each line.
+    pub fn raw_height(&self) -> f32 {
+        unsafe { listbox_get_row_height(self.as_ptr()) }
     }
 }

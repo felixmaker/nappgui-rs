@@ -1,16 +1,19 @@
 use std::{
-    cell::RefCell, ptr::NonNull, rc::{Rc, Weak}
+    cell::RefCell,
+    ptr::NonNull,
+    rc::{Rc, Weak},
 };
 
 use crate::{
     draw_2d::Image,
     gui::{event::EvButton, global_get, global_record},
-    util::macros::{ listener},
+    util::macros::listener,
 };
 
 use nappgui_sys::{
-    popup_OnSelect, popup_add_elem, popup_clear, popup_count, popup_create, popup_get_image, popup_get_selected,
-    popup_get_text, popup_list_height, popup_selected, popup_set_elem, popup_tooltip,
+    popup_OnSelect, popup_add_elem, popup_clear, popup_count, popup_create, popup_del_elem, popup_get_image,
+    popup_get_selected, popup_get_text, popup_ins_elem, popup_list_height, popup_selected, popup_set_elem,
+    popup_tooltip,
 };
 
 pub(crate) struct PopUpInner {
@@ -36,6 +39,7 @@ impl PopUpInner {
 /// # Remarks
 /// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
+#[derive(Clone)]
 pub struct PopUp(Weak<PopUpInner>);
 
 impl PopUp {
@@ -60,62 +64,53 @@ impl PopUp {
         unsafe { Self::from_raw(popup) }
     }
 
-        /// Set an event handler for the selection of a new item.
-        pub fn set_on_select_handler<F>(&self, callback: F)
-        where
-            F: Fn(&EvButton) + 'static,
-        {
-            self.0.upgrade().map(|inner| *inner.on_select.borrow_mut() = Some(Rc::new(callback)));
-            let listener = listener!(self.as_ptr(), PopUpInner, on_select(EvButton));
-            unsafe { popup_OnSelect(self.as_ptr(), listener) };
-        }
-
+    /// Set an event handler for the selection of a new item.
+    pub fn set_on_select_handler<F>(&self, callback: F)
+    where
+        F: Fn(&EvButton) + 'static,
+    {
+        self.0
+            .upgrade()
+            .map(|inner| *inner.on_select.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), PopUpInner, on_select(EvButton));
+        unsafe { popup_OnSelect(self.as_ptr(), listener) }
+    }
 
     /// Assign a tooltip to the popup control.
     pub fn set_tooltip(&self, text: &str) {
         let text = std::ffi::CString::new(text).unwrap();
-        unsafe {
-            popup_tooltip(self.as_ptr(), text.as_ptr());
-        }
+        unsafe { popup_tooltip(self.as_ptr(), text.as_ptr()) }
     }
 
     /// Add a new item to the popup list.
-    pub fn add_element(&self, text: &str) {
+    pub fn add_element(&self, text: &str, image: Option<&Image>) {
         let text = std::ffi::CString::new(text).unwrap();
-        unsafe {
-            popup_add_elem(self.as_ptr(), text.as_ptr(), std::ptr::null());
-        }
-    }
-
-    /// Add a new item with image to the popup list.
-    pub fn add_image_element(&self, text: &str, image: &Image) {
-        let text = std::ffi::CString::new(text).unwrap();
-        unsafe {
-            popup_add_elem(self.as_ptr(), text.as_ptr(), image.as_ptr());
-        }
+        let image = image.map(|image| image.as_ptr()).unwrap_or(std::ptr::null_mut());
+        unsafe { popup_add_elem(self.as_ptr(), text.as_ptr(), image) }
     }
 
     /// Edit an item from the drop-down list.
-    pub fn set_element(&self, index: u32, text: &str) {
+    pub fn set_element(&self, index: u32, text: &str, image: Option<&Image>) {
         let text = std::ffi::CString::new(text).unwrap();
-        unsafe {
-            popup_set_elem(self.as_ptr(), index, text.as_ptr(), std::ptr::null());
-        }
+        let image = image.map(|image| image.as_ptr()).unwrap_or(std::ptr::null_mut());
+        unsafe { popup_set_elem(self.as_ptr(), index, text.as_ptr(), image) }
     }
 
-    /// Edit an item with image from the drop-down list.
-    pub fn set_image_element(&self, index: u32, text: &str, image: &Image) {
+    /// Inserts an item in the drop-down list.
+    pub fn insert_element(&self, index: u32, text: &str, image: Option<&Image>) {
         let text = std::ffi::CString::new(text).unwrap();
-        unsafe {
-            popup_set_elem(self.as_ptr(), index, text.as_ptr(), image.as_ptr());
-        }
+        let image = image.map(|image| image.as_ptr()).unwrap_or(std::ptr::null_mut());
+        unsafe { popup_ins_elem(self.as_ptr(), index, text.as_ptr(), image) }
+    }
+
+    /// Remove an item from the drop-down list.
+    pub fn remove_element(&self, index: u32) {
+        unsafe { popup_del_elem(self.as_ptr(), index) }
     }
 
     /// Remove all items from the dropdown list.
     pub fn clear(&self) {
-        unsafe {
-            popup_clear(self.as_ptr());
-        }
+        unsafe { popup_clear(self.as_ptr()) }
     }
 
     /// Gets the number of items in the list.
@@ -125,16 +120,12 @@ impl PopUp {
 
     /// Set the size of the drop-down list.
     pub fn set_list_height(&self, elems: u32) {
-        unsafe {
-            popup_list_height(self.as_ptr(), elems);
-        }
+        unsafe { popup_list_height(self.as_ptr(), elems) }
     }
 
     /// Set the selected popup element.
     pub fn set_selected(&self, index: u32) {
-        unsafe {
-            popup_selected(self.as_ptr(), index);
-        }
+        unsafe { popup_selected(self.as_ptr(), index) }
     }
 
     /// Get the selected popup item.

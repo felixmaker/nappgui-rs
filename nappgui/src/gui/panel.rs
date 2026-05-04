@@ -1,17 +1,19 @@
 use std::{
-    cell::RefCell,
+    cell::{Cell, RefCell},
     ptr::NonNull,
     rc::{Rc, Weak},
 };
 
 use nappgui_sys::{
-    panel_create, panel_custom, panel_layout, panel_scroll, panel_size, panel_update, panel_visible_layout,
+    panel_create, panel_custom, panel_layout, panel_scroll, panel_scroll_size, panel_size, panel_update,
+    panel_viewport, panel_visible_layout,
 };
 
 use crate::gui::{global_get, global_record, Layout};
 
 pub(crate) struct PanelInner {
     ptr: NonNull<nappgui_sys::Panel>,
+    scroll: Cell<bool>,
     layouts: RefCell<Vec<Layout>>,
 }
 
@@ -19,6 +21,7 @@ impl PanelInner {
     pub(crate) fn from_raw(ptr: *mut nappgui_sys::Panel) -> Self {
         Self {
             ptr: NonNull::new(ptr).expect("Null pointer passed to PanelInner::from_raw"),
+            scroll: Cell::new(false),
             layouts: RefCell::new(Vec::new()),
         }
     }
@@ -58,12 +61,16 @@ impl Panel {
 
     /// Create a panel with scroll bars.
     pub fn new_scroll(hscroll: bool, vscroll: bool) -> Self {
-        unsafe { Self::from_raw(panel_scroll(hscroll as _, vscroll as _)) }
+        let panel = unsafe { Self::from_raw(panel_scroll(hscroll as _, vscroll as _)) };
+        panel.0.upgrade().map(|inner| inner.scroll.set(hscroll || vscroll));
+        panel
     }
 
     /// Create a fully configurable panel.
     pub fn new_custom(hscroll: bool, vscroll: bool, border: bool) -> Self {
-        unsafe { Self::from_raw(panel_custom(hscroll as _, vscroll as _, border as _)) }
+        let panel = unsafe { Self::from_raw(panel_custom(hscroll as _, vscroll as _, border as _)) };
+        panel.0.upgrade().map(|inner| inner.scroll.set(hscroll || vscroll));
+        panel
     }
 
     /// Sets the default size of the visible area of a panel.
@@ -102,5 +109,35 @@ impl Panel {
     /// It is equivalent to calling window_update.
     pub fn update(&self) {
         unsafe { panel_update(self.as_ptr()) }
+    }
+
+    /// Gets the measurements of the scroll bars.
+    ///
+    /// # Remarks
+    /// If the panel does not have scroll bars, it will return None.
+    pub fn scroll_size(&self) -> Option<(f32, f32)> {
+        let panel = self.0.upgrade()?;
+        if !panel.scroll.get() {
+            return None;
+        }
+        let mut width = 0f32;
+        let mut height = 0f32;
+        unsafe { panel_scroll_size(panel.as_ptr(), &mut width, &mut height) }
+        Some((width, height))
+    }
+
+    /// Gets the dimensions of the visible area of the panel.
+    ///
+    /// # Remarks
+    /// It returns the position and size of the visible area of the panel.
+    /// If the panel does not have scroll bars, it will return ((0.0, 0.0), (0.0, 0.0)).
+    pub fn viewport(&self) -> ((f32, f32), (f32, f32)) {
+        let mut position = nappgui_sys::V2Df { x: 0.0, y: 0.0 };
+        let mut size = nappgui_sys::S2Df {
+            width: 0.0,
+            height: 0.0,
+        };
+        unsafe { panel_viewport(self.as_ptr(), &mut position, &mut size) };
+        ((position.x, position.y), (size.width, size.height))
     }
 }

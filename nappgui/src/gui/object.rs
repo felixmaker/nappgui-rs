@@ -52,32 +52,32 @@ where
     object
 }
 
-/// Move the ownership of the object from one pointer to another.
-///
-/// # Remarks
-/// The object that is moved to the `to` pointer will be created if it does not exist.
-pub(crate) fn global_move_ownership(from: *mut (), to: *mut ()) {
-    GLOBAL_OBJECTS.with_borrow_mut(|objects| -> Option<()> {
-        let from_objects: Vec<Rc<dyn Any + 'static>> = {
-            let mut result = Vec::new();
-            let from_object = objects.get_mut(&from)?;
-            if let Some(obj) = from_object.object.take() {
-                result.push(obj);
-            } else if let Some(obj) = from_object.weak_object.as_ref() {
-                if let Some(obj) = obj.upgrade() {
-                    result.push(obj);
-                }
-            }
-            while let Some(obj) = from_object.object_owns.pop() {
-                result.push(obj);
-            }
-            result
-        };
-        if !objects.contains_key(&to) {
-            objects.insert(to, GlobalObject::default());
-        }
-        let to_object = objects.get_mut(&to)?;
-        to_object.object_owns.extend(from_objects);
-        Some(())
-    });
-}
+// /// Move the ownership of the object from one pointer to another.
+// ///
+// /// # Remarks
+// /// The object that is moved to the `to` pointer will be created if it does not exist.
+// pub(crate) fn global_move_ownership(from: *mut (), to: *mut ()) {
+//     GLOBAL_OBJECTS.with_borrow_mut(|objects| -> Option<()> {
+//         let from_objects: Vec<Rc<dyn Any + 'static>> = {
+//             let mut result = Vec::new();
+//             let from_object = objects.get_mut(&from)?;
+//             if let Some(obj) = from_object.object.take() {
+//                 result.push(obj);
+//             } else if let Some(obj) = from_object.weak_object.as_ref() {
+//                 if let Some(obj) = obj.upgrade() {
+//                     result.push(obj);
+//                 }
+//             }
+//             while let Some(obj) = from_object.object_owns.pop() {
+//                 result.push(obj);
+//             }
+//             result
+//         };
+//         if !objects.contains_key(&to) {
+//             objects.insert(to, GlobalObject::default());
+//         }
+//         let to_object = objects.get_mut(&to)?;
+//         to_object.object_owns.extend(from_objects);
+//         Some(())
+//     });
+// }

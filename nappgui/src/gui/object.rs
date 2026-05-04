@@ -10,9 +10,9 @@ pub(crate) struct GlobalObject {
     /// Always points to the object itself if its wrapped with reference count.
     weak_object: Option<Weak<dyn Any + 'static>>,
     /// The object itself.
-    object: Option<Rc<dyn Any + 'static>>,
+    _object: Option<Rc<dyn Any + 'static>>,
     /// Objects that this object owns.
-    object_owns: Vec<Rc<dyn Any + 'static>>,
+    _object_owns: Vec<Rc<dyn Any + 'static>>,
 }
 
 thread_local! {
@@ -44,7 +44,7 @@ where
     let object = Rc::new(object);
     let weak_object = Rc::downgrade(&object);
     let global_object = GlobalObject {
-        object: Some(object.clone()),
+        _object: Some(object.clone()),
         weak_object: Some(weak_object.clone()),
         ..Default::default()
     };

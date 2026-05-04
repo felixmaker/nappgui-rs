@@ -141,12 +141,27 @@ impl Window {
     /// # Remarks
     /// The size of the window will be adjusted based on the Natural sizing of the main panel.
     /// In order to aviod memory leak, the panel can only be set once.
-    /// 
+    ///
     /// # Panics
     /// This method will panic if the panel has no layout in it.
     pub fn set_panel(&self, panel: &Panel) {
         assert!(panel.layout(0).is_some(), "Panel has no layout in it.");
-        debug_assert!(self.0.upgrade().is_some(), "Panel has already been set.");
+
+        // Check if the same panel has already been set.
+        if Some(panel.as_ptr())
+            == self
+                .0
+                .upgrade()
+                .and_then(|x| x.panel.borrow().as_ref().map(|x| x.as_ptr()))
+        {
+            return;
+        }
+
+        debug_assert_eq!(
+            self.0.upgrade().map(|x| x.panel.borrow().is_none()),
+            Some(true),
+            "Panel has already been set."
+        );
 
         unsafe { window_panel(self.as_ptr(), panel.as_ptr()) };
         self.0

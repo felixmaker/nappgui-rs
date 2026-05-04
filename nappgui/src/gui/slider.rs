@@ -5,7 +5,8 @@ use std::{
 };
 
 use nappgui_sys::{
-    slider_OnMoved, slider_create, slider_get_value, slider_steps, slider_tooltip, slider_value, slider_vertical,
+    slider_OnMoved, slider_create, slider_get_value, slider_length, slider_steps, slider_tooltip, slider_value,
+    slider_vertical,
 };
 
 use crate::{
@@ -61,6 +62,11 @@ impl Slider {
     /// Create a new vertical slider.
     pub fn new_vertical() -> Self {
         unsafe { Slider::from_raw(slider_vertical()) }
+    }
+
+    /// Set the natural length of control. By default 100px.
+    pub fn set_length(&self, length: f32) {
+        unsafe { slider_length(self.as_ptr(), length) }
     }
 
     /// Set an event handler for slider movement.

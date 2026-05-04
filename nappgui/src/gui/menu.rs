@@ -1,20 +1,21 @@
 use std::{
-    cell::Cell,
+    cell::{Cell, RefCell},
     rc::{Rc, Weak},
 };
 
 use nappgui_sys::{
-    menu_add_item, menu_count, menu_create, menu_del_item, menu_destroy, menu_get_item, menu_ins_item, menu_is_menubar,
-    menu_launch, menu_off_items, V2Df,
+    menu_add_item, menu_count, menu_create, menu_del_item, menu_destroy, menu_ins_item, menu_is_menubar, menu_launch,
+    menu_off_items, V2Df,
 };
 
-use crate::gui::{global_exists, global_get, global_move_ownership, global_record, Window};
+use crate::gui::{global_exists, global_get, global_record, Window};
 
 use super::MenuItem;
 
 pub(crate) struct MenuInner {
     ptr: *mut nappgui_sys::Menu,
     c_managed: Cell<bool>,
+    items: RefCell<Vec<MenuItem>>,
 }
 
 impl MenuInner {
@@ -24,6 +25,7 @@ impl MenuInner {
         Self {
             ptr,
             c_managed: Cell::new(false),
+            items: RefCell::new(Vec::new()),
         }
     }
 
@@ -77,13 +79,15 @@ impl Menu {
     /// Add an item at the end of the menu.
     pub fn add_item(&self, item: MenuItem) {
         unsafe { menu_add_item(self.as_ptr(), item.as_ptr()) };
-        global_move_ownership(item.as_ptr() as _, self.as_ptr() as _);
+        self.0.upgrade().map(|inner| inner.items.borrow_mut().push(item));
     }
 
     /// Insert an item in an arbitrary position of the menu.
     pub fn insert_item(&self, index: u32, item: MenuItem) {
         unsafe { menu_ins_item(self.as_ptr(), index, item.as_ptr()) };
-        global_move_ownership(item.as_ptr() as _, self.as_ptr() as _);
+        self.0
+            .upgrade()
+            .map(|inner| inner.items.borrow_mut().insert(index as _, item));
     }
 
     /// Remove an item from the menu.
@@ -93,6 +97,9 @@ impl Menu {
     /// it will also be destroyed recursively.
     pub fn delete_item(&self, index: u32) {
         unsafe { menu_del_item(self.as_ptr(), index) };
+        self.0
+            .upgrade()
+            .map(|inner| inner.items.borrow_mut().remove(index as _));
     }
 
     /// Launch a menu as secondary or PopUp.
@@ -113,12 +120,9 @@ impl Menu {
 
     /// Get an item from the menu.
     pub fn get_item(&self, index: u32) -> Option<MenuItem> {
-        let item = unsafe { menu_get_item(self.as_ptr(), index) };
-        if item.is_null() {
-            None
-        } else {
-            Some(unsafe { MenuItem::from_raw(item) })
-        }
+        self.0
+            .upgrade()
+            .and_then(|inner| inner.items.borrow().get(index as usize).cloned())
     }
 
     /// Returns TRUE if the menu is currently established as a menu bar.

@@ -7,21 +7,21 @@ use std::{
 
 use crate::{
     draw_2d::Image,
-    gui::{event::EvMenu, global_get, global_move_ownership, global_record, Menu},
+    gui::{event::EvMenu, global_get, global_record, Menu},
     types::{GuiState, KeyCode, ModifierKey},
     util::macros::listener,
 };
 
 use nappgui_sys::{
     menuitem_OnClick, menuitem_create, menuitem_enabled, menuitem_get_enabled, menuitem_get_image,
-    menuitem_get_separator, menuitem_get_state, menuitem_get_submenu, menuitem_get_text, menuitem_get_visible,
-    menuitem_image, menuitem_key, menuitem_separator, menuitem_state, menuitem_submenu, menuitem_text,
-    menuitem_visible,
+    menuitem_get_separator, menuitem_get_state, menuitem_get_text, menuitem_get_visible, menuitem_image, menuitem_key,
+    menuitem_separator, menuitem_state, menuitem_submenu, menuitem_text, menuitem_visible,
 };
 
 pub(crate) struct MenuItemInner {
     ptr: NonNull<nappgui_sys::MenuItem>,
     on_click: RefCell<Option<Rc<dyn Fn(&EvMenu) + 'static>>>,
+    submenu: RefCell<Option<Menu>>,
 }
 
 impl MenuItemInner {
@@ -29,6 +29,7 @@ impl MenuItemInner {
         Self {
             ptr: NonNull::new(ptr).expect("Null pointer passed to MenuItemInner::from_raw"),
             on_click: RefCell::new(None),
+            submenu: RefCell::new(None),
         }
     }
 
@@ -110,8 +111,8 @@ impl MenuItem {
     /// Assign a drop-down submenu when selecting the item.
     pub fn set_submenu(&self, menu: Menu) {
         unsafe { menuitem_submenu(self.as_ptr(), &mut menu.as_ptr()) };
-        menu.set_c_managed(true);
-        global_move_ownership(menu.as_ptr() as _, self.as_ptr() as _);
+        menu.set_c_managed(true); // Avoid double leak from C
+        self.0.upgrade().map(|inner| *inner.submenu.borrow_mut() = Some(menu));
     }
 
     /// Set the status of the item, which will be reflected with a mark next to the text.
@@ -158,11 +159,6 @@ impl MenuItem {
 
     /// Gets the submenu associated with item.
     pub fn submenu(&self) -> Option<Menu> {
-        let submenu = unsafe { menuitem_get_submenu(self.as_ptr()) };
-        if submenu.is_null() {
-            None
-        } else {
-            Some(unsafe { Menu::from_raw(submenu) })
-        }
+        self.0.upgrade().and_then(|inner| inner.submenu.borrow().clone())
     }
 }

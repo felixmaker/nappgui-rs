@@ -77,7 +77,7 @@ impl Layout {
         assert!(row < self.nrows());
 
         control.insert_in_layout(self, col, row);
-        global_move_ownership(control.as_control_ptr() as _, self.as_ptr() as _);
+        // global_move_ownership(control.as_control_ptr() as _, self.as_ptr() as _);
     }
 
     /// Replaces one Panel in a layout with another.

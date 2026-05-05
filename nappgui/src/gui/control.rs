@@ -52,21 +52,10 @@ pub trait Control {
 }
 
 /// Macro to implement the `Control` trait for widget types.
-///
-/// # Usage
-/// ```rust
-/// impl_control!(Button, Button, guicontrol_button, ControlType::Button);
-/// ```
-///
-/// Parameters:
-/// - First: Rust widget struct name
-/// - Second: C control type from nappgui_sys
-/// - Third: guicontrol conversion function (e.g., guicontrol_button)
-/// - Fourth: ControlType enum variant
 macro_rules! impl_control {
-    ($rust_type:ident, $c_type:ident, $guicontrol_func:ident, $control_type:expr) => {
+    ($rust_type:ident, $guicontrol_func:ident) => {
         impl Control for $rust_type {
-            type CControlType = nappgui_sys::$c_type;
+            type CControlType = nappgui_sys::$rust_type;
 
             fn as_ptr(&self) -> *mut Self::CControlType {
                 self.as_ptr()
@@ -85,7 +74,7 @@ macro_rules! impl_control {
             }
 
             fn control_type(&self) -> ControlType {
-                $control_type
+                ControlType::$rust_type
             }
         }
     };
@@ -98,20 +87,20 @@ use crate::gui::{
 };
 
 // Implement Control for all widgets using the macro
-impl_control!(Button, Button, guicontrol_button, ControlType::Button);
-impl_control!(Combo, Combo, guicontrol_combo, ControlType::Combo);
-impl_control!(Edit, Edit, guicontrol_edit, ControlType::Edit);
-impl_control!(ImageView, ImageView, guicontrol_imageview, ControlType::ImageView);
-impl_control!(Label, Label, guicontrol_label, ControlType::Label);
-impl_control!(Panel, Panel, guicontrol_panel, ControlType::Panel);
-impl_control!(ListBox, ListBox, guicontrol_listbox, ControlType::ListBox);
-impl_control!(PopUp, PopUp, guicontrol_popup, ControlType::PopUp);
-impl_control!(Progress, Progress, guicontrol_progress, ControlType::Progress);
-impl_control!(Slider, Slider, guicontrol_slider, ControlType::Slider);
-impl_control!(SplitView, SplitView, guicontrol_splitview, ControlType::SplitView);
-impl_control!(TableView, TableView, guicontrol_tableview, ControlType::TableView);
-impl_control!(TextView, TextView, guicontrol_textview, ControlType::TextView);
-impl_control!(UpDown, UpDown, guicontrol_updown, ControlType::UpDown);
-impl_control!(View, View, guicontrol_view, ControlType::View);
-impl_control!(WebView, WebView, guicontrol_webview, ControlType::WebView);
-impl_control!(Line, Line, guicontrol_line, ControlType::Line);
+impl_control!(Button, guicontrol_button);
+impl_control!(Combo, guicontrol_combo);
+impl_control!(Edit, guicontrol_edit);
+impl_control!(ImageView, guicontrol_imageview);
+impl_control!(Label, guicontrol_label);
+impl_control!(Panel, guicontrol_panel);
+impl_control!(ListBox, guicontrol_listbox);
+impl_control!(PopUp, guicontrol_popup);
+impl_control!(Progress, guicontrol_progress);
+impl_control!(Slider, guicontrol_slider);
+impl_control!(SplitView, guicontrol_splitview);
+impl_control!(TableView, guicontrol_tableview);
+impl_control!(TextView, guicontrol_textview);
+impl_control!(UpDown, guicontrol_updown);
+impl_control!(View, guicontrol_view);
+impl_control!(WebView, guicontrol_webview);
+impl_control!(Line, guicontrol_line);

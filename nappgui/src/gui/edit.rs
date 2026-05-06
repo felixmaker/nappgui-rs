@@ -1,8 +1,4 @@
-use std::{
-    cell::RefCell,
-    ptr::NonNull,
-    rc::{Rc, Weak},
-};
+use std::{cell::RefCell, rc::Rc};
 
 use nappgui_sys::{
     edit_OnChange, edit_OnFilter, edit_OnFocus, edit_align, edit_autoselect, edit_bgcolor, edit_bgcolor_focus,
@@ -15,53 +11,18 @@ use crate::{
     draw_2d::{font::Font, Color},
     gui::{
         event::{TextEvent, TextFilterEvent},
-        global_get, global_record,
+        impl_control, GUID,
     },
     types::{Align, FontStyle},
     util::macros::listener,
 };
 
+#[derive(Default)]
 pub(crate) struct EditInner {
-    ptr: NonNull<nappgui_sys::Edit>,
+    ptr: RefCell<*mut nappgui_sys::Edit>,
     on_filter: RefCell<Option<Rc<dyn Fn(&TextEvent) -> TextFilterEvent + 'static>>>,
     on_change: RefCell<Option<Rc<dyn Fn(&TextEvent) -> bool + 'static>>>,
     on_focus: RefCell<Option<Rc<dyn Fn(&bool) + 'static>>>,
-}
-
-impl EditInner {
-    pub(crate) fn from_raw(ptr: *mut nappgui_sys::Edit) -> Self {
-        Self {
-            ptr: NonNull::new(ptr).expect("Null pointer passed to EditInner::from_raw"),
-            on_filter: RefCell::new(None),
-            on_change: RefCell::new(None),
-            on_focus: RefCell::new(None),
-        }
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Edit {
-        self.ptr.as_ptr()
-    }
-
-    pub(crate) fn set_on_filter_handler<F>(&self, callback: F)
-    where
-        F: Fn(&TextEvent) -> TextFilterEvent + 'static,
-    {
-        *self.on_filter.borrow_mut() = Some(Rc::new(callback));
-    }
-
-    pub(crate) fn set_on_change_handler<F>(&self, callback: F)
-    where
-        F: Fn(&TextEvent) -> bool + 'static,
-    {
-        *self.on_change.borrow_mut() = Some(Rc::new(callback));
-    }
-
-    pub(crate) fn set_on_focus_handler<F>(&self, callback: F)
-    where
-        F: Fn(&bool) + 'static,
-    {
-        *self.on_focus.borrow_mut() = Some(Rc::new(callback));
-    }
 }
 
 /// The edit control.
@@ -69,23 +30,12 @@ impl EditInner {
 /// # Remarks
 /// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
-pub struct Edit(Weak<EditInner>);
+#[derive(Clone)]
+pub struct Edit(GUID);
+
+impl_control!(Edit, EditInner);
 
 impl Edit {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Edit) -> Self {
-        let object = global_record(ptr as _, EditInner::from_raw(ptr));
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::Edit) -> Self {
-        let object = global_get(ptr as _).unwrap();
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Edit {
-        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
-    }
-
     /// Create a text edit control.
     pub fn new() -> Self {
         let edit = unsafe { edit_create() };
@@ -103,8 +53,8 @@ impl Edit {
     where
         F: Fn(&TextEvent) -> TextFilterEvent + 'static,
     {
-        self.0.upgrade().unwrap().set_on_filter_handler(callback);
-        let listener = listener!(self.as_ptr(), EditInner, on_filter(TextEvent) -> TextFilterEvent);
+        self.inner(|object| *object.on_filter.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.0, Edit, on_filter(TextEvent) -> TextFilterEvent);
         unsafe { edit_OnFilter(self.as_ptr(), listener) };
     }
 
@@ -113,8 +63,8 @@ impl Edit {
     where
         F: Fn(&TextEvent) -> bool + 'static,
     {
-        self.0.upgrade().unwrap().set_on_change_handler(callback);
-        let listener = listener!(self.as_ptr(), EditInner, on_change(TextEvent) -> bool);
+        self.inner(|object| *object.on_change.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.0, Edit, on_change(TextEvent) -> bool);
         unsafe { edit_OnChange(self.as_ptr(), listener) };
     }
 
@@ -123,8 +73,8 @@ impl Edit {
     where
         F: Fn(&bool) + 'static,
     {
-        self.0.upgrade().unwrap().set_on_focus_handler(callback);
-        let listener = listener!(self.as_ptr(), EditInner, on_focus(bool));
+        self.inner(|object| *object.on_focus.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.0, Edit, on_focus(bool));
         unsafe { edit_OnFocus(self.as_ptr(), listener) };
     }
 

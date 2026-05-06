@@ -1,7 +1,4 @@
-use std::{
-    ptr::NonNull,
-    rc::{Rc, Weak},
-};
+use std::cell::RefCell;
 
 use nappgui_sys::{
     splitview_get_pos, splitview_horizontal, splitview_minsize0, splitview_minsize1, splitview_panel, splitview_pos,
@@ -10,24 +7,13 @@ use nappgui_sys::{
 };
 
 use crate::{
-    gui::{global_get, global_record, Panel, TableView, TextView, View, WebView},
+    gui::{impl_control, Panel, TableView, TextView, View, WebView, GUID},
     types::SplitMode,
 };
 
+#[derive(Default)]
 pub(crate) struct SplitViewInner {
-    ptr: NonNull<nappgui_sys::SplitView>,
-}
-
-impl SplitViewInner {
-    pub(crate) fn from_raw(ptr: *mut nappgui_sys::SplitView) -> Self {
-        Self {
-            ptr: NonNull::new(ptr).expect("Null pointer passed to SplitViewInner::from_raw"),
-        }
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::SplitView {
-        self.ptr.as_ptr()
-    }
+    ptr: RefCell<*mut nappgui_sys::SplitView>,
 }
 
 /// The splitview control.
@@ -36,23 +22,11 @@ impl SplitViewInner {
 /// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct SplitView(Weak<SplitViewInner>);
+pub struct SplitView(GUID);
+
+impl_control!(SplitView, SplitViewInner);
 
 impl SplitView {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::SplitView) -> Self {
-        let object = global_record(ptr as _, SplitViewInner::from_raw(ptr));
-        SplitView(Rc::downgrade(&object))
-    }
-
-    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::SplitView) -> Self {
-        let object = global_get(ptr as _).unwrap();
-        SplitView(Rc::downgrade(&object))
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::SplitView {
-        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
-    }
-
     /// Create a splitview with horizontal split.
     pub fn new_horizontal() -> Self {
         unsafe { SplitView::from_raw(splitview_horizontal()) }

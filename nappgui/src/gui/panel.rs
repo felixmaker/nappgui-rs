@@ -1,34 +1,17 @@
-use std::{
-    cell::{Cell, RefCell},
-    ptr::NonNull,
-    rc::{Rc, Weak},
-};
+use std::cell::{Cell, RefCell};
 
 use nappgui_sys::{
     panel_create, panel_custom, panel_layout, panel_scroll, panel_scroll_size, panel_size, panel_update,
     panel_viewport, panel_visible_layout,
 };
 
-use crate::gui::{global_get, global_record, Layout};
+use crate::gui::{GUID, Layout, impl_control};
 
+#[derive(Default)]
 pub(crate) struct PanelInner {
-    ptr: NonNull<nappgui_sys::Panel>,
+    ptr: RefCell<*mut nappgui_sys::Panel>,
     scroll: Cell<bool>,
     pub(crate) layouts: RefCell<Vec<Layout>>,
-}
-
-impl PanelInner {
-    pub(crate) fn from_raw(ptr: *mut nappgui_sys::Panel) -> Self {
-        Self {
-            ptr: NonNull::new(ptr).expect("Null pointer passed to PanelInner::from_raw"),
-            scroll: Cell::new(false),
-            layouts: RefCell::new(Vec::new()),
-        }
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Panel {
-        self.ptr.as_ptr()
-    }
 }
 
 /// The panel control.
@@ -37,23 +20,11 @@ impl PanelInner {
 /// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Panel(Weak<PanelInner>);
+pub struct Panel(GUID);
+
+impl_control!(Panel, PanelInner);
 
 impl Panel {
-    pub(crate) unsafe fn from_raw(panel: *mut nappgui_sys::Panel) -> Self {
-        let object = global_record(panel as _, PanelInner::from_raw(panel));
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) unsafe fn from_ptr(panel: *mut nappgui_sys::Panel) -> Self {
-        let object = global_get(panel as _).unwrap();
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Panel {
-        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
-    }
-
     /// Create a panel.
     pub fn new() -> Self {
         unsafe { Self::from_raw(panel_create()) }
@@ -62,14 +33,14 @@ impl Panel {
     /// Create a panel with scroll bars.
     pub fn new_scroll(hscroll: bool, vscroll: bool) -> Self {
         let panel = unsafe { Self::from_raw(panel_scroll(hscroll as _, vscroll as _)) };
-        panel.0.upgrade().map(|inner| inner.scroll.set(hscroll || vscroll));
+        panel.inner(|inner| inner.scroll.set(hscroll || vscroll));
         panel
     }
 
     /// Create a fully configurable panel.
     pub fn new_custom(hscroll: bool, vscroll: bool, border: bool) -> Self {
         let panel = unsafe { Self::from_raw(panel_custom(hscroll as _, vscroll as _, border as _)) };
-        panel.0.upgrade().map(|inner| inner.scroll.set(hscroll || vscroll));
+        panel.inner(|inner| inner.scroll.set(hscroll || vscroll));
         panel
     }
 
@@ -86,13 +57,13 @@ impl Panel {
     /// You may use set_visible_layout to switch visible layout.
     pub fn add_layout(&self, layout: &Layout) -> u32 {
         let result = unsafe { panel_layout(self.as_ptr(), layout.as_ptr()) };
-        self.0.upgrade().map(|x| x.layouts.borrow_mut().push(layout.clone()));
+        self.inner(|inner| inner.layouts.borrow_mut().push(layout.clone()));
         result
     }
 
     /// Get a layout of a panel.
     pub fn layout(&self, index: u32) -> Option<Layout> {
-        self.0.upgrade()?.layouts.borrow().get(index as usize).cloned()
+        self.inner(|inner| inner.layouts.borrow().get(index as usize).cloned())?
     }
 
     /// Set the active layout inside the panel.
@@ -116,13 +87,13 @@ impl Panel {
     /// # Remarks
     /// If the panel does not have scroll bars, it will return None.
     pub fn scroll_size(&self) -> Option<(f32, f32)> {
-        let panel = self.0.upgrade()?;
-        if !panel.scroll.get() {
+        let scroll = self.inner(|inner| inner.scroll.get())?;
+        if scroll {
             return None;
         }
         let mut width = 0f32;
         let mut height = 0f32;
-        unsafe { panel_scroll_size(panel.as_ptr(), &mut width, &mut height) }
+        unsafe { panel_scroll_size(self.as_ptr(), &mut width, &mut height) }
         Some((width, height))
     }
 

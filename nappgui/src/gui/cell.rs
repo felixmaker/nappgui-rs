@@ -2,7 +2,7 @@ use std::{marker::PhantomData, ptr::NonNull};
 
 use nappgui_sys::{cell_control, cell_empty, cell_enabled, cell_padding, cell_padding2, cell_padding4, cell_visible};
 
-use crate::gui::{Control, Layout};
+use crate::gui::{Control, Layout, control_uid};
 
 /// Represents a cell in a layout.
 #[repr(transparent)]
@@ -21,7 +21,7 @@ impl<'a> LayoutCell<'a> {
     }
 
     /// Returns a raw pointer to the cell object.
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Cell {
+    pub fn as_ptr(&self) -> *mut nappgui_sys::Cell {
         self.ptr.as_ptr()
     }
 
@@ -39,7 +39,9 @@ impl<'a> LayoutCell<'a> {
         T: Control,
     {
         let ptr = unsafe { cell_control(self.as_ptr()) };
-        T::from_control_ptr(ptr)
+        let _uid = control_uid(ptr)?;
+        // global_get(uid)
+        todo!()
     }
 
     /// Activate or deactivate a cell.

@@ -1,14 +1,10 @@
-use std::{
-    cell::RefCell,
-    ptr::NonNull,
-    rc::{Rc, Weak},
-};
+use std::{cell::RefCell, rc::Rc};
 
 use crate::{
     draw_2d::{Color, Image},
     gui::{
         event::{TextEvent, TextFilterEvent},
-        global_get, global_record,
+        impl_control, GUID,
     },
     types::{Align, FontStyle},
     util::macros::listener,
@@ -22,24 +18,11 @@ use nappgui_sys::{
     combo_set_elem, combo_text, combo_tooltip, combo_width,
 };
 
+#[derive(Default)]
 pub(crate) struct ComboInner {
-    ptr: NonNull<nappgui_sys::Combo>,
+    ptr: RefCell<*mut nappgui_sys::Combo>,
     on_filter: RefCell<Option<Rc<dyn Fn(&TextEvent) -> TextFilterEvent + 'static>>>,
     on_change: RefCell<Option<Rc<dyn Fn(&TextEvent) -> bool + 'static>>>,
-}
-
-impl ComboInner {
-    pub(crate) fn from_raw(ptr: *mut nappgui_sys::Combo) -> Self {
-        Self {
-            ptr: NonNull::new(ptr).expect("Null pointer passed to ComboInner::from_raw"),
-            on_filter: RefCell::new(None),
-            on_change: RefCell::new(None),
-        }
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Combo {
-        self.ptr.as_ptr()
-    }
 }
 
 /// The combo control.
@@ -48,23 +31,11 @@ impl ComboInner {
 /// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Combo(Weak<ComboInner>);
+pub struct Combo(GUID);
+
+impl_control!(Combo, ComboInner);
 
 impl Combo {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Combo) -> Self {
-        let object = global_record(ptr as _, ComboInner::from_raw(ptr));
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::Combo) -> Self {
-        let object = global_get(ptr as _).unwrap();
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Combo {
-        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
-    }
-
     /// Create a combo control.
     pub fn new() -> Self {
         let combo = unsafe { combo_create() };
@@ -76,10 +47,8 @@ impl Combo {
     where
         F: Fn(&TextEvent) -> TextFilterEvent + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_filter.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.as_ptr(), ComboInner, on_filter(TextEvent) -> TextFilterEvent);
+        self.inner(|object| *object.on_filter.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.0, Combo, on_filter(TextEvent) -> TextFilterEvent);
         unsafe { combo_OnFilter(self.as_ptr(), listener) };
     }
 
@@ -88,10 +57,8 @@ impl Combo {
     where
         F: Fn(&TextEvent) -> bool + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_change.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.as_ptr(), ComboInner, on_change(TextEvent) -> bool);
+        self.inner(|object| *object.on_change.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), Combo, on_change(TextEvent) -> bool);
         unsafe { combo_OnChange(self.as_ptr(), listener) };
     }
 

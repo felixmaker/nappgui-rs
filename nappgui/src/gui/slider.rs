@@ -1,8 +1,4 @@
-use std::{
-    cell::RefCell,
-    ptr::NonNull,
-    rc::{Rc, Weak},
-};
+use std::{cell::RefCell, rc::Rc};
 
 use nappgui_sys::{
     slider_OnMoved, slider_create, slider_get_value, slider_length, slider_steps, slider_tooltip, slider_value,
@@ -10,26 +6,14 @@ use nappgui_sys::{
 };
 
 use crate::{
-    gui::{event::SliderEvent, global_get, global_record},
+    gui::{event::SliderEvent, impl_control, GUID},
     util::macros::listener,
 };
 
+#[derive(Default)]
 pub(crate) struct SliderInner {
-    ptr: NonNull<nappgui_sys::Slider>,
+    ptr: RefCell<*mut nappgui_sys::Slider>,
     on_moved: RefCell<Option<Rc<dyn Fn(&SliderEvent) + 'static>>>,
-}
-
-impl SliderInner {
-    pub(crate) fn from_raw(ptr: *mut nappgui_sys::Slider) -> Self {
-        Self {
-            ptr: NonNull::new(ptr).expect("Null pointer passed to SliderInner::from_raw"),
-            on_moved: RefCell::new(None),
-        }
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Slider {
-        self.ptr.as_ptr()
-    }
 }
 
 /// The slider control.
@@ -37,23 +21,12 @@ impl SliderInner {
 /// # Remarks
 /// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
-pub struct Slider(Weak<SliderInner>);
+#[derive(Clone)]
+pub struct Slider(GUID);
+
+impl_control!(Slider, SliderInner);
 
 impl Slider {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Slider) -> Self {
-        let object = global_record(ptr as _, SliderInner::from_raw(ptr));
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::Slider) -> Self {
-        let object = global_get(ptr as _).unwrap();
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Slider {
-        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
-    }
-
     /// Create a new slider control.
     pub fn new() -> Self {
         unsafe { Slider::from_raw(slider_create()) }
@@ -74,10 +47,8 @@ impl Slider {
     where
         F: Fn(&SliderEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_moved.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), SliderInner, on_moved(SliderEvent));
+        self.inner(|inner| *inner.on_moved.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, Slider, on_moved(SliderEvent));
         unsafe { slider_OnMoved(self.as_ptr(), listener) }
     }
 

@@ -1,12 +1,8 @@
-use std::{
-    cell::RefCell,
-    ptr::NonNull,
-    rc::{Rc, Weak},
-};
+use std::{cell::RefCell, rc::Rc};
 
 use crate::{
     draw_2d::Image,
-    gui::{event::ButtonEvent, global_get, global_record},
+    gui::{event::ButtonEvent, impl_control, GUID},
     util::macros::listener,
 };
 
@@ -16,22 +12,10 @@ use nappgui_sys::{
     popup_tooltip,
 };
 
+#[derive(Default)]
 pub(crate) struct PopUpInner {
-    ptr: NonNull<nappgui_sys::PopUp>,
+    ptr: RefCell<*mut nappgui_sys::PopUp>,
     on_select: RefCell<Option<Rc<dyn Fn(&ButtonEvent) + 'static>>>,
-}
-
-impl PopUpInner {
-    pub(crate) fn from_raw(ptr: *mut nappgui_sys::PopUp) -> Self {
-        Self {
-            ptr: NonNull::new(ptr).expect("Null pointer passed to PopUpInner::from_raw"),
-            on_select: RefCell::new(None),
-        }
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::PopUp {
-        self.ptr.as_ptr()
-    }
 }
 
 /// The popup control.
@@ -40,24 +24,11 @@ impl PopUpInner {
 /// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct PopUp(Weak<PopUpInner>);
+pub struct PopUp(GUID);
+
+impl_control!(PopUp, PopUpInner);
 
 impl PopUp {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::PopUp) -> Self {
-        let object = global_record(ptr as _, PopUpInner::from_raw(ptr));
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::PopUp) -> Self {
-        let object = global_get(ptr as _).unwrap();
-        Self(Rc::downgrade(&object))
-    }
-
-    /// Returns the underlying raw pointer.
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::PopUp {
-        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
-    }
-
     /// Create a new popup control (PopUp button).
     pub fn new() -> Self {
         let popup = unsafe { popup_create() };
@@ -69,10 +40,8 @@ impl PopUp {
     where
         F: Fn(&ButtonEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_select.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.as_ptr(), PopUpInner, on_select(ButtonEvent));
+        self.inner(|inner| *inner.on_select.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.0, PopUp, on_select(ButtonEvent));
         unsafe { popup_OnSelect(self.as_ptr(), listener) }
     }
 

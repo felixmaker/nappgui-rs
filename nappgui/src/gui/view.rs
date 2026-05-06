@@ -1,9 +1,4 @@
-use std::{
-    cell::RefCell,
-    ffi::CString,
-    ptr::NonNull,
-    rc::{Rc, Weak},
-};
+use std::{cell::RefCell, ffi::CString, rc::Rc};
 
 use nappgui_sys::{
     view_OnAcceptFocus, view_OnClick, view_OnDown, view_OnDrag, view_OnDraw, view_OnEnter, view_OnExit, view_OnFocus,
@@ -16,13 +11,14 @@ use nappgui_sys::{
 use crate::{
     gui::{
         event::{DrawEvent, KeyEvent, MouseEvent, ScrollEvent, SizeEvent},
-        global_get, global_record,
+        impl_control, GUID,
     },
     util::macros::listener,
 };
 
+#[derive(Default)]
 pub(crate) struct ViewInner {
-    ptr: NonNull<nappgui_sys::View>,
+    ptr: RefCell<*mut nappgui_sys::View>,
     on_draw: RefCell<Option<Rc<dyn Fn(&DrawEvent) + 'static>>>,
     on_overlay: RefCell<Option<Rc<dyn Fn(&DrawEvent) + 'static>>>,
     on_size: RefCell<Option<Rc<dyn Fn(&SizeEvent) + 'static>>>,
@@ -42,57 +38,17 @@ pub(crate) struct ViewInner {
     on_scroll: RefCell<Option<Rc<dyn Fn(&ScrollEvent) -> f32 + 'static>>>,
 }
 
-impl ViewInner {
-    pub(crate) fn from_raw(ptr: *mut nappgui_sys::View) -> Self {
-        Self {
-            ptr: NonNull::new(ptr).expect("Null pointer passed to ViewInner::from_raw"),
-            on_draw: RefCell::new(None),
-            on_overlay: RefCell::new(None),
-            on_size: RefCell::new(None),
-            on_enter: RefCell::new(None),
-            on_exit: RefCell::new(None),
-            on_move: RefCell::new(None),
-            on_down: RefCell::new(None),
-            on_up: RefCell::new(None),
-            on_click: RefCell::new(None),
-            on_drag: RefCell::new(None),
-            on_wheel: RefCell::new(None),
-            on_key_down: RefCell::new(None),
-            on_key_up: RefCell::new(None),
-            on_focus: RefCell::new(None),
-            on_accept_focus: RefCell::new(None),
-            on_resign_focus: RefCell::new(None),
-            on_scroll: RefCell::new(None),
-        }
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::View {
-        self.ptr.as_ptr()
-    }
-}
-
 /// The view control.
 ///
 /// # Remarks
 /// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
-pub struct View(Weak<ViewInner>);
+#[derive(Clone)]
+pub struct View(GUID);
+
+impl_control!(View, ViewInner);
 
 impl View {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::View) -> Self {
-        let object = global_record(ptr as _, ViewInner::from_raw(ptr));
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::View) -> Self {
-        let object = global_get(ptr as _).unwrap();
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::View {
-        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
-    }
-
     /// Create a new custom view.
     pub fn new() -> Self {
         unsafe { View::from_raw(view_create()) }
@@ -119,10 +75,8 @@ impl View {
     where
         F: Fn(&DrawEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_draw.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), ViewInner, on_draw(DrawEvent));
+        self.inner(|inner| *inner.on_draw.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, View, on_draw(DrawEvent));
         unsafe { view_OnDraw(self.as_ptr(), listener) }
     }
 
@@ -131,10 +85,8 @@ impl View {
     where
         F: Fn(&DrawEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_overlay.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), ViewInner, on_overlay(DrawEvent));
+        self.inner(|inner| *inner.on_overlay.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, View, on_overlay(DrawEvent));
         unsafe { view_OnOverlay(self.as_ptr(), listener) }
     }
 
@@ -143,10 +95,8 @@ impl View {
     where
         F: Fn(&SizeEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_size.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), ViewInner, on_size(SizeEvent));
+        self.inner(|inner| *inner.on_size.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, View, on_size(SizeEvent));
         unsafe { view_OnSize(self.as_ptr(), listener) }
     }
 
@@ -155,10 +105,8 @@ impl View {
     where
         F: Fn(&MouseEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_enter.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), ViewInner, on_enter(MouseEvent));
+        self.inner(|inner| *inner.on_enter.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, View, on_enter(MouseEvent));
         unsafe { view_OnEnter(self.as_ptr(), listener) }
     }
 
@@ -167,10 +115,8 @@ impl View {
     where
         F: Fn(&MouseEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_exit.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), ViewInner, on_exit(MouseEvent));
+        self.inner(|inner| *inner.on_exit.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, View, on_exit(MouseEvent));
         unsafe { view_OnExit(self.as_ptr(), listener) }
     }
 
@@ -179,10 +125,8 @@ impl View {
     where
         F: Fn(&MouseEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_move.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), ViewInner, on_move(MouseEvent));
+        self.inner(|inner| *inner.on_move.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, View, on_move(MouseEvent));
         unsafe { view_OnMove(self.as_ptr(), listener) }
     }
 
@@ -191,10 +135,8 @@ impl View {
     where
         F: Fn(&MouseEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_down.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), ViewInner, on_down(MouseEvent));
+        self.inner(|inner| *inner.on_down.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, View, on_down(MouseEvent));
         unsafe { view_OnDown(self.as_ptr(), listener) }
     }
 
@@ -203,10 +145,8 @@ impl View {
     where
         F: Fn(&MouseEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_up.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), ViewInner, on_up(MouseEvent));
+        self.inner(|inner| *inner.on_up.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, View, on_up(MouseEvent));
         unsafe { view_OnUp(self.as_ptr(), listener) }
     }
 
@@ -215,10 +155,8 @@ impl View {
     where
         F: Fn(&MouseEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), ViewInner, on_click(MouseEvent));
+        self.inner(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, View, on_click(MouseEvent));
         unsafe { view_OnClick(self.as_ptr(), listener) }
     }
 
@@ -227,10 +165,8 @@ impl View {
     where
         F: Fn(&MouseEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_drag.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), ViewInner, on_drag(MouseEvent));
+        self.inner(|inner| *inner.on_drag.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, View, on_drag(MouseEvent));
         unsafe { view_OnDrag(self.as_ptr(), listener) }
     }
 
@@ -239,10 +175,8 @@ impl View {
     where
         F: Fn(&MouseEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_wheel.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), ViewInner, on_wheel(MouseEvent));
+        self.inner(|inner| *inner.on_wheel.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, View, on_wheel(MouseEvent));
         unsafe { view_OnWheel(self.as_ptr(), listener) }
     }
 
@@ -251,10 +185,8 @@ impl View {
     where
         F: Fn(&KeyEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_key_down.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), ViewInner, on_key_down(KeyEvent));
+        self.inner(|inner| *inner.on_key_down.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, View, on_key_down(KeyEvent));
         unsafe { view_OnKeyDown(self.as_ptr(), listener) }
     }
 
@@ -263,10 +195,8 @@ impl View {
     where
         F: Fn(&KeyEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_key_up.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), ViewInner, on_key_up(KeyEvent));
+        self.inner(|inner| *inner.on_key_up.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, View, on_key_up(KeyEvent));
         unsafe { view_OnKeyUp(self.as_ptr(), listener) }
     }
 
@@ -275,10 +205,8 @@ impl View {
     where
         F: Fn(&bool) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_focus.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), ViewInner, on_focus(bool));
+        self.inner(|inner| *inner.on_focus.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, View, on_focus(bool));
         unsafe { view_OnFocus(self.as_ptr(), listener) }
     }
 
@@ -287,10 +215,8 @@ impl View {
     where
         F: Fn() -> bool + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_accept_focus.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), ViewInner, on_accept_focus());
+        self.inner(|inner| *inner.on_accept_focus.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, View, on_accept_focus());
         unsafe { view_OnAcceptFocus(self.as_ptr(), listener) }
     }
 
@@ -299,10 +225,8 @@ impl View {
     where
         F: Fn() -> bool + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_resign_focus.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), ViewInner, on_resign_focus());
+        self.inner(|inner| *inner.on_resign_focus.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, View, on_resign_focus());
         unsafe { view_OnResignFocus(self.as_ptr(), listener) }
     }
 
@@ -311,10 +235,8 @@ impl View {
     where
         F: Fn(&ScrollEvent) -> f32 + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_scroll.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), ViewInner, on_scroll(ScrollEvent));
+        self.inner(|inner| *inner.on_scroll.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, View, on_scroll(ScrollEvent));
         unsafe { view_OnScroll(self.as_ptr(), listener) }
     }
 

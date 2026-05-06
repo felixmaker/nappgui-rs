@@ -10,12 +10,11 @@ use nappgui_sys::{
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::ffi::{CStr, CString};
-use std::ptr::NonNull;
-use std::rc::{Rc, Weak};
+use std::rc::Rc;
 
 use crate::draw_2d::{Color, Image};
 use crate::gui::event::{PositionEvent, SizeEvent, WindowCloseEvent};
-use crate::gui::{global_exists, global_get, global_record, Button, Control, Menu, Panel};
+use crate::gui::{impl_object, Button, Control, Menu, Panel, GUID};
 use crate::types::{
     Align, FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D, Size2D, WindowFlags,
 };
@@ -24,11 +23,12 @@ use crate::util::macros::listener;
 struct HotkeyContext {
     key: KeyCode,
     modifiers: ModifierKey,
-    window: Weak<WindowInner>,
+    window: Window,
 }
 
+#[derive(Default)]
 pub(crate) struct WindowInner {
-    ptr: NonNull<nappgui_sys::Window>,
+    ptr: RefCell<*mut nappgui_sys::Window>,
     menu_bar: RefCell<Option<Menu>>,
     default_button: RefCell<Option<Button>>,
     panel: RefCell<Option<Panel>>,
@@ -37,26 +37,6 @@ pub(crate) struct WindowInner {
     on_resize: RefCell<Option<Rc<dyn Fn(&SizeEvent) + 'static>>>,
     on_hotkey: RefCell<HashMap<(KeyCode, ModifierKey), Rc<dyn Fn() + 'static>>>,
     on_hotkey_context: RefCell<Vec<*mut HotkeyContext>>,
-}
-
-impl WindowInner {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Window) -> Self {
-        Self {
-            ptr: NonNull::new(ptr).expect("Null pointer passed to WindowInner::from_raw"),
-            menu_bar: RefCell::new(None),
-            default_button: RefCell::new(None),
-            panel: RefCell::new(None),
-            on_close: RefCell::new(None),
-            on_moved: RefCell::new(None),
-            on_resize: RefCell::new(None),
-            on_hotkey: RefCell::new(HashMap::new()),
-            on_hotkey_context: RefCell::new(Vec::new()),
-        }
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Window {
-        self.ptr.as_ptr()
-    }
 }
 
 impl Drop for WindowInner {
@@ -73,28 +53,11 @@ impl Drop for WindowInner {
 /// The window object.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Window(Weak<WindowInner>);
+pub struct Window(GUID);
+
+impl_object!(Window, WindowInner);
 
 impl Window {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Window) -> Self {
-        assert!(!ptr.is_null());
-        if !global_exists(ptr as _) {
-            let window = global_record(ptr as _, WindowInner::from_raw(ptr));
-            return Self(Rc::downgrade(&window));
-        }
-
-        if let Some(window) = global_get(ptr as _) {
-            return Self(Rc::downgrade(&window));
-        }
-
-        panic!("Window object has been destroyed already.");
-    }
-
-    /// Returns the raw pointer of Window object
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Window {
-        self.0.upgrade().map(|x| x.as_ptr()).unwrap()
-    }
-
     /// Create a new window.
     pub fn new(flag: WindowFlags) -> Self {
         unsafe { Self::from_raw(window_create(flag.to_window_flag_t() as u32)) }
@@ -105,10 +68,8 @@ impl Window {
     where
         F: Fn(&WindowCloseEvent) -> bool + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_close.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), WindowInner, on_close(WindowCloseEvent));
+        self.inner(|inner| *inner.on_close.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, Window, on_close(WindowCloseEvent));
         unsafe { window_OnClose(self.as_ptr(), listener) }
     }
 
@@ -117,10 +78,8 @@ impl Window {
     where
         F: Fn(&PositionEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_moved.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), WindowInner, on_moved(PositionEvent));
+        self.inner(|inner| *inner.on_moved.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, Window, on_moved(PositionEvent));
         unsafe { window_OnMoved(self.as_ptr(), listener) }
     }
 
@@ -129,10 +88,8 @@ impl Window {
     where
         F: Fn(&SizeEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_resize.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), WindowInner, on_resize(SizeEvent));
+        self.inner(|inner| *inner.on_resize.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, Window, on_resize(SizeEvent));
         unsafe { window_OnResize(self.as_ptr(), listener) }
     }
 
@@ -148,25 +105,18 @@ impl Window {
         assert!(panel.layout(0).is_some(), "Panel has no layout in it.");
 
         // Check if the same panel has already been set.
-        if Some(panel.as_ptr())
-            == self
-                .0
-                .upgrade()
-                .and_then(|x| x.panel.borrow().as_ref().map(|x| x.as_ptr()))
-        {
+        if Some(Some(panel.as_ptr())) == self.inner(|x| x.panel.borrow().as_ref().map(|x| x.as_ptr())) {
             return;
         }
 
         debug_assert_eq!(
-            self.0.upgrade().map(|x| x.panel.borrow().is_none()),
+            self.inner(|x| x.panel.borrow().is_none()),
             Some(true),
             "Panel has already been set."
         );
 
         unsafe { window_panel(self.as_ptr(), panel.as_ptr()) };
-        self.0
-            .upgrade()
-            .map(|inner| *inner.panel.borrow_mut() = Some(panel.clone()));
+        self.inner(|inner| *inner.panel.borrow_mut() = Some(panel.clone()));
     }
 
     /// Set the text that will display the window in the title bar.
@@ -211,31 +161,23 @@ impl Window {
         F: Fn() + 'static,
     {
         let id = (key, modifiers);
-        self.0
-            .upgrade()
-            .map(|inner| inner.on_hotkey.borrow_mut().insert(id, Rc::new(handler)));
+        self.inner(|inner| inner.on_hotkey.borrow_mut().insert(id, Rc::new(handler)));
 
         extern "C" fn shim(obj: *mut std::ffi::c_void, _event: *mut nappgui_sys::Event) {
             let context = unsafe { &*(obj as *mut HotkeyContext) };
             let id = (context.key, context.modifiers);
-            if let Some(obj) = context.window.upgrade() {
-                let callback = obj.on_hotkey.borrow().get(&id).cloned();
-
-                if let Some(f) = callback {
-                    let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f()));
-                }
+            if let Some(Some(f)) = context.window.inner(|obj| obj.on_hotkey.borrow().get(&id).cloned()) {
+                let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f()));
             }
         }
 
         let context = Box::into_raw(Box::new(HotkeyContext {
             key,
             modifiers,
-            window: self.0.clone(),
+            window: self.clone(),
         }));
 
-        self.0
-            .upgrade()
-            .map(|inner| inner.on_hotkey_context.borrow_mut().push(context));
+        self.inner(|inner| inner.on_hotkey_context.borrow_mut().push(context));
 
         let listener = unsafe { listener_imp(context as _, Some(shim)) };
         unsafe {
@@ -409,13 +351,16 @@ impl Window {
     /// This function disables the possible previous default button. For the new button to be set,
     /// it must exist in the active layout.
     pub fn set_default_button(&self, button: &Button) {
-        if let Some(window) = self.0.upgrade() {
-            if let Some(_panel) = window.panel.borrow().clone() {
-                // todo: check if button is in the panel
-                unsafe { window_defbutton(window.as_ptr(), button.as_ptr()) };
-                *window.default_button.borrow_mut() = Some(button.clone());
-            }
-        }
+        self.inner(|inner| *inner.default_button.borrow_mut() = Some(button.clone()));
+        unsafe { window_defbutton(self.as_ptr(), button.as_ptr()) }
+
+        // if let Some(window) = self.0.upgrade() {
+        //     if let Some(_panel) = window.panel.borrow().clone() {
+        //         // todo: check if button is in the panel
+        //         unsafe { window_defbutton(window.as_ptr(), button.as_ptr()) };
+        //         *window.default_button.borrow_mut() = Some(button.clone());
+        //     }
+        // }
     }
 
     /// Change the mouse cursor.
@@ -429,10 +374,8 @@ impl Window {
 
     /// Set the general menu bar of the application.
     pub fn set_menubar(&self, menu: &Menu) {
-        if let Some(window) = self.0.upgrade() {
-            *window.menu_bar.borrow_mut() = Some(menu.clone());
-            unsafe { osapp_menubar(menu.as_ptr(), self.as_ptr()) }
-        }
+        self.inner(|inner| *inner.menu_bar.borrow_mut() = Some(menu.clone()));
+        unsafe { osapp_menubar(menu.as_ptr(), self.as_ptr()) }
     }
 
     /// Launches the directory selection dialog.

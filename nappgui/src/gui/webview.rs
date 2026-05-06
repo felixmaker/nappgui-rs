@@ -1,32 +1,16 @@
-use std::{
-    cell::RefCell,
-    ptr::NonNull,
-    rc::{Rc, Weak},
-};
+use std::{cell::RefCell, rc::Rc};
 
 use nappgui_sys::{webview_OnFocus, webview_back, webview_create, webview_forward, webview_navigate, webview_size};
 
 use crate::{
-    gui::{global_get, global_record},
+    gui::{impl_control, GUID},
     util::macros::listener,
 };
 
+#[derive(Default)]
 pub(crate) struct WebViewInner {
-    ptr: NonNull<nappgui_sys::WebView>,
+    ptr: RefCell<*mut nappgui_sys::WebView>,
     on_focus: RefCell<Option<Rc<dyn Fn(&bool) + 'static>>>,
-}
-
-impl WebViewInner {
-    pub(crate) fn from_raw(ptr: *mut nappgui_sys::WebView) -> Self {
-        Self {
-            ptr: NonNull::new(ptr).expect("Null pointer passed to WebViewInner::from_raw"),
-            on_focus: RefCell::new(None),
-        }
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::WebView {
-        self.ptr.as_ptr()
-    }
 }
 
 /// The web view control.
@@ -34,23 +18,13 @@ impl WebViewInner {
 /// # Remarks
 /// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
-pub struct WebView(Weak<WebViewInner>);
+#[derive(Clone)]
+
+pub struct WebView(GUID);
+
+impl_control!(WebView, WebViewInner);
 
 impl WebView {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::WebView) -> Self {
-        let object = global_record(ptr as _, WebViewInner::from_raw(ptr));
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::WebView) -> Self {
-        let object = global_get(ptr as _).unwrap();
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::WebView {
-        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
-    }
-
     /// Create a Web View.
     pub fn new() -> Self {
         unsafe { Self::from_raw(webview_create()) }
@@ -61,10 +35,8 @@ impl WebView {
     where
         F: Fn(&bool) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_focus.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), WebViewInner, on_focus(bool));
+        self.inner(|inner| *inner.on_focus.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, WebView, on_focus(bool));
         unsafe { webview_OnFocus(self.as_ptr(), listener) }
     }
 

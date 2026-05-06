@@ -29,7 +29,8 @@ impl Layout {
         Self(ptr)
     }
 
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Layout {
+    /// Gets the raw pointer to the layout.
+    pub fn as_ptr(&self) -> *mut nappgui_sys::Layout {
         self.0
     }
 

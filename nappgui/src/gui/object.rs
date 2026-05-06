@@ -1,9 +1,11 @@
 use std::{
     any::Any,
-    cell::RefCell,
+    cell::{Cell, RefCell},
     collections::HashMap,
     rc::{Rc, Weak},
 };
+
+use crate::gui::*;
 
 #[derive(Default)]
 pub(crate) struct GlobalObject {
@@ -15,40 +17,52 @@ pub(crate) struct GlobalObject {
     _object_owns: Vec<Rc<dyn Any + 'static>>,
 }
 
+pub(crate) enum GObject {
+    Button(ButtonInner),
+    Combo(ComboInner),
+    Edit(EditInner),
+    ImageView(ImageViewInner),
+    Label(LabelInner),
+    Panel(PanelInner),
+    ListBox(ListBoxInner),
+    PopUp(PopUpInner),
+    Progress(ProgressInner),
+    Slider(SliderInner),
+    SplitView(SplitViewInner),
+    TableView(TableViewInner),
+    TextView(TextViewInner),
+    UpDown(UpDownInner),
+    View(ViewInner),
+    WebView(WebViewInner),
+    Line(LineInner),
+    Window(WindowInner),
+    Menu(MenuInner),
+    MenuItem(MenuItemInner),
+}
+
+pub(crate) type GUID = u32;
+
 thread_local! {
-    pub(crate) static GLOBAL_OBJECTS: RefCell<HashMap<*mut (), GlobalObject>> = Default::default();
+    static GLOBAL_UID: Cell<GUID> = Cell::new(0);
+    pub(crate) static GLOBAL_OBJECTS: RefCell<HashMap<GUID, Rc<GObject>>> = Default::default();
 }
 
-pub(crate) fn global_exists(pointer: *mut ()) -> bool {
-    GLOBAL_OBJECTS.with_borrow(|objects| objects.get(&pointer).is_some())
+pub(crate) fn global_guid() -> GUID {
+    GLOBAL_UID.with(|uid| {
+        let id = uid.get() + 1;
+        uid.set(id);
+        id
+    })
 }
 
-pub(crate) fn global_get<T>(pointer: *mut ()) -> Option<Rc<T>>
-where
-    T: Any + 'static,
-{
-    if pointer.is_null() {
-        return None;
-    }
-    let this = GLOBAL_OBJECTS.with_borrow(|objects| objects.get(&pointer).and_then(|x| x.weak_object.clone()))?;
-    let object = this.upgrade()?;
-    object.downcast::<T>().ok()
+pub(crate) fn global_get(uid: GUID) -> Option<Rc<GObject>> {
+    GLOBAL_OBJECTS.with_borrow(|objects| objects.get(&uid).map(|x| x.clone()))
 }
 
 /// Record the object to the global object.
-pub(crate) fn global_record<T>(pointer: *mut (), object: T) -> Rc<T>
-where
-    T: Any + 'static,
-{
-    assert!(!pointer.is_null());
+pub(crate) fn global_record(uid: GUID, object: GObject) -> Rc<GObject> {
     let object = Rc::new(object);
-    let weak_object = Rc::downgrade(&object);
-    let global_object = GlobalObject {
-        _object: Some(object.clone()),
-        weak_object: Some(weak_object.clone()),
-        ..Default::default()
-    };
-    GLOBAL_OBJECTS.with_borrow_mut(|objects| objects.insert(pointer, global_object));
+    GLOBAL_OBJECTS.with_borrow_mut(|objects| objects.insert(uid, object.clone()));
     object
 }
 
@@ -81,3 +95,52 @@ where
 //         Some(())
 //     });
 // }
+
+macro_rules! impl_object {
+    ($type:ident, $type_ex:ident) => {
+        impl $type {
+            pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::$type) -> Self {
+                let uid = crate::gui::global_guid();
+                crate::gui::global_record(uid, crate::gui::GObject::$type($type_ex::from_raw(ptr)));
+                Self(uid)
+            }
+
+            pub(crate) fn from_ptr(ptr: *mut nappgui_sys::$type) -> Option<Self> {
+                let uid = crate::gui::control_uid(ptr as _)?;
+                Some(Self(uid))
+            }
+
+            pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::$type {
+                match crate::gui::global_get(self.0).unwrap().as_ref() {
+                    crate::gui::GObject::$type(obj) => obj.as_ptr(),
+                    _ => panic!("$type object not found."),
+                }
+            }
+
+            pub(crate) fn inner<F, R>(&self, f: F) -> Option<R>
+            where
+                F: FnOnce(&$type_ex) -> R,
+            {
+                crate::gui::global_get(self.0).and_then(|x| match x.as_ref() {
+                    crate::gui::GObject::$type(object) => Some(f(object)),
+                    _ => None,
+                })
+            }
+        }
+
+        impl $type_ex {
+            pub(crate) fn from_raw(ptr: *mut nappgui_sys::$type) -> Self {
+                assert!(!ptr.is_null(), "Null pointer passed to $type_ex::from_raw");
+                let object: Self = Default::default();
+                *object.ptr.borrow_mut() = ptr;
+                object
+            }
+
+            pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::$type {
+                *self.ptr.borrow()
+            }
+        }
+    };
+}
+
+pub(crate) use impl_object;

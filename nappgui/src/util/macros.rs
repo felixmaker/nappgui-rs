@@ -25,19 +25,19 @@
 // }
 
 macro_rules! listener {
-    ($ptr: expr, $inner_type:ty, $member:ident($($params: ty)?) $(-> $return:ty)?) => {{
+    ($ptr: expr, $type:ident, $member:ident($($params: ty)?) $(-> $return:ty)?) => {{
         #[allow(unused)]
         extern "C" fn shim(obj: *mut std::ffi::c_void, event: *mut nappgui_sys::Event) {
-            if let Some(obj) = global_get::<$inner_type>(obj as _) {
-                let callback = obj.$member.borrow().clone();
-                let event = crate::core::event::Event::new(event);
-                $(
-                    let params = unsafe { event.params::<$params>() };
-                )?
-                if let Some(f) = callback {
-                    if let Ok(r) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f($(&(params as $params))?))) {
-                        $( unsafe { event.result(r as $return); })?
-                    }
+            let Some(obj) = crate::gui::global_get(obj as _) else { return };
+            let crate::gui::GObject::$type(obj) = obj.as_ref() else { return };
+            let callback = obj.$member.borrow().clone();
+            let event = crate::core::event::Event::new(event);
+            $(
+                let params = unsafe { event.params::<$params>() };
+            )?
+            if let Some(f) = callback {
+                if let Ok(r) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f($(&(params as $params))?))) {
+                    $( unsafe { event.result(r as $return); })?
                 }
             }
         }

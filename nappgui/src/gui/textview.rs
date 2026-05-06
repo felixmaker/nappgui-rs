@@ -1,18 +1,14 @@
-use std::{
-    cell::RefCell,
-    ptr::NonNull,
-    rc::{Rc, Weak},
-};
+use std::{cell::RefCell, rc::Rc};
 
 use crate::{
     core::Stream,
     draw_2d::Color,
     gui::{
         event::{TextEvent, TextFilterEvent},
-        global_get, global_record,
+        impl_control, GUID,
     },
     types::{Align, FontStyle},
-    util::macros::{ listener},
+    util::macros::listener,
 };
 
 use nappgui_sys::{
@@ -24,24 +20,11 @@ use nappgui_sys::{
     textview_writef, S2Df,
 };
 
+#[derive(Default)]
 pub(crate) struct TextViewInner {
-    ptr: NonNull<nappgui_sys::TextView>,
+    ptr: RefCell<*mut nappgui_sys::TextView>,
     on_filter: RefCell<Option<Rc<dyn Fn(&TextEvent) -> TextFilterEvent + 'static>>>,
     on_focus: RefCell<Option<Rc<dyn Fn(&bool) + 'static>>>,
-}
-
-impl TextViewInner {
-    pub(crate) fn from_raw(ptr: *mut nappgui_sys::TextView) -> Self {
-        Self {
-            ptr: NonNull::new(ptr).expect("Null pointer passed to TextViewInner::from_raw"),
-            on_filter: RefCell::new(None),
-            on_focus: RefCell::new(None),
-        }
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::TextView {
-        self.ptr.as_ptr()
-    }
 }
 
 /// The text view control.
@@ -49,23 +32,12 @@ impl TextViewInner {
 /// # Remarks
 /// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
-pub struct TextView(Weak<TextViewInner>);
+#[derive(Clone)]
+pub struct TextView(GUID);
+
+impl_control!(TextView, TextViewInner);
 
 impl TextView {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::TextView) -> Self {
-        let object = global_record(ptr as _, TextViewInner::from_raw(ptr));
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::TextView) -> Self {
-        let object = global_get(ptr as _).unwrap();
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::TextView {
-        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
-    }
-
     /// Create a text view.
     pub fn new() -> Self {
         unsafe { TextView::from_raw(textview_create()) }
@@ -76,10 +48,8 @@ impl TextView {
     where
         F: Fn(&TextEvent) -> TextFilterEvent + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_filter.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), TextViewInner, on_filter(TextEvent)->TextFilterEvent);
+        self.inner(|inner| *inner.on_filter.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, TextView, on_filter(TextEvent)->TextFilterEvent);
         unsafe { textview_OnFilter(self.as_ptr(), listener) }
     }
 
@@ -88,10 +58,8 @@ impl TextView {
     where
         F: Fn(&bool) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_focus.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.as_ptr(), TextViewInner, on_focus(bool));
+        self.inner(|inner| *inner.on_focus.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.0, TextView, on_focus(bool));
         unsafe { textview_OnFocus(self.as_ptr(), listener) }
     }
 

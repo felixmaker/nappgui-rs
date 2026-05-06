@@ -1,13 +1,8 @@
-use std::{
-    cell::RefCell,
-    ffi::CStr,
-    ptr::NonNull,
-    rc::{Rc, Weak},
-};
+use std::{cell::RefCell, ffi::CStr, rc::Rc};
 
 use crate::{
     draw_2d::Image,
-    gui::{event::MenuEvent, global_get, global_record, Menu},
+    gui::{event::MenuEvent, impl_object, Menu, GUID},
     types::{GuiState, KeyCode, ModifierKey},
     util::macros::listener,
 };
@@ -18,24 +13,11 @@ use nappgui_sys::{
     menuitem_separator, menuitem_state, menuitem_submenu, menuitem_text, menuitem_visible,
 };
 
+#[derive(Default)]
 pub(crate) struct MenuItemInner {
-    ptr: NonNull<nappgui_sys::MenuItem>,
+    ptr: RefCell<*mut nappgui_sys::MenuItem>,
     on_click: RefCell<Option<Rc<dyn Fn(&MenuEvent) + 'static>>>,
     submenu: RefCell<Option<Menu>>,
-}
-
-impl MenuItemInner {
-    pub(crate) fn from_raw(ptr: *mut nappgui_sys::MenuItem) -> Self {
-        Self {
-            ptr: NonNull::new(ptr).expect("Null pointer passed to MenuItemInner::from_raw"),
-            on_click: RefCell::new(None),
-            submenu: RefCell::new(None),
-        }
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::MenuItem {
-        self.ptr.as_ptr()
-    }
 }
 
 /// The menu item control.
@@ -44,18 +26,11 @@ impl MenuItemInner {
 /// If the object is not attached to a menu, it will cause a memory leak.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct MenuItem(Weak<MenuItemInner>);
+pub struct MenuItem(GUID);
+
+impl_object!(MenuItem, MenuItemInner);
 
 impl MenuItem {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::MenuItem) -> Self {
-        let object = global_record(ptr as _, MenuItemInner::from_raw(ptr));
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::MenuItem {
-        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
-    }
-
     /// Create a new item for a menu.
     pub fn new(text: &str) -> Self {
         let menu_item = unsafe { Self::from_raw(menuitem_create()) };
@@ -74,11 +49,9 @@ impl MenuItem {
     where
         F: Fn(&MenuEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(callback)));
+        self.inner(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(callback)));
 
-        let listener = listener!(self.as_ptr(), MenuItemInner, on_click(MenuEvent));
+        let listener = listener!(self.0, MenuItem, on_click(MenuEvent));
         unsafe { menuitem_OnClick(self.as_ptr(), listener) };
     }
 
@@ -112,7 +85,7 @@ impl MenuItem {
     pub fn set_submenu(&self, menu: Menu) {
         unsafe { menuitem_submenu(self.as_ptr(), &mut menu.as_ptr()) };
         menu.set_c_managed(true); // Avoid double leak from C
-        self.0.upgrade().map(|inner| *inner.submenu.borrow_mut() = Some(menu));
+        self.inner(|inner| *inner.submenu.borrow_mut() = Some(menu));
     }
 
     /// Set the status of the item, which will be reflected with a mark next to the text.
@@ -159,6 +132,6 @@ impl MenuItem {
 
     /// Gets the submenu associated with item.
     pub fn submenu(&self) -> Option<Menu> {
-        self.0.upgrade().and_then(|inner| inner.submenu.borrow().clone())
+        self.inner(|inner| inner.submenu.borrow().clone())?
     }
 }

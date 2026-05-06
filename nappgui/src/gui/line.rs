@@ -1,26 +1,12 @@
-use std::{
-    ptr::NonNull,
-    rc::{Rc, Weak},
-};
+use std::cell::RefCell;
 
 use nappgui_sys::{line_horizontal, line_length, line_vertical};
 
-use crate::gui::{global_get, global_record};
+use crate::gui::{impl_control, GUID};
 
+#[derive(Default)]
 pub(crate) struct LineInner {
-    ptr: NonNull<nappgui_sys::Line>,
-}
-
-impl LineInner {
-    pub(crate) fn from_raw(ptr: *mut nappgui_sys::Line) -> Self {
-        Self {
-            ptr: NonNull::new(ptr).expect("Null pointer passed to LineInner::from_raw"),
-        }
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Line {
-        self.ptr.as_ptr()
-    }
+    ptr: RefCell<*mut nappgui_sys::Line>,
 }
 
 /// The line control.
@@ -28,23 +14,11 @@ impl LineInner {
 /// # Remarks
 /// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
-pub struct Line(Weak<LineInner>);
+pub struct Line(GUID);
+
+impl_control!(Line, LineInner);
 
 impl Line {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Line) -> Self {
-        let object = global_record(ptr as _, LineInner::from_raw(ptr));
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::Line) -> Self {
-        let object = global_get(ptr as _).unwrap();
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Line {
-        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
-    }
-
     /// Create a horizontal separator.
     pub fn new_horizontal() -> Self {
         unsafe { Line::from_raw(line_horizontal()) }

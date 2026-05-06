@@ -1,13 +1,12 @@
 use std::{
     cell::RefCell,
     ffi::{CStr, CString},
-    ptr::NonNull,
-    rc::{Rc, Weak},
+    rc::Rc,
 };
 
 use crate::{
     draw_2d::{Font, Image},
-    gui::{event::ButtonEvent, global_get, global_record},
+    gui::{event::ButtonEvent, impl_control, GUID},
     types::GuiState,
     util::macros::listener,
 };
@@ -19,22 +18,10 @@ use nappgui_sys::{
     button_tooltip, button_vpadding, button_width,
 };
 
+#[derive(Default)]
 pub(crate) struct ButtonInner {
-    ptr: NonNull<nappgui_sys::Button>,
+    ptr: RefCell<*mut nappgui_sys::Button>,
     on_click: RefCell<Option<Rc<dyn Fn(&ButtonEvent) + 'static>>>,
-}
-
-impl ButtonInner {
-    pub(crate) fn from_raw(ptr: *mut nappgui_sys::Button) -> Self {
-        Self {
-            ptr: NonNull::new(ptr).expect("Null pointer passed to ButtonInner::from_raw"),
-            on_click: RefCell::new(None),
-        }
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Button {
-        self.ptr.as_ptr()
-    }
 }
 
 /// The button control.
@@ -43,23 +30,11 @@ impl ButtonInner {
 /// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Button(Weak<ButtonInner>);
+pub struct Button(GUID);
+
+impl_control!(Button, ButtonInner);
 
 impl Button {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Button) -> Self {
-        let object = global_record(ptr as _, ButtonInner::from_raw(ptr));
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::Button) -> Self {
-        let object = global_get(ptr as _).unwrap();
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Button {
-        self.0.upgrade().map(|button| button.as_ptr()).unwrap()
-    }
-
     /// Create a push button, the typical [Accept], [Cancel], etc.
     pub fn new(text: &str) -> Self {
         let button = unsafe { Self::from_raw(button_push()) };
@@ -107,10 +82,8 @@ impl Button {
     where
         F: Fn(&ButtonEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|button| *button.on_click.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.as_ptr(), ButtonInner, on_click(ButtonEvent));
+        self.inner(|object| *object.on_click.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.0, Button, on_click(ButtonEvent));
         unsafe { button_OnClick(self.as_ptr(), listener) };
     }
 

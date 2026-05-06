@@ -1,13 +1,12 @@
 use std::{
     cell::RefCell,
     ffi::{CStr, CString},
-    ptr::NonNull,
-    rc::{Rc, Weak},
+    rc::Rc,
 };
 
 use crate::{
     draw_2d::{Color, Font},
-    gui::{event::MouseEvent, global_get, global_record},
+    gui::{event::MouseEvent, impl_control, GUID},
     types::{Align, Ellipsis, FontStyle},
     util::macros::listener,
 };
@@ -18,22 +17,10 @@ use nappgui_sys::{
     label_trim, label_width,
 };
 
+#[derive(Default)]
 pub(crate) struct LabelInner {
-    ptr: NonNull<nappgui_sys::Label>,
+    ptr: RefCell<*mut nappgui_sys::Label>,
     on_click: RefCell<Option<Rc<dyn Fn(&MouseEvent) + 'static>>>,
-}
-
-impl LabelInner {
-    pub(crate) fn from_raw(ptr: *mut nappgui_sys::Label) -> Self {
-        Self {
-            ptr: NonNull::new(ptr).expect("Null pointer passed to LabelInner::from_raw"),
-            on_click: RefCell::new(None),
-        }
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Label {
-        self.ptr.as_ptr()
-    }
 }
 
 /// The label control.
@@ -42,23 +29,11 @@ impl LabelInner {
 /// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Label(Weak<LabelInner>);
+pub struct Label(GUID);
+
+impl_control!(Label, LabelInner);
 
 impl Label {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Label) -> Self {
-        let object = global_record(ptr as _, LabelInner::from_raw(ptr));
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::Label) -> Self {
-        let object = global_get(ptr as _).unwrap();
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::Label {
-        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
-    }
-
     /// Create a text control.
     pub fn new(text: &str) -> Label {
         let label = unsafe { label_create() };
@@ -81,10 +56,8 @@ impl Label {
     where
         F: Fn(&MouseEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.as_ptr(), LabelInner, on_click(MouseEvent));
+        self.inner(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.0, Label, on_click(MouseEvent));
         unsafe { label_OnClick(self.as_ptr(), listener) };
     }
 

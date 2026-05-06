@@ -1,15 +1,14 @@
 use std::{
     cell::RefCell,
     ffi::{CStr, CString},
-    ptr::NonNull,
-    rc::{Rc, Weak},
+    rc::Rc,
 };
 
 use crate::{
     draw_2d::{Color, Font, Image},
     gui::{
         event::{ButtonEvent, MouseEvent},
-        global_get, global_record,
+        impl_control, GUID,
     },
     util::macros::listener,
 };
@@ -21,24 +20,11 @@ use nappgui_sys::{
     listbox_set_elem, listbox_size, S2Df,
 };
 
+#[derive(Default)]
 pub(crate) struct ListBoxInner {
-    ptr: NonNull<nappgui_sys::ListBox>,
+    ptr: RefCell<*mut nappgui_sys::ListBox>,
     on_down: RefCell<Option<Rc<dyn Fn(&MouseEvent) -> bool + 'static>>>,
     on_select: RefCell<Option<Rc<dyn Fn(&ButtonEvent) + 'static>>>,
-}
-
-impl ListBoxInner {
-    pub(crate) fn from_raw(ptr: *mut nappgui_sys::ListBox) -> Self {
-        Self {
-            ptr: NonNull::new(ptr).expect("Null pointer passed to ListBoxInner::from_raw"),
-            on_down: RefCell::new(None),
-            on_select: RefCell::new(None),
-        }
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::ListBox {
-        self.ptr.as_ptr()
-    }
 }
 
 /// The list box control.
@@ -46,23 +32,12 @@ impl ListBoxInner {
 /// # Remarks
 /// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
-pub struct ListBox(Weak<ListBoxInner>);
+#[derive(Clone)]
+pub struct ListBox(GUID);
+
+impl_control!(ListBox, ListBoxInner);
 
 impl ListBox {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::ListBox) -> Self {
-        let object = global_record(ptr as _, ListBoxInner::from_raw(ptr));
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::ListBox) -> Self {
-        let object = global_get(ptr as _).unwrap();
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::ListBox {
-        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
-    }
-
     /// Create a new list control.
     pub fn new() -> Self {
         let listbox = unsafe { listbox_create() };
@@ -80,10 +55,8 @@ impl ListBox {
     where
         F: Fn(&MouseEvent) -> bool + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_down.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.as_ptr(), ListBoxInner, on_down(MouseEvent) -> bool);
+        self.inner(|inner| *inner.on_down.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.0, ListBox, on_down(MouseEvent) -> bool);
         unsafe { listbox_OnDown(self.as_ptr(), listener) }
     }
 
@@ -92,10 +65,8 @@ impl ListBox {
     where
         F: Fn(&ButtonEvent) + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_select.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.as_ptr(), ListBoxInner, on_select(ButtonEvent));
+        self.inner(|inner| *inner.on_select.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.0, ListBox, on_select(ButtonEvent));
         unsafe { listbox_OnSelect(self.as_ptr(), listener) }
     }
 

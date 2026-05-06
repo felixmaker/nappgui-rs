@@ -1,12 +1,8 @@
-use std::{
-    cell::RefCell,
-    ptr::NonNull,
-    rc::{Rc, Weak},
-};
+use std::{cell::RefCell, rc::Rc};
 
 use crate::{
     draw_2d::Image,
-    gui::{global_get, global_record},
+    gui::{impl_control, GUID},
     types::Scale,
     util::macros::listener,
 };
@@ -16,24 +12,11 @@ use nappgui_sys::{
     imageview_size,
 };
 
+#[derive(Default)]
 pub(crate) struct ImageViewInner {
-    ptr: NonNull<nappgui_sys::ImageView>,
+    ptr: RefCell<*mut nappgui_sys::ImageView>,
     on_click: RefCell<Option<Rc<dyn Fn() + 'static>>>,
     on_over_draw: RefCell<Option<Rc<dyn Fn() + 'static>>>,
-}
-
-impl ImageViewInner {
-    pub(crate) fn from_raw(ptr: *mut nappgui_sys::ImageView) -> Self {
-        Self {
-            ptr: NonNull::new(ptr).expect("Null pointer passed to ImageViewInner::from_raw"),
-            on_click: RefCell::new(None),
-            on_over_draw: RefCell::new(None),
-        }
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::ImageView {
-        self.ptr.as_ptr()
-    }
 }
 
 /// The image view control.
@@ -41,23 +24,12 @@ impl ImageViewInner {
 /// # Remark
 /// If the object is not attached to a window, it will cause a memory leak.
 #[repr(transparent)]
-pub struct ImageView(Weak<ImageViewInner>);
+#[derive(Clone)]
+pub struct ImageView(GUID);
+
+impl_control!(ImageView, ImageViewInner);
 
 impl ImageView {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::ImageView) -> Self {
-        let object = global_record(ptr as _, ImageViewInner::from_raw(ptr));
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) unsafe fn from_ptr(ptr: *mut nappgui_sys::ImageView) -> Self {
-        let object = global_get(ptr as _).unwrap();
-        Self(Rc::downgrade(&object))
-    }
-
-    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::ImageView {
-        self.0.upgrade().map(|inner| inner.as_ptr()).unwrap()
-    }
-
     /// Create a image view.
     pub fn new(width: f32, height: f32) -> Self {
         let imageview = unsafe { imageview_create() };
@@ -93,11 +65,8 @@ impl ImageView {
     where
         F: Fn() + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(callback)));
-
-        let listener = listener!(self.as_ptr(), ImageViewInner, on_click());
+        self.inner(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.0, ImageView, on_click());
         unsafe { imageview_OnClick(self.as_ptr(), listener) };
     }
 
@@ -106,10 +75,8 @@ impl ImageView {
     where
         F: Fn() + 'static,
     {
-        self.0
-            .upgrade()
-            .map(|inner| *inner.on_over_draw.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.as_ptr(), ImageViewInner, on_over_draw());
+        self.inner(|inner| *inner.on_over_draw.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.0, ImageView, on_over_draw());
         unsafe { imageview_OnOverDraw(self.as_ptr(), listener) };
     }
 

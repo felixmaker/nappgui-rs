@@ -1,11 +1,12 @@
 use std::{cell::RefCell, ffi::CString};
 
 use nappgui_sys::{
-    cell_dbind_imp, dbind_create_imp, dbind_destroy_imp, layout_bgcolor, layout_cell, layout_control, layout_create,
-    layout_dbind_imp, layout_dbind_obj_imp, layout_group, layout_halign, layout_hexpandn, layout_hmargin, layout_hsize,
-    layout_insert_col, layout_insert_row, layout_margin4, layout_ncols, layout_nrows, layout_panel_replace,
-    layout_remove_col, layout_remove_row, layout_show_col, layout_show_row, layout_skcolor, layout_taborder,
-    layout_tabstop, layout_update, layout_valign, layout_vexpandn, layout_vmargin, layout_vsize,
+    cell_dbind_imp, cell_empty, cell_enabled, cell_padding4, cell_visible, dbind_create_imp, dbind_destroy_imp,
+    layout_bgcolor, layout_cell, layout_control, layout_create, layout_dbind_imp, layout_dbind_obj_imp, layout_group,
+    layout_halign, layout_hexpandn, layout_hmargin, layout_hsize, layout_insert_col, layout_insert_row, layout_margin4,
+    layout_ncols, layout_nrows, layout_panel_replace, layout_remove_col, layout_remove_row, layout_show_col,
+    layout_show_row, layout_skcolor, layout_taborder, layout_tabstop, layout_update, layout_valign, layout_vexpandn,
+    layout_vmargin, layout_vsize,
 };
 
 use crate::{
@@ -17,34 +18,28 @@ use crate::{
 use super::*;
 
 #[derive(Default)]
-pub(crate) struct LayoutInner {
-    ptr: RefCell<*mut nappgui_sys::Layout>,
+pub(crate) struct LayoutProps {
     object_type: RefCell<Option<CString>>,
     object: RefCell<Option<*mut ()>>,
 }
 
-impl Drop for LayoutInner {
-    fn drop(&mut self) {
-        if let Some(obj) = self.object.borrow_mut().as_mut() {
-            if let Some(ty) = self.object_type.borrow().as_ref() {
-                unsafe { dbind_destroy_imp(obj as *mut *mut () as _, ty.as_ptr()) };
-            }
-        }
-    }
-}
+define_object!(Layout, LayoutInner, Layout, LayoutProps);
 
-/// The layout.
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct Layout(GUID);
-
-impl_object!(Layout, LayoutInner);
+// impl Drop for LayoutInner {
+//     fn drop(&mut self) {
+//         if let Some(obj) = self.object.borrow_mut().as_mut() {
+//             if let Some(ty) = self.object_type.borrow().as_ref() {
+//                 unsafe { dbind_destroy_imp(obj as *mut *mut () as _, ty.as_ptr()) };
+//             }
+//         }
+//     }
+// }
 
 impl Layout {
     /// Creates a new layout.
     pub fn new(ncols: u32, nrows: u32) -> Self {
         let layout = unsafe { layout_create(ncols, nrows) };
-        unsafe { Self::from_raw(layout) }
+        Self::from_raw(layout)
     }
 
     /// Gets the number of columns in the layout.
@@ -57,19 +52,10 @@ impl Layout {
         unsafe { layout_nrows(self.as_ptr()) }
     }
 
-    /// Get a layout cell.
-    pub fn cell(&self, col: u32, row: u32) -> LayoutCell<'_> {
-        let cell = unsafe { layout_cell(self.as_ptr(), col, row) };
-        unsafe { LayoutCell::from_raw(cell) }
-    }
-
     /// Gets the control assigned to a cell in the layout.
-    pub fn control<T>(&self, col: u32, row: u32) -> Option<T>
-    where
-        T: Control,
-    {
+    pub fn control<T>(&self, col: u32, row: u32) -> Option<T> {
         let control = unsafe { layout_control(self.as_ptr(), col, row) };
-        T::from_control_ptr(control)
+        todo!()
     }
 
     /// Insert a control to the layout.
@@ -79,13 +65,12 @@ impl Layout {
     /// Panics if col or row is out of bounds.
     pub fn set_control<T>(&self, col: u32, row: u32, control: &T)
     where
-        T: LayoutControl + Control,
+        T: LayoutControl,
     {
         assert!(col < self.ncols());
         assert!(row < self.nrows());
 
         control.insert_in_layout(self, col, row);
-        // global_move_ownership(control.as_control_ptr() as _, self.as_ptr() as _);
     }
 
     /// Replaces one Panel in a layout with another.
@@ -340,26 +325,26 @@ impl Layout {
         let ty = CString::new(ty).unwrap();
         self.inner(|inner| {
             dbind_struct(&ty, |obj| unsafe {
-                layout_dbind_imp(inner.as_ptr(), std::ptr::null_mut(), obj.ty.as_ptr(), obj.size);
+                layout_dbind_imp(inner.ptr.get(), std::ptr::null_mut(), obj.ty.as_ptr(), obj.size);
             });
             let object = unsafe { dbind_create_imp(ty.as_ptr()) };
-            unsafe { layout_dbind_obj_imp(inner.as_ptr(), object as _, ty.as_ptr()) };
-            *inner.object_type.borrow_mut() = Some(ty);
-            *inner.object.borrow_mut() = Some(object as _)
+            unsafe { layout_dbind_obj_imp(inner.ptr.get(), object as _, ty.as_ptr()) };
+            *inner.props.object_type.borrow_mut() = Some(ty);
+            *inner.props.object.borrow_mut() = Some(object as _)
         });
     }
 
     /// Bind a field to a layout cell.
-    pub fn cell_dbind(&self, col: u32, row: u32, field: &str) {
-        let cell = self.cell(col, row);
+    pub fn dbind_cell(&self, col: u32, row: u32, field: &str) {
+        let cell = unsafe { layout_cell(self.as_ptr(), col, row) };
         let field = CString::new(field).unwrap();
         self.inner(|layout| {
-            if let Some(ty) = layout.object_type.borrow().as_ref() {
+            if let Some(ty) = layout.props.object_type.borrow().as_ref() {
                 dbind_struct(ty, |dbind| {
                     if let Some(field) = dbind.fields.borrow().get(&field) {
                         unsafe {
                             cell_dbind_imp(
-                                cell.as_ptr(),
+                                cell,
                                 dbind.ty.as_ptr(),
                                 field.size,
                                 field.name.as_ptr(),
@@ -372,6 +357,33 @@ impl Layout {
                 });
             }
         });
+    }
+
+    /// Check if the cell is empty.
+    pub fn is_empty(&self, col: u32, row: u32) -> bool {
+        let cell = unsafe { layout_cell(self.as_ptr(), col, row) };
+        unsafe { cell_empty(cell) != 0 }
+    }
+
+    /// Activate or deactivate a cell.
+    pub fn set_enabled(&self, col: u32, row: u32, enabled: bool) {
+        let cell = unsafe { layout_cell(self.as_ptr(), col, row) };
+        unsafe { cell_enabled(cell, enabled as _) }
+    }
+
+    /// Show or hide a cell.
+    ///
+    /// # Remarks
+    /// If the cell contains a sublayout, the command will affect all controls recursively.
+    pub fn set_visible(&self, col: u32, row: u32, visible: bool) {
+        let cell = unsafe { layout_cell(self.as_ptr(), col, row) };
+        unsafe { cell_visible(cell, visible as _) }
+    }
+
+    /// Set an inner margin.
+    pub fn set_padding(&self, col: u32, row: u32, top: f32, right: f32, bottom: f32, left: f32) {
+        let cell = unsafe { layout_cell(self.as_ptr(), col, row) };
+        unsafe { cell_padding4(cell, top, right, bottom, left) }
     }
 }
 

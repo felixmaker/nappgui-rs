@@ -1,8 +1,6 @@
 #![doc = include_str!("../README.md")]
 #![warn(missing_docs)]
 
-pub(crate) mod util;
-
 /// Just as a building needs a strong foundation, any software project must be supported by robust
 /// and efficient pillars. For this purpose, the core library has been developed, which provides
 /// commonly used non-graphical utilities.

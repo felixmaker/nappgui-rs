@@ -2,9 +2,8 @@ use std::{cell::RefCell, ffi::CStr, rc::Rc};
 
 use crate::{
     draw_2d::Image,
-    gui::{event::MenuEvent, impl_object, Menu, GUID},
+    gui::{define_object, event::MenuEvent, listener, Callback, Menu},
     types::{GuiState, KeyCode, ModifierKey},
-    util::macros::listener,
 };
 
 use nappgui_sys::{
@@ -14,21 +13,12 @@ use nappgui_sys::{
 };
 
 #[derive(Default)]
-pub(crate) struct MenuItemInner {
-    ptr: RefCell<*mut nappgui_sys::MenuItem>,
-    on_click: RefCell<Option<Rc<dyn Fn(&MenuEvent) + 'static>>>,
+pub(crate) struct MenuItemProps {
+    on_click: Callback<MenuEvent>,
     submenu: RefCell<Option<Menu>>,
 }
 
-/// The menu item control.
-///
-/// # Remarks
-/// If the object is not attached to a menu, it will cause a memory leak.
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct MenuItem(GUID);
-
-impl_object!(MenuItem, MenuItemInner);
+define_object!(MenuItem, MenuItemInner, MenuItem, MenuItemProps);
 
 impl MenuItem {
     /// Create a new item for a menu.
@@ -41,7 +31,7 @@ impl MenuItem {
     /// Create a new separator for a menu.
     pub fn new_separator() -> Self {
         let menu_item = unsafe { menuitem_separator() };
-        unsafe { Self::from_raw(menu_item) }
+        Self::from_raw(menu_item)
     }
 
     /// Set an event handle for item click.
@@ -49,9 +39,9 @@ impl MenuItem {
     where
         F: Fn(&MenuEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(callback)));
+        self.inner(|inner| *inner.props.on_click.borrow_mut() = Some(Rc::new(callback)));
 
-        let listener = listener!(self.0, MenuItem, on_click(MenuEvent));
+        let listener = listener!(self.as_ptr(), MenuItemInner, on_click(MenuEvent));
         unsafe { menuitem_OnClick(self.as_ptr(), listener) };
     }
 
@@ -85,7 +75,7 @@ impl MenuItem {
     pub fn set_submenu(&self, menu: Menu) {
         unsafe { menuitem_submenu(self.as_ptr(), &mut menu.as_ptr()) };
         menu.set_c_managed(true); // Avoid double leak from C
-        self.inner(|inner| *inner.submenu.borrow_mut() = Some(menu));
+        self.inner(|inner| *inner.props.submenu.borrow_mut() = Some(menu));
     }
 
     /// Set the status of the item, which will be reflected with a mark next to the text.
@@ -132,6 +122,6 @@ impl MenuItem {
 
     /// Gets the submenu associated with item.
     pub fn submenu(&self) -> Option<Menu> {
-        self.inner(|inner| inner.submenu.borrow().clone())?
+        self.inner(|inner| inner.props.submenu.borrow().clone())?
     }
 }

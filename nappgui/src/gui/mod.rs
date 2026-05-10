@@ -1,5 +1,4 @@
 mod button;
-mod cell;
 mod combo;
 mod control;
 mod edit;
@@ -28,9 +27,9 @@ pub mod event;
 
 use crate::{draw_2d::Image, types::Point2D};
 pub use {
-    button::*, cell::*, combo::*, control::*, edit::*, imageview::*, label::*, layout::*, line::*, listbox::*, menu::*,
+    button::*, combo::*, control::*, edit::*, imageview::*, label::*, layout::*, line::*, listbox::*, menu::*,
     menuitem::*, panel::*, popup::*, progress::*, slider::*, splitview::*, tableview::*, textview::*, updown::*,
-    view::*, webview::*, window::*,
+    view::*, webview::*, window::*, object::*,
 };
 
 pub(crate) use object::*;

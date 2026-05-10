@@ -5,24 +5,15 @@ use nappgui_sys::{
     panel_viewport, panel_visible_layout,
 };
 
-use crate::gui::{GUID, Layout, impl_control};
+use crate::gui::{define_object, Layout};
 
 #[derive(Default)]
-pub(crate) struct PanelInner {
-    ptr: RefCell<*mut nappgui_sys::Panel>,
+pub(crate) struct PanelProps {
     scroll: Cell<bool>,
-    pub(crate) layouts: RefCell<Vec<Layout>>,
+    layouts: RefCell<Vec<Layout>>,
 }
 
-/// The panel control.
-///
-/// # Remarks
-/// If the object is not attached to a window, it will cause a memory leak.
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct Panel(GUID);
-
-impl_control!(Panel, PanelInner);
+define_object!(Panel, PanelInner, Panel, PanelProps);
 
 impl Panel {
     /// Create a panel.
@@ -33,14 +24,14 @@ impl Panel {
     /// Create a panel with scroll bars.
     pub fn new_scroll(hscroll: bool, vscroll: bool) -> Self {
         let panel = unsafe { Self::from_raw(panel_scroll(hscroll as _, vscroll as _)) };
-        panel.inner(|inner| inner.scroll.set(hscroll || vscroll));
+        panel.inner(|inner| inner.props.scroll.set(hscroll || vscroll));
         panel
     }
 
     /// Create a fully configurable panel.
     pub fn new_custom(hscroll: bool, vscroll: bool, border: bool) -> Self {
         let panel = unsafe { Self::from_raw(panel_custom(hscroll as _, vscroll as _, border as _)) };
-        panel.inner(|inner| inner.scroll.set(hscroll || vscroll));
+        panel.inner(|inner| inner.props.scroll.set(hscroll || vscroll));
         panel
     }
 
@@ -57,13 +48,13 @@ impl Panel {
     /// You may use set_visible_layout to switch visible layout.
     pub fn add_layout(&self, layout: &Layout) -> u32 {
         let result = unsafe { panel_layout(self.as_ptr(), layout.as_ptr()) };
-        self.inner(|inner| inner.layouts.borrow_mut().push(layout.clone()));
+        self.inner(|inner| inner.props.layouts.borrow_mut().push(layout.clone()));
         result
     }
 
     /// Get a layout of a panel.
     pub fn layout(&self, index: u32) -> Option<Layout> {
-        self.inner(|inner| inner.layouts.borrow().get(index as usize).cloned())?
+        self.inner(|inner| inner.props.layouts.borrow().get(index as usize).cloned())?
     }
 
     /// Set the active layout inside the panel.
@@ -87,7 +78,7 @@ impl Panel {
     /// # Remarks
     /// If the panel does not have scroll bars, it will return None.
     pub fn scroll_size(&self) -> Option<(f32, f32)> {
-        let scroll = self.inner(|inner| inner.scroll.get())?;
+        let scroll = self.inner(|inner| inner.props.scroll.get())?;
         if scroll {
             return None;
         }

@@ -1,29 +1,17 @@
-use std::cell::RefCell;
-
 use nappgui_sys::{progress_create, progress_undefined, progress_value, progress_width};
 
-use crate::gui::{impl_control, GUID};
+use crate::gui::define_object;
 
 #[derive(Default)]
-pub(crate) struct ProgressInner {
-    ptr: RefCell<*mut nappgui_sys::Progress>,
-}
+pub(crate) struct ProgressProps {}
 
-/// The progress bar control.
-///
-/// # Remark
-/// If the object is not attached to a window, it will cause a memory leak.
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct Progress(GUID);
-
-impl_control!(Progress, ProgressInner);
+define_object!(Progress, ProgressInner, Progress, ProgressProps);
 
 impl Progress {
     /// Create a progress bar.
     pub fn new() -> Self {
         let progress = unsafe { progress_create() };
-        unsafe { Self::from_raw(progress) }
+        Self::from_raw(progress)
     }
 
     /// Set the natural width of control. By default 100px.

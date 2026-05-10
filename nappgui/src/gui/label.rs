@@ -1,14 +1,12 @@
 use std::{
-    cell::RefCell,
     ffi::{CStr, CString},
     rc::Rc,
 };
 
 use crate::{
     draw_2d::{Color, Font},
-    gui::{event::MouseEvent, impl_control, GUID},
+    gui::{define_object, event::MouseEvent, listener, Callback},
     types::{Align, Ellipsis, FontStyle},
-    util::macros::listener,
 };
 
 use nappgui_sys::{
@@ -18,26 +16,17 @@ use nappgui_sys::{
 };
 
 #[derive(Default)]
-pub(crate) struct LabelInner {
-    ptr: RefCell<*mut nappgui_sys::Label>,
-    on_click: RefCell<Option<Rc<dyn Fn(&MouseEvent) + 'static>>>,
+pub(crate) struct LabelProps {
+    on_click: Callback<MouseEvent>,
 }
 
-/// The label control.
-///
-/// # Remark
-/// If the object is not attached to a window, it will cause a memory leak.
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct Label(GUID);
-
-impl_control!(Label, LabelInner);
+define_object!(Label, LabelInner, Label, LabelProps);
 
 impl Label {
     /// Create a text control.
     pub fn new(text: &str) -> Label {
         let label = unsafe { label_create() };
-        let label = unsafe { Label::from_raw(label) };
+        let label = Label::from_raw(label);
         label.set_text(text);
         label
     }
@@ -56,8 +45,8 @@ impl Label {
     where
         F: Fn(&MouseEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.0, Label, on_click(MouseEvent));
+        self.inner(|inner| *inner.props.on_click.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), LabelInner, on_click(MouseEvent));
         unsafe { label_OnClick(self.as_ptr(), listener) };
     }
 

@@ -1,10 +1,9 @@
-use std::{cell::RefCell, rc::Rc};
+use std::rc::Rc;
 
 use crate::{
     draw_2d::Image,
-    gui::{impl_control, GUID},
+    gui::{VoidCallback, define_object, listener},
     types::Scale,
-    util::macros::listener,
 };
 
 use nappgui_sys::{
@@ -13,27 +12,18 @@ use nappgui_sys::{
 };
 
 #[derive(Default)]
-pub(crate) struct ImageViewInner {
-    ptr: RefCell<*mut nappgui_sys::ImageView>,
-    on_click: RefCell<Option<Rc<dyn Fn() + 'static>>>,
-    on_over_draw: RefCell<Option<Rc<dyn Fn() + 'static>>>,
+pub(crate) struct ImageViewProps {
+    on_click: VoidCallback<()>,
+    on_over_draw: VoidCallback<()>,
 }
 
-/// The image view control.
-///
-/// # Remark
-/// If the object is not attached to a window, it will cause a memory leak.
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct ImageView(GUID);
-
-impl_control!(ImageView, ImageViewInner);
+define_object!(ImageView, ImageViewInner, ImageView, ImageViewProps);
 
 impl ImageView {
     /// Create a image view.
     pub fn new(width: f32, height: f32) -> Self {
         let imageview = unsafe { imageview_create() };
-        let imageview = unsafe { ImageView::from_raw(imageview) };
+        let imageview = ImageView::from_raw(imageview);
         imageview.set_size(width, height);
         imageview
     }
@@ -65,8 +55,8 @@ impl ImageView {
     where
         F: Fn() + 'static,
     {
-        self.inner(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.0, ImageView, on_click());
+        self.inner(|inner| *inner.props.on_click.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), ImageViewInner, on_click());
         unsafe { imageview_OnClick(self.as_ptr(), listener) };
     }
 
@@ -75,8 +65,8 @@ impl ImageView {
     where
         F: Fn() + 'static,
     {
-        self.inner(|inner| *inner.on_over_draw.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.0, ImageView, on_over_draw());
+        self.inner(|inner| *inner.props.on_over_draw.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), ImageViewInner, on_over_draw());
         unsafe { imageview_OnOverDraw(self.as_ptr(), listener) };
     }
 

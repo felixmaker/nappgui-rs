@@ -1,13 +1,13 @@
-use std::{cell::RefCell, rc::Rc};
+use std::rc::Rc;
 
 use crate::{
     draw_2d::{Color, Image},
     gui::{
+        define_object,
         event::{TextEvent, TextFilterEvent},
-        impl_control, GUID,
+        listener, Callback,
     },
     types::{Align, FontStyle},
-    util::macros::listener,
 };
 
 use nappgui_sys::{
@@ -19,27 +19,18 @@ use nappgui_sys::{
 };
 
 #[derive(Default)]
-pub(crate) struct ComboInner {
-    ptr: RefCell<*mut nappgui_sys::Combo>,
-    on_filter: RefCell<Option<Rc<dyn Fn(&TextEvent) -> TextFilterEvent + 'static>>>,
-    on_change: RefCell<Option<Rc<dyn Fn(&TextEvent) -> bool + 'static>>>,
+pub(crate) struct ComboProps {
+    on_filter: Callback<TextEvent, TextFilterEvent>,
+    on_change: Callback<TextEvent, bool>,
 }
 
-/// The combo control.
-///
-/// # Remarks
-/// If the object is not attached to a window, it will cause a memory leak.
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct Combo(GUID);
-
-impl_control!(Combo, ComboInner);
+define_object!(Combo, ComboInner, Combo, ComboProps);
 
 impl Combo {
     /// Create a combo control.
     pub fn new() -> Self {
         let combo = unsafe { combo_create() };
-        unsafe { Self::from_raw(combo) }
+        Self::from_raw(combo)
     }
 
     /// Set a function to filter the text while editing.
@@ -47,8 +38,8 @@ impl Combo {
     where
         F: Fn(&TextEvent) -> TextFilterEvent + 'static,
     {
-        self.inner(|object| *object.on_filter.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.0, Combo, on_filter(TextEvent) -> TextFilterEvent);
+        self.inner(|object| *object.props.on_filter.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), ComboInner, on_filter(TextEvent) -> TextFilterEvent);
         unsafe { combo_OnFilter(self.as_ptr(), listener) };
     }
 
@@ -57,15 +48,15 @@ impl Combo {
     where
         F: Fn(&TextEvent) -> bool + 'static,
     {
-        self.inner(|object| *object.on_change.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.as_ptr(), Combo, on_change(TextEvent) -> bool);
+        self.inner(|object| *object.props.on_change.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), ComboInner, on_change(TextEvent) -> bool);
         unsafe { combo_OnChange(self.as_ptr(), listener) };
     }
 
     /// Set the default control width.
     ///
     /// # Remarks
-    /// The default width of an EditBox will be 100px. This value can be modified by this function.
+    /// The default width of an Combo will be 100px. This value can be modified by this function.
     pub fn set_width(&self, width: f32) {
         unsafe { combo_width(self.as_ptr(), width) };
     }

@@ -1,30 +1,18 @@
-use std::{cell::RefCell, rc::Rc};
+use std::rc::Rc;
 
 use nappgui_sys::{
     slider_OnMoved, slider_create, slider_get_value, slider_length, slider_steps, slider_tooltip, slider_value,
     slider_vertical,
 };
 
-use crate::{
-    gui::{event::SliderEvent, impl_control, GUID},
-    util::macros::listener,
-};
+use crate::gui::{Callback, define_object, event::SliderEvent, listener};
 
 #[derive(Default)]
-pub(crate) struct SliderInner {
-    ptr: RefCell<*mut nappgui_sys::Slider>,
-    on_moved: RefCell<Option<Rc<dyn Fn(&SliderEvent) + 'static>>>,
+pub(crate) struct SliderProps {
+    on_moved: Callback<SliderEvent>,
 }
 
-/// The slider control.
-///
-/// # Remarks
-/// If the object is not attached to a window, it will cause a memory leak.
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct Slider(GUID);
-
-impl_control!(Slider, SliderInner);
+define_object!(Slider, SliderInner, Slider, SliderProps);
 
 impl Slider {
     /// Create a new slider control.
@@ -47,8 +35,8 @@ impl Slider {
     where
         F: Fn(&SliderEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_moved.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, Slider, on_moved(SliderEvent));
+        self.inner(|inner| *inner.props.on_moved.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), SliderInner, on_moved(SliderEvent));
         unsafe { slider_OnMoved(self.as_ptr(), listener) }
     }
 

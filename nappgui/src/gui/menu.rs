@@ -5,35 +5,29 @@ use nappgui_sys::{
     menu_off_items, V2Df,
 };
 
-use crate::gui::{impl_object, Window, GUID};
+use crate::gui::{define_object, Window};
 
 use super::MenuItem;
 
 #[derive(Default)]
-pub(crate) struct MenuInner {
-    ptr: RefCell<*mut nappgui_sys::Menu>,
+pub(crate) struct MenuProps {
     c_managed: Cell<bool>,
     items: RefCell<Vec<MenuItem>>,
 }
 
-impl Drop for MenuInner {
-    fn drop(&mut self) {
-        if !self.c_managed.get() {
-            unsafe { menu_destroy(&mut self.as_ptr()) }
-        }
-    }
-}
+define_object!(Menu, MenuInner, Menu, MenuProps);
 
-/// The menu control.
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct Menu(GUID);
-
-impl_object!(Menu, MenuInner);
+// impl Drop for MenuInner {
+//     fn drop(&mut self) {
+//         if !self.c_managed.get() {
+//             unsafe { menu_destroy(&mut self.as_ptr()) }
+//         }
+//     }
+// }
 
 impl Menu {
     pub(crate) fn set_c_managed(&self, managed: bool) {
-        self.inner(|x| x.c_managed.set(managed));
+        self.inner(|x| x.props.c_managed.set(managed));
     }
 
     /// Create a new menu.
@@ -44,13 +38,13 @@ impl Menu {
     /// Add an item at the end of the menu.
     pub fn add_item(&self, item: MenuItem) {
         unsafe { menu_add_item(self.as_ptr(), item.as_ptr()) };
-        self.inner(|inner| inner.items.borrow_mut().push(item));
+        self.inner(|inner| inner.props.items.borrow_mut().push(item));
     }
 
     /// Insert an item in an arbitrary position of the menu.
     pub fn insert_item(&self, index: u32, item: MenuItem) {
         unsafe { menu_ins_item(self.as_ptr(), index, item.as_ptr()) };
-        self.inner(|inner| inner.items.borrow_mut().insert(index as _, item));
+        self.inner(|inner| inner.props.items.borrow_mut().insert(index as _, item));
     }
 
     /// Remove an item from the menu.
@@ -60,7 +54,7 @@ impl Menu {
     /// it will also be destroyed recursively.
     pub fn delete_item(&self, index: u32) {
         unsafe { menu_del_item(self.as_ptr(), index) };
-        self.inner(|inner| inner.items.borrow_mut().remove(index as _));
+        self.inner(|inner| inner.props.items.borrow_mut().remove(index as _));
     }
 
     /// Launch a menu as secondary or PopUp.
@@ -81,7 +75,7 @@ impl Menu {
 
     /// Get an item from the menu.
     pub fn get_item(&self, index: u32) -> Option<MenuItem> {
-        self.inner(|inner| inner.items.borrow().get(index as usize).cloned())?
+        self.inner(|inner| inner.props.items.borrow().get(index as usize).cloned())?
     }
 
     /// Returns TRUE if the menu is currently established as a menu bar.

@@ -1,14 +1,14 @@
-use std::{cell::RefCell, rc::Rc};
+use std::rc::Rc;
 
 use crate::{
     core::Stream,
     draw_2d::Color,
     gui::{
+        define_object,
         event::{TextEvent, TextFilterEvent},
-        impl_control, GUID,
+        listener, Callback,
     },
     types::{Align, FontStyle},
-    util::macros::listener,
 };
 
 use nappgui_sys::{
@@ -21,21 +21,12 @@ use nappgui_sys::{
 };
 
 #[derive(Default)]
-pub(crate) struct TextViewInner {
-    ptr: RefCell<*mut nappgui_sys::TextView>,
-    on_filter: RefCell<Option<Rc<dyn Fn(&TextEvent) -> TextFilterEvent + 'static>>>,
-    on_focus: RefCell<Option<Rc<dyn Fn(&bool) + 'static>>>,
+pub(crate) struct TextViewProps {
+    on_filter: Callback<TextEvent, TextFilterEvent>,
+    on_focus: Callback<bool>,
 }
 
-/// The text view control.
-///
-/// # Remarks
-/// If the object is not attached to a window, it will cause a memory leak.
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct TextView(GUID);
-
-impl_control!(TextView, TextViewInner);
+define_object!(TextView, TextViewInner, TextView, TextViewProps);
 
 impl TextView {
     /// Create a text view.
@@ -48,8 +39,8 @@ impl TextView {
     where
         F: Fn(&TextEvent) -> TextFilterEvent + 'static,
     {
-        self.inner(|inner| *inner.on_filter.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, TextView, on_filter(TextEvent)->TextFilterEvent);
+        self.inner(|inner| *inner.props.on_filter.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), TextViewInner, on_filter(TextEvent)->TextFilterEvent);
         unsafe { textview_OnFilter(self.as_ptr(), listener) }
     }
 
@@ -58,8 +49,8 @@ impl TextView {
     where
         F: Fn(&bool) + 'static,
     {
-        self.inner(|inner| *inner.on_focus.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, TextView, on_focus(bool));
+        self.inner(|inner| *inner.props.on_focus.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), TextViewInner, on_focus(bool));
         unsafe { textview_OnFocus(self.as_ptr(), listener) }
     }
 

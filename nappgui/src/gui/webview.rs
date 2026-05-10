@@ -1,28 +1,15 @@
-use std::{cell::RefCell, rc::Rc};
+use std::rc::Rc;
 
 use nappgui_sys::{webview_OnFocus, webview_back, webview_create, webview_forward, webview_navigate, webview_size};
 
-use crate::{
-    gui::{impl_control, GUID},
-    util::macros::listener,
-};
+use crate::gui::{Callback, define_object, listener};
 
 #[derive(Default)]
-pub(crate) struct WebViewInner {
-    ptr: RefCell<*mut nappgui_sys::WebView>,
-    on_focus: RefCell<Option<Rc<dyn Fn(&bool) + 'static>>>,
+pub(crate) struct WebViewProps {
+    on_focus: Callback<bool>,
 }
 
-/// The web view control.
-///
-/// # Remarks
-/// If the object is not attached to a window, it will cause a memory leak.
-#[repr(transparent)]
-#[derive(Clone)]
-
-pub struct WebView(GUID);
-
-impl_control!(WebView, WebViewInner);
+define_object!(WebView, WebViewInner, WebView, WebViewProps);
 
 impl WebView {
     /// Create a Web View.
@@ -35,8 +22,8 @@ impl WebView {
     where
         F: Fn(&bool) + 'static,
     {
-        self.inner(|inner| *inner.on_focus.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, WebView, on_focus(bool));
+        self.inner(|inner| *inner.props.on_focus.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), WebViewInner, on_focus(bool));
         unsafe { webview_OnFocus(self.as_ptr(), listener) }
     }
 

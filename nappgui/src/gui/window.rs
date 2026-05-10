@@ -14,11 +14,10 @@ use std::rc::Rc;
 
 use crate::draw_2d::{Color, Image};
 use crate::gui::event::{PositionEvent, SizeEvent, WindowCloseEvent};
-use crate::gui::{impl_object, Button, Control, Menu, Panel, GUID};
+use crate::gui::{define_object, listener, Button, Callback, Menu, Panel};
 use crate::types::{
     Align, FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D, Size2D, WindowFlags,
 };
-use crate::util::macros::listener;
 
 struct HotkeyContext {
     key: KeyCode,
@@ -27,35 +26,29 @@ struct HotkeyContext {
 }
 
 #[derive(Default)]
-pub(crate) struct WindowInner {
-    ptr: RefCell<*mut nappgui_sys::Window>,
+pub(crate) struct WindowProps {
     menu_bar: RefCell<Option<Menu>>,
     default_button: RefCell<Option<Button>>,
     panel: RefCell<Option<Panel>>,
-    on_close: RefCell<Option<Rc<dyn Fn(&WindowCloseEvent) -> bool + 'static>>>,
-    on_moved: RefCell<Option<Rc<dyn Fn(&PositionEvent) + 'static>>>,
-    on_resize: RefCell<Option<Rc<dyn Fn(&SizeEvent) + 'static>>>,
+    on_close: Callback<WindowCloseEvent, bool>,
+    on_moved: Callback<PositionEvent>,
+    on_resize: Callback<SizeEvent>,
     on_hotkey: RefCell<HashMap<(KeyCode, ModifierKey), Rc<dyn Fn() + 'static>>>,
     on_hotkey_context: RefCell<Vec<*mut HotkeyContext>>,
 }
 
-impl Drop for WindowInner {
-    fn drop(&mut self) {
-        unsafe { window_destroy(&mut self.as_ptr()) };
-        for context in self.on_hotkey_context.borrow().iter() {
-            unsafe {
-                let _ = Box::from_raw(*context);
-            };
-        }
-    }
-}
+define_object!(Window, WindowInner, Window, WindowProps);
 
-/// The window object.
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct Window(GUID);
-
-impl_object!(Window, WindowInner);
+// impl<T> Drop for ObjectInner<T, WindowProps> {
+//     fn drop(&mut self) {
+//         unsafe { window_destroy(&mut self.as_ptr()) };
+//         for context in self.on_hotkey_context.borrow().iter() {
+//             unsafe {
+//                 let _ = Box::from_raw(*context);
+//             };
+//         }
+//     }
+// }
 
 impl Window {
     /// Create a new window.
@@ -68,8 +61,8 @@ impl Window {
     where
         F: Fn(&WindowCloseEvent) -> bool + 'static,
     {
-        self.inner(|inner| *inner.on_close.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, Window, on_close(WindowCloseEvent));
+        self.inner(|inner| *inner.props.on_close.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), WindowInner, on_close(WindowCloseEvent));
         unsafe { window_OnClose(self.as_ptr(), listener) }
     }
 
@@ -78,8 +71,8 @@ impl Window {
     where
         F: Fn(&PositionEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_moved.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, Window, on_moved(PositionEvent));
+        self.inner(|inner| *inner.props.on_moved.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), WindowInner, on_moved(PositionEvent));
         unsafe { window_OnMoved(self.as_ptr(), listener) }
     }
 
@@ -88,8 +81,8 @@ impl Window {
     where
         F: Fn(&SizeEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_resize.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, Window, on_resize(SizeEvent));
+        self.inner(|inner| *inner.props.on_resize.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), WindowInner, on_resize(SizeEvent));
         unsafe { window_OnResize(self.as_ptr(), listener) }
     }
 
@@ -105,18 +98,18 @@ impl Window {
         assert!(panel.layout(0).is_some(), "Panel has no layout in it.");
 
         // Check if the same panel has already been set.
-        if Some(Some(panel.as_ptr())) == self.inner(|x| x.panel.borrow().as_ref().map(|x| x.as_ptr())) {
+        if Some(Some(panel.as_ptr())) == self.inner(|x| x.props.panel.borrow().as_ref().map(|x| x.as_ptr())) {
             return;
         }
 
         debug_assert_eq!(
-            self.inner(|x| x.panel.borrow().is_none()),
+            self.inner(|x| x.props.panel.borrow().is_none()),
             Some(true),
             "Panel has already been set."
         );
 
         unsafe { window_panel(self.as_ptr(), panel.as_ptr()) };
-        self.inner(|inner| *inner.panel.borrow_mut() = Some(panel.clone()));
+        self.inner(|inner| *inner.props.panel.borrow_mut() = Some(panel.clone()));
     }
 
     /// Set the text that will display the window in the title bar.
@@ -161,12 +154,15 @@ impl Window {
         F: Fn() + 'static,
     {
         let id = (key, modifiers);
-        self.inner(|inner| inner.on_hotkey.borrow_mut().insert(id, Rc::new(handler)));
+        self.inner(|inner| inner.props.on_hotkey.borrow_mut().insert(id, Rc::new(handler)));
 
         extern "C" fn shim(obj: *mut std::ffi::c_void, _event: *mut nappgui_sys::Event) {
             let context = unsafe { &*(obj as *mut HotkeyContext) };
             let id = (context.key, context.modifiers);
-            if let Some(Some(f)) = context.window.inner(|obj| obj.on_hotkey.borrow().get(&id).cloned()) {
+            if let Some(Some(f)) = context
+                .window
+                .inner(|obj| obj.props.on_hotkey.borrow().get(&id).cloned())
+            {
                 let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f()));
             }
         }
@@ -177,7 +173,7 @@ impl Window {
             window: self.clone(),
         }));
 
-        self.inner(|inner| inner.on_hotkey_context.borrow_mut().push(context));
+        self.inner(|inner| inner.props.on_hotkey_context.borrow_mut().push(context));
 
         let listener = unsafe { listener_imp(context as _, Some(shim)) };
         unsafe {
@@ -213,23 +209,23 @@ impl Window {
         GuiFocus::try_from(focus).unwrap()
     }
 
-    /// Set keyboard focus to a specific control.
-    pub fn set_focus<T>(&self, control: &T) -> GuiFocus
-    where
-        T: Control,
-    {
-        let focus = unsafe { window_focus(self.as_ptr(), control.as_control_ptr()) };
-        GuiFocus::try_from(focus).unwrap()
-    }
+    // /// Set keyboard focus to a specific control.
+    // pub fn set_focus<T>(&self, control: &T) -> GuiFocus
+    // where
+    //     T: Control,
+    // {
+    //     let focus = unsafe { window_focus(self.as_ptr(), control.as_control_ptr()) };
+    //     GuiFocus::try_from(focus).unwrap()
+    // }
 
-    /// Gets the control that keyboard focus has.
-    pub fn focus<T>(&self) -> Option<T>
-    where
-        T: Control,
-    {
-        let control = unsafe { window_get_focus(self.as_ptr()) };
-        T::from_control_ptr(control)
-    }
+    // /// Gets the control that keyboard focus has.
+    // pub fn focus<T>(&self) -> Option<T>
+    // where
+    //     T: Control,
+    // {
+    //     let control = unsafe { window_get_focus(self.as_ptr()) };
+    //     T::from_control_ptr(control)
+    // }
 
     /// Gets additional information about a keyboard focus change operation.
     ///
@@ -326,14 +322,12 @@ impl Window {
     /// # Remarks
     ///
     /// control must belong to the window, be active and visible. The point (0,0) corresponds to the upper left vertex of the client area of the window.
-    pub fn control_frame<T>(&self, control: &T) -> Rect2D
-    where
-        T: Control,
-    {
-        unsafe {
-            let rect = window_control_frame(self.as_ptr(), control.as_control_ptr());
-            std::mem::transmute(rect)
-        }
+    pub fn control_frame<T>(&self, control: &T) -> Rect2D {
+        // unsafe {
+        //     let rect = window_control_frame(self.as_ptr(), control.as_ptr());
+        //     std::mem::transmute(rect)
+        // }
+        todo!()
     }
 
     /// Transforms a point expressed in window coordinates to screen coordinates.
@@ -351,16 +345,8 @@ impl Window {
     /// This function disables the possible previous default button. For the new button to be set,
     /// it must exist in the active layout.
     pub fn set_default_button(&self, button: &Button) {
-        self.inner(|inner| *inner.default_button.borrow_mut() = Some(button.clone()));
+        self.inner(|inner| *inner.props.default_button.borrow_mut() = Some(button.clone()));
         unsafe { window_defbutton(self.as_ptr(), button.as_ptr()) }
-
-        // if let Some(window) = self.0.upgrade() {
-        //     if let Some(_panel) = window.panel.borrow().clone() {
-        //         // todo: check if button is in the panel
-        //         unsafe { window_defbutton(window.as_ptr(), button.as_ptr()) };
-        //         *window.default_button.borrow_mut() = Some(button.clone());
-        //     }
-        // }
     }
 
     /// Change the mouse cursor.
@@ -374,7 +360,7 @@ impl Window {
 
     /// Set the general menu bar of the application.
     pub fn set_menubar(&self, menu: &Menu) {
-        self.inner(|inner| *inner.menu_bar.borrow_mut() = Some(menu.clone()));
+        self.inner(|inner| *inner.props.menu_bar.borrow_mut() = Some(menu.clone()));
         unsafe { osapp_menubar(menu.as_ptr(), self.as_ptr()) }
     }
 

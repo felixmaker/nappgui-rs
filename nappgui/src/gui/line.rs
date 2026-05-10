@@ -1,22 +1,11 @@
-use std::cell::RefCell;
-
 use nappgui_sys::{line_horizontal, line_length, line_vertical};
 
-use crate::gui::{impl_control, GUID};
+use crate::gui::define_object;
 
 #[derive(Default)]
-pub(crate) struct LineInner {
-    ptr: RefCell<*mut nappgui_sys::Line>,
-}
+pub(crate) struct LineProps {}
 
-/// The line control.
-///
-/// # Remarks
-/// If the object is not attached to a window, it will cause a memory leak.
-#[repr(transparent)]
-pub struct Line(GUID);
-
-impl_control!(Line, LineInner);
+define_object!(Line, LineInner, Line, LineProps);
 
 impl Line {
     /// Create a horizontal separator.

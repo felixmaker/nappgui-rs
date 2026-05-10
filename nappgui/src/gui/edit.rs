@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::rc::Rc;
 
 use nappgui_sys::{
     edit_OnChange, edit_OnFilter, edit_OnFocus, edit_align, edit_autoselect, edit_bgcolor, edit_bgcolor_focus,
@@ -10,42 +10,33 @@ use nappgui_sys::{
 use crate::{
     draw_2d::{font::Font, Color},
     gui::{
+        define_object,
         event::{TextEvent, TextFilterEvent},
-        impl_control, GUID,
+        listener, Callback,
     },
     types::{Align, FontStyle},
-    util::macros::listener,
 };
 
 #[derive(Default)]
-pub(crate) struct EditInner {
-    ptr: RefCell<*mut nappgui_sys::Edit>,
-    on_filter: RefCell<Option<Rc<dyn Fn(&TextEvent) -> TextFilterEvent + 'static>>>,
-    on_change: RefCell<Option<Rc<dyn Fn(&TextEvent) -> bool + 'static>>>,
-    on_focus: RefCell<Option<Rc<dyn Fn(&bool) + 'static>>>,
+pub(crate) struct EditProps {
+    on_filter: Callback<TextEvent, TextFilterEvent>,
+    on_change: Callback<TextEvent, bool>,
+    on_focus: Callback<bool>,
 }
 
-/// The edit control.
-///
-/// # Remarks
-/// If the object is not attached to a window, it will cause a memory leak.
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct Edit(GUID);
-
-impl_control!(Edit, EditInner);
+define_object!(Edit, EditInner, Edit, EditProps);
 
 impl Edit {
     /// Create a text edit control.
     pub fn new() -> Self {
         let edit = unsafe { edit_create() };
-        unsafe { Self::from_raw(edit) }
+        Self::from_raw(edit)
     }
 
     /// Create a multiline text edit control.
     pub fn new_multiline() -> Self {
         let edit = unsafe { edit_multiline() };
-        unsafe { Self::from_raw(edit) }
+        Self::from_raw(edit)
     }
 
     /// Set a function to filter the text while editing.
@@ -53,8 +44,8 @@ impl Edit {
     where
         F: Fn(&TextEvent) -> TextFilterEvent + 'static,
     {
-        self.inner(|object| *object.on_filter.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.0, Edit, on_filter(TextEvent) -> TextFilterEvent);
+        self.inner(|object| *object.props.on_filter.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), EditInner, on_filter(TextEvent) -> TextFilterEvent);
         unsafe { edit_OnFilter(self.as_ptr(), listener) };
     }
 
@@ -63,8 +54,8 @@ impl Edit {
     where
         F: Fn(&TextEvent) -> bool + 'static,
     {
-        self.inner(|object| *object.on_change.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.0, Edit, on_change(TextEvent) -> bool);
+        self.inner(|object| *object.props.on_change.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), EditInner, on_change(TextEvent) -> bool);
         unsafe { edit_OnChange(self.as_ptr(), listener) };
     }
 
@@ -73,8 +64,8 @@ impl Edit {
     where
         F: Fn(&bool) + 'static,
     {
-        self.inner(|object| *object.on_focus.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.0, Edit, on_focus(bool));
+        self.inner(|object| *object.props.on_focus.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), EditInner, on_focus(bool));
         unsafe { edit_OnFocus(self.as_ptr(), listener) };
     }
 

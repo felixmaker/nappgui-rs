@@ -1,5 +1,4 @@
 use std::{
-    cell::RefCell,
     ffi::{CStr, CString},
     rc::Rc,
 };
@@ -7,10 +6,10 @@ use std::{
 use crate::{
     draw_2d::{Color, Font, Image},
     gui::{
+        define_object,
         event::{ButtonEvent, MouseEvent},
-        impl_control, GUID,
+        listener, Callback,
     },
-    util::macros::listener,
 };
 
 use nappgui_sys::{
@@ -21,27 +20,18 @@ use nappgui_sys::{
 };
 
 #[derive(Default)]
-pub(crate) struct ListBoxInner {
-    ptr: RefCell<*mut nappgui_sys::ListBox>,
-    on_down: RefCell<Option<Rc<dyn Fn(&MouseEvent) -> bool + 'static>>>,
-    on_select: RefCell<Option<Rc<dyn Fn(&ButtonEvent) + 'static>>>,
+pub(crate) struct ListBoxProps {
+    on_down: Callback<MouseEvent, bool>,
+    on_select: Callback<ButtonEvent>,
 }
 
-/// The list box control.
-///
-/// # Remarks
-/// If the object is not attached to a window, it will cause a memory leak.
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct ListBox(GUID);
-
-impl_control!(ListBox, ListBoxInner);
+define_object!(ListBox, ListBoxInner, ListBox, ListBoxProps);
 
 impl ListBox {
     /// Create a new list control.
     pub fn new() -> Self {
         let listbox = unsafe { listbox_create() };
-        unsafe { Self::from_raw(listbox) }
+        Self::from_raw(listbox)
     }
 
     /// Sets a handler for a mouse button press.
@@ -55,8 +45,8 @@ impl ListBox {
     where
         F: Fn(&MouseEvent) -> bool + 'static,
     {
-        self.inner(|inner| *inner.on_down.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.0, ListBox, on_down(MouseEvent) -> bool);
+        self.inner(|inner| *inner.props.on_down.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), ListBoxInner, on_down(MouseEvent) -> bool);
         unsafe { listbox_OnDown(self.as_ptr(), listener) }
     }
 
@@ -65,8 +55,8 @@ impl ListBox {
     where
         F: Fn(&ButtonEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_select.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.0, ListBox, on_select(ButtonEvent));
+        self.inner(|inner| *inner.props.on_select.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), ListBoxInner, on_select(ButtonEvent));
         unsafe { listbox_OnSelect(self.as_ptr(), listener) }
     }
 

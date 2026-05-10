@@ -1,15 +1,13 @@
-use std::{
-    cell::RefCell,
-    rc::{Rc, },
-};
+use std::rc::Rc;
 
 use crate::{
     draw_2d::Font,
     gui::{
-        GUID, event::{TableDataParams, TableDataResult}, impl_control,
+        define_object,
+        event::{TableDataParams, TableDataResult},
+        listener, Callback, VoidCallback,
     },
     types::{Align, EventType, TablePositionEvent},
-    util::macros::listener,
 };
 
 use nappgui_sys::{
@@ -23,25 +21,14 @@ use nappgui_sys::{
 };
 
 #[derive(Default)]
-pub(crate) struct TableViewInner {
-    ptr: RefCell<*mut nappgui_sys::TableView>,
-    on_select: RefCell<Option<Rc<dyn Fn() + 'static>>>,
-    on_row_click: RefCell<Option<Rc<dyn Fn() + 'static>>>,
-    on_header_click: RefCell<Option<Rc<dyn Fn() + 'static>>>,
-    on_data: RefCell<Option<Rc<dyn Fn(&TableDataParams) -> TableDataResult + 'static>>>,
+pub(crate) struct TableViewProps {
+    on_select: VoidCallback,
+    on_row_click: VoidCallback,
+    on_header_click: VoidCallback,
+    on_data: Callback<TableDataParams, TableDataResult>,
 }
 
-
-/// The table view control.
-///
-/// # Remarks
-/// If the object is not attached to a window, it will cause a memory leak.
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct TableView(GUID);
-
-impl_control!(TableView, TableViewInner);
-
+define_object!(TableView, TableViewInner, TableView, TableViewProps);
 
 impl TableView {
     /// Create an table view control.
@@ -54,8 +41,8 @@ impl TableView {
     where
         F: Fn() + 'static,
     {
-        self.inner(|inner| *inner.on_select.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, TableView, on_select());
+        self.inner(|inner| *inner.props.on_select.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), TableViewInner, on_select());
         unsafe { tableview_OnSelect(self.as_ptr(), listener) }
     }
 
@@ -64,8 +51,8 @@ impl TableView {
     where
         F: Fn() + 'static,
     {
-        self.inner(|inner| *inner.on_row_click.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, TableView, on_row_click());
+        self.inner(|inner| *inner.props.on_row_click.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), TableViewInner, on_row_click());
         unsafe { tableview_OnRowClick(self.as_ptr(), listener) }
     }
 
@@ -74,8 +61,8 @@ impl TableView {
     where
         F: Fn() + 'static,
     {
-        self.inner(|inner| *inner.on_header_click.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, TableView, on_header_click());
+        self.inner(|inner| *inner.props.on_header_click.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), TableViewInner, on_header_click());
         unsafe { tableview_OnHeaderClick(self.as_ptr(), listener) }
     }
 
@@ -84,14 +71,14 @@ impl TableView {
     where
         F: Fn(&TableDataParams) -> TableDataResult + 'static,
     {
-        self.inner(|inner| *inner.on_data.borrow_mut() = Some(Rc::new(handler)));
+        self.inner(|inner| *inner.props.on_data.borrow_mut() = Some(Rc::new(handler)));
 
         let listener = {
             use std::ffi::c_void;
             extern "C" fn shim(obj: *mut c_void, event: *mut nappgui_sys::Event) {
-                if let Some(obj) = crate::gui::global_get(obj as _) {
-                    let crate::gui::GObject::TableView(obj) = obj.as_ref() else { return };
-                    let Some(f) = obj.on_data.borrow().clone() else { return };
+                if let Some(Some(f)) =
+                    crate::gui::global_object(obj as _, |inner: &TableViewInner| inner.props.on_data.borrow().clone())
+                {
                     let event = crate::core::event::Event::new(event);
                     let params = match event.type_() {
                         EventType::TableNRows => TableDataParams::TableNCols,

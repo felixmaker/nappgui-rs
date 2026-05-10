@@ -1,9 +1,8 @@
-use std::{cell::RefCell, rc::Rc};
+use std::rc::Rc;
 
 use crate::{
     draw_2d::Image,
-    gui::{event::ButtonEvent, impl_control, GUID},
-    util::macros::listener,
+    gui::{define_object, event::ButtonEvent, listener, Callback},
 };
 
 use nappgui_sys::{
@@ -13,26 +12,17 @@ use nappgui_sys::{
 };
 
 #[derive(Default)]
-pub(crate) struct PopUpInner {
-    ptr: RefCell<*mut nappgui_sys::PopUp>,
-    on_select: RefCell<Option<Rc<dyn Fn(&ButtonEvent) + 'static>>>,
+pub(crate) struct PopUpProps {
+    on_select: Callback<ButtonEvent>,
 }
 
-/// The popup control.
-///
-/// # Remarks
-/// If the object is not attached to a window, it will cause a memory leak.
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct PopUp(GUID);
-
-impl_control!(PopUp, PopUpInner);
+define_object!(PopUp, PopUpInner, PopUp, PopUpProps);
 
 impl PopUp {
     /// Create a new popup control (PopUp button).
     pub fn new() -> Self {
         let popup = unsafe { popup_create() };
-        unsafe { Self::from_raw(popup) }
+        Self::from_raw(popup)
     }
 
     /// Set an event handler for the selection of a new item.
@@ -40,8 +30,8 @@ impl PopUp {
     where
         F: Fn(&ButtonEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_select.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.0, PopUp, on_select(ButtonEvent));
+        self.inner(|inner| *inner.props.on_select.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), PopUpInner, on_select(ButtonEvent));
         unsafe { popup_OnSelect(self.as_ptr(), listener) }
     }
 

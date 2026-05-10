@@ -13,7 +13,7 @@ struct App {}
 impl AppHandler for App {
     fn create() -> Self {
         Data::dbind_register().expect("DBind failed");
-
+        
         let panel = Panel::new();
 
         let layout = Layout::new(1, 10);
@@ -28,10 +28,10 @@ impl AppHandler for App {
         layout.set_control(0, 3, &check2);
 
         layout.dbind("Data");
-        layout.cell_dbind(0, 0, "text");
-        layout.cell_dbind(0, 1, "text");
-        layout.cell_dbind(0, 2, "boolean");
-        layout.cell_dbind(0, 3, "boolean");
+        layout.dbind_cell(0, 0, "text");
+        layout.dbind_cell(0, 1, "text");
+        layout.dbind_cell(0, 2, "boolean");
+        layout.dbind_cell(0, 3, "boolean");
 
         panel.add_layout(&layout);
 

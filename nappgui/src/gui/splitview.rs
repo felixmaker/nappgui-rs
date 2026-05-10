@@ -1,5 +1,3 @@
-use std::cell::RefCell;
-
 use nappgui_sys::{
     splitview_get_pos, splitview_horizontal, splitview_minsize0, splitview_minsize1, splitview_panel, splitview_pos,
     splitview_splitview, splitview_tableview, splitview_textview, splitview_vertical, splitview_view,
@@ -7,24 +5,14 @@ use nappgui_sys::{
 };
 
 use crate::{
-    gui::{impl_control, Panel, TableView, TextView, View, WebView, GUID},
+    gui::{define_object, Panel, TableView, TextView, View, WebView},
     types::SplitMode,
 };
 
 #[derive(Default)]
-pub(crate) struct SplitViewInner {
-    ptr: RefCell<*mut nappgui_sys::SplitView>,
-}
+pub(crate) struct SplitViewProps {}
 
-/// The splitview control.
-///
-/// # Remarks
-/// If the object is not attached to a window, it will cause a memory leak.
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct SplitView(GUID);
-
-impl_control!(SplitView, SplitViewInner);
+define_object!(SplitView, SplitViewInner, SplitView, SplitViewProps);
 
 impl SplitView {
     /// Create a splitview with horizontal split.

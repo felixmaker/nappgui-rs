@@ -1,33 +1,21 @@
-use std::{cell::RefCell, rc::Rc};
+use std::rc::Rc;
 
 use nappgui_sys::{updown_OnClick, updown_create, updown_tooltip};
 
-use crate::{
-    gui::{event::ButtonEvent, impl_control, GUID},
-    util::macros::listener,
-};
+use crate::gui::{define_object, event::ButtonEvent, listener, Callback};
 
 #[derive(Default)]
-pub(crate) struct UpDownInner {
-    ptr: RefCell<*mut nappgui_sys::UpDown>,
-    on_click: RefCell<Option<Rc<dyn Fn(&ButtonEvent) + 'static>>>,
+pub(crate) struct UpDownProps {
+    on_click: Callback<ButtonEvent>,
 }
 
-/// The updown control.
-///
-/// # Remark
-/// If the object is not attached to a window, it will cause a memory leak.
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct UpDown(GUID);
-
-impl_control!(UpDown, UpDownInner);
+define_object!(UpDown, UpDownInner, UpDown, UpDownProps);
 
 impl UpDown {
     /// Create an updown control.
     pub fn new() -> Self {
         let updown = unsafe { updown_create() };
-        unsafe { UpDown::from_raw(updown) }
+        UpDown::from_raw(updown)
     }
 
     /// Set an event handler for pressing the button.
@@ -35,8 +23,8 @@ impl UpDown {
     where
         F: Fn(&ButtonEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, UpDown, on_click(ButtonEvent));
+        self.inner(|inner| *inner.props.on_click.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), UpDownInner, on_click(ButtonEvent));
         unsafe { updown_OnClick(self.as_ptr(), listener) }
     }
 

@@ -1,14 +1,12 @@
 use std::{
-    cell::RefCell,
     ffi::{CStr, CString},
     rc::Rc,
 };
 
 use crate::{
     draw_2d::{Font, Image},
-    gui::{event::ButtonEvent, impl_control, GUID},
+    gui::{define_object, event::ButtonEvent, listener, Callback},
     types::GuiState,
-    util::macros::listener,
 };
 
 use nappgui_sys::{
@@ -19,20 +17,11 @@ use nappgui_sys::{
 };
 
 #[derive(Default)]
-pub(crate) struct ButtonInner {
-    ptr: RefCell<*mut nappgui_sys::Button>,
-    on_click: RefCell<Option<Rc<dyn Fn(&ButtonEvent) + 'static>>>,
+pub(crate) struct ButtonProps {
+    on_click: Callback<ButtonEvent>,
 }
 
-/// The button control.
-///
-/// # Remarks
-/// If the object is not attached to a window, it will cause a memory leak.
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct Button(GUID);
-
-impl_control!(Button, ButtonInner);
+define_object!(Button, ButtonInner, Button, ButtonProps);
 
 impl Button {
     /// Create a push button, the typical [Accept], [Cancel], etc.
@@ -82,8 +71,8 @@ impl Button {
     where
         F: Fn(&ButtonEvent) + 'static,
     {
-        self.inner(|object| *object.on_click.borrow_mut() = Some(Rc::new(callback)));
-        let listener = listener!(self.0, Button, on_click(ButtonEvent));
+        self.inner(|object| *object.props.on_click.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), ButtonInner, on_click(ButtonEvent));
         unsafe { button_OnClick(self.as_ptr(), listener) };
     }
 

@@ -1,4 +1,4 @@
-use std::{cell::RefCell, ffi::CString, rc::Rc};
+use std::{ffi::CString, rc::Rc};
 
 use nappgui_sys::{
     view_OnAcceptFocus, view_OnClick, view_OnDown, view_OnDrag, view_OnDraw, view_OnEnter, view_OnExit, view_OnFocus,
@@ -8,45 +8,32 @@ use nappgui_sys::{
     view_tooltip, view_update, view_viewport, S2Df, V2Df,
 };
 
-use crate::{
-    gui::{
-        event::{DrawEvent, KeyEvent, MouseEvent, ScrollEvent, SizeEvent},
-        impl_control, GUID,
-    },
-    util::macros::listener,
+use crate::gui::{
+    Callback, VoidCallback, define_object, event::{DrawEvent, KeyEvent, MouseEvent, ScrollEvent, SizeEvent}, listener
 };
 
 #[derive(Default)]
-pub(crate) struct ViewInner {
-    ptr: RefCell<*mut nappgui_sys::View>,
-    on_draw: RefCell<Option<Rc<dyn Fn(&DrawEvent) + 'static>>>,
-    on_overlay: RefCell<Option<Rc<dyn Fn(&DrawEvent) + 'static>>>,
-    on_size: RefCell<Option<Rc<dyn Fn(&SizeEvent) + 'static>>>,
-    on_enter: RefCell<Option<Rc<dyn Fn(&MouseEvent) + 'static>>>,
-    on_exit: RefCell<Option<Rc<dyn Fn(&MouseEvent) + 'static>>>,
-    on_move: RefCell<Option<Rc<dyn Fn(&MouseEvent) + 'static>>>,
-    on_down: RefCell<Option<Rc<dyn Fn(&MouseEvent) + 'static>>>,
-    on_up: RefCell<Option<Rc<dyn Fn(&MouseEvent) + 'static>>>,
-    on_click: RefCell<Option<Rc<dyn Fn(&MouseEvent) + 'static>>>,
-    on_drag: RefCell<Option<Rc<dyn Fn(&MouseEvent) + 'static>>>,
-    on_wheel: RefCell<Option<Rc<dyn Fn(&MouseEvent) + 'static>>>,
-    on_key_down: RefCell<Option<Rc<dyn Fn(&KeyEvent) + 'static>>>,
-    on_key_up: RefCell<Option<Rc<dyn Fn(&KeyEvent) + 'static>>>,
-    on_focus: RefCell<Option<Rc<dyn Fn(&bool) + 'static>>>,
-    on_accept_focus: RefCell<Option<Rc<dyn Fn() -> bool + 'static>>>,
-    on_resign_focus: RefCell<Option<Rc<dyn Fn() -> bool + 'static>>>,
-    on_scroll: RefCell<Option<Rc<dyn Fn(&ScrollEvent) -> f32 + 'static>>>,
+pub(crate) struct ViewProps {
+    on_draw: Callback<DrawEvent>,
+    on_overlay: Callback<DrawEvent>,
+    on_size: Callback<SizeEvent>,
+    on_enter: Callback<MouseEvent>,
+    on_exit: Callback<MouseEvent>,
+    on_move: Callback<MouseEvent>,
+    on_down: Callback<MouseEvent>,
+    on_up: Callback<MouseEvent>,
+    on_click: Callback<MouseEvent>,
+    on_drag: Callback<MouseEvent>,
+    on_wheel: Callback<MouseEvent>,
+    on_key_down: Callback<KeyEvent>,
+    on_key_up: Callback<KeyEvent>,
+    on_focus: Callback<bool>,
+    on_accept_focus: VoidCallback<bool>,
+    on_resign_focus: VoidCallback<bool>,
+    on_scroll: Callback<ScrollEvent, f32>,
 }
 
-/// The view control.
-///
-/// # Remarks
-/// If the object is not attached to a window, it will cause a memory leak.
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct View(GUID);
-
-impl_control!(View, ViewInner);
+define_object!(View, ViewInner, View, ViewProps);
 
 impl View {
     /// Create a new custom view.
@@ -75,8 +62,8 @@ impl View {
     where
         F: Fn(&DrawEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_draw.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, View, on_draw(DrawEvent));
+        self.inner(|inner| *inner.props.on_draw.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_draw(DrawEvent));
         unsafe { view_OnDraw(self.as_ptr(), listener) }
     }
 
@@ -85,8 +72,8 @@ impl View {
     where
         F: Fn(&DrawEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_overlay.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, View, on_overlay(DrawEvent));
+        self.inner(|inner| *inner.props.on_overlay.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_overlay(DrawEvent));
         unsafe { view_OnOverlay(self.as_ptr(), listener) }
     }
 
@@ -95,8 +82,8 @@ impl View {
     where
         F: Fn(&SizeEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_size.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, View, on_size(SizeEvent));
+        self.inner(|inner| *inner.props.on_size.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_size(SizeEvent));
         unsafe { view_OnSize(self.as_ptr(), listener) }
     }
 
@@ -105,8 +92,8 @@ impl View {
     where
         F: Fn(&MouseEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_enter.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, View, on_enter(MouseEvent));
+        self.inner(|inner| *inner.props.on_enter.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_enter(MouseEvent));
         unsafe { view_OnEnter(self.as_ptr(), listener) }
     }
 
@@ -115,8 +102,8 @@ impl View {
     where
         F: Fn(&MouseEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_exit.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, View, on_exit(MouseEvent));
+        self.inner(|inner| *inner.props.on_exit.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_exit(MouseEvent));
         unsafe { view_OnExit(self.as_ptr(), listener) }
     }
 
@@ -125,8 +112,8 @@ impl View {
     where
         F: Fn(&MouseEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_move.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, View, on_move(MouseEvent));
+        self.inner(|inner| *inner.props.on_move.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_move(MouseEvent));
         unsafe { view_OnMove(self.as_ptr(), listener) }
     }
 
@@ -135,8 +122,8 @@ impl View {
     where
         F: Fn(&MouseEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_down.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, View, on_down(MouseEvent));
+        self.inner(|inner| *inner.props.on_down.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_down(MouseEvent));
         unsafe { view_OnDown(self.as_ptr(), listener) }
     }
 
@@ -145,8 +132,8 @@ impl View {
     where
         F: Fn(&MouseEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_up.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, View, on_up(MouseEvent));
+        self.inner(|inner| *inner.props.on_up.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_up(MouseEvent));
         unsafe { view_OnUp(self.as_ptr(), listener) }
     }
 
@@ -155,8 +142,8 @@ impl View {
     where
         F: Fn(&MouseEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_click.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, View, on_click(MouseEvent));
+        self.inner(|inner| *inner.props.on_click.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_click(MouseEvent));
         unsafe { view_OnClick(self.as_ptr(), listener) }
     }
 
@@ -165,8 +152,8 @@ impl View {
     where
         F: Fn(&MouseEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_drag.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, View, on_drag(MouseEvent));
+        self.inner(|inner| *inner.props.on_drag.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_drag(MouseEvent));
         unsafe { view_OnDrag(self.as_ptr(), listener) }
     }
 
@@ -175,8 +162,8 @@ impl View {
     where
         F: Fn(&MouseEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_wheel.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, View, on_wheel(MouseEvent));
+        self.inner(|inner| *inner.props.on_wheel.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_wheel(MouseEvent));
         unsafe { view_OnWheel(self.as_ptr(), listener) }
     }
 
@@ -185,8 +172,8 @@ impl View {
     where
         F: Fn(&KeyEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_key_down.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, View, on_key_down(KeyEvent));
+        self.inner(|inner| *inner.props.on_key_down.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_key_down(KeyEvent));
         unsafe { view_OnKeyDown(self.as_ptr(), listener) }
     }
 
@@ -195,8 +182,8 @@ impl View {
     where
         F: Fn(&KeyEvent) + 'static,
     {
-        self.inner(|inner| *inner.on_key_up.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, View, on_key_up(KeyEvent));
+        self.inner(|inner| *inner.props.on_key_up.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_key_up(KeyEvent));
         unsafe { view_OnKeyUp(self.as_ptr(), listener) }
     }
 
@@ -205,8 +192,8 @@ impl View {
     where
         F: Fn(&bool) + 'static,
     {
-        self.inner(|inner| *inner.on_focus.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, View, on_focus(bool));
+        self.inner(|inner| *inner.props.on_focus.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_focus(bool));
         unsafe { view_OnFocus(self.as_ptr(), listener) }
     }
 
@@ -215,8 +202,8 @@ impl View {
     where
         F: Fn() -> bool + 'static,
     {
-        self.inner(|inner| *inner.on_accept_focus.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, View, on_accept_focus());
+        self.inner(|inner| *inner.props.on_accept_focus.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_accept_focus());
         unsafe { view_OnAcceptFocus(self.as_ptr(), listener) }
     }
 
@@ -225,8 +212,8 @@ impl View {
     where
         F: Fn() -> bool + 'static,
     {
-        self.inner(|inner| *inner.on_resign_focus.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, View, on_resign_focus());
+        self.inner(|inner| *inner.props.on_resign_focus.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_resign_focus());
         unsafe { view_OnResignFocus(self.as_ptr(), listener) }
     }
 
@@ -235,8 +222,8 @@ impl View {
     where
         F: Fn(&ScrollEvent) -> f32 + 'static,
     {
-        self.inner(|inner| *inner.on_scroll.borrow_mut() = Some(Rc::new(handler)));
-        let listener = listener!(self.0, View, on_scroll(ScrollEvent));
+        self.inner(|inner| *inner.props.on_scroll.borrow_mut() = Some(Rc::new(handler)));
+        let listener = listener!(self.as_ptr(), ViewInner, on_scroll(ScrollEvent));
         unsafe { view_OnScroll(self.as_ptr(), listener) }
     }
 

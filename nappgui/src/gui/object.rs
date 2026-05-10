@@ -1,21 +1,21 @@
 use std::{
-    any::Any,
+    // any::Any,
     cell::{Cell, RefCell},
     collections::HashMap,
-    rc::{Rc, Weak},
+    rc::{Rc},
 };
 
 use crate::gui::*;
 
-#[derive(Default)]
-pub(crate) struct GlobalObject {
-    /// Always points to the object itself if its wrapped with reference count.
-    weak_object: Option<Weak<dyn Any + 'static>>,
-    /// The object itself.
-    _object: Option<Rc<dyn Any + 'static>>,
-    /// Objects that this object owns.
-    _object_owns: Vec<Rc<dyn Any + 'static>>,
-}
+// #[derive(Default)]
+// pub(crate) struct GlobalObject {
+//     /// Always points to the object itself if its wrapped with reference count.
+//     weak_object: Option<Weak<dyn Any + 'static>>,
+//     /// The object itself.
+//     _object: Option<Rc<dyn Any + 'static>>,
+//     /// Objects that this object owns.
+//     _object_owns: Vec<Rc<dyn Any + 'static>>,
+// }
 
 pub(crate) enum GObject {
     Button(ButtonInner),
@@ -38,6 +38,7 @@ pub(crate) enum GObject {
     Window(WindowInner),
     Menu(MenuInner),
     MenuItem(MenuItemInner),
+    Layout(LayoutInner)
 }
 
 pub(crate) type GUID = u32;

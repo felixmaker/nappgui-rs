@@ -1,39 +1,46 @@
-use std::ffi::CString;
+use std::{cell::RefCell, ffi::CString};
 
 use nappgui_sys::{
-    layout_bgcolor, layout_cell, layout_control, layout_create, layout_group, layout_halign, layout_hexpandn, layout_hmargin, layout_hsize, layout_insert_col,
-    layout_insert_row, layout_margin4, layout_ncols, layout_nrows, layout_panel_replace,
+    cell_dbind_imp, dbind_create_imp, dbind_destroy_imp, layout_bgcolor, layout_cell, layout_control, layout_create,
+    layout_dbind_imp, layout_dbind_obj_imp, layout_group, layout_halign, layout_hexpandn, layout_hmargin, layout_hsize,
+    layout_insert_col, layout_insert_row, layout_margin4, layout_ncols, layout_nrows, layout_panel_replace,
     layout_remove_col, layout_remove_row, layout_show_col, layout_show_row, layout_skcolor, layout_taborder,
-    layout_tabstop, layout_update, layout_valign, layout_vexpandn,
-    layout_vmargin, layout_vsize,
+    layout_tabstop, layout_update, layout_valign, layout_vexpandn, layout_vmargin, layout_vsize,
 };
 
 use crate::{
+    core::dbind::dbind_struct,
     draw_2d::Color,
     types::{Align, GuiOrient},
 };
 
 use super::*;
 
+#[derive(Default)]
+pub(crate) struct LayoutInner {
+    ptr: RefCell<*mut nappgui_sys::Layout>,
+    object_type: RefCell<Option<CString>>,
+    object: RefCell<Option<*mut ()>>,
+}
+
+impl Drop for LayoutInner {
+    fn drop(&mut self) {
+        if let Some(obj) = self.object.borrow_mut().as_mut() {
+            if let Some(ty) = self.object_type.borrow().as_ref() {
+                unsafe { dbind_destroy_imp(obj as *mut *mut () as _, ty.as_ptr()) };
+            }
+        }
+    }
+}
+
 /// The layout.
-///
-/// # Remarks
-/// If the layout is not attached to a panel, it will cause a memory leak.
 #[repr(transparent)]
 #[derive(Clone)]
-pub struct Layout(*mut nappgui_sys::Layout);
+pub struct Layout(GUID);
+
+impl_object!(Layout, LayoutInner);
 
 impl Layout {
-    pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::Layout) -> Self {
-        assert!(!ptr.is_null());
-        Self(ptr)
-    }
-
-    /// Gets the raw pointer to the layout.
-    pub fn as_ptr(&self) -> *mut nappgui_sys::Layout {
-        self.0
-    }
-
     /// Creates a new layout.
     pub fn new(ncols: u32, nrows: u32) -> Self {
         let layout = unsafe { layout_create(ncols, nrows) };
@@ -328,71 +335,45 @@ impl Layout {
         unsafe { layout_update(self.as_ptr()) };
     }
 
-    // /// Associate a type struct with a layout.
-    // fn dbind_imp(&self, type_: &str, size: u16) {
-    //     let type_ = CString::new(type_).unwrap();
-    //     unsafe {
-    //         layout_dbind_imp(self.as_ptr(), std::ptr::null_mut(), type_.as_ptr(), size);
-    //     }
-    // }
+    /// Bind a struct within a layout.
+    pub fn dbind(&self, ty: &str) {
+        let ty = CString::new(ty).unwrap();
+        self.inner(|inner| {
+            dbind_struct(&ty, |obj| unsafe {
+                layout_dbind_imp(inner.as_ptr(), std::ptr::null_mut(), obj.ty.as_ptr(), obj.size);
+            });
+            let object = unsafe { dbind_create_imp(ty.as_ptr()) };
+            unsafe { layout_dbind_obj_imp(inner.as_ptr(), object as _, ty.as_ptr()) };
+            *inner.object_type.borrow_mut() = Some(ty);
+            *inner.object.borrow_mut() = Some(object as _)
+        });
+    }
 
-    // /// Associate an object with a layout to view and edit it.
-    // fn dbind_obj_imp(&self, obj: *mut c_void, type_: &str) {
-    //     let type_ = CString::new(type_).unwrap();
-
-    //     unsafe {
-    //         layout_dbind_obj_imp(self.as_ptr(), obj, type_.as_ptr());
-    //     }
-    // }
-
-    // /// Gets the object associated with a layout.
-    // fn dbind_get_obj_imp(&self, type_: &str) -> *mut c_void {
-    //     let type_ = CString::new(type_).unwrap();
-    //     unsafe { layout_dbind_get_obj_imp(self.as_ptr(), type_.as_ptr()) }
-    // }
+    /// Bind a field to a layout cell.
+    pub fn cell_dbind(&self, col: u32, row: u32, field: &str) {
+        let cell = self.cell(col, row);
+        let field = CString::new(field).unwrap();
+        self.inner(|layout| {
+            if let Some(ty) = layout.object_type.borrow().as_ref() {
+                dbind_struct(ty, |dbind| {
+                    if let Some(field) = dbind.fields.borrow().get(&field) {
+                        unsafe {
+                            cell_dbind_imp(
+                                cell.as_ptr(),
+                                dbind.ty.as_ptr(),
+                                field.size,
+                                field.name.as_ptr(),
+                                field.ty.as_ptr(),
+                                field.offset,
+                                field.size,
+                            )
+                        };
+                    }
+                });
+            }
+        });
+    }
 }
-
-// /// A Layout is a virtual and transparent grid always linked with a Panel which serves to locate the different
-// /// interface elements.
-// ///
-// /// # Remark
-// /// This type is managed by nappgui itself. Rust does not have its ownership. When the window object is dropped, all
-// /// components assciated with it will be automatically released.
-// #[repr(transparent)]
-// #[derive(Clone, Copy, Debug)]
-// pub struct Layout {
-//     pub(crate) inner: *mut nappgui_sys::Layout,
-// }
-
-// impl LayoutTrait for Layout {
-//     fn as_ptr(&self) -> *mut nappgui_sys::Layout {
-//         self.inner
-//     }
-// }
-
-// impl Layout {
-//     /// Create a new layout specifying the number of columns and rows.
-//     pub fn new(ncols: u32, nrows: u32) -> Self {
-//         let layout = unsafe { layout_create(ncols as _, nrows as _) };
-//         Self { inner: layout }
-//     }
-// }
-
-// /// Associates a cell with the field of a struct.
-// #[macro_export]
-// macro_rules! layout_dbind {
-//     ($layout: expr, $struct: ty) => {
-//         nappgui::gui::Layout::dbind_imp($layout, stringify!($struct), size_of::<$struct>() as _)
-//     };
-// }
-
-// /// Associate an object with a layout to view and edit it.
-// #[macro_export]
-// macro_rules! layout_dbind_obj {
-//     ($layout: expr, $obj: expr, $type: ty) => {
-//         nappgui::gui::Layout::dbind_obj_imp($layout, $obj, stringify!($type))
-//     };
-// }
 
 /// Define how controls are laid out in a layout.
 pub trait LayoutControl {

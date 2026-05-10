@@ -127,6 +127,7 @@ macro_rules! impl_control {
             }
         }
 
+        #[allow(dead_code)]
         impl $type {
             pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::$type) -> Self {
                 let uid = crate::gui::global_guid();

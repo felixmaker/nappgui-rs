@@ -2,7 +2,7 @@ use std::{marker::PhantomData, ptr::NonNull};
 
 use nappgui_sys::{cell_control, cell_empty, cell_enabled, cell_padding, cell_padding2, cell_padding4, cell_visible};
 
-use crate::gui::{Control, Layout, control_uid};
+use crate::gui::{control_uid, Control, Layout};
 
 /// Represents a cell in a layout.
 #[repr(transparent)]
@@ -71,46 +71,4 @@ impl<'a> LayoutCell<'a> {
     pub fn set_padding4(&self, pleft: f32, ptop: f32, pright: f32, pbottom: f32) {
         unsafe { cell_padding4(self.as_ptr(), pleft, ptop, pright, pbottom) }
     }
-
-    // /// Associates a cell with the field of a struct.
-    // fn dbind_imp(
-    //     &self,
-    //     type_: &str,
-    //     size: u16,
-    //     mname: &str,
-    //     mtype: &str,
-    //     moffset: u16,
-    //     msize: u16,
-    // ) {
-    //     let type_ = CString::new(type_).unwrap();
-    //     let mname = CString::new(mname).unwrap();
-    //     let mtype = CString::new(mtype).unwrap();
-    //     unsafe {
-    //         cell_dbind_imp(
-    //             self.as_ptr(),
-    //             type_.as_ptr(),
-    //             size,
-    //             mname.as_ptr(),
-    //             mtype.as_ptr(),
-    //             moffset,
-    //             msize,
-    //         );
-    //     }
-    // }
 }
-
-// /// Associates a cell with the field of a struct.
-// #[macro_export]
-// macro_rules! cell_dbind {
-//     ($cell: expr, $struct: ty, $field: ident, $field_type: ty, $bind_type: literal) => {
-//         nappgui::gui::Cell::dbind_imp(
-//             $cell,
-//             stringify!($struct),
-//             size_of::<$struct>() as _,
-//             stringify!($field),
-//             $bind_type,
-//             offset_of!($struct, $field) as _,
-//             size_of::<$field_type>() as _,
-//         )
-//     };
-// }

@@ -1,6 +1,221 @@
-use std::ffi::{c_void, CString};
+use std::{
+    cell::RefCell,
+    collections::HashMap,
+    ffi::{CStr, CString},
+};
 
-use crate::{core::Stream, error::NappguiError};
+use crate::error::NappguiError;
+
+/// DBind type.
+pub enum DBind {
+    /// Struct.
+    Struct(DBindStruct),
+    /// Enum.
+    Enum(DBindEnum),
+    /// Alias.
+    Alias(DBindAlias),
+}
+
+impl DBind {
+    /// Registers DBind.
+    pub(crate) fn register(&self) -> Result<(), NappguiError> {
+        match self {
+            DBind::Struct(obj) => obj.register(),
+            DBind::Enum(obj) => obj.register(),
+            DBind::Alias(obj) => obj.register(),
+        }
+    }
+
+    /// Returns the type of the DBind.
+    pub(crate) fn ty(&self) -> CString {
+        match self {
+            DBind::Struct(obj) => obj.ty.clone(),
+            DBind::Enum(obj) => obj.ty.clone(),
+            DBind::Alias(obj) => obj.ty.clone(),
+        }
+    }
+}
+
+/// DBind alias.
+pub struct DBindAlias {
+    /// Alias type.
+    pub ty: CString,
+    /// Alias.
+    pub alias: CString,
+    /// Type size in bytes.
+    pub size: u16,
+    /// Alias size in bytes.
+    pub alias_size: u16,
+}
+
+impl DBindAlias {
+    /// Registers the alias.
+    pub(crate) fn register(&self) -> Result<(), NappguiError> {
+        let result =
+            unsafe { nappgui_sys::dbind_alias_imp(self.ty.as_ptr(), self.alias.as_ptr(), self.size, self.alias_size) };
+        convert_dbindst_t_to_nappgui_result(result)?;
+        Ok(())
+    }
+}
+
+/// DBind Enum
+pub struct DBindEnum {
+    /// Enum name.
+    pub ty: CString,
+    /// Enum variants.
+    pub variants: RefCell<Vec<DBindVariant>>,
+}
+
+/// DBind variant.
+pub struct DBindVariant {
+    /// Variant name.
+    pub name: CString,
+    /// Variant value.
+    pub value: i32,
+    /// Variant alias.
+    pub alias: CString,
+}
+
+impl DBindEnum {
+    /// Registers the enum.
+    pub(crate) fn register(&self) -> Result<(), NappguiError> {
+        for variant in self.variants.borrow().iter() {
+            let result = unsafe {
+                let DBindVariant { name, value, alias } = variant;
+                nappgui_sys::dbind_enum_imp(self.ty.as_ptr(), name.as_ptr(), *value, alias.as_ptr())
+            };
+            convert_dbindst_t_to_nappgui_result(result)?;
+        }
+        Ok(())
+    }
+}
+
+/// DBind struct.
+pub struct DBindStruct {
+    /// Struct type
+    pub ty: CString,
+    /// Struct size
+    pub size: u16,
+    /// Struct fields
+    pub fields: RefCell<HashMap<CString, DBindField>>,
+}
+
+/// DBind field.
+pub struct DBindField {
+    /// Field name.
+    pub(crate) name: CString,
+    /// Field type.
+    pub(crate) ty: CString,
+    /// Field offset in bytes.
+    pub(crate) offset: u16,
+    /// Field size in bytes.
+    pub(crate) size: u16,
+    /// Field range.
+    range: Option<(NappguiNumber, NappguiNumber)>,
+    /// Field precision.
+    precision: Option<NappguiNumber>,
+    /// Field increment.  
+    increment: Option<NappguiNumber>,
+    /// Field suffix.
+    suffix: Option<CString>,
+    /// Field default value.
+    _default: Option<CString>,
+}
+
+impl DBindStruct {
+    /// Registers the struct.
+    pub(crate) fn register(&self) -> Result<(), NappguiError> {
+        let struct_type = self.ty.as_ptr();
+
+        for (_name, field) in self.fields.borrow().iter() {
+            let result = unsafe {
+                nappgui_sys::dbind_imp(
+                    struct_type,
+                    self.size,
+                    field.name.as_ptr(),
+                    field.ty.as_ptr(),
+                    field.offset,
+                    field.size,
+                )
+            };
+
+            let _ = convert_dbindst_t_to_nappgui_result(result); // Todo!!
+
+            if let Some((min, max)) = &field.range {
+                unsafe { nappgui_sys::dbind_range_imp(struct_type, field.name.as_ptr(), min.as_ptr(), max.as_ptr()) }
+            }
+
+            if let Some(precision) = &field.precision {
+                unsafe { nappgui_sys::dbind_precision_imp(struct_type, field.name.as_ptr(), precision.as_ptr()) }
+            }
+
+            if let Some(increment) = &field.increment {
+                unsafe { nappgui_sys::dbind_increment_imp(struct_type, field.name.as_ptr(), increment.as_ptr()) }
+            }
+
+            if let Some(suffix) = &field.suffix {
+                unsafe { nappgui_sys::dbind_suffix_imp(struct_type, field.name.as_ptr(), suffix.as_ptr()) }
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Create a dbind to Struct.
+    pub fn new(ty: &CStr, size: u16) -> Self {
+        Self {
+            ty: ty.to_owned(),
+            size,
+            fields: RefCell::new(HashMap::new()),
+        }
+    }
+
+    /// Add a field to struct. If the field exists, then overwrite.
+    pub fn add_field(&self, name: &CStr, ty: &CStr, offset: u16, size: u16) {
+        self.fields.borrow_mut().insert(
+            name.to_owned(),
+            DBindField {
+                name: name.to_owned(),
+                ty: ty.to_owned(),
+                offset,
+                size,
+                range: None,
+                precision: None,
+                increment: None,
+                suffix: None,
+                _default: None,
+            },
+        );
+    }
+}
+
+/// NAppGUI number type.
+#[allow(dead_code)]
+pub(crate) enum NappguiNumber {
+    /// Integer.
+    Integer(NappguiInt),
+    /// Float.
+    Float(NappguiFloat),
+}
+
+impl NappguiNumber {
+    /// Converts NappguiNumber to *const u8.
+    pub(crate) fn as_ptr(&self) -> *const u8 {
+        match self {
+            NappguiNumber::Integer(value) => value as *const _ as *const u8,
+            NappguiNumber::Float(value) => value as *const _ as *const u8,
+        }
+    }
+}
+
+/// NAppGUI integer type.
+pub type NappguiInt = i64;
+
+/// NAppGUI real type.
+pub type NappguiFloat = f64;
+
+/// NAppGUI boolean type.
+pub type NappguiBoolean = bool;
 
 /// Helper function to convert dbindst_t to Result<(), NappguiError>.
 fn convert_dbindst_t_to_nappgui_result(result: i32) -> Result<(), NappguiError> {
@@ -11,220 +226,43 @@ fn convert_dbindst_t_to_nappgui_result(result: i32) -> Result<(), NappguiError> 
     }
 }
 
-/// Adds a field from a structure to its internal table within DBind.
-pub fn dbind_imp(
-    type_: &str,
-    size: u16,
-    mname: &str,
-    mtype: &str,
-    moffset: u16,
-    msize: u16,
-) -> Result<(), NappguiError> {
-    let type_ = CString::new(type_).unwrap();
-    let mname = CString::new(mname).unwrap();
-    let mtype = CString::new(mtype).unwrap();
-    let result = unsafe {
-        nappgui_sys::dbind_imp(
-            type_.as_ptr(),
-            size,
-            mname.as_ptr(),
-            mtype.as_ptr(),
-            moffset,
-            msize,
-        )
-    };
-    convert_dbindst_t_to_nappgui_result(result)
+thread_local! {
+    pub(crate) static DBIND: RefCell<HashMap<CString, DBind>> = RefCell::new(HashMap::new());
 }
 
-/// Registers a value of type enum.
-///
-/// # Remark
-/// dbind_enum(mode_t, ekIMAGE_ANALISYS, "Image Analisys") will use the string "Image Analisys" instead of "ekIMAGE_ANALISYS"
-/// for those I/O or interface operations that require displaying enumeration literals. For example, to populate the fields of
-/// a PopUp linked to a data field.
-pub fn dbind_enum_imp(
-    type_: &str,
-    name: &str,
-    value: i32,
-    alias: &str,
-) -> Result<(), NappguiError> {
-    let type_ = CString::new(type_).unwrap();
-    let name = CString::new(name).unwrap();
-    let alias = CString::new(alias).unwrap();
-    let result = unsafe {
-        nappgui_sys::dbind_enum_imp(type_.as_ptr(), name.as_ptr(), value, alias.as_ptr())
-    };
-    convert_dbindst_t_to_nappgui_result(result)
+impl From<DBindStruct> for DBind {
+    fn from(value: DBindStruct) -> Self {
+        Self::Struct(value)
+    }
 }
 
-/// Registers an alias for a data type (typedef).
-pub fn dbind_alias_imp(
-    type_: &str,
-    alias: &str,
-    type_size: u16,
-    alias_size: u16,
-) -> Result<(), NappguiError> {
-    let type_ = CString::new(type_).unwrap();
-    let alias = CString::new(alias).unwrap();
-    let result = unsafe {
-        nappgui_sys::dbind_alias_imp(type_.as_ptr(), alias.as_ptr(), type_size, alias_size)
-    };
-    convert_dbindst_t_to_nappgui_result(result)
+/// Registers DBind.
+pub fn dbind_register<T>(item: T) -> Result<(), NappguiError>
+where
+    T: Into<DBind>,
+{
+    let item = item.into();
+    item.register()?;
+    DBIND.with_borrow_mut(|dbind| dbind.insert(item.ty(), item));
+    Ok(())
 }
 
-/// Removes a data type from the DBind record.
-pub fn dbind_unreg_imp(type_: &str) -> Result<(), NappguiError> {
-    let type_ = CString::new(type_).unwrap();
-    let result = unsafe { nappgui_sys::dbind_unreg_imp(type_.as_ptr()) };
-    convert_dbindst_t_to_nappgui_result(result)
+/// Unregisters DBind.
+pub fn dbind_unregister(ty: &CStr) -> Result<(), NappguiError> {
+    let result = unsafe { nappgui_sys::dbind_unreg_imp(ty.as_ptr()) };
+    convert_dbindst_t_to_nappgui_result(result)?;
+    DBIND.with_borrow_mut(|dbind| dbind.remove(ty));
+    Ok(())
 }
 
-/// Creates an object of registered type, initializing its fields with the default values.
-pub fn dbind_create_imp(type_: &str) -> *mut u8 {
-    let type_ = CString::new(type_).unwrap();
-    unsafe { nappgui_sys::dbind_create_imp(type_.as_ptr()) }
-}
-
-/// Copies an object of registered type.
-pub fn dbind_copy_imp(obj: *mut u8, type_: &str) -> *mut u8 {
-    let type_ = CString::new(type_).unwrap();
-    unsafe { nappgui_sys::dbind_copy_imp(obj, type_.as_ptr()) }
-}
-
-/// Initializes the fields of a registered type object with the default values.
-pub fn dbind_init_imp(obj: *mut u8, type_: &str) {
-    let type_ = CString::new(type_).unwrap();
-    unsafe { nappgui_sys::dbind_init_imp(obj, type_.as_ptr()) }
-}
-
-/// Frees the memory reserved by the fields of an object of registered type, but does not destroy the object itself.
-pub fn dbind_remove_imp(obj: *mut u8, type_: &str) {
-    let type_ = CString::new(type_).unwrap();
-    unsafe { nappgui_sys::dbind_remove_imp(obj, type_.as_ptr()) }
-}
-
-/// Destroys an object of registered type. Memory allocated to fields and sub-objects will also be freed recursively.
-pub fn dbind_destroy_imp(obj: *mut *mut u8, type_: &str) {
-    let type_ = CString::new(type_).unwrap();
-    unsafe { nappgui_sys::dbind_destopt_imp(obj, type_.as_ptr()) }
-}
-
-/// Compares two objects of registered type.
-///
-/// Returns -1, 1 or 0 if obj1 is less than, greater than or equal to obj2.
-pub fn dbind_cmp_imp(obj1: *mut u8, obj2: *mut u8, type_: &str) -> i32 {
-    let type_ = CString::new(type_).unwrap();
-    unsafe { nappgui_sys::dbind_cmp_imp(obj1, obj2, type_.as_ptr()) }
-}
-
-/// Checks if two objects of registered type are the same.
-pub fn dbind_equ_imp(obj1: *mut u8, obj2: *mut u8, type_: &str) -> bool {
-    let type_ = CString::new(type_).unwrap();
-    unsafe { nappgui_sys::dbind_equ_imp(obj1, obj2, type_.as_ptr()) != 0 }
-}
-
-/// Creates a registered type object from data read from a stream.
-pub fn dbind_read(stream: &Stream, type_: &str) -> *mut u8 {
-    let type_ = CString::new(type_).unwrap();
-    unsafe { nappgui_sys::dbind_read_imp(stream.inner, type_.as_ptr()) }
-}
-
-/// Writes the contents of a registered type object to a write stream.
-pub fn dbind_write_imp(stream: &Stream, obj: *const c_void, type_: &str) {
-    let type_ = CString::new(type_).unwrap();
-    unsafe { nappgui_sys::dbind_write_imp(stream.inner, obj, type_.as_ptr()) }
-}
-
-/// Sets the default value of a field.
-pub fn dbind_default_imp(type_: &str, mname: &str, value: *const u8) {
-    let type_ = CString::new(type_).unwrap();
-    let mname = CString::new(mname).unwrap();
-    unsafe { nappgui_sys::dbind_default_imp(type_.as_ptr(), mname.as_ptr(), value) }
-}
-
-/// Sets the maximum and minimum value in numeric fields.
-pub fn dbind_range_imp(type_: &str, mname: &str, min: *const u8, max: *const u8) {
-    let type_ = CString::new(type_).unwrap();
-    let mname = CString::new(mname).unwrap();
-    unsafe { nappgui_sys::dbind_range_imp(type_.as_ptr(), mname.as_ptr(), min, max) }
-}
-
-/// Sets the jump between two consecutive real values.
-pub fn dbind_precision_imp(type_: &str, mname: &str, precision: *const u8) {
-    let type_ = CString::new(type_).unwrap();
-    let mname = CString::new(mname).unwrap();
-    unsafe { nappgui_sys::dbind_precision_imp(type_.as_ptr(), mname.as_ptr(), precision) }
-}
-
-/// Sets the increment of a numeric value, for example, when clicking an UpDown control.
-pub fn dbind_increment_imp(type_: &str, mname: &str, increment: *const u8) {
-    let type_ = CString::new(type_).unwrap();
-    let mname = CString::new(mname).unwrap();
-    unsafe { nappgui_sys::dbind_increment_imp(type_.as_ptr(), mname.as_ptr(), increment) }
-}
-
-/// Sets a suffix that will be added to the numeric value when converting to text.
-pub fn dbind_suffix_imp(type_: &str, mname: &str, suffix: &str) {
-    let type_ = CString::new(type_).unwrap();
-    let mname = CString::new(mname).unwrap();
-    let suffix = CString::new(suffix).unwrap();
-    unsafe { nappgui_sys::dbind_suffix_imp(type_.as_ptr(), mname.as_ptr(), suffix.as_ptr()) }
-}
-
-/// Adds a field from a structure to its internal table within DBind.
-#[macro_export]
-macro_rules! dbind {
-    ($struct: ty, $field: ident, $field_type: ty, $bind_type: literal) => {
-        nappgui::core::dbind::dbind_imp(
-            stringify!($struct),
-            size_of::<$struct>() as _,
-            stringify!($field),
-            $bind_type,
-            offset_of!($struct, $field) as _,
-            size_of::<$field_type>() as _,
-        )
-    };
-}
-
-/// Registers a value of type enum.
-///
-/// # Remark
-/// dbind_enum(mode_t, ekIMAGE_ANALISYS, "Image Analisys") will use the string "Image Analisys" instead of "ekIMAGE_ANALISYS"
-/// for those I/O or interface operations that require displaying enumeration literals. For example, to populate the fields of
-/// a PopUp linked to a data field.
-#[macro_export]
-macro_rules! dbind_enum {
-    ($enum: ty, $value: ident, $alias: literal) => {
-        nappgui::core::dbind::dbind_enum_imp(
-            stringify!($enum),
-            stringify!($value),
-            <$enum>::$value as _,
-            $alias,
-        )
-    };
-}
-
-/// Sets the maximum and minimum value in numeric fields.
-#[macro_export]
-macro_rules! dbind_range {
-    ($struct: ty, $field: ident, $min: literal, $max: literal) => {
-        nappgui::core::dbind::dbind_range_imp(
-            stringify!($struct),
-            stringify!($field),
-            $min.to_ne_bytes().as_ptr(),
-            $max.to_ne_bytes().as_ptr(),
-        );
-    };
-}
-
-/// Sets the increment of a numeric value, for example, when clicking an UpDown control.
-#[macro_export]
-macro_rules! dbind_increment {
-    ($struct: ty, $field: ident, $increment: literal) => {
-        nappgui::core::dbind::dbind_increment_imp(
-            stringify!($struct),
-            stringify!($field),
-            $increment.to_ne_bytes().as_ptr(),
-        );
-    };
+pub(crate) fn dbind_struct<F, R>(ty: &CStr, f: F) -> Option<R>
+where
+    F: FnOnce(&DBindStruct) -> R,
+{
+    DBIND.with_borrow(|map| {
+        map.get(ty).and_then(|obj| match obj {
+            DBind::Struct(value) => Some(f(value)),
+            _ => None,
+        })
+    })
 }

@@ -1,4 +1,7 @@
-use std::ffi::{CStr, CString};
+use std::{
+    ffi::{CStr, CString},
+    fmt::Debug,
+};
 
 /// String objects contain dynamically reserved UTF-8 character strings.
 #[repr(transparent)]
@@ -68,5 +71,11 @@ impl Drop for NappguiString {
         unsafe {
             nappgui_sys::str_destroy(&mut self.inner);
         }
+    }
+}
+
+impl Debug for NappguiString {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_string())
     }
 }

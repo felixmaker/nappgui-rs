@@ -1,6 +1,6 @@
 [package]
 name = "nappgui-macros"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["felixmaker"]
 description = "Macro helper for nappgui crate"
@@ -10,3 +10,8 @@ repository = "https://github.com/felixmaker/nappgui-rs"
 
 [lib]
 proc-macro = true
+
+[dependencies]
+syn = { version = "2.0", features = ["full"] }
+quote = "1.0"
+proc-macro2 = "1.0"

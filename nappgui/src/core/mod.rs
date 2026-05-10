@@ -14,12 +14,13 @@ pub(crate) mod respack;
 ///  - Serialization: Reading and writing in streams.
 ///  - Import/export in different formats, such as JSON.
 ///  - Synchronization with user interfaces.
-pub mod dbind;
+pub(crate) mod dbind;
 
 pub use {
     event::{Event, NappGUIEventParams},
     regex::RegEx,
     stream::Stream,
     string::NappguiString,
-    respack::*
+    respack::*,
+    dbind::*
 };

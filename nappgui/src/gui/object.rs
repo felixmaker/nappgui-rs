@@ -20,7 +20,7 @@ macro_rules! define_object {
 
         #[doc = concat!("The ", stringify!($type), " object.")]
         #[repr(transparent)]
-        #[derive(Clone)]
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
         pub struct $type(crate::gui::GUID);
 
         impl $type {

@@ -14,10 +14,10 @@ impl AppHandler for App {
         let panel = Panel::new();
 
         layout.set_margin(5.0, 5.0, 5.0, 5.0);
-        layout.set_control(0, 0, &button_select_dir);
-        layout.set_control(0, 1, &button_open_file);
-        layout.set_control(0, 2, &button_save_file);
-        layout.set_control(0, 3, &button_color);
+        layout.set_control(0, 0, button_select_dir);
+        layout.set_control(0, 1, button_open_file);
+        layout.set_control(0, 2, button_save_file);
+        layout.set_control(0, 3, button_color);
 
         panel.add_layout(&layout);
 

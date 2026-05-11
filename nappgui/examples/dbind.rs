@@ -22,10 +22,10 @@ impl AppHandler for App {
         let check1 = Button::new_check("Check 1");
         let check2 = Button::new_check("Check 2");
 
-        layout.set_control(0, 0, &text1);
-        layout.set_control(0, 1, &text2);
-        layout.set_control(0, 2, &check1);
-        layout.set_control(0, 3, &check2);
+        layout.set_control(0, 0, text1);
+        layout.set_control(0, 1, text2);
+        layout.set_control(0, 2, check1);
+        layout.set_control(0, 3, check2);
 
         layout.dbind("Data");
         layout.dbind_cell(0, 0, "text");

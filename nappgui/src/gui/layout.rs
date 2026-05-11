@@ -67,7 +67,7 @@ impl Layout {
     /// # Panics
     ///
     /// Panics if col or row is out of bounds.
-    pub fn set_control<T>(&self, col: u32, row: u32, control: &T)
+    pub fn set_control<T>(&self, col: u32, row: u32, control: T)
     where
         T: LayoutControl,
     {

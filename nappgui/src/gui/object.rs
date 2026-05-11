@@ -12,7 +12,6 @@ pub(crate) struct ObjectInner<T, P> {
     pub(crate) props: P,
 }
 
-
 /// Macro to implement the `Object` trait for widget types.
 macro_rules! define_object {
     ($type:ident, $inner_type:ident, $nappgui_type:ident, $props:ident) => {
@@ -21,7 +20,7 @@ macro_rules! define_object {
         #[doc = concat!("The ", stringify!($type), " object.")]
         #[repr(transparent)]
         #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-        pub struct $type(crate::gui::GUID);
+        pub struct $type(pub(crate) crate::gui::GUID);
 
         impl $type {
             pub(crate) fn from_raw(ptr: *mut nappgui_sys::$nappgui_type) -> Self {

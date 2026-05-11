@@ -1,8 +1,8 @@
 use std::cell::{Cell, RefCell};
 
 use nappgui_sys::{
-    menu_add_item, menu_count, menu_create, menu_del_item, menu_ins_item, menu_is_menubar, menu_launch, menu_off_items,
-    V2Df,
+    menu_add_item, menu_count, menu_create, menu_del_item, menu_destroy, menu_ins_item, menu_is_menubar, menu_launch,
+    menu_off_items, V2Df,
 };
 
 use crate::gui::{define_object, Window};
@@ -22,6 +22,18 @@ impl Menu {
         self.inner(|x| x.props.c_managed.set(managed));
     }
 
+    pub(crate) fn destroy(&self) {
+        self.inner(|inner| {
+            if !inner.props.c_managed.get() {
+                let mut menu = inner.ptr.get();
+                unsafe { menu_destroy(&mut menu) };
+                inner.ptr.set(menu);
+            }
+        });
+    }
+}
+
+impl Menu {
     /// Create a new menu.
     pub fn new() -> Self {
         unsafe { Self::from_raw(menu_create()) }

@@ -1,10 +1,10 @@
 use nappgui_sys::{
     comwin_color, comwin_open_file, comwin_save_file, comwin_select_dir, listener_imp, osapp_menubar, window_OnClose,
     window_OnMoved, window_OnResize, window_clear_hotkeys, window_client_size, window_client_to_screen,
-    window_control_frame, window_create, window_cursor, window_cycle_tabstop, window_defbutton, window_focus,
-    window_focus_info, window_get_client_size, window_get_focus, window_get_maximize, window_get_minimize,
-    window_get_origin, window_get_size, window_get_visible, window_hide, window_hotkey, window_maximize,
-    window_minimize, window_modal, window_next_tabstop, window_origin, window_overlay, window_panel,
+    window_control_frame, window_create, window_cursor, window_cycle_tabstop, window_defbutton, window_destroy,
+    window_focus, window_focus_info, window_get_client_size, window_get_focus, window_get_maximize,
+    window_get_minimize, window_get_origin, window_get_size, window_get_visible, window_hide, window_hotkey,
+    window_maximize, window_minimize, window_modal, window_next_tabstop, window_origin, window_overlay, window_panel,
     window_previous_tabstop, window_show, window_stop_modal, window_title, window_update, S2Df, V2Df,
 };
 use std::cell::RefCell;
@@ -46,6 +46,16 @@ impl Drop for WindowProps {
                 let _ = Box::from_raw(*context);
             };
         }
+    }
+}
+
+impl Window {
+    pub(crate) fn destroy(&self) {
+        self.inner(|inner| {
+            let mut window = inner.ptr.get();
+            unsafe { window_destroy(&mut window) };
+            inner.ptr.set(window);
+        });
     }
 }
 

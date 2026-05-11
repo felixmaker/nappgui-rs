@@ -24,14 +24,15 @@ impl AppHandler for App {
         layout.set_vertical_margin(0, 5.0);
         layout.set_vertical_margin(1, 5.0);
 
+        panel.add_layout(layout);
+
+        let window = Window::new(WindowFlags::default());
+        window.set_panel(panel);
+
         button.set_on_click_handler(move |_params| {
             text.write(&format!("Button click {}\n", clicks.borrow()));
             *clicks.borrow_mut() += 1;
         });
-        panel.add_layout(&layout);
-
-        let window = Window::new(WindowFlags::default());
-        window.set_panel(&panel);
 
         window.title("Hello, World!");
         window.set_origin(500.0, 200.0);

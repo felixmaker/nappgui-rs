@@ -42,13 +42,13 @@ impl AppHandler for App {
         layout.set_vertical_margin(0, 5.0);
         layout.set_vertical_margin(1, 5.0);
 
-        panel.add_layout(&layout);
+        panel.add_layout(layout);
 
         let window = Window::new(WindowFlags::default());
-        window.set_panel(&panel);
+        window.set_panel(panel);
         window.title("Hello, World!");
-        window.set_menubar(&global_menu);
-        window.set_menubar(&global_menu2);
+        window.set_menubar(global_menu);
+        window.set_menubar(global_menu2);
         window.set_origin(500.0, 200.0);
         window.set_on_close_handler(|_| finish());
 

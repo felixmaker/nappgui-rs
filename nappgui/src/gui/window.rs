@@ -103,7 +103,7 @@ impl Window {
     ///
     /// # Panics
     /// This method will panic if the panel has no layout in it.
-    pub fn set_panel(&self, panel: &Panel) {
+    pub fn set_panel(&self, panel: Panel) {
         assert!(panel.layout(0).is_some(), "Panel has no layout in it.");
 
         // Check if the same panel has already been set.
@@ -138,14 +138,14 @@ impl Window {
     }
 
     /// Launch an overlay window.
-    pub fn overlay(&self, parent: &Self) {
+    pub fn overlay(&self, parent: Self) {
         unsafe {
             window_overlay(self.as_ptr(), parent.as_ptr());
         }
     }
 
     /// Launch a window in modal mode.
-    pub fn modal(&self, parent: &Self) -> GuiClose {
+    pub fn modal(&self, parent: Self) -> GuiClose {
         let value = unsafe { window_modal(self.as_ptr(), parent.as_ptr()) };
         GuiClose::from(value)
     }
@@ -219,7 +219,7 @@ impl Window {
     }
 
     /// Set keyboard focus to a specific control.
-    pub fn set_focus<T>(&self, control: &T) -> GuiFocus
+    pub fn set_focus<T>(&self, control: T) -> GuiFocus
     where
         T: AsRef<Control>,
     {
@@ -332,7 +332,7 @@ impl Window {
     /// # Remarks
     ///
     /// control must belong to the window, be active and visible. The point (0,0) corresponds to the upper left vertex of the client area of the window.
-    pub fn control_frame<T>(&self, control: &T) -> Rect2D
+    pub fn control_frame<T>(&self, control: T) -> Rect2D
     where
         T: AsRef<Control>,
     {
@@ -356,7 +356,7 @@ impl Window {
     ///
     /// This function disables the possible previous default button. For the new button to be set,
     /// it must exist in the active layout.
-    pub fn set_default_button(&self, button: &Button) {
+    pub fn set_default_button(&self, button: Button) {
         self.inner(|inner| *inner.props.default_button.borrow_mut() = Some(button.clone()));
         unsafe { window_defbutton(self.as_ptr(), button.as_ptr()) }
     }
@@ -371,7 +371,7 @@ impl Window {
     }
 
     /// Set the general menu bar of the application.
-    pub fn set_menubar(&self, menu: &Menu) {
+    pub fn set_menubar(&self, menu: Menu) {
         self.inner(|inner| *inner.props.menu_bar.borrow_mut() = Some(menu.clone()));
         unsafe { osapp_menubar(menu.as_ptr(), self.as_ptr()) }
     }

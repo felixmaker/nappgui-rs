@@ -46,9 +46,9 @@ impl Panel {
     /// # Remarks
     /// A panel can have multiple layouts. The first layout added is the visible layout.
     /// You may use set_visible_layout to switch visible layout.
-    pub fn add_layout(&self, layout: &Layout) -> u32 {
+    pub fn add_layout(&self, layout: Layout) -> u32 {
         let result = unsafe { panel_layout(self.as_ptr(), layout.as_ptr()) };
-        self.inner(|inner| inner.props.layouts.borrow_mut().push(layout.clone()));
+        self.inner(|inner| inner.props.layouts.borrow_mut().push(layout));
         result
     }
 

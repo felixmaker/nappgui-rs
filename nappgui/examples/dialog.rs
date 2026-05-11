@@ -19,10 +19,10 @@ impl AppHandler for App {
         layout.set_control(0, 2, button_save_file);
         layout.set_control(0, 3, button_color);
 
-        panel.add_layout(&layout);
+        panel.add_layout(layout);
 
         let window = Window::new(WindowFlags::default());
-        window.set_panel(&panel);
+        window.set_panel(panel);
         window.title("Dialogs");
         window.set_origin(500.0, 200.0);
         window.set_client_size(200.0, 150.0);

@@ -74,7 +74,7 @@ impl Layout {
         assert!(col < self.ncols());
         assert!(row < self.nrows());
 
-        control.insert_in_layout(self, col, row);
+        control.insert_in_layout(*self, col, row);
     }
 
     /// Replaces one Panel in a layout with another.
@@ -88,7 +88,7 @@ impl Layout {
     /// # Panics
     ///
     /// Panics if col or row is out of bounds.
-    pub unsafe fn panel_replace<T>(&self, panel: &Panel, col: u32, row: u32) {
+    pub unsafe fn panel_replace<T>(&self, panel: Panel, col: u32, row: u32) {
         assert!(col < self.ncols());
         assert!(row < self.nrows());
 
@@ -394,13 +394,13 @@ impl Layout {
 /// Define how controls are laid out in a layout.
 pub trait LayoutControl {
     /// Insert the control to the layout
-    fn insert_in_layout(&self, layout: &Layout, col: u32, row: u32);
+    fn insert_in_layout(&self, layout: Layout, col: u32, row: u32);
 }
 
 macro_rules! impl_layout {
     ($type: ty, $func: ident) => {
         impl crate::gui::LayoutControl for $type {
-            fn insert_in_layout(&self, layout: &Layout, col: u32, row: u32) {
+            fn insert_in_layout(&self, layout: Layout, col: u32, row: u32) {
                 unsafe {
                     nappgui_sys::$func(layout.as_ptr(), self.as_ptr(), col, row);
                 }

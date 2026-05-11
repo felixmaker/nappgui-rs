@@ -33,10 +33,10 @@ impl AppHandler for App {
         layout.dbind_cell(0, 2, "boolean");
         layout.dbind_cell(0, 3, "boolean");
 
-        panel.add_layout(&layout);
+        panel.add_layout(layout);
 
         let window = Window::new(WindowFlags::default());
-        window.set_panel(&panel);
+        window.set_panel(panel);
         window.title("Hello, World!");
         window.set_origin(500.0, 200.0);
         window.set_client_size(200.0, 100.0);

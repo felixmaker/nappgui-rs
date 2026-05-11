@@ -1,8 +1,8 @@
 use std::cell::{Cell, RefCell};
 
 use nappgui_sys::{
-    menu_add_item, menu_count, menu_create, menu_del_item, menu_destroy, menu_ins_item, menu_is_menubar, menu_launch,
-    menu_off_items, V2Df,
+    menu_add_item, menu_count, menu_create, menu_del_item, menu_ins_item, menu_is_menubar, menu_launch, menu_off_items,
+    V2Df,
 };
 
 use crate::gui::{define_object, Window};
@@ -16,14 +16,6 @@ pub(crate) struct MenuProps {
 }
 
 define_object!(Menu, MenuInner, Menu, MenuProps);
-
-// impl Drop for MenuInner {
-//     fn drop(&mut self) {
-//         if !self.c_managed.get() {
-//             unsafe { menu_destroy(&mut self.as_ptr()) }
-//         }
-//     }
-// }
 
 impl Menu {
     pub(crate) fn set_c_managed(&self, managed: bool) {

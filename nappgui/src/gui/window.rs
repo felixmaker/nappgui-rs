@@ -1,10 +1,10 @@
 use nappgui_sys::{
     comwin_color, comwin_open_file, comwin_save_file, comwin_select_dir, listener_imp, osapp_menubar, window_OnClose,
     window_OnMoved, window_OnResize, window_clear_hotkeys, window_client_size, window_client_to_screen,
-    window_control_frame, window_create, window_cursor, window_cycle_tabstop, window_defbutton, window_destroy,
-    window_focus, window_focus_info, window_get_client_size, window_get_focus, window_get_maximize,
-    window_get_minimize, window_get_origin, window_get_size, window_get_visible, window_hide, window_hotkey,
-    window_maximize, window_minimize, window_modal, window_next_tabstop, window_origin, window_overlay, window_panel,
+    window_control_frame, window_create, window_cursor, window_cycle_tabstop, window_defbutton, window_focus,
+    window_focus_info, window_get_client_size, window_get_focus, window_get_maximize, window_get_minimize,
+    window_get_origin, window_get_size, window_get_visible, window_hide, window_hotkey, window_maximize,
+    window_minimize, window_modal, window_next_tabstop, window_origin, window_overlay, window_panel,
     window_previous_tabstop, window_show, window_stop_modal, window_title, window_update, S2Df, V2Df,
 };
 use std::cell::RefCell;
@@ -14,7 +14,7 @@ use std::rc::Rc;
 
 use crate::draw_2d::{Color, Image};
 use crate::gui::event::{PositionEvent, SizeEvent, WindowCloseEvent};
-use crate::gui::{define_object, listener, Button, Callback, Menu, Panel};
+use crate::gui::{define_object, listener, Button, Callback, Control, Menu, Panel};
 use crate::types::{
     Align, FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D, Size2D, WindowFlags,
 };
@@ -39,16 +39,15 @@ pub(crate) struct WindowProps {
 
 define_object!(Window, WindowInner, Window, WindowProps);
 
-// impl<T> Drop for ObjectInner<T, WindowProps> {
-//     fn drop(&mut self) {
-//         unsafe { window_destroy(&mut self.as_ptr()) };
-//         for context in self.on_hotkey_context.borrow().iter() {
-//             unsafe {
-//                 let _ = Box::from_raw(*context);
-//             };
-//         }
-//     }
-// }
+impl Drop for WindowProps {
+    fn drop(&mut self) {
+        for context in self.on_hotkey_context.borrow().iter() {
+            unsafe {
+                let _ = Box::from_raw(*context);
+            };
+        }
+    }
+}
 
 impl Window {
     /// Create a new window.
@@ -209,23 +208,24 @@ impl Window {
         GuiFocus::try_from(focus).unwrap()
     }
 
-    // /// Set keyboard focus to a specific control.
-    // pub fn set_focus<T>(&self, control: &T) -> GuiFocus
-    // where
-    //     T: Control,
-    // {
-    //     let focus = unsafe { window_focus(self.as_ptr(), control.as_control_ptr()) };
-    //     GuiFocus::try_from(focus).unwrap()
-    // }
+    /// Set keyboard focus to a specific control.
+    pub fn set_focus<T>(&self, control: &T) -> GuiFocus
+    where
+        T: AsRef<Control>,
+    {
+        let focus = unsafe { window_focus(self.as_ptr(), control.as_ref().as_ptr()) };
+        GuiFocus::try_from(focus).unwrap()
+    }
 
-    // /// Gets the control that keyboard focus has.
-    // pub fn focus<T>(&self) -> Option<T>
-    // where
-    //     T: Control,
-    // {
-    //     let control = unsafe { window_get_focus(self.as_ptr()) };
-    //     T::from_control_ptr(control)
-    // }
+    /// Gets the control that keyboard focus has.
+    pub fn focus(&self) -> Option<Control> {
+        let control = unsafe { window_get_focus(self.as_ptr()) };
+        if control.is_null() {
+            None
+        } else {
+            Some(Control::from_raw(control))
+        }
+    }
 
     /// Gets additional information about a keyboard focus change operation.
     ///
@@ -322,12 +322,14 @@ impl Window {
     /// # Remarks
     ///
     /// control must belong to the window, be active and visible. The point (0,0) corresponds to the upper left vertex of the client area of the window.
-    pub fn control_frame<T>(&self, control: &T) -> Rect2D {
-        // unsafe {
-        //     let rect = window_control_frame(self.as_ptr(), control.as_ptr());
-        //     std::mem::transmute(rect)
-        // }
-        todo!()
+    pub fn control_frame<T>(&self, control: &T) -> Rect2D
+    where
+        T: AsRef<Control>,
+    {
+        unsafe {
+            let rect = window_control_frame(self.as_ptr(), control.as_ref().as_ptr());
+            std::mem::transmute(rect)
+        }
     }
 
     /// Transforms a point expressed in window coordinates to screen coordinates.

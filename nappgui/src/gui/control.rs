@@ -1,166 +1,58 @@
-// use std::{
-//     any::Any,
-//     cell::{Cell, RefCell},
-//     collections::HashMap,
-//     rc::Rc,
-// };
+use crate::gui::*;
 
-// use crate::gui::*;
+/// The control object.
+#[repr(transparent)]
+pub struct Control {
+    inner: *mut nappgui_sys::GuiControl,
+}
 
-// pub(crate) struct ControlInner<T, P> {
-//     pub(crate) ptr: Cell<*mut T>,
-//     pub(crate) props: P,
-// }
+impl Control {
+    pub(crate) fn from_raw(inner: *mut nappgui_sys::GuiControl) -> Self {
+        assert!(!inner.is_null());
+        Self { inner }
+    }
 
-// /// Macro to implement the `Control` trait for widget types.
-// macro_rules! define_object {
-//     ($type:ident, $inner_type:ident, $nappgui_type:ident, $props:ident) => {
-//         pub(crate) type $inner_type = crate::gui::ControlInner<nappgui_sys::$nappgui_type, $props>;
+    pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::GuiControl {
+        self.inner
+    }
+}
 
-//         #[doc = concat!("The ", stringify!($type), " control.")]
-//         #[repr(transparent)]
-//         #[derive(Clone)]
-//         pub struct $type(crate::gui::GUID);
+macro_rules! impl_control {
+    ($type:ident, $func:ident, $nappgui_func:ident) => {
+        impl AsRef<Control> for $type {
+            fn as_ref(&self) -> &Control {
+                unsafe { std::mem::transmute(self) }
+            }
+        }
 
-//         impl $type {
-//             pub(crate) fn from_raw(ptr: *mut nappgui_sys::$nappgui_type) -> Self {
-//                 let inner = std::rc::Rc::new(crate::gui::ControlInner {
-//                     ptr: std::cell::Cell::new(ptr),
-//                     props: Default::default(),
-//                 });
-//                 let id = crate::gui::global_control_insert(inner);
-//                 Self(id)
-//             }
+        impl Control {
+            #[doc = concat!("Converts the control to a ", stringify!($type))]
+            pub fn $func(&self) -> Option<$type> {
+                let control = unsafe { nappgui_sys::$nappgui_func(self.as_ptr()) };
+                if control.is_null() {
+                    None
+                } else {
+                    Some($type::from_raw(control))
+                }
+            }
+        }
+    };
+}
 
-//             pub(crate) fn inner<F, R>(&self, f: F) -> Option<R>
-//             where
-//                 F: FnOnce(&$inner_type) -> R,
-//             {
-//                 crate::gui::global_control(self.0, f)
-//             }
-
-//             /// Returns a pointer to the control. Can be null.
-//             pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::$nappgui_type {
-//                 self.inner(|inner| inner.as_ptr()).unwrap_or(std::ptr::null_mut())
-//             }
-//         }
-//     };
-// }
-
-// pub(crate) use define_object;
-
-// pub type Callback<T, R = ()> = RefCell<Option<Rc<dyn Fn(&T) -> R + 'static>>>;
-
-// // /// Control.
-// // pub(crate) enum Control {
-// //     Button(ButtonInner),
-// //     Combo(ComboInner),
-// //     Edit(EditInner),
-// //     ImageView(ImageViewInner),
-// //     Label(LabelInner),
-// //     Panel(PanelInner),
-// //     ListBox(ListBoxInner),
-// //     PopUp(PopUpInner),
-// //     Progress(ProgressInner),
-// //     Slider(SliderInner),
-// //     SplitView(SplitViewInner),
-// //     TableView(TableViewInner),
-// //     TextView(TextViewInner),
-// //     UpDown(UpDownInner),
-// //     View(ViewInner),
-// //     WebView(WebViewInner),
-// //     Line(LineInner),
-// // }
-
-// thread_local! {
-//     static GLOBAL_UID: Cell<GUID> = Cell::new(0);
-//     static GLOBAL_CONTROLS: RefCell<HashMap<GUID, Rc<dyn Any + 'static>>> = Default::default();
-// }
-
-// fn global_id() -> GUID {
-//     GLOBAL_UID.with(|uid| {
-//         let id = uid.get() + 1;
-//         uid.set(id);
-//         id
-//     })
-// }
-
-// pub(crate) unsafe fn global_control_set_id(control: *mut nappgui_sys::GuiControl, uid: GUID) {
-//     nappgui_sys::guicontrol_tag(control, uid)
-// }
-
-// pub(crate) unsafe fn global_control_id(control: *mut nappgui_sys::GuiControl) -> GUID {
-//     nappgui_sys::guicontrol_get_tag(control)
-// }
-
-// pub(crate) fn global_control_insert<T>(control: T) -> GUID
-// where
-//     T: Any + 'static,
-// {
-//     let control = Rc::new(control);
-//     let control_id = global_id();
-//     GLOBAL_CONTROLS.with_borrow_mut(|controls| controls.insert(control_id, control));
-//     control_id
-// }
-
-// pub(crate) fn global_control<T, F, R>(uid: GUID, f: F) -> Option<R>
-// where
-//     T: Any + 'static,
-//     F: FnOnce(&T) -> R,
-// {
-//     let control = GLOBAL_CONTROLS.with_borrow(|controls| controls.get(&uid).map(|x| x.clone()))?;
-//     if let Ok(control) = control.downcast::<T>() {
-//         Some(f(control.as_ref()))
-//     } else {
-//         None
-//     }
-// }
-
-// // macro_rules! define_control {
-// //     ($type:ident, $inner_type:ident, $nappgui_type:ident, $props:ident) => {
-// //         pub(crate) type $inner_type_inner = ControlInner<nappgui_sys::$nappgui_type, $props>;
-
-// //         /// The button control.
-// //         #[repr(transparent)]
-// //         #[derive(Clone)]
-// //         pub struct $type(GUID);
-
-// //         #[allow(dead_code)]
-// //         impl $type {
-// //             pub(crate) unsafe fn from_raw(ptr: *mut nappgui_sys::$type) -> Self {
-// //                 let inner = $props::from_raw(ptr);
-// //                 let uid = crate::gui::global_control_new(inner);
-// //                 unsafe { crate::gui::global_control_set_id(ptr as _, uid) };
-// //                 Self(uid)
-// //             }
-
-// //             pub(crate) fn inner<F, R>(&self, f: F) -> Option<R>
-// //             where
-// //                 F: FnOnce(&$props) -> R,
-// //             {
-// //                 let control = crate::gui::global_control(self.0)?;
-// //                 match control.as_ref() {
-// //                     crate::gui::Control::$type(inner) => Some(f(inner)),
-// //                     _ => None,
-// //                 }
-// //             }
-
-// //             pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::$type {
-// //                 self.inner(|inner| inner.as_ptr()).unwrap()
-// //             }
-// //         }
-
-// //         impl $props {
-// //             pub(crate) fn from_raw(ptr: *mut nappgui_sys::$type) -> Self {
-// //                 assert!(!ptr.is_null(), "Null pointer passed to $props::from_raw");
-// //                 let mut obj = Default::default();
-// //                 obj.ptr = RefCell::new(ptr);
-// //                 obj
-// //             }
-
-// //             pub(crate) fn as_ptr(&self) -> *mut nappgui_sys::$type {
-// //                 *self.ptr.borrow()
-// //             }
-// //         }
-// //     };
-// // }
+impl_control!(Button, as_button, guicontrol_button);
+impl_control!(Combo, as_combo, guicontrol_combo);
+impl_control!(Edit, as_edit, guicontrol_edit);
+impl_control!(ImageView, as_imageview, guicontrol_imageview);
+impl_control!(Label, as_label, guicontrol_label);
+impl_control!(Panel, as_panel, guicontrol_panel);
+impl_control!(ListBox, as_listbox, guicontrol_listbox);
+impl_control!(PopUp, as_popup, guicontrol_popup);
+impl_control!(Progress, as_progress, guicontrol_progress);
+impl_control!(Slider, as_slider, guicontrol_slider);
+impl_control!(SplitView, as_splitview, guicontrol_splitview);
+impl_control!(TableView, as_tableview, guicontrol_tableview);
+impl_control!(TextView, as_textview, guicontrol_textview);
+impl_control!(UpDown, as_updown, guicontrol_updown);
+impl_control!(View, as_view, guicontrol_view);
+impl_control!(WebView, as_webview, guicontrol_webview);
+impl_control!(Line, as_line, guicontrol_line);

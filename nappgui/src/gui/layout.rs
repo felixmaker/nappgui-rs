@@ -25,15 +25,15 @@ pub(crate) struct LayoutProps {
 
 define_object!(Layout, LayoutInner, Layout, LayoutProps);
 
-// impl Drop for LayoutInner {
-//     fn drop(&mut self) {
-//         if let Some(obj) = self.object.borrow_mut().as_mut() {
-//             if let Some(ty) = self.object_type.borrow().as_ref() {
-//                 unsafe { dbind_destroy_imp(obj as *mut *mut () as _, ty.as_ptr()) };
-//             }
-//         }
-//     }
-// }
+impl Drop for LayoutProps {
+    fn drop(&mut self) {
+        if let Some(obj) = self.object.borrow_mut().as_mut() {
+            if let Some(ty) = self.object_type.borrow().as_ref() {
+                unsafe { dbind_destroy_imp(obj as *mut *mut () as _, ty.as_ptr()) };
+            }
+        }
+    }
+}
 
 impl Layout {
     /// Creates a new layout.
@@ -53,9 +53,13 @@ impl Layout {
     }
 
     /// Gets the control assigned to a cell in the layout.
-    pub fn control<T>(&self, col: u32, row: u32) -> Option<T> {
+    pub fn control(&self, col: u32, row: u32) -> Option<Control> {
         let control = unsafe { layout_control(self.as_ptr(), col, row) };
-        todo!()
+        if control.is_null() {
+            None
+        } else {
+            Some(Control::from_raw(control))
+        }
     }
 
     /// Insert a control to the layout.

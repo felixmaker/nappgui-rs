@@ -28,11 +28,9 @@ pub mod event;
 use crate::{draw_2d::Image, types::Point2D};
 pub use {
     button::*, combo::*, control::*, edit::*, imageview::*, label::*, layout::*, line::*, listbox::*, menu::*,
-    menuitem::*, panel::*, popup::*, progress::*, slider::*, splitview::*, tableview::*, textview::*, updown::*,
-    view::*, webview::*, window::*, object::*,
+    menuitem::*, object::*, panel::*, popup::*, progress::*, slider::*, splitview::*, tableview::*, textview::*,
+    updown::*, view::*, webview::*, window::*,
 };
-
-pub(crate) use object::*;
 
 /// Get image from resource
 pub fn gui_image(rid: &str) -> &'static Image {

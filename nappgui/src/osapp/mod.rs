@@ -60,6 +60,7 @@ where
                     }
                 }
             });
+            GLOBAL_OBJECTS.with_borrow_mut(|objs| objs.clear());
         }));
     }
 

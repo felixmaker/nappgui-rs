@@ -6,33 +6,42 @@ struct App {}
 impl AppHandler for App {
     fn create() -> Self {
         let layout = Layout::new(1, 3);
-        let button = Button::new("Click Me!");
+        let button = Button::new();
+        button.set_text("Click Me!");
         let text = TextView::new();
         let panel = Panel::new();
 
         let global_menu = Menu::new();
 
         let menu = Menu::new();
-        let item = MenuItem::new("Edit");
+        let item = MenuItem::new();
+        item.set_text("Edit");
         item.on_click(|params| println!("{} is clicked!", params.text));
         menu.add_item(item);
-        menu.add_item(MenuItem::new("Exit"));
-        let submenu = MenuItem::new("File");
-        submenu.set_submenu(menu);
+        let item = MenuItem::new();
+        item.set_text("Exit");
+        menu.add_item(item);
+        let item = MenuItem::new();
+        item.set_text("File");
+        item.set_submenu(menu);
 
-        global_menu.add_item(submenu);
+        global_menu.add_item(item);
 
         let global_menu2 = Menu::new();
 
         let menu = Menu::new();
-        let item = MenuItem::new("Edit2");
+        let item = MenuItem::new();
+        item.set_text("Edit2");
         item.on_click(|params| println!("{} is clicked!", params.text));
         menu.add_item(item);
-        menu.add_item(MenuItem::new("Exit2"));
-        let submenu = MenuItem::new("File2");
-        submenu.set_submenu(menu);
+        let item = MenuItem::new();
+        item.set_text("Exit2");
+        menu.add_item(item);
+        let item = MenuItem::new();
+        item.set_text("File2");
+        item.set_submenu(menu);
 
-        global_menu2.add_item(submenu);
+        global_menu2.add_item(item);
 
         layout.set_control(0, 1, button);
         layout.set_control(0, 2, text);
@@ -46,7 +55,7 @@ impl AppHandler for App {
 
         let window = Window::new(WindowFlags::default());
         window.set_panel(panel);
-        window.title("Hello, World!");
+        window.set_title("Hello, World!");
         window.set_menubar(global_menu);
         window.set_menubar(global_menu2);
         window.set_origin(500.0, 200.0);

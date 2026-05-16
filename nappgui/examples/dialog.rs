@@ -6,10 +6,14 @@ struct App {}
 impl AppHandler for App {
     fn create() -> Self {
         let layout = Layout::new(1, 4);
-        let button_select_dir = Button::new("Select Dir");
-        let button_open_file = Button::new("Open File");
-        let button_save_file = Button::new("Save File");
-        let button_color = Button::new("Color");
+        let button_select_dir = Button::new();
+        let button_open_file = Button::new();
+        let button_save_file = Button::new();
+        let button_color = Button::new();
+        button_select_dir.set_text("Select Dir");
+        button_open_file.set_text("Open File");
+        button_save_file.set_text("Save File");
+        button_color.set_text("Color");
 
         let panel = Panel::new();
 
@@ -23,7 +27,7 @@ impl AppHandler for App {
 
         let window = Window::new(WindowFlags::default());
         window.set_panel(panel);
-        window.title("Dialogs");
+        window.set_title("Dialogs");
         window.set_origin(500.0, 200.0);
         window.set_client_size(200.0, 150.0);
         window.set_on_close_handler(|_| finish());

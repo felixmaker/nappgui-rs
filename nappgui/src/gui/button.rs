@@ -25,45 +25,33 @@ define_object!(Button, ButtonInner, Button, ButtonProps);
 
 impl Button {
     /// Create a push button, the typical [Accept], [Cancel], etc.
-    pub fn new(text: &str) -> Self {
-        let button = unsafe { Self::from_raw(button_push()) };
-        button.set_text(text);
-        button
+    pub fn new() -> Self {
+        unsafe { Self::from_raw(button_push()) }
     }
 
     /// Create a checkbox.
-    pub fn new_check(text: &str) -> Self {
-        let button = unsafe { Self::from_raw(button_check()) };
-        button.set_text(text);
-        button
+    pub fn new_check() -> Self {
+        unsafe { Self::from_raw(button_check()) }
     }
 
     /// Create a checkbox with three states.
-    pub fn new_check3(text: &str) -> Self {
-        let button = unsafe { Self::from_raw(button_check3()) };
-        button.set_text(text);
-        button
+    pub fn new_check3() -> Self {
+        unsafe { Self::from_raw(button_check3()) }
     }
 
     /// Create a radio button.
-    pub fn new_radio(text: &str) -> Self {
-        let button = unsafe { Self::from_raw(button_radio()) };
-        button.set_text(text);
-        button
+    pub fn new_radio() -> Self {
+        unsafe { Self::from_raw(button_radio()) }
     }
 
     /// Create a flat button, to which an image can be assigned. It is the typical toolbar button.
-    pub fn new_flat(icon: &Image) -> Self {
-        let button = unsafe { Self::from_raw(button_flat()) };
-        button.set_image(icon);
-        button
+    pub fn new_flat() -> Self {
+        unsafe { Self::from_raw(button_flat()) }
     }
 
     /// Create a flat button with status. The button will alternate between pressed/released each time you click on it.
-    pub fn new_flatgle(icon: &Image) -> Self {
-        let button = unsafe { Self::from_raw(button_flatgle()) };
-        button.set_image(icon);
-        button
+    pub fn new_flatgle() -> Self {
+        unsafe { Self::from_raw(button_flatgle()) }
     }
 
     /// Set a function for pressing the button.

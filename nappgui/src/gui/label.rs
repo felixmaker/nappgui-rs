@@ -24,11 +24,8 @@ define_object!(Label, LabelInner, Label, LabelProps);
 
 impl Label {
     /// Create a text control.
-    pub fn new(text: &str) -> Label {
-        let label = unsafe { label_create() };
-        let label = Label::from_raw(label);
-        label.set_text(text);
-        label
+    pub fn new() -> Label {
+        unsafe { Label::from_raw(label_create()) }
     }
 
     /// Set the control default width.

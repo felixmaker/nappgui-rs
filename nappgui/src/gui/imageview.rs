@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::{
     draw_2d::Image,
-    gui::{VoidCallback, define_object, listener},
+    gui::{define_object, listener, VoidCallback},
     types::Scale,
 };
 
@@ -21,11 +21,8 @@ define_object!(ImageView, ImageViewInner, ImageView, ImageViewProps);
 
 impl ImageView {
     /// Create a image view.
-    pub fn new(width: f32, height: f32) -> Self {
-        let imageview = unsafe { imageview_create() };
-        let imageview = ImageView::from_raw(imageview);
-        imageview.set_size(width, height);
-        imageview
+    pub fn new() -> Self {
+        unsafe { ImageView::from_raw(imageview_create()) }
     }
 
     /// Set the default control size.

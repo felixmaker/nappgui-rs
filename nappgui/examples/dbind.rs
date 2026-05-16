@@ -19,8 +19,10 @@ impl AppHandler for App {
         let layout = Layout::new(1, 10);
         let text1 = Edit::new();
         let text2 = Edit::new();
-        let check1 = Button::new_check("Check 1");
-        let check2 = Button::new_check("Check 2");
+        let check1 = Button::new_check();
+        let check2 = Button::new_check();
+        check1.set_text("Check 1");
+        check2.set_text("Check 2");
 
         layout.set_control(0, 0, text1);
         layout.set_control(0, 1, text2);
@@ -37,7 +39,7 @@ impl AppHandler for App {
 
         let window = Window::new(WindowFlags::default());
         window.set_panel(panel);
-        window.title("Hello, World!");
+        window.set_title("Hello, World!");
         window.set_origin(500.0, 200.0);
         window.set_client_size(200.0, 100.0);
         window.set_on_close_handler(|_| finish());

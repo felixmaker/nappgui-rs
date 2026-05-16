@@ -122,7 +122,7 @@ impl Window {
     }
 
     /// Set the text that will display the window in the title bar.
-    pub fn title(&self, text: &str) {
+    pub fn set_title(&self, text: &str) {
         let text = CString::new(text).unwrap();
         unsafe { window_title(self.as_ptr(), text.as_ptr()) }
     }

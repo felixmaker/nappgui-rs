@@ -28,7 +28,10 @@ pub mod prelude {
     pub use crate::error::*;
     pub use crate::gui::*;
     pub use crate::types::*;
+    pub use nappgui_macros::include_resource;
+    pub use nappgui_macros::ui as nappgui_ui;
 }
 
 /// Embed resources
 pub use nappgui_macros::include_resource;
+pub use nappgui_macros::ui as nappgui_ui;

@@ -22,16 +22,13 @@ define_object!(MenuItem, MenuItemInner, MenuItem, MenuItemProps);
 
 impl MenuItem {
     /// Create a new item for a menu.
-    pub fn new(text: &str) -> Self {
-        let menu_item = unsafe { Self::from_raw(menuitem_create()) };
-        menu_item.set_text(text);
-        menu_item
+    pub fn new() -> Self {
+        unsafe { Self::from_raw(menuitem_create()) }
     }
 
     /// Create a new separator for a menu.
     pub fn new_separator() -> Self {
-        let menu_item = unsafe { menuitem_separator() };
-        Self::from_raw(menu_item)
+        unsafe { Self::from_raw(menuitem_separator()) }
     }
 
     /// Set an event handle for item click.

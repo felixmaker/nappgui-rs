@@ -1,13 +1,3 @@
-# nappgui-rs
-
-Rust bindings to NAppGUI, providing XML based UI description.
-
-NAppGUI is a professional SDK to build cross-platform desktop applications using The C Programming Language (ANSI C90). See [frang75/nappgui_src](https://github.com/frang75/nappgui_src) and its [home page](https://nappgui.com/) for more information.
-
-
-## Example
-
-```rust
 use nappgui::osapp::*;
 use nappgui::prelude::*;
 
@@ -48,11 +38,3 @@ impl AppHandler for App {
 fn main() {
     osmain::<App>();
 }
-```
-
-
-## requirements
-
- - CMake: for building the NAppGui static library
- - Windows SDK: only needed when using MSVC
- - Rust MSRV: 1.88.0

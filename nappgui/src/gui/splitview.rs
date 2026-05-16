@@ -16,7 +16,7 @@ define_object!(SplitView, SplitViewInner, SplitView, SplitViewProps);
 
 impl SplitView {
     /// Create a splitview with horizontal split.
-    pub fn new_horizontal() -> Self {
+    pub fn new() -> Self {
         unsafe { SplitView::from_raw(splitview_horizontal()) }
     }
 

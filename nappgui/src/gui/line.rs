@@ -9,7 +9,7 @@ define_object!(Line, LineInner, Line, LineProps);
 
 impl Line {
     /// Create a horizontal separator.
-    pub fn new_horizontal() -> Self {
+    pub fn new() -> Self {
         unsafe { Line::from_raw(line_horizontal()) }
     }
 

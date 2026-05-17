@@ -61,7 +61,12 @@ impl Window {
 
 impl Window {
     /// Create a new window.
-    pub fn new(flag: WindowFlags) -> Self {
+    pub fn new() -> Self {
+        unsafe { Self::from_raw(window_create(WindowFlags::default().to_window_flag_t() as u32)) }
+    }
+
+    /// Create a new window with a specific flag.
+    pub fn new_with_flag(flag: WindowFlags) -> Self {
         unsafe { Self::from_raw(window_create(flag.to_window_flag_t() as u32)) }
     }
 
@@ -494,11 +499,5 @@ impl Window {
                 listener,
             );
         }
-    }
-}
-
-impl Default for Window {
-    fn default() -> Self {
-        Self::new(WindowFlags::default())
     }
 }

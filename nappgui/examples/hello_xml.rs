@@ -3,7 +3,7 @@ use nappgui::prelude::*;
 
 nappgui_ui!(
     r#"
-<window name="window" ident="HelloWindow" title="Hello, World!" origin="500.0,200.0">
+<HelloWindow inherits="Window" name="window" title="Hello, World!" origin="500.0,200.0">
     <panel>
         <layout rows="3">
             <cell for="label" column="0" row="0" />
@@ -14,7 +14,7 @@ nappgui_ui!(
         <button name="button" text="Click me!"/>
         <textview name="textview" />
     </panel>
-</window>
+</HelloWindow>
 "#
 );
 

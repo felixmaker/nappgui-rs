@@ -26,10 +26,7 @@ pub fn process_ui_macro(input: TokenStream) -> TokenStream {
         }
     };
 
-    let generator = match StructGenerator::from_xml_doc(&doc) {
-        Ok(generator) => generator,
-        Err(err) => return err.to_compile_error(),
-    };
+    let generator = StructGenerator::from_xml_doc(&doc);
     generator.generate()
 }
 
@@ -55,10 +52,18 @@ impl StructGenerator {
     }
 
     /// Insert a node into the generator. Return the unique ident for the node.
-    fn insert_node_from_xml_node(&mut self, node: Node) -> Result<usize, syn::Error> {
+    fn insert_node<F>(&mut self, f: F) -> usize
+    where
+        F: FnOnce(usize) -> StructNode,
+    {
         let id = self.next_id();
-        self.nodes.insert(id, StructNode::from_xml_node(node, id)?);
-        Ok(id)
+        self.nodes.insert(id, f(id));
+        id
+    }
+
+    /// Check if a node is a root node.
+    fn is_root(&self, id: usize) -> bool {
+        self.root == Some(id)
     }
 
     /// Set the parent of a node.
@@ -68,12 +73,12 @@ impl StructGenerator {
     }
 
     /// Create a new struct generator from an XML document.
-    fn from_xml_doc(doc: &roxmltree::Document) -> Result<Self, syn::Error> {
+    fn from_xml_doc(doc: &roxmltree::Document) -> Self {
         let mut generator = Self::new();
         let mut nodes_left = Vec::new();
         nodes_left.push((doc.root_element(), None)); // Add the root node to the queue.
         while let Some((node, parent)) = nodes_left.pop() {
-            let node_id = generator.insert_node_from_xml_node(node)?;
+            let node_id = generator.insert_node(|id| StructNode::from_xml_node(node, id));
             if let Some(parent) = parent {
                 generator.set_parent(node_id, parent);
             } else {
@@ -85,23 +90,24 @@ impl StructGenerator {
                 }
             }
         }
-        Ok(generator)
+        generator
     }
 
     /// Generate the struct code from the generator.
     fn generate(&self) -> TokenStream {
         let root_node = self.root_node();
-        let struct_ident = root_node.ident();
-        let struct_type = root_node.ty.to_type().expect("Root node type is not supported");
-        let struct_name = root_node.name();
-        let define_fields = self.nodes.iter().filter_map(|(_, node)| node.generate_self_type());
-        let init_fields = self.nodes.iter().filter_map(|(_, node)| node.generate_self_field());
-        let apply_layouts = self.nodes.iter().filter_map(|(_, node)| node.apply_layouts(self));
-        let apply_attrs = self.nodes.iter().filter_map(|(_, node)| node.apply_attrs(self));
+        let StructFieldType::Custom(struct_ident) = &root_node.ty else {
+            panic!("Root node should be taged as custom type.")
+        };
+        let struct_ident = Ident::new(struct_ident, Span::call_site());
+        let define_fields = self.nodes.iter().filter_map(|(_, node)| node.define_field(self));
+        let init_fields = self.nodes.iter().filter_map(|(_, node)| node.init_field(self));
+        let apply_layouts = self.nodes.iter().filter_map(|(_, node)| node.apply_layout(self));
+        let apply_attrs = self.nodes.iter().filter_map(|(_, node)| node.apply_attr(self));
         let define_setters = self.nodes.iter().filter_map(|(_, node)| node.generate_setter());
         quote! {
             pub struct #struct_ident {
-                #(#define_fields,)*
+                #(#define_fields)*
             }
 
             impl #struct_ident {
@@ -116,12 +122,6 @@ impl StructGenerator {
 
                 #(#define_setters)*
             }
-
-            impl Into<#struct_type> for #struct_ident {
-                fn into(self: Self) -> #struct_type {
-                    self.#struct_name
-                }
-            }
         }
     }
 
@@ -131,7 +131,7 @@ impl StructGenerator {
     }
 
     /// Get the node from the generator.
-    fn get(&self, id: usize) -> Option<&StructNode> {
+    fn node(&self, id: usize) -> Option<&StructNode> {
         self.nodes.get(&id)
     }
 }
@@ -151,19 +151,19 @@ struct StructNode {
 
 impl StructNode {
     /// Create a new node from an XML node.
-    fn from_xml_node(node: Node, id: usize) -> Result<Self, syn::Error> {
+    fn from_xml_node(node: Node, id: usize) -> Self {
         let attrs: HashMap<String, String> = node
             .attributes()
             .map(|attr| (attr.name().to_string(), attr.value().to_string()))
             .collect();
-        let ty = StructFieldType::from_str(node.tag_name().name())?;
-        Ok(Self {
+        let ty = StructFieldType::from_str(node.tag_name().name());
+        Self {
             id,
             ty,
             attrs: Some(attrs),
             parent: None,
             children: None,
-        })
+        }
     }
 
     /// Set the parent of the node.
@@ -179,6 +179,7 @@ impl StructNode {
         self.children.as_mut().unwrap().push(child);
     }
 
+    /// Return the name of the node, which is the field name in the struct.
     fn name(&self) -> Ident {
         if let Some(attrs) = &self.attrs {
             if let Some(name) = attrs.get("name") {
@@ -188,15 +189,24 @@ impl StructNode {
         Ident::new(&format!("__obj_{}", self.id), Span::call_site())
     }
 
-    fn ident(&self) -> Ident {
-        if let Some(attrs) = &self.attrs {
-            if let Some(ident) = attrs.get("ident") {
-                return Ident::new(ident, Span::call_site());
-            }
+    /// Return the type of the node, which is the field type in the struct.
+    /// If the node is a root node, it returns the type specified in the `inherits` attribute.
+    /// If the node is not a root node and is element type, it returns the element type.
+    /// Or, it returns None.
+    fn ty(&self, generator: &StructGenerator) -> Option<Ident> {
+        if generator.is_root(self.id) {
+            Some(Ident::new(
+                self.attr("inherits|extends")
+                    .expect("Root node should `inherits` from a existing type."),
+                Span::call_site(),
+            ))
+        } else {
+            self.ty.to_type()
         }
-        Ident::new(&format!("__Obj_{}", self.id), Span::call_site())
     }
 
+    /// Returns the real type of the node.
+    /// If the node is a root node, it returns the type specified in the `inherits` attribute.
     fn attr_or(&self, name: &str, default: &'static str) -> &str {
         let names: Vec<&str> = name.split("|").collect();
         if let Some(attrs) = &self.attrs {
@@ -221,17 +231,17 @@ impl StructNode {
         None
     }
 
-    fn generate_self_type(&self) -> Option<TokenStream> {
-        let field_ident = self.name();
-        let field_type = self.ty.to_type()?;
+    fn define_field(&self, generator: &StructGenerator) -> Option<TokenStream> {
+        let field_name = self.name();
+        let field_type = self.ty(generator)?;
         Some(quote! {
-            #field_ident: #field_type
+            #field_name: #field_type,
         })
     }
 
-    fn generate_self_field(&self) -> Option<TokenStream> {
+    fn init_field(&self, generator: &StructGenerator) -> Option<TokenStream> {
         let name = self.name();
-        let obj = match self.ty {
+        let obj = match &self.ty {
             StructFieldType::Button => match ButtonType::from_str(self.attr_or("type", "push")) {
                 ButtonType::Push => quote! { Button::new() },
                 ButtonType::Flat => quote! { Button::new_flat() },
@@ -297,13 +307,17 @@ impl StructNode {
             }
             StructFieldType::Window => quote! { Window::new(WindowFlags::default()) },
             StructFieldType::Cell => return None,
+            StructFieldType::Custom(_) => {
+                let custom = self.ty(generator).unwrap();
+                quote! { #custom::new() }
+            }
         };
         Some(quote! {
             #name: #obj
         })
     }
 
-    fn apply_attrs(&self, generator: &StructGenerator) -> Option<TokenStream> {
+    fn apply_attr(&self, generator: &StructGenerator) -> Option<TokenStream> {
         let name = self.name();
         match self.ty {
             StructFieldType::Button => {
@@ -336,8 +350,8 @@ impl StructNode {
             }
             StructFieldType::Panel => {
                 let panel_name = self.name();
-                let window_name = generator.get(self.parent?)?;
-                if window_name.ty != StructFieldType::Window {
+                let window_name = generator.node(self.parent?)?;
+                if window_name.ty(generator) != StructFieldType::Window.to_type() {
                     return None;
                 }
                 let window_name = window_name.name();
@@ -378,10 +392,10 @@ impl StructNode {
         }
     }
 
-    fn apply_layouts(&self, generator: &StructGenerator) -> Option<TokenStream> {
+    fn apply_layout(&self, generator: &StructGenerator) -> Option<TokenStream> {
         match self.ty {
             StructFieldType::Layout => {
-                let panel = generator.get(self.parent?)?;
+                let panel = generator.node(self.parent?)?;
                 let panel_name = panel.name();
                 let layout_name = self.name();
                 Some(quote! {
@@ -389,7 +403,7 @@ impl StructNode {
                 })
             }
             StructFieldType::Cell => {
-                let layout = generator.get(self.parent?)?;
+                let layout = generator.node(self.parent?)?;
                 let layout_name = layout.name();
                 let col = LitInt::new(self.attr("column|col")?, Span::call_site());
                 let row = LitInt::new(self.attr("row")?, Span::call_site());
@@ -442,7 +456,7 @@ impl StructNode {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
 enum StructFieldType {
     Button,
     Combo,
@@ -464,35 +478,33 @@ enum StructFieldType {
     Layout,
     Cell,
     Window,
+    Custom(String),
 }
 
 impl StructFieldType {
-    fn from_str(s: &str) -> Result<Self, syn::Error> {
+    fn from_str(s: &str) -> Self {
         match s.trim().to_lowercase().as_str() {
-            "button" => Ok(Self::Button),
-            "combo" => Ok(Self::Combo),
-            "edit" => Ok(Self::Edit),
-            "imageview" | "image-view" | "image_view" => Ok(Self::ImageView),
-            "label" => Ok(Self::Label),
-            "panel" => Ok(Self::Panel),
-            "listbox" | "list-box" | "list_box" => Ok(Self::ListBox),
-            "popup" => Ok(Self::PopUp),
-            "progress" => Ok(Self::Progress),
-            "slider" => Ok(Self::Slider),
-            "splitview" | "split-view" | "split_view" => Ok(Self::SplitView),
-            "tableview" | "table-view" | "table_view" => Ok(Self::TableView),
-            "textview" | "text-view" | "text_view" => Ok(Self::TextView),
-            "updown" | "up-down" | "up_down" => Ok(Self::UpDown),
-            "view" => Ok(Self::View),
-            "webview" | "web-view" | "web_view" => Ok(Self::WebView),
-            "line" => Ok(Self::Line),
-            "layout" => Ok(Self::Layout),
-            "cell" => Ok(Self::Cell),
-            "window" | "win" => Ok(Self::Window),
-            _ => Err(syn::Error::new(
-                Span::call_site(),
-                &format!("Unknown tag type: <{}>", s),
-            )),
+            "button" => Self::Button,
+            "combo" => Self::Combo,
+            "edit" => Self::Edit,
+            "imageview" | "image-view" | "image_view" => Self::ImageView,
+            "label" => Self::Label,
+            "panel" => Self::Panel,
+            "listbox" | "list-box" | "list_box" => Self::ListBox,
+            "popup" => Self::PopUp,
+            "progress" => Self::Progress,
+            "slider" => Self::Slider,
+            "splitview" | "split-view" | "split_view" => Self::SplitView,
+            "tableview" | "table-view" | "table_view" => Self::TableView,
+            "textview" | "text-view" | "text_view" => Self::TextView,
+            "updown" | "up-down" | "up_down" => Self::UpDown,
+            "view" => Self::View,
+            "webview" | "web-view" | "web_view" => Self::WebView,
+            "line" => Self::Line,
+            "layout" => Self::Layout,
+            "cell" => Self::Cell,
+            "window" | "win" => Self::Window,
+            _ => Self::Custom(s.trim().to_owned()),
         }
     }
 
@@ -517,6 +529,7 @@ impl StructFieldType {
             Self::Line => Some(Ident::new("Line", Span::call_site())),
             Self::Layout => Some(Ident::new("Layout", Span::call_site())),
             Self::Window => Some(Ident::new("Window", Span::call_site())),
+            Self::Custom(custom) => Some(Ident::new(custom, Span::call_site())),
             _ => None,
         }
     }

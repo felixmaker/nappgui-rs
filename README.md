@@ -1,6 +1,6 @@
 # nappgui-rs
 
-Rust bindings to NAppGUI, providing XML based UI description.
+Rust bindings to NAppGUI, providing XML based UI description macro.
 
 NAppGUI is a professional SDK to build cross-platform desktop applications using The C Programming Language (ANSI C90). See [frang75/nappgui_src](https://github.com/frang75/nappgui_src) and its [home page](https://nappgui.com/) for more information.
 
@@ -13,7 +13,7 @@ use nappgui::prelude::*;
 
 nappgui_ui!(
     r#"
-<window name="window" ident="HelloWindow" title="Hello, World!" origin="500.0,200.0">
+<HelloWindow inherits="Window" name="window" title="Hello, World!" origin="500.0,200.0">
     <panel>
         <layout rows="3">
             <cell for="label" column="0" row="0" />
@@ -24,7 +24,7 @@ nappgui_ui!(
         <button name="button" text="Click me!"/>
         <textview name="textview" />
     </panel>
-</window>
+</HelloWindow>
 "#
 );
 

@@ -26,7 +26,7 @@ impl AppHandler for App {
 
         panel.add_layout(layout);
 
-        let window = Window::new(WindowFlags::default());
+        let window = Window::new();
         window.set_panel(panel);
 
         let button2 = Button::new();

@@ -7,6 +7,24 @@ use std::{
 
 use crate::gui::*;
 
+/// Trait for objects easy conversion.
+pub trait AsObject<T>
+where
+    T: Copy,
+{
+    /// Convert the object to the specified type.
+    fn as_object(self) -> T;
+}
+
+impl<T> AsObject<T> for T
+where
+    T: Copy,
+{
+    fn as_object(self) -> T {
+        self
+    }
+}
+
 pub(crate) struct ObjectInner<T, P> {
     pub(crate) ptr: Cell<*mut T>,
     pub(crate) props: P,

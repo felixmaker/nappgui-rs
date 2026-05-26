@@ -394,15 +394,16 @@ impl Layout {
 /// Define how controls are laid out in a layout.
 pub trait LayoutControl {
     /// Insert the control to the layout
-    fn insert_in_layout(&self, layout: Layout, col: u32, row: u32);
+    fn insert_in_layout(self, layout: Layout, col: u32, row: u32);
 }
 
 macro_rules! impl_layout {
     ($type: ty, $func: ident) => {
         impl crate::gui::LayoutControl for $type {
-            fn insert_in_layout(&self, layout: Layout, col: u32, row: u32) {
+            fn insert_in_layout(self, layout: Layout, col: u32, row: u32) {
+                let control: $type = self.as_object();
                 unsafe {
-                    nappgui_sys::$func(layout.as_ptr(), self.as_ptr(), col, row);
+                    nappgui_sys::$func(layout.as_ptr(), control.as_ptr(), col, row);
                 }
             }
         }

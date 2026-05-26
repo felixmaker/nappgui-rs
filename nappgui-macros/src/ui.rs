@@ -26,21 +26,21 @@ pub fn process_ui_macro(input: TokenStream) -> TokenStream {
         }
     };
 
-    let generator = StructGenerator::from_xml_doc(&doc);
+    let generator = Generator::from_xml_doc(&doc);
     generator.generate()
 }
 
-struct StructGenerator {
+struct Generator {
     id: usize,
     root: Option<usize>,
-    nodes: HashMap<usize, StructNode>,
+    nodes: HashMap<usize, GeneratorNode>,
 }
 
-impl StructGenerator {
+impl Generator {
     fn new() -> Self {
         Self {
-            root: None,
             id: 0,
+            root: None,
             nodes: HashMap::new(),
         }
     }
@@ -54,31 +54,28 @@ impl StructGenerator {
     /// Insert a node into the generator. Return the unique ident for the node.
     fn insert_node<F>(&mut self, f: F) -> usize
     where
-        F: FnOnce(usize) -> StructNode,
+        F: FnOnce(usize) -> GeneratorNode,
     {
         let id = self.next_id();
         self.nodes.insert(id, f(id));
         id
     }
 
-    /// Check if a node is a root node.
-    fn is_root(&self, id: usize) -> bool {
-        self.root == Some(id)
-    }
-
     /// Set the parent of a node.
-    fn set_parent(&mut self, id: usize, parent: usize) {
-        self.nodes.get_mut(&id).unwrap().set_parent(parent);
-        self.nodes.get_mut(&parent).unwrap().add_child(id);
+    fn set_parent(&mut self, id: usize, parent_id: usize) {
+        let child = self.nodes.get_mut(&id).unwrap();
+        child.parent = Some(parent_id);
+        let parent = self.nodes.get_mut(&parent_id).unwrap();
+        parent.children.push(id);
     }
 
     /// Create a new struct generator from an XML document.
     fn from_xml_doc(doc: &roxmltree::Document) -> Self {
         let mut generator = Self::new();
-        let mut nodes_left = Vec::new();
-        nodes_left.push((doc.root_element(), None)); // Add the root node to the queue.
-        while let Some((node, parent)) = nodes_left.pop() {
-            let node_id = generator.insert_node(|id| StructNode::from_xml_node(node, id));
+        let mut nodes_stack = Vec::new();
+        nodes_stack.push((doc.root_element(), None)); // Add the root node to the queue.
+        while let Some((node, parent)) = nodes_stack.pop() {
+            let node_id = generator.insert_node(|id| GeneratorNode::from_xml_node(node, id));
             if let Some(parent) = parent {
                 generator.set_parent(node_id, parent);
             } else {
@@ -86,229 +83,93 @@ impl StructGenerator {
             }
             for child in node.children() {
                 if child.is_element() {
-                    nodes_left.push((child, Some(node_id)));
+                    nodes_stack.push((child, Some(node_id)));
                 }
             }
         }
         generator
     }
 
-    /// Generate the struct code from the generator.
-    fn generate(&self) -> TokenStream {
-        let root_node = self.root_node();
-        let StructFieldType::Custom(struct_ident) = &root_node.ty else {
-            panic!("Root node should be taged as custom type.")
-        };
-        let struct_ident = Ident::new(struct_ident, Span::call_site());
-        let define_fields = self.nodes.iter().filter_map(|(_, node)| node.define_field(self));
-        let init_fields = self.nodes.iter().filter_map(|(_, node)| node.init_field(self));
-        let apply_layouts = self.nodes.iter().filter_map(|(_, node)| node.apply_layout(self));
-        let apply_attrs = self.nodes.iter().filter_map(|(_, node)| node.apply_attr(self));
-        let define_setters = self.nodes.iter().filter_map(|(_, node)| node.generate_setter());
-        quote! {
-            pub struct #struct_ident {
-                #(#define_fields)*
-            }
-
-            impl #struct_ident {
-                pub fn new() -> Self {
-                    let obj = Self {
-                        #(#init_fields,)*
-                    };
-                    #(#apply_layouts)*
-                    #(#apply_attrs)*
-                    obj
-                }
-
-                #(#define_setters)*
-            }
-        }
-    }
-
-    /// Get the root node from the generator.
-    fn root_node(&self) -> &StructNode {
-        self.nodes.get(&self.root.unwrap()).unwrap()
-    }
-
-    /// Get the node from the generator.
-    fn node(&self, id: usize) -> Option<&StructNode> {
-        self.nodes.get(&id)
-    }
-}
-
-struct StructNode {
-    /// Unique ident for the node, used as field name in the struct and object name in the code.
-    id: usize,
-    /// The type of the node, used to determine the field type in the struct.
-    ty: StructFieldType,
-    /// Attributes of the node, used to apply properties to the object.
-    attrs: Option<HashMap<String, String>>,
-    /// The unique ident of the parent node, used to build the hierarchy of objects.
-    parent: Option<usize>,
-    /// The unique ident of the children nodes, used to build the hierarchy of objects.
-    children: Option<Vec<usize>>,
-}
-
-impl StructNode {
-    /// Create a new node from an XML node.
-    fn from_xml_node(node: Node, id: usize) -> Self {
-        let attrs: HashMap<String, String> = node
-            .attributes()
-            .map(|attr| (attr.name().to_string(), attr.value().to_string()))
-            .collect();
-        let ty = StructFieldType::from_str(node.tag_name().name());
-        Self {
-            id,
-            ty,
-            attrs: Some(attrs),
-            parent: None,
-            children: None,
-        }
-    }
-
-    /// Set the parent of the node.
-    fn set_parent(&mut self, parent: usize) {
-        self.parent = Some(parent);
-    }
-
-    /// Add a child node to the node.
-    fn add_child(&mut self, child: usize) {
-        if self.children.is_none() {
-            self.children = Some(Vec::new());
-        }
-        self.children.as_mut().unwrap().push(child);
-    }
-
-    /// Return the name of the node, which is the field name in the struct.
-    fn name(&self) -> Ident {
-        if let Some(attrs) = &self.attrs {
-            if let Some(name) = attrs.get("name") {
-                return Ident::new(name, Span::call_site());
-            }
-        }
-        Ident::new(&format!("__obj_{}", self.id), Span::call_site())
-    }
-
-    /// Return the type of the node, which is the field type in the struct.
-    /// If the node is a root node, it returns the type specified in the `inherits` attribute.
-    /// If the node is not a root node and is element type, it returns the element type.
-    /// Or, it returns None.
-    fn ty(&self, generator: &StructGenerator) -> Option<Ident> {
-        if generator.is_root(self.id) {
-            Some(Ident::new(
-                self.attr("inherits|extends")
-                    .expect("Root node should `inherits` from a existing type."),
-                Span::call_site(),
-            ))
-        } else {
-            self.ty.to_type()
-        }
-    }
-
-    /// Returns the real type of the node.
-    /// If the node is a root node, it returns the type specified in the `inherits` attribute.
-    fn attr_or(&self, name: &str, default: &'static str) -> &str {
-        let names: Vec<&str> = name.split("|").collect();
-        if let Some(attrs) = &self.attrs {
-            for name in names {
-                if let Some(value) = attrs.get(name) {
-                    return value;
-                }
-            }
-        }
-        default
-    }
-
-    fn attr(&self, name: &str) -> Option<&str> {
-        let names: Vec<&str> = name.split("|").collect();
-        if let Some(attrs) = &self.attrs {
-            for name in names {
-                if let Some(value) = attrs.get(name) {
-                    return Some(value);
-                }
-            }
-        }
-        None
-    }
-
-    fn define_field(&self, generator: &StructGenerator) -> Option<TokenStream> {
-        let field_name = self.name();
-        let field_type = self.ty(generator)?;
+    fn define_field(&self, id: usize) -> Option<TokenStream> {
+        let node = self.node(id);
+        let field_name = node.name_ident();
+        let field_type = node.type_ident()?;
         Some(quote! {
-            #field_name: #field_type,
+            #field_name: #field_type
         })
     }
 
-    fn init_field(&self, generator: &StructGenerator) -> Option<TokenStream> {
-        let name = self.name();
-        let obj = match &self.ty {
-            StructFieldType::Button => match ButtonType::from_str(self.attr_or("type", "push")) {
-                ButtonType::Push => quote! { Button::new() },
-                ButtonType::Flat => quote! { Button::new_flat() },
-                ButtonType::Check => quote! { Button::new_check() },
-                ButtonType::Check3 => quote! { Button::new_check3() },
-                ButtonType::Radio => quote! { Button::new_radio() },
-                ButtonType::FlatGle => quote! { Button::new_flatgle() },
+    fn init_field(&self, id: usize) -> Option<TokenStream> {
+        let node = self.node(id);
+        let name = node.name_ident();
+        let obj = match &node.ty {
+            FieldType::Button => match node.attr_or("type", "push") {
+                "check" => quote! { Button::new_check() },
+                "check3" => quote! { Button::new_check3() },
+                "radio" => quote! { Button::new_radio() },
+                "flat" => quote! { Button::new_flat() },
+                "flatgle" => quote! { Button::new_flatgle() },
+                _ => quote! { Button::new() },
             },
-            StructFieldType::Combo => quote! { Combo::new() },
-            StructFieldType::Edit => {
-                if bool::from_str(self.attr_or("multiline|multi-line", "false")) {
+            FieldType::Combo => quote! { Combo::new() },
+            FieldType::Edit => {
+                if bool::from_str(node.attr_or("multiline|multi-line", "false")) {
                     quote! { Edit::new_multiline() }
                 } else {
-                    quote! { Edit::new() }
+                    quote! { Edsit::new() }
                 }
             }
-            StructFieldType::ImageView => quote! { ImageView::new() },
-            StructFieldType::Label => quote! { Label::new() },
-            StructFieldType::Panel => {
+            FieldType::ImageView => quote! { ImageView::new() },
+            FieldType::Label => quote! { Label::new() },
+            FieldType::Panel => {
                 let horizontal_scroll =
-                    bool::from_str(self.attr_or("horizontal-scroll|horizontal_scroll|hscroll", "false"));
-                let vertical_scroll = bool::from_str(self.attr_or("vertical-scroll|vertical_scroll|vscroll", "false"));
-                let border = bool::from_str(self.attr_or("border|has-border", "false"));
+                    bool::from_str(node.attr_or("horizontal-scroll|horizontal_scroll|hscroll", "false"));
+                let vertical_scroll = bool::from_str(node.attr_or("vertical-scroll|vertical_scroll|vscroll", "false"));
+                let border = bool::from_str(node.attr_or("border|has-border", "false"));
                 match (horizontal_scroll, vertical_scroll, border) {
                     (false, false, false) => quote! { Panel::new() },
                     (_, _, false) => quote! { Panel::new_scroll(#horizontal_scroll, #vertical_scroll) },
                     (_, _, true) => quote! { Panel::new_custom(#horizontal_scroll, #vertical_scroll, #border) },
                 }
             }
-            StructFieldType::ListBox => quote! { ListBox::new() },
-            StructFieldType::PopUp => quote! { PopUp::new() },
-            StructFieldType::Progress => quote! { Progress::new() },
-            StructFieldType::Slider => {
-                if bool::from_str(self.attr_or("vertical", "false")) {
+            FieldType::ListBox => quote! { ListBox::new() },
+            FieldType::PopUp => quote! { PopUp::new() },
+            FieldType::Progress => quote! { Progress::new() },
+            FieldType::Slider => {
+                if bool::from_str(node.attr_or("vertical", "false")) {
                     quote! { Slider::new_vertical() }
                 } else {
                     quote! { Slider::new() }
                 }
             }
-            StructFieldType::SplitView => {
-                if bool::from_str(self.attr_or("vertical", "false")) {
+            FieldType::SplitView => {
+                if bool::from_str(node.attr_or("vertical", "false")) {
                     quote! { SplitView::new_vertical() }
                 } else {
                     quote! { SplitView::new() }
                 }
             }
-            StructFieldType::TableView => quote! { TableView::new() },
-            StructFieldType::TextView => quote! { TextView::new() },
-            StructFieldType::UpDown => quote! { UpDown::new() },
-            StructFieldType::View => quote! { View::new() },
-            StructFieldType::WebView => quote! { WebView::new() },
-            StructFieldType::Line => {
-                if bool::from_str(self.attr_or("vertical", "false")) {
+            FieldType::TableView => quote! { TableView::new() },
+            FieldType::TextView => quote! { TextView::new() },
+            FieldType::UpDown => quote! { UpDown::new() },
+            FieldType::View => quote! { View::new() },
+            FieldType::WebView => quote! { WebView::new() },
+            FieldType::Line => {
+                if bool::from_str(node.attr_or("vertical", "false")) {
                     quote! { Line::new_vertical() }
                 } else {
                     quote! { Line::new() }
                 }
             }
-            StructFieldType::Layout => {
-                let columns = LitInt::new(self.attr_or("cols|columns", "1"), Span::call_site());
-                let rows = LitInt::new(self.attr_or("rows", "1"), Span::call_site());
+            FieldType::Layout => {
+                let columns = LitInt::new(node.attr_or("cols|columns", "1"), Span::call_site());
+                let rows = LitInt::new(node.attr_or("rows", "1"), Span::call_site());
                 quote! { Layout::new(#columns, #rows) }
             }
-            StructFieldType::Window => quote! { Window::new(WindowFlags::default()) },
-            StructFieldType::Cell => return None,
-            StructFieldType::Custom(_) => {
-                let custom = self.ty(generator).unwrap();
+            FieldType::Window => quote! { Window::new(WindowFlags::default()) },
+            FieldType::Cell => return None,
+            FieldType::Custom(_) => {
+                let custom = node.type_ident()?;
                 quote! { #custom::new() }
             }
         };
@@ -317,19 +178,20 @@ impl StructNode {
         })
     }
 
-    fn apply_attr(&self, generator: &StructGenerator) -> Option<TokenStream> {
-        let name = self.name();
-        match self.ty {
-            StructFieldType::Button => {
-                let text_setter = self.attr("text").map(|text| {
+    fn apply_attr(&self, id: usize) -> Option<TokenStream> {
+        let node = self.node(id);
+        let name = node.name_ident();
+        match node.ty {
+            FieldType::Button => {
+                let text_setter = node.attr("text").map(|text| {
                     let text = LitStr::new(text, Span::call_site());
                     quote! { obj.#name.set_text(#text); }
                 });
-                let width_setter = self.attr("width").map(|width| {
+                let width_setter = node.attr("width").map(|width| {
                     let width = LitFloat::new(width, Span::call_site());
                     quote! { obj.#name.set_width(#width); }
                 });
-                let set_text_alt_setter = self.attr("set-text-alt").map(|set_text_alt| {
+                let set_text_alt_setter = node.attr("set-text-alt").map(|set_text_alt| {
                     let set_text_alt = LitStr::new(set_text_alt, Span::call_site());
                     quote! { obj.#name.set_text_alt(#set_text_alt); }
                 });
@@ -339,8 +201,8 @@ impl StructNode {
                     #set_text_alt_setter
                 })
             }
-            StructFieldType::Label => {
-                let text_setter = self.attr("text").map(|text| {
+            FieldType::Label => {
+                let text_setter = node.attr("text").map(|text| {
                     let text = LitStr::new(text, Span::call_site());
                     quote! { obj.#name.set_text(#text); }
                 });
@@ -348,23 +210,20 @@ impl StructNode {
                     #text_setter
                 })
             }
-            StructFieldType::Panel => {
-                let panel_name = self.name();
-                let window_name = generator.node(self.parent?)?;
-                if window_name.ty(generator) != StructFieldType::Window.to_type() {
-                    return None;
-                }
-                let window_name = window_name.name();
+            FieldType::Panel => {
+                let panel_name = node.name_ident();
+                let window = self.node(node.parent?);
+                let window_name = window.name_ident();
                 Some(quote! {
                     obj.#window_name.set_panel(obj.#panel_name);
                 })
             }
-            StructFieldType::Window => {
-                let title_setter = self.attr("title").map(|title| {
+            FieldType::Window => {
+                let title_setter = node.attr("title").map(|title| {
                     let title = LitStr::new(title, Span::call_site());
                     quote! { obj.#name.set_title(#title); }
                 });
-                let client_size_setter = self.attr("client-size|size").and_then(|client_size| {
+                let client_size_setter = node.attr("client-size|size").and_then(|client_size| {
                     let client_size = client_size.split(',').collect::<Vec<_>>();
                     if client_size.len() != 2 {
                         return None;
@@ -373,7 +232,7 @@ impl StructNode {
                     let height = LitFloat::new(client_size[1], Span::call_site());
                     Some(quote! { obj.#name.set_client_size(#width, #height); })
                 });
-                let origin_setter = self.attr("origin").and_then(|origin| {
+                let origin_setter = node.attr("origin").and_then(|origin| {
                     let origin = origin.split(',').collect::<Vec<_>>();
                     if origin.len() != 2 {
                         return None;
@@ -392,22 +251,23 @@ impl StructNode {
         }
     }
 
-    fn apply_layout(&self, generator: &StructGenerator) -> Option<TokenStream> {
-        match self.ty {
-            StructFieldType::Layout => {
-                let panel = generator.node(self.parent?)?;
-                let panel_name = panel.name();
-                let layout_name = self.name();
+    fn apply_layout(&self, id: usize) -> Option<TokenStream> {
+        let node = self.node(id);
+        match node.ty {
+            FieldType::Layout => {
+                let panel = self.node(node.parent?);
+                let panel_name = panel.name_ident();
+                let layout_name = node.name_ident();
                 Some(quote! {
                     obj.#panel_name.add_layout(obj.#layout_name);
                 })
             }
-            StructFieldType::Cell => {
-                let layout = generator.node(self.parent?)?;
-                let layout_name = layout.name();
-                let col = LitInt::new(self.attr("column|col")?, Span::call_site());
-                let row = LitInt::new(self.attr("row")?, Span::call_site());
-                let control_name = Ident::new(self.attr("for|control")?, Span::call_site());
+            FieldType::Cell => {
+                let layout = self.node(node.parent?);
+                let layout_name = layout.name_ident();
+                let col = LitInt::new(node.attr("column|col")?, Span::call_site());
+                let row = LitInt::new(node.attr("row")?, Span::call_site());
+                let control_name = Ident::new(node.attr("for|control")?, Span::call_site());
                 Some(quote! {
                     obj.#layout_name.set_control(#col, #row, obj.#control_name);
                 })
@@ -416,12 +276,13 @@ impl StructNode {
         }
     }
 
-    fn generate_setter(&self) -> Option<TokenStream> {
-        let name = self.name();
-        match self.ty {
-            StructFieldType::Button => {
-                let on_click_setter = self.attr("on-click").map(|on_click| {
-                    let on_click = Ident::new(&format!("set_{}_handler", on_click), Span::call_site());
+    fn generate_setter(&self, id: usize) -> Option<TokenStream> {
+        let node = self.node(id);
+        let name = node.name_ident();
+        match node.ty {
+            FieldType::Button => {
+                let on_click_setter = node.attr("on-click").map(|on_click| {
+                    let on_click = Ident::new(&format!("setter_{}", on_click), Span::call_site());
                     quote! {
                         pub fn #on_click<F>(&self, callback: F)
                         where
@@ -435,9 +296,9 @@ impl StructNode {
                     #on_click_setter
                 })
             }
-            StructFieldType::Window => {
-                let on_close_setter = self.attr("on-close").map(|on_close| {
-                    let on_close = Ident::new(&format!("set_{}_handler", on_close), Span::call_site());
+            FieldType::Window => {
+                let on_close_setter = node.attr("on-close").map(|on_close| {
+                    let on_close = Ident::new(&format!("setter_{}", on_close), Span::call_site());
                     quote! {
                         pub fn #on_close<F>(&self, callback: F)
                         where
@@ -451,13 +312,216 @@ impl StructNode {
                     #on_close_setter
                 })
             }
+            FieldType::TextView => {
+                let text_setter = node.attr("write").map(|text| {
+                    let text_setter = Ident::new(&format!("setter_{}", text), Span::call_site());
+                    quote! {
+                        pub fn #text_setter(&self, text: &str) {
+                            self.#name.write(text)
+                        }
+                    }
+                });
+                Some(quote! {
+                    #text_setter
+                })
+            }
             _ => None,
         }
+    }
+
+    /// Generate all user defined struct.
+    fn generate(&self) -> TokenStream {
+        let root = self.node(self.root.unwrap());
+        let mod_name = root.attr_or("mod|module|namespacing", "ui");
+        let mod_name = Ident::new(mod_name, Span::call_site());
+        let nodes = self.defined_nodes().map(|x| self.generate_node(*x));
+        quote! {
+            pub mod #mod_name {
+                use nappgui::prelude::*;
+                #(#nodes)*
+            }
+
+            use #mod_name::*;
+        }
+    }
+
+    /// Generate the struct code from the generator.
+    fn generate_node(&self, id: usize) -> TokenStream {
+        let node = self.nodes.get(&id).unwrap();
+        let child_nodes = self.child_nodes(id);
+
+        let FieldType::Custom(struct_ident) = &node.ty else {
+            panic!("Node under <UI> should be taged as custom type.")
+        };
+
+        let inner_name = node.name_ident();
+        let inner_type = Ident::new(
+            node.attr("inherits|extends")
+                .expect("Root node should `inherits` from a existing type."),
+            Span::call_site(),
+        );
+        let struct_ident = Ident::new(struct_ident, Span::call_site());
+        let define_child_fields = child_nodes.iter().filter_map(|node| self.define_field(*node));
+        let init_child_fields = child_nodes.iter().filter_map(|node| self.init_field(*node));
+        let apply_layouts = child_nodes.iter().filter_map(|node| self.apply_layout(*node));
+        let apply_attrs = child_nodes.iter().filter_map(|node| self.apply_attr(*node));
+        let define_setters = child_nodes.iter().filter_map(|node| self.generate_setter(*node));
+        quote! {
+            #[derive(Debug, Clone, Copy)]
+            pub struct #struct_ident {
+                #inner_name: #inner_type,
+                #(#define_child_fields,)*
+            }
+
+            impl #struct_ident {
+                pub fn new() -> Self {
+                    let obj = Self {
+                        #inner_name: #inner_type::new(),
+                        #(#init_child_fields,)*
+                    };
+                    #(#apply_layouts)*
+                    #(#apply_attrs)*
+                    obj
+                }
+
+                #(#define_setters)*
+            }
+
+            impl std::ops::Deref for #struct_ident {
+                type Target = #inner_type;
+                fn deref(&self) -> &Self::Target {
+                    &self.#inner_name
+                }
+            }
+
+            impl nappgui::gui::AsObject<#inner_type> for #struct_ident {
+                fn as_object(self) -> #inner_type {
+                    self.#inner_name
+                }
+            }
+        }
+    }
+
+    /// Get the node from the generator. If not found, panic.
+    fn node(&self, id: usize) -> &GeneratorNode {
+        self.nodes.get(&id).unwrap()
+    }
+
+    /// Get all nodes based on id. If the id not found, panic.
+    fn child_nodes(&self, id: usize) -> Vec<usize> {
+        let mut result = Vec::new();
+        let mut node_stack = Vec::new();
+        let node = self.node(id);
+        for child in &node.children {
+            node_stack.push(*child);
+        }
+
+        while let Some(node) = node_stack.pop() {
+            result.push(node);
+            for child in &self.node(node).children {
+                node_stack.push(*child);
+            }
+        }
+        result
+    }
+
+    /// Get the root nodes from the generator. If the id not found, panic.
+    fn defined_nodes(&self) -> impl Iterator<Item = &usize> {
+        let root = self.node(self.root.unwrap());
+        root.children.iter()
+    }
+}
+
+struct GeneratorNode {
+    /// Unique ident for the node, used as field name in the struct and object name in the code.
+    id: usize,
+    /// The type of the node, used to determine the field type in the struct.
+    ty: FieldType,
+    /// Attributes of the node, used to apply properties to the object.
+    attrs: HashMap<String, String>,
+    /// The unique ident of the parent node, used to build the hierarchy of objects.
+    parent: Option<usize>,
+    /// The unique ident of the children nodes, used to build the hierarchy of objects.
+    children: Vec<usize>,
+}
+
+impl GeneratorNode {
+    /// Create a new node from an XML node.
+    fn from_xml_node(node: Node, id: usize) -> Self {
+        let attrs: HashMap<String, String> = node
+            .attributes()
+            .map(|attr| (attr.name().to_string(), attr.value().to_string()))
+            .collect();
+        let ty = FieldType::from_str(node.tag_name().name());
+        Self {
+            id,
+            ty,
+            attrs,
+            parent: None,
+            children: Vec::new(),
+        }
+    }
+
+    /// Return the name of the node, which is the field name in the struct.
+    fn name_ident(&self) -> Ident {
+        if let Some(name) = self.attrs.get("name") {
+            return Ident::new(name, Span::call_site());
+        }
+        Ident::new(&format!("__obj_{}", self.id), Span::call_site())
+    }
+
+    /// Return the type of the node, which is the field type in the struct.
+    fn type_ident(&self) -> Option<Ident> {
+        match &self.ty {
+            FieldType::Button => Some(Ident::new("Button", Span::call_site())),
+            FieldType::Combo => Some(Ident::new("Combo", Span::call_site())),
+            FieldType::Edit => Some(Ident::new("Edit", Span::call_site())),
+            FieldType::ImageView => Some(Ident::new("ImageView", Span::call_site())),
+            FieldType::Label => Some(Ident::new("Label", Span::call_site())),
+            FieldType::Panel => Some(Ident::new("Panel", Span::call_site())),
+            FieldType::ListBox => Some(Ident::new("ListBox", Span::call_site())),
+            FieldType::PopUp => Some(Ident::new("PopUp", Span::call_site())),
+            FieldType::Progress => Some(Ident::new("Progress", Span::call_site())),
+            FieldType::Slider => Some(Ident::new("Slider", Span::call_site())),
+            FieldType::SplitView => Some(Ident::new("SplitView", Span::call_site())),
+            FieldType::TableView => Some(Ident::new("TableView", Span::call_site())),
+            FieldType::TextView => Some(Ident::new("TextView", Span::call_site())),
+            FieldType::UpDown => Some(Ident::new("UpDown", Span::call_site())),
+            FieldType::View => Some(Ident::new("View", Span::call_site())),
+            FieldType::WebView => Some(Ident::new("WebView", Span::call_site())),
+            FieldType::Line => Some(Ident::new("Line", Span::call_site())),
+            FieldType::Layout => Some(Ident::new("Layout", Span::call_site())),
+            FieldType::Window => Some(Ident::new("Window", Span::call_site())),
+            FieldType::Custom(custom) => Some(Ident::new(custom, Span::call_site())),
+            _ => None,
+        }
+    }
+
+    /// Returns the real type of the node.
+    /// If the node is a root node, it returns the type specified in the `inherits` attribute.
+    fn attr_or(&self, name: &str, default: &'static str) -> &str {
+        let names: Vec<&str> = name.split("|").collect();
+        for name in names {
+            if let Some(value) = self.attrs.get(name) {
+                return value;
+            }
+        }
+        default
+    }
+
+    fn attr(&self, name: &str) -> Option<&str> {
+        let names: Vec<&str> = name.split("|").collect();
+        for name in names {
+            if let Some(value) = &self.attrs.get(name) {
+                return Some(value);
+            }
+        }
+        None
     }
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
-enum StructFieldType {
+enum FieldType {
     Button,
     Combo,
     Edit,
@@ -481,7 +545,7 @@ enum StructFieldType {
     Custom(String),
 }
 
-impl StructFieldType {
+impl FieldType {
     fn from_str(s: &str) -> Self {
         match s.trim().to_lowercase().as_str() {
             "button" => Self::Button,
@@ -507,60 +571,10 @@ impl StructFieldType {
             _ => Self::Custom(s.trim().to_owned()),
         }
     }
-
-    fn to_type(&self) -> Option<Ident> {
-        match self {
-            Self::Button => Some(Ident::new("Button", Span::call_site())),
-            Self::Combo => Some(Ident::new("Combo", Span::call_site())),
-            Self::Edit => Some(Ident::new("Edit", Span::call_site())),
-            Self::ImageView => Some(Ident::new("ImageView", Span::call_site())),
-            Self::Label => Some(Ident::new("Label", Span::call_site())),
-            Self::Panel => Some(Ident::new("Panel", Span::call_site())),
-            Self::ListBox => Some(Ident::new("ListBox", Span::call_site())),
-            Self::PopUp => Some(Ident::new("PopUp", Span::call_site())),
-            Self::Progress => Some(Ident::new("Progress", Span::call_site())),
-            Self::Slider => Some(Ident::new("Slider", Span::call_site())),
-            Self::SplitView => Some(Ident::new("SplitView", Span::call_site())),
-            Self::TableView => Some(Ident::new("TableView", Span::call_site())),
-            Self::TextView => Some(Ident::new("TextView", Span::call_site())),
-            Self::UpDown => Some(Ident::new("UpDown", Span::call_site())),
-            Self::View => Some(Ident::new("View", Span::call_site())),
-            Self::WebView => Some(Ident::new("WebView", Span::call_site())),
-            Self::Line => Some(Ident::new("Line", Span::call_site())),
-            Self::Layout => Some(Ident::new("Layout", Span::call_site())),
-            Self::Window => Some(Ident::new("Window", Span::call_site())),
-            Self::Custom(custom) => Some(Ident::new(custom, Span::call_site())),
-            _ => None,
-        }
-    }
 }
 
 trait FromStr {
     fn from_str(s: &str) -> Self;
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-enum ButtonType {
-    Push,
-    Check,
-    Check3,
-    Radio,
-    Flat,
-    FlatGle,
-}
-
-impl FromStr for ButtonType {
-    fn from_str(s: &str) -> Self {
-        match s.trim().to_lowercase().as_str() {
-            "push" => Self::Push,
-            "check" => Self::Check,
-            "check3" => Self::Check3,
-            "radio" => Self::Radio,
-            "flat" => Self::Flat,
-            "flatgle" => Self::FlatGle,
-            _ => Self::Push,
-        }
-    }
 }
 
 impl FromStr for bool {

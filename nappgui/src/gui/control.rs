@@ -2,6 +2,7 @@ use crate::gui::*;
 
 /// The control object.
 #[repr(transparent)]
+#[derive(Clone, Copy)]
 pub struct Control {
     inner: *mut nappgui_sys::GuiControl,
 }
@@ -19,8 +20,8 @@ impl Control {
 
 macro_rules! impl_control {
     ($type:ident, $func:ident, $nappgui_func:ident) => {
-        impl AsRef<Control> for $type {
-            fn as_ref(&self) -> &Control {
+        impl crate::gui::AsObject<Control> for $type {
+            fn as_object(self) -> Control {
                 unsafe { std::mem::transmute(self) }
             }
         }

@@ -195,10 +195,48 @@ impl Generator {
                     let set_text_alt = LitStr::new(set_text_alt, Span::call_site());
                     quote! { obj.#name.set_text_alt(#set_text_alt); }
                 });
+                let font_setter: Option<TokenStream> = {
+                    let font_family = node
+                        .attr("font-family")
+                        .map(|font_family| LitStr::new(font_family, Span::call_site()));
+                    let font_size = node
+                        .attr("font-size")
+                        .map(|font_size| LitFloat::new(font_size, Span::call_site()))?;
+                    let font_style = node.attr_or("font-style", "normal");
+                    let styles = font_style.split("|");
+                    let mut font_style = vec![];
+                    for style in styles {
+                        match style {
+                            "normal" => font_style.push(Ident::new("Normal", Span::call_site())),
+                            "bold" => font_style.push(Ident::new("Bold", Span::call_site())),
+                            "italic" => font_style.push(Ident::new("Italic", Span::call_site())),
+                            "strike_out" => font_style.push(Ident::new("StrikeOut", Span::call_site())),
+                            "underlined" => font_style.push(Ident::new("Underlined", Span::call_site())),
+                            "subscript" => font_style.push(Ident::new("Subscript", Span::call_site())),
+                            "superscript" => font_style.push(Ident::new("Superscript", Span::call_site())),
+                            "points" => font_style.push(Ident::new("Points", Span::call_site())),
+                            "cell" => font_style.push(Ident::new("Cell", Span::call_site())),
+                            _ => (),
+                        }
+                    }
+
+                    if let Some(font_family) = font_family {
+                        Some(quote! {
+                            let font = Font::new(#font_family, #font_size, [#(FontStyle::#font_style),*]);
+                            obj.#name.set_font(&font);
+                        })
+                    } else {
+                        Some(quote! {
+                            let font = Font::system(#font_size, [#(FontStyle::#font_style),*]);
+                            obj.#name.set_font(&font);
+                        })
+                    }
+                };
                 Some(quote! {
                     #text_setter
                     #width_setter
                     #set_text_alt_setter
+                    #font_setter
                 })
             }
             FieldType::Label => {

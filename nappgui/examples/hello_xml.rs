@@ -15,7 +15,7 @@ nappgui_ui!(
             <cell for="textview" column="0" row="2" />
         </layout>
         <label name="label" text="Hello, world!" />
-        <button name="button" text="Click me!" on-click="button_click"/>
+        <button name="button" text="Click me!" font-size="16.0" font-style="bold" on-click="button_click"/>
         <textview name="textview" write="click" />
     </Panel>
     </HelloWindow>

@@ -14,7 +14,7 @@ use crate::{
         event::{TextEvent, TextFilterEvent},
         listener, Callback,
     },
-    types::{Align, FontStyle},
+    types::{Align, IntoFontStyle},
 };
 
 #[derive(Default)]
@@ -175,9 +175,9 @@ impl Edit {
     }
 
     /// Set the font style for the placeholder.
-    pub fn set_placeholder_style(&self, style: FontStyle) {
+    pub fn set_placeholder_style<T>(&self, style: T) where T: IntoFontStyle {
         unsafe {
-            edit_phstyle(self.as_ptr(), style.to_fstyle_t());
+            edit_phstyle(self.as_ptr(), style.into_font_style());
         }
     }
 

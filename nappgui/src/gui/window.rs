@@ -16,7 +16,7 @@ use crate::draw_2d::{Color, Image};
 use crate::gui::event::{PositionEvent, SizeEvent, WindowCloseEvent};
 use crate::gui::{AsObject, Button, Callback, Control, Menu, Panel, define_object, listener};
 use crate::types::{
-    Align, FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D, Size2D, WindowFlags,
+    Align, FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, IntoWindowFlag, KeyCode, ModifierKey, Point2D, Rect2D, Size2D, WindowFlag
 };
 
 struct HotkeyContext {
@@ -62,12 +62,15 @@ impl Window {
 impl Window {
     /// Create a new window.
     pub fn new() -> Self {
-        unsafe { Self::from_raw(window_create(WindowFlags::default().to_window_flag_t() as u32)) }
+        Self::new_with_flag([WindowFlag::Title, WindowFlag::Close])
     }
 
     /// Create a new window with a specific flag.
-    pub fn new_with_flag(flag: WindowFlags) -> Self {
-        unsafe { Self::from_raw(window_create(flag.to_window_flag_t() as u32)) }
+    pub fn new_with_flag<T>(flag: T) -> Self
+    where
+        T: IntoWindowFlag,
+    {
+        unsafe { Self::from_raw(window_create(flag.into_window_flag())) }
     }
 
     /// Set an event handler for the window closing.

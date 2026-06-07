@@ -7,7 +7,7 @@ use nappgui_sys::{
     font_with_style, font_with_width, font_with_xscale, font_xscale,
 };
 
-use crate::types::FontStyle;
+use crate::types::IntoFontStyle;
 
 /// Represents a typographic family, size and style with which the texts will be drawn.
 #[repr(transparent)]
@@ -31,27 +31,39 @@ impl Font {
     }
 
     /// Create a font.
-    pub fn new(family: &str, size: f32, style: FontStyle) -> Self {
+    pub fn new<T>(family: &str, size: f32, style: T) -> Self
+    where
+        T: IntoFontStyle,
+    {
         let family = CString::new(family).unwrap();
-        let font = unsafe { font_create(family.as_ptr(), size, style.to_fstyle_t() as _) };
+        let font = unsafe { font_create(family.as_ptr(), size, style.into_font_style() as _) };
         unsafe { Font::from_raw(font) }
     }
 
     /// Create a font, with the system's default family.
-    pub fn system(size: f32, style: FontStyle) -> Self {
-        let font = unsafe { font_system(size, style.to_fstyle_t() as _) };
+    pub fn system<T>(size: f32, style: T) -> Self
+    where
+        T: IntoFontStyle,
+    {
+        let font = unsafe { font_system(size, style.into_font_style() as _) };
         unsafe { Font::from_raw(font) }
     }
 
     /// Create a font, with the system's default monospace family.
-    pub fn monospace(size: f32, style: FontStyle) -> Self {
-        let font = unsafe { font_monospace(size, style.to_fstyle_t() as _) };
+    pub fn monospace<T>(size: f32, style: T) -> Self
+    where
+        T: IntoFontStyle,
+    {
+        let font = unsafe { font_monospace(size, style.into_font_style() as _) };
         unsafe { Font::from_raw(font) }
     }
 
     /// Create a copy of an existing font, changing the style.
-    pub fn with_style(&self, style: FontStyle) -> Self {
-        let font = unsafe { font_with_style(self.as_ptr(), style.to_fstyle_t() as _) };
+    pub fn with_style<T>(&self, style: T) -> Self
+    where
+        T: IntoFontStyle,
+    {
+        let font = unsafe { font_with_style(self.as_ptr(), style.into_font_style() as _) };
         unsafe { Font::from_raw(font) }
     }
 

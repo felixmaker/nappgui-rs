@@ -7,7 +7,7 @@ use crate::{
         event::{TextEvent, TextFilterEvent},
         listener, Callback,
     },
-    types::{Align, FontStyle},
+    types::{Align, IntoFontStyle},
 };
 
 use nappgui_sys::{
@@ -130,8 +130,8 @@ impl Combo {
     }
 
     /// Set the font style for the placeholder.
-    pub fn set_placeholder_style(&self, style: FontStyle) {
-        unsafe { combo_phstyle(self.as_ptr(), style.to_fstyle_t()) }
+    pub fn set_placeholder_style<T>(&self, style: T) where T: IntoFontStyle {
+        unsafe { combo_phstyle(self.as_ptr(), style.into_font_style()) }
     }
 
     /// Copies the selected text to the clipboard.

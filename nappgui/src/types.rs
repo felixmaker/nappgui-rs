@@ -46,80 +46,89 @@ pub enum GuiState {
 
 impl_i32_to_enum!(GuiState, 0..=2);
 
-/// Style in typographic fonts.
-#[derive(Clone, Copy)]
-pub struct FontStyle {
-    /// Normal font, no style. Also called Regular.
-    pub is_normal: bool,
+/// Font style.
+#[repr(i32)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum FontStyle {
+    /// Normal font, no style. Also called Regular, indicated in pixels.
+    Normal = 0,
     /// Bold font.
-    pub is_bold: bool,
+    Bold = 1,
     /// Italic font.
-    pub is_italic: bool,
+    Italic = 2,
     /// Crossed out font.
-    pub is_strike_out: bool,
+    StrikeOut = 4,
     /// Underlined font.
-    pub is_underlined: bool,
+    Underlined = 8,
     /// Subscript.
-    pub is_subscript: bool,
+    Subscript = 16,
     /// Superscript.
-    pub is_superscript: bool,
+    Superscript = 32,
     /// Font sizes will be indicated in pixels.
-    pub is_pixels: bool,
-    /// Font sizes will be indicated in points.
-    pub is_points: bool,
+    Points = 64,
     /// Font sizes will refer to cell height and not character height.
-    pub is_cell: bool,
+    Cell = 128,
 }
 
-impl Default for FontStyle {
-    fn default() -> Self {
-        Self {
-            is_normal: true,
-            is_bold: false,
-            is_italic: false,
-            is_strike_out: false,
-            is_underlined: false,
-            is_subscript: false,
-            is_superscript: false,
-            is_pixels: false,
-            is_points: false,
-            is_cell: false,
-        }
+/// Trait for converting a type into a font style.
+pub trait IntoFontStyle {
+    /// Convert into a font style.
+    fn into_font_style(self) -> u32;
+}
+
+impl IntoFontStyle for FontStyle {
+    fn into_font_style(self) -> u32 {
+        self as u32
     }
 }
 
-impl FontStyle {
-    pub(crate) fn to_fstyle_t(&self) -> u32 {
-        let mut style = nappgui_sys::_fstyle_t_ekFNORMAL;
+impl<T> IntoFontStyle for T
+where
+    T: IntoIterator<Item = FontStyle>,
+{
+    fn into_font_style(self) -> u32 {
+        let mut result = 0u32;
+        let mut seen = HashSet::new();
 
-        if self.is_bold {
-            style |= nappgui_sys::_fstyle_t_ekFBOLD;
+        for font in self {
+            if seen.insert(font) {
+                result += font as u32;
+            }
         }
-        if self.is_italic {
-            style |= nappgui_sys::_fstyle_t_ekFITALIC;
-        }
-        if self.is_strike_out {
-            style |= nappgui_sys::_fstyle_t_ekFSTRIKEOUT;
-        }
-        if self.is_underlined {
-            style |= nappgui_sys::_fstyle_t_ekFUNDERLINE;
-        }
-        if self.is_subscript {
-            style |= nappgui_sys::_fstyle_t_ekFSUBSCRIPT;
-        }
-        if self.is_superscript {
-            style |= nappgui_sys::_fstyle_t_ekFSUPSCRIPT;
-        }
-        if self.is_pixels {
-            style |= nappgui_sys::_fstyle_t_ekFPIXELS;
-        }
-        if self.is_points {
-            style |= nappgui_sys::_fstyle_t_ekFPOINTS;
-        }
-        if self.is_cell {
-            style |= nappgui_sys::_fstyle_t_ekFCELL;
-        }
-        style as _
+        result
+    }
+}
+
+#[cfg(test)]
+mod font_style_test {
+    use super::*;
+
+    #[test]
+    fn test_font_style() {
+        let font_style = FontStyle::Bold;
+        let font_style = font_style.into_font_style();
+        assert_eq!(font_style, 1);
+    }
+
+    #[test]
+    fn test_font_style_iter() {
+        let font_style = vec![FontStyle::Bold, FontStyle::Italic];
+        let font_style = font_style.into_font_style();
+        assert_eq!(font_style, 3);
+    }
+
+    #[test]
+    fn test_font_style_iter2() {
+        let font_style = vec![FontStyle::Bold, FontStyle::Bold, FontStyle::Italic, FontStyle::Points];
+        let font_style = font_style.into_font_style();
+        assert_eq!(font_style, 67);
+    }
+
+    #[test]
+    fn test_font_style_iter3() {
+        let font_style = vec![];
+        let font_style = font_style.into_font_style();
+        assert_eq!(font_style, 0);
     }
 }
 
@@ -201,42 +210,57 @@ impl FocusInfo {
     }
 }
 
-/// Window Flag
-#[derive(Clone, Copy)]
-pub struct WindowFlags {
+/// The window flag.
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+pub enum WindowFlag {
     /// The window draws an outer border.
-    pub has_outer_border: bool,
+    Edge = 1,
     /// The window has a title bar.
-    pub has_title_bar: bool,
+    Title = 2,
     /// The window shows the maximize button.
-    pub has_maximize_button: bool,
+    Maximize = 4,
     /// The window shows the minimize button.
-    pub has_minimize_button: bool,
+    Minimize = 8,
     /// The window shows the close button.
-    pub has_close_button: bool,
+    Close = 16,
     /// The window has resizable borders.
-    pub has_resizable_borders: bool,
+    Resizable = 32,
     /// The window will process the pressing of the \[RETURN\] key as a possible closing event, sending the message OnClose.
-    pub process_return_key: bool,
+    Return = 64,
     /// The window will process the pressing of the \[ESC\] key as a possible closing event, sending the message OnClose.
-    pub process_escape_key: bool,
+    Escape = 128,
     /// Avoids hiding a modal window when the modal cycle has finished. See Modal windows.
-    pub avoid_hiding_modal: bool,
+    OffScreen = 256,
+    /// The window is a modal window.
+    ModalNoHide = 512,
 }
 
-impl Default for WindowFlags {
-    fn default() -> Self {
-        Self {
-            has_outer_border: false,
-            has_title_bar: true,
-            has_maximize_button: false,
-            has_minimize_button: true,
-            has_close_button: true,
-            has_resizable_borders: false,
-            process_return_key: false,
-            process_escape_key: false,
-            avoid_hiding_modal: false,
+/// Trait for converting a type into a window flag.
+pub trait IntoWindowFlag {
+    /// Convert into a window flag.
+    fn into_window_flag(self) -> u32;
+}
+
+impl IntoWindowFlag for WindowFlag {
+    fn into_window_flag(self) -> u32 {
+        self as u32
+    }
+}
+
+impl<T> IntoWindowFlag for T
+where
+    T: IntoIterator<Item = WindowFlag>,
+{
+    fn into_window_flag(self) -> u32 {
+        let mut result = 0u32;
+        let mut seen = HashSet::new();
+
+        for font in self {
+            if seen.insert(font) {
+                result += font as u32;
+            }
         }
+        result
     }
 }
 
@@ -390,50 +414,6 @@ pub enum GuiFocus {
 }
 
 impl_i32_to_enum!(GuiFocus, 1..=5);
-
-impl WindowFlags {
-    pub(crate) fn to_window_flag_t(&self) -> u32 {
-        let mut result = 0;
-
-        if self.has_outer_border {
-            result |= nappgui_sys::_window_flag_t_ekWINDOW_EDGE;
-        }
-
-        if self.has_title_bar {
-            result |= nappgui_sys::_window_flag_t_ekWINDOW_TITLE;
-        }
-
-        if self.has_maximize_button {
-            result |= nappgui_sys::_window_flag_t_ekWINDOW_MAX;
-        }
-
-        if self.has_minimize_button {
-            result |= nappgui_sys::_window_flag_t_ekWINDOW_MIN;
-        }
-
-        if self.has_close_button {
-            result |= nappgui_sys::_window_flag_t_ekWINDOW_CLOSE;
-        }
-
-        if self.has_resizable_borders {
-            result |= nappgui_sys::_window_flag_t_ekWINDOW_RESIZE;
-        }
-
-        if self.process_return_key {
-            result |= nappgui_sys::_window_flag_t_ekWINDOW_RETURN;
-        }
-
-        if self.process_escape_key {
-            result |= nappgui_sys::_window_flag_t_ekWINDOW_ESC;
-        }
-
-        if self.avoid_hiding_modal {
-            result |= nappgui_sys::_window_flag_t_ekWINDOW_MODAL_NOHIDE;
-        }
-
-        result as u32
-    }
-}
 
 /// Reason for closing a window.
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -741,6 +721,8 @@ pub enum GuiType {
 }
 
 impl_i32_to_enum!(GuiType, 0..=18);
+
+use std::collections::HashSet;
 
 pub use crate::gui::event::*;
 use crate::gui::Control;

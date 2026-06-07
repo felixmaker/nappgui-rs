@@ -8,7 +8,7 @@ use crate::{
         event::{TextEvent, TextFilterEvent},
         listener, Callback,
     },
-    types::{Align, FontStyle},
+    types::{Align, IntoFontStyle},
 };
 
 use nappgui_sys::{
@@ -113,9 +113,12 @@ impl TextView {
     }
 
     /// Sets the text style.
-    pub fn set_font_style(&self, style: FontStyle) {
+    pub fn set_font_style<T>(&self, style: T)
+    where
+        T: IntoFontStyle,
+    {
         unsafe {
-            textview_fstyle(self.as_ptr(), style.to_fstyle_t());
+            textview_fstyle(self.as_ptr(), style.into_font_style());
         }
     }
 

@@ -1,6 +1,6 @@
-use std::path::PathBuf;
-use std::process::Command;
 use std::env;
+use std::path::{Path, PathBuf};
+use std::process::Command;
 
 fn main() {
     let out = build();
@@ -24,10 +24,19 @@ fn build() -> PathBuf {
             .output()
             .expect("failed to run xcrun");
 
-        let sysroot = String::from_utf8(output.stdout)
+        let mut sysroot = String::from_utf8(output.stdout)
             .expect("invalid utf8")
             .trim()
             .to_string();
+
+        if Path::new(&sysroot)
+            .file_name()
+            .is_some_and(|name| name == "MacOSX.sdk")
+        {
+            if let Some(versioned_sysroot) = versioned_macos_sdk(&sysroot) {
+                sysroot = versioned_sysroot;
+            }
+        }
 
         dst.define("CMAKE_OSX_SYSROOT", &sysroot);
     }
@@ -38,6 +47,35 @@ fn build() -> PathBuf {
         dst.profile(&env::var("PROFILE").unwrap());
     }
     dst.build()
+}
+
+fn versioned_macos_sdk(sysroot: &str) -> Option<String> {
+    let sdk_dir = Path::new(sysroot).parent()?;
+    let mut sdks = std::fs::read_dir(sdk_dir)
+        .ok()?
+        .filter_map(Result::ok)
+        .filter_map(|entry| {
+            let path = entry.path();
+            let name = path.file_name()?.to_str()?;
+            let version = name.strip_prefix("MacOSX")?.strip_suffix(".sdk")?;
+
+            if version.is_empty() {
+                return None;
+            }
+
+            Some((parse_version(version), path))
+        })
+        .collect::<Vec<_>>();
+
+    sdks.sort_by(|(a, _), (b, _)| a.cmp(b));
+    sdks.pop().map(|(_, path)| path.display().to_string())
+}
+
+fn parse_version(version: &str) -> Vec<u32> {
+    version
+        .split('.')
+        .map(|part| part.parse::<u32>().unwrap_or(0))
+        .collect()
 }
 
 /// Link the nappgui library

@@ -5,8 +5,6 @@ use std::{
     rc::Rc,
 };
 
-use crate::gui::*;
-
 /// Trait for objects easy conversion.
 pub trait AsObject<T>
 where

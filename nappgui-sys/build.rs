@@ -43,6 +43,13 @@ fn build() -> PathBuf {
 
     if cfg!(target_os = "windows") {
         dst.profile("release"); // Always set to Release on Windows in order to prevent link to _CrtDumpMemoryLeaks ...
+        dst.define("CMAKE_C_FLAGS", "-D_WINDOWS");
+        dst.define("CMAKE_CXX_FLAGS", "-D_WINDOWS");
+        
+        if std::env::var("TARGET").unwrap().contains("msvc") {
+            dst.cflag("/utf-8");
+            dst.cxxflag("/utf-8");
+        }
     } else {
         dst.profile(&env::var("PROFILE").unwrap());
     }

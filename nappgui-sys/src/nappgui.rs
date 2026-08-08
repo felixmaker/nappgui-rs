@@ -30,7 +30,9 @@ pub const ARRST: &[u8; 8] = b"ArrSt::\0";
 pub const ARRPT: &[u8; 8] = b"ArrPt::\0";
 pub const SETST: &[u8; 8] = b"SetSt::\0";
 pub const SETPT: &[u8; 8] = b"SetPt::\0";
-pub const GUI_CONTEXT_NUM_COMPONENTS: u32 = 16;
+pub const TREEST: &[u8; 9] = b"TreeSt::\0";
+pub const TREEPT: &[u8; 9] = b"TreePt::\0";
+pub const GUI_CONTEXT_NUM_COMPONENTS: u32 = 14;
 pub const kTEXTFILTER_SIZE: u32 = 4096;
 pub type va_list = *mut ::libc::c_char;
 pub type __vcrt_bool = bool;
@@ -484,6 +486,18 @@ pub struct _rbtree_t {
 pub type RBTree = _rbtree_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct _ntree_t {
+    _unused: [u8; 0],
+}
+pub type NTree = _ntree_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _nnode_t {
+    _unused: [u8; 0],
+}
+pub type NNode = _nnode_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _regex {
     _unused: [u8; 0],
 }
@@ -835,35 +849,162 @@ unsafe extern "C" {
 unsafe extern "C" {
     pub fn rbtree_check(tree: *const RBTree) -> bool_t;
 }
+unsafe extern "C" {
+    pub fn ntree_create(esize: u16, type_: *const char_t) -> *mut NTree;
+}
+unsafe extern "C" {
+    pub fn ntree_copy(tree: *const NTree, func_copy: FPtr_scopy, type_: *const char_t) -> *mut NTree;
+}
+unsafe extern "C" {
+    pub fn ntree_copy_ptr(tree: *const NTree, func_copy: FPtr_copy, type_: *const char_t) -> *mut NTree;
+}
+unsafe extern "C" {
+    pub fn ntree_read(
+        stream: *mut Stream,
+        esize: u16,
+        func_read_init: FPtr_read_init,
+        type_: *const char_t,
+    ) -> *mut NTree;
+}
+unsafe extern "C" {
+    pub fn ntree_read_ex(
+        stream: *mut Stream,
+        esize: u16,
+        func_read_init: FPtr_read_init_ex,
+        data: *mut ::libc::c_void,
+        type_: *const char_t,
+    ) -> *mut NTree;
+}
+unsafe extern "C" {
+    pub fn ntree_read_ptr(stream: *mut Stream, func_read: FPtr_read, type_: *const char_t) -> *mut NTree;
+}
+unsafe extern "C" {
+    pub fn ntree_read_ptr_ex(
+        stream: *mut Stream,
+        func_read: FPtr_read_ex,
+        data: *mut ::libc::c_void,
+        type_: *const char_t,
+    ) -> *mut NTree;
+}
+unsafe extern "C" {
+    pub fn ntree_destroy(tree: *mut *mut NTree, func_remove: FPtr_remove, type_: *const char_t);
+}
+unsafe extern "C" {
+    pub fn ntree_destopt(tree: *mut *mut NTree, func_remove: FPtr_remove, type_: *const char_t);
+}
+unsafe extern "C" {
+    pub fn ntree_destroy_ptr(tree: *mut *mut NTree, func_destroy: FPtr_destroy, type_: *const char_t);
+}
+unsafe extern "C" {
+    pub fn ntree_destopt_ptr(tree: *mut *mut NTree, func_destroy: FPtr_destroy, type_: *const char_t);
+}
+unsafe extern "C" {
+    pub fn ntree_clear(tree: *mut NTree, func_remove: FPtr_remove);
+}
+unsafe extern "C" {
+    pub fn ntree_clear_ptr(tree: *mut NTree, func_destroy: FPtr_destroy);
+}
+unsafe extern "C" {
+    pub fn ntree_write(stream: *mut Stream, tree: *const NTree, func_write: FPtr_write);
+}
+unsafe extern "C" {
+    pub fn ntree_write_ex(
+        stream: *mut Stream,
+        tree: *const NTree,
+        func_write: FPtr_write_ex,
+        data: *const ::libc::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn ntree_write_ptr(stream: *mut Stream, tree: *const NTree, func_write: FPtr_write);
+}
+unsafe extern "C" {
+    pub fn ntree_write_ptr_ex(
+        stream: *mut Stream,
+        tree: *const NTree,
+        func_write: FPtr_write_ex,
+        data: *const ::libc::c_void,
+    );
+}
+unsafe extern "C" {
+    pub fn ntree_esize(tree: *const NTree) -> u32;
+}
+unsafe extern "C" {
+    pub fn ntree_mem(tree: *const NTree) -> u32;
+}
+unsafe extern "C" {
+    pub fn ntree_root_get(tree: *const NTree) -> *mut NNode;
+}
+unsafe extern "C" {
+    pub fn ntree_root_new(tree: *mut NTree) -> *mut NNode;
+}
+unsafe extern "C" {
+    pub fn ntree_dfs_first(tree: *mut NTree) -> *mut NNode;
+}
+unsafe extern "C" {
+    pub fn ntree_dfs_last(tree: *mut NTree) -> *mut NNode;
+}
+unsafe extern "C" {
+    pub fn ntree_next(tree: *mut NTree) -> *mut NNode;
+}
+unsafe extern "C" {
+    pub fn ntree_prev(tree: *mut NTree) -> *mut NNode;
+}
+unsafe extern "C" {
+    pub fn ntree_dfs_stop(tree: *mut NTree);
+}
+unsafe extern "C" {
+    pub fn ntree_node_size(node: *const NNode) -> u32;
+}
+unsafe extern "C" {
+    pub fn ntree_node_depth(node: *const NNode) -> u32;
+}
+unsafe extern "C" {
+    pub fn ntree_node_index(node: *const NNode) -> u32;
+}
+unsafe extern "C" {
+    pub fn ntree_node_parent(node: *const NNode) -> *mut NNode;
+}
+unsafe extern "C" {
+    pub fn ntree_node_get(node: *const NNode, pos: u32) -> *mut NNode;
+}
+unsafe extern "C" {
+    pub fn ntree_node_insert(node: *mut NNode, pos: u32) -> *mut NNode;
+}
+unsafe extern "C" {
+    pub fn ntree_node_data(node: *mut NNode) -> *mut byte_t;
+}
+unsafe extern "C" {
+    pub fn ntree_node_data0(node: *mut NNode) -> *mut byte_t;
+}
+unsafe extern "C" {
+    pub fn ntree_node_delete(node: *mut NNode, pos: u32, func_remove: FPtr_remove);
+}
+unsafe extern "C" {
+    pub fn ntree_node_delete_ptr(node: *mut NNode, pos: u32, func_destroy: FPtr_destroy);
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct bool_tData {
-    pub elem: [bool_t; 1024usize],
+pub struct _arrstnonusedbool_t_t {
+    _unused: [u8; 0],
 }
+pub type arrstnonusedbool_t = _arrstnonusedbool_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedbool_t_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedbool_t = _setstnonusedbool_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedbool_t_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedbool_t = _treestnonusedbool_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStbool_t {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut bool_tData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStbool_t {
-    pub rb: u32,
-    pub left: *mut NodeStbool_t,
-    pub right: *mut NodeStbool_t,
-    pub data: bool_t,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStbool_t {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStbool_t,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -873,39 +1014,53 @@ pub struct _arrstendbool_t_t {
 pub type arrstendbool_t = _arrstendbool_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStbool_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendbool_t_t {
     _unused: [u8; 0],
 }
 pub type setstendbool_t = _setstendbool_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct int8_tData {
-    pub elem: [i8; 1024usize],
+pub struct TreeStbool_t {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStbool_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendbool_t_t {
+    _unused: [u8; 0],
+}
+pub type treestendbool_t = _treestendbool_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedint8_t_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedint8_t = _arrstnonusedint8_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedint8_t_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedint8_t = _setstnonusedint8_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedint8_t_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedint8_t = _treestnonusedint8_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStint8_t {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut int8_tData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStint8_t {
-    pub rb: u32,
-    pub left: *mut NodeStint8_t,
-    pub right: *mut NodeStint8_t,
-    pub data: i8,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStint8_t {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStint8_t,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -915,39 +1070,53 @@ pub struct _arrstendint8_t_t {
 pub type arrstendint8_t = _arrstendint8_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStint8_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendint8_t_t {
     _unused: [u8; 0],
 }
 pub type setstendint8_t = _setstendint8_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct int16_tData {
-    pub elem: [i16; 1024usize],
+pub struct TreeStint8_t {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStint8_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendint8_t_t {
+    _unused: [u8; 0],
+}
+pub type treestendint8_t = _treestendint8_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedint16_t_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedint16_t = _arrstnonusedint16_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedint16_t_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedint16_t = _setstnonusedint16_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedint16_t_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedint16_t = _treestnonusedint16_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStint16_t {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut int16_tData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStint16_t {
-    pub rb: u32,
-    pub left: *mut NodeStint16_t,
-    pub right: *mut NodeStint16_t,
-    pub data: i16,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStint16_t {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStint16_t,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -957,39 +1126,53 @@ pub struct _arrstendint16_t_t {
 pub type arrstendint16_t = _arrstendint16_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStint16_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendint16_t_t {
     _unused: [u8; 0],
 }
 pub type setstendint16_t = _setstendint16_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct int32_tData {
-    pub elem: [i32; 1024usize],
+pub struct TreeStint16_t {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStint16_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendint16_t_t {
+    _unused: [u8; 0],
+}
+pub type treestendint16_t = _treestendint16_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedint32_t_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedint32_t = _arrstnonusedint32_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedint32_t_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedint32_t = _setstnonusedint32_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedint32_t_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedint32_t = _treestnonusedint32_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStint32_t {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut int32_tData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStint32_t {
-    pub rb: u32,
-    pub left: *mut NodeStint32_t,
-    pub right: *mut NodeStint32_t,
-    pub data: i32,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStint32_t {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStint32_t,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -999,39 +1182,53 @@ pub struct _arrstendint32_t_t {
 pub type arrstendint32_t = _arrstendint32_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStint32_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendint32_t_t {
     _unused: [u8; 0],
 }
 pub type setstendint32_t = _setstendint32_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct int64_tData {
-    pub elem: [i64; 1024usize],
+pub struct TreeStint32_t {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStint32_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendint32_t_t {
+    _unused: [u8; 0],
+}
+pub type treestendint32_t = _treestendint32_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedint64_t_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedint64_t = _arrstnonusedint64_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedint64_t_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedint64_t = _setstnonusedint64_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedint64_t_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedint64_t = _treestnonusedint64_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStint64_t {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut int64_tData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStint64_t {
-    pub rb: u32,
-    pub left: *mut NodeStint64_t,
-    pub right: *mut NodeStint64_t,
-    pub data: i64,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStint64_t {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStint64_t,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1041,39 +1238,53 @@ pub struct _arrstendint64_t_t {
 pub type arrstendint64_t = _arrstendint64_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStint64_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendint64_t_t {
     _unused: [u8; 0],
 }
 pub type setstendint64_t = _setstendint64_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct uint8_tData {
-    pub elem: [u8; 1024usize],
+pub struct TreeStint64_t {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStint64_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendint64_t_t {
+    _unused: [u8; 0],
+}
+pub type treestendint64_t = _treestendint64_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonuseduint8_t_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonuseduint8_t = _arrstnonuseduint8_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonuseduint8_t_t {
+    _unused: [u8; 0],
+}
+pub type setstnonuseduint8_t = _setstnonuseduint8_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonuseduint8_t_t {
+    _unused: [u8; 0],
+}
+pub type treestnonuseduint8_t = _treestnonuseduint8_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStuint8_t {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut uint8_tData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStuint8_t {
-    pub rb: u32,
-    pub left: *mut NodeStuint8_t,
-    pub right: *mut NodeStuint8_t,
-    pub data: u8,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStuint8_t {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStuint8_t,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1083,39 +1294,53 @@ pub struct _arrstenduint8_t_t {
 pub type arrstenduint8_t = _arrstenduint8_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStuint8_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstenduint8_t_t {
     _unused: [u8; 0],
 }
 pub type setstenduint8_t = _setstenduint8_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct uint16_tData {
-    pub elem: [u16; 1024usize],
+pub struct TreeStuint8_t {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStuint8_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestenduint8_t_t {
+    _unused: [u8; 0],
+}
+pub type treestenduint8_t = _treestenduint8_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonuseduint16_t_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonuseduint16_t = _arrstnonuseduint16_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonuseduint16_t_t {
+    _unused: [u8; 0],
+}
+pub type setstnonuseduint16_t = _setstnonuseduint16_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonuseduint16_t_t {
+    _unused: [u8; 0],
+}
+pub type treestnonuseduint16_t = _treestnonuseduint16_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStuint16_t {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut uint16_tData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStuint16_t {
-    pub rb: u32,
-    pub left: *mut NodeStuint16_t,
-    pub right: *mut NodeStuint16_t,
-    pub data: u16,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStuint16_t {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStuint16_t,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1125,39 +1350,53 @@ pub struct _arrstenduint16_t_t {
 pub type arrstenduint16_t = _arrstenduint16_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStuint16_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstenduint16_t_t {
     _unused: [u8; 0],
 }
 pub type setstenduint16_t = _setstenduint16_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct uint32_tData {
-    pub elem: [u32; 1024usize],
+pub struct TreeStuint16_t {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStuint16_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestenduint16_t_t {
+    _unused: [u8; 0],
+}
+pub type treestenduint16_t = _treestenduint16_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonuseduint32_t_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonuseduint32_t = _arrstnonuseduint32_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonuseduint32_t_t {
+    _unused: [u8; 0],
+}
+pub type setstnonuseduint32_t = _setstnonuseduint32_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonuseduint32_t_t {
+    _unused: [u8; 0],
+}
+pub type treestnonuseduint32_t = _treestnonuseduint32_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStuint32_t {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut uint32_tData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStuint32_t {
-    pub rb: u32,
-    pub left: *mut NodeStuint32_t,
-    pub right: *mut NodeStuint32_t,
-    pub data: u32,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStuint32_t {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStuint32_t,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1167,39 +1406,53 @@ pub struct _arrstenduint32_t_t {
 pub type arrstenduint32_t = _arrstenduint32_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStuint32_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstenduint32_t_t {
     _unused: [u8; 0],
 }
 pub type setstenduint32_t = _setstenduint32_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct uint64_tData {
-    pub elem: [u64; 1024usize],
+pub struct TreeStuint32_t {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStuint32_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestenduint32_t_t {
+    _unused: [u8; 0],
+}
+pub type treestenduint32_t = _treestenduint32_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonuseduint64_t_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonuseduint64_t = _arrstnonuseduint64_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonuseduint64_t_t {
+    _unused: [u8; 0],
+}
+pub type setstnonuseduint64_t = _setstnonuseduint64_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonuseduint64_t_t {
+    _unused: [u8; 0],
+}
+pub type treestnonuseduint64_t = _treestnonuseduint64_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStuint64_t {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut uint64_tData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStuint64_t {
-    pub rb: u32,
-    pub left: *mut NodeStuint64_t,
-    pub right: *mut NodeStuint64_t,
-    pub data: u64,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStuint64_t {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStuint64_t,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1209,39 +1462,53 @@ pub struct _arrstenduint64_t_t {
 pub type arrstenduint64_t = _arrstenduint64_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStuint64_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstenduint64_t_t {
     _unused: [u8; 0],
 }
 pub type setstenduint64_t = _setstenduint64_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct real32_tData {
-    pub elem: [real32_t; 1024usize],
+pub struct TreeStuint64_t {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStuint64_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestenduint64_t_t {
+    _unused: [u8; 0],
+}
+pub type treestenduint64_t = _treestenduint64_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedreal32_t_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedreal32_t = _arrstnonusedreal32_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedreal32_t_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedreal32_t = _setstnonusedreal32_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedreal32_t_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedreal32_t = _treestnonusedreal32_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStreal32_t {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut real32_tData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStreal32_t {
-    pub rb: u32,
-    pub left: *mut NodeStreal32_t,
-    pub right: *mut NodeStreal32_t,
-    pub data: real32_t,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStreal32_t {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStreal32_t,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1251,39 +1518,53 @@ pub struct _arrstendreal32_t_t {
 pub type arrstendreal32_t = _arrstendreal32_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStreal32_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendreal32_t_t {
     _unused: [u8; 0],
 }
 pub type setstendreal32_t = _setstendreal32_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct real64_tData {
-    pub elem: [real64_t; 1024usize],
+pub struct TreeStreal32_t {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStreal32_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendreal32_t_t {
+    _unused: [u8; 0],
+}
+pub type treestendreal32_t = _treestendreal32_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedreal64_t_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedreal64_t = _arrstnonusedreal64_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedreal64_t_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedreal64_t = _setstnonusedreal64_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedreal64_t_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedreal64_t = _treestnonusedreal64_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStreal64_t {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut real64_tData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStreal64_t {
-    pub rb: u32,
-    pub left: *mut NodeStreal64_t,
-    pub right: *mut NodeStreal64_t,
-    pub data: real64_t,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStreal64_t {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStreal64_t,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1293,39 +1574,53 @@ pub struct _arrstendreal64_t_t {
 pub type arrstendreal64_t = _arrstendreal64_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStreal64_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendreal64_t_t {
     _unused: [u8; 0],
 }
 pub type setstendreal64_t = _setstendreal64_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct StringPtData {
-    pub elem: [*mut String; 1024usize],
+pub struct TreeStreal64_t {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStreal64_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendreal64_t_t {
+    _unused: [u8; 0],
+}
+pub type treestendreal64_t = _treestendreal64_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrptnonusedString_t {
+    _unused: [u8; 0],
+}
+pub type arrptnonusedString = _arrptnonusedString_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setptnonusedString_t {
+    _unused: [u8; 0],
+}
+pub type setptnonusedString = _setptnonusedString_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treeptnonusedString_t {
+    _unused: [u8; 0],
+}
+pub type treeptnonusedString = _treeptnonusedString_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrPtString {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut StringPtData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodePtString {
-    pub rb: u32,
-    pub left: *mut NodePtString,
-    pub right: *mut NodePtString,
-    pub data: *mut String,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetPtString {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodePtString,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1335,39 +1630,53 @@ pub struct _arrptendString_t {
 pub type arrptendString = _arrptendString_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetPtString {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setptendString_t {
     _unused: [u8; 0],
 }
 pub type setptendString = _setptendString_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct DirEntryData {
-    pub elem: [DirEntry; 1024usize],
+pub struct TreePtString {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodePtString {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treeptendString_t {
+    _unused: [u8; 0],
+}
+pub type treeptendString = _treeptendString_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedDirEntry_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedDirEntry = _arrstnonusedDirEntry_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedDirEntry_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedDirEntry = _setstnonusedDirEntry_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedDirEntry_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedDirEntry = _treestnonusedDirEntry_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStDirEntry {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut DirEntryData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStDirEntry {
-    pub rb: u32,
-    pub left: *mut NodeStDirEntry,
-    pub right: *mut NodeStDirEntry,
-    pub data: DirEntry,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStDirEntry {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStDirEntry,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1377,39 +1686,53 @@ pub struct _arrstendDirEntry_t {
 pub type arrstendDirEntry = _arrstendDirEntry_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStDirEntry {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendDirEntry_t {
     _unused: [u8; 0],
 }
 pub type setstendDirEntry = _setstendDirEntry_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct ResPackPtData {
-    pub elem: [*mut ResPack; 1024usize],
+pub struct TreeStDirEntry {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStDirEntry {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendDirEntry_t {
+    _unused: [u8; 0],
+}
+pub type treestendDirEntry = _treestendDirEntry_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrptnonusedResPack_t {
+    _unused: [u8; 0],
+}
+pub type arrptnonusedResPack = _arrptnonusedResPack_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setptnonusedResPack_t {
+    _unused: [u8; 0],
+}
+pub type setptnonusedResPack = _setptnonusedResPack_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treeptnonusedResPack_t {
+    _unused: [u8; 0],
+}
+pub type treeptnonusedResPack = _treeptnonusedResPack_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrPtResPack {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut ResPackPtData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodePtResPack {
-    pub rb: u32,
-    pub left: *mut NodePtResPack,
-    pub right: *mut NodePtResPack,
-    pub data: *mut ResPack,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetPtResPack {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodePtResPack,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1419,39 +1742,53 @@ pub struct _arrptendResPack_t {
 pub type arrptendResPack = _arrptendResPack_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetPtResPack {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setptendResPack_t {
     _unused: [u8; 0],
 }
 pub type setptendResPack = _setptendResPack_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct RegExPtData {
-    pub elem: [*mut RegEx; 1024usize],
+pub struct TreePtResPack {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodePtResPack {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treeptendResPack_t {
+    _unused: [u8; 0],
+}
+pub type treeptendResPack = _treeptendResPack_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrptnonusedRegEx_t {
+    _unused: [u8; 0],
+}
+pub type arrptnonusedRegEx = _arrptnonusedRegEx_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setptnonusedRegEx_t {
+    _unused: [u8; 0],
+}
+pub type setptnonusedRegEx = _setptnonusedRegEx_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treeptnonusedRegEx_t {
+    _unused: [u8; 0],
+}
+pub type treeptnonusedRegEx = _treeptnonusedRegEx_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrPtRegEx {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut RegExPtData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodePtRegEx {
-    pub rb: u32,
-    pub left: *mut NodePtRegEx,
-    pub right: *mut NodePtRegEx,
-    pub data: *mut RegEx,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetPtRegEx {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodePtRegEx,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1461,10 +1798,31 @@ pub struct _arrptendRegEx_t {
 pub type arrptendRegEx = _arrptendRegEx_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetPtRegEx {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setptendRegEx_t {
     _unused: [u8; 0],
 }
 pub type setptendRegEx = _setptendRegEx_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct TreePtRegEx {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodePtRegEx {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treeptendRegEx_t {
+    _unused: [u8; 0],
+}
+pub type treeptendRegEx = _treeptendRegEx_t;
 pub type V2Df = _v2df_t;
 pub type V2Dd = _v2dd_t;
 pub type S2Df = _s2df_t;
@@ -1623,33 +1981,26 @@ pub struct _col2dd_t {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct V2DfData {
-    pub elem: [V2Df; 1024usize],
+pub struct _arrstnonusedV2Df_t {
+    _unused: [u8; 0],
 }
+pub type arrstnonusedV2Df = _arrstnonusedV2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedV2Df_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedV2Df = _setstnonusedV2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedV2Df_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedV2Df = _treestnonusedV2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStV2Df {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut V2DfData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStV2Df {
-    pub rb: u32,
-    pub left: *mut NodeStV2Df,
-    pub right: *mut NodeStV2Df,
-    pub data: V2Df,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStV2Df {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStV2Df,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1659,39 +2010,53 @@ pub struct _arrstendV2Df_t {
 pub type arrstendV2Df = _arrstendV2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStV2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendV2Df_t {
     _unused: [u8; 0],
 }
 pub type setstendV2Df = _setstendV2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct V2DdData {
-    pub elem: [V2Dd; 1024usize],
+pub struct TreeStV2Df {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStV2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendV2Df_t {
+    _unused: [u8; 0],
+}
+pub type treestendV2Df = _treestendV2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedV2Dd_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedV2Dd = _arrstnonusedV2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedV2Dd_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedV2Dd = _setstnonusedV2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedV2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedV2Dd = _treestnonusedV2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStV2Dd {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut V2DdData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStV2Dd {
-    pub rb: u32,
-    pub left: *mut NodeStV2Dd,
-    pub right: *mut NodeStV2Dd,
-    pub data: V2Dd,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStV2Dd {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStV2Dd,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1701,39 +2066,53 @@ pub struct _arrstendV2Dd_t {
 pub type arrstendV2Dd = _arrstendV2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStV2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendV2Dd_t {
     _unused: [u8; 0],
 }
 pub type setstendV2Dd = _setstendV2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct S2DfData {
-    pub elem: [S2Df; 1024usize],
+pub struct TreeStV2Dd {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStV2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendV2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treestendV2Dd = _treestendV2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedS2Df_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedS2Df = _arrstnonusedS2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedS2Df_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedS2Df = _setstnonusedS2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedS2Df_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedS2Df = _treestnonusedS2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStS2Df {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut S2DfData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStS2Df {
-    pub rb: u32,
-    pub left: *mut NodeStS2Df,
-    pub right: *mut NodeStS2Df,
-    pub data: S2Df,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStS2Df {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStS2Df,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1743,39 +2122,53 @@ pub struct _arrstendS2Df_t {
 pub type arrstendS2Df = _arrstendS2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStS2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendS2Df_t {
     _unused: [u8; 0],
 }
 pub type setstendS2Df = _setstendS2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct S2DdData {
-    pub elem: [S2Dd; 1024usize],
+pub struct TreeStS2Df {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStS2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendS2Df_t {
+    _unused: [u8; 0],
+}
+pub type treestendS2Df = _treestendS2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedS2Dd_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedS2Dd = _arrstnonusedS2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedS2Dd_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedS2Dd = _setstnonusedS2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedS2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedS2Dd = _treestnonusedS2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStS2Dd {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut S2DdData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStS2Dd {
-    pub rb: u32,
-    pub left: *mut NodeStS2Dd,
-    pub right: *mut NodeStS2Dd,
-    pub data: S2Dd,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStS2Dd {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStS2Dd,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1785,39 +2178,53 @@ pub struct _arrstendS2Dd_t {
 pub type arrstendS2Dd = _arrstendS2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStS2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendS2Dd_t {
     _unused: [u8; 0],
 }
 pub type setstendS2Dd = _setstendS2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct R2DfData {
-    pub elem: [R2Df; 1024usize],
+pub struct TreeStS2Dd {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStS2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendS2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treestendS2Dd = _treestendS2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedR2Df_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedR2Df = _arrstnonusedR2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedR2Df_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedR2Df = _setstnonusedR2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedR2Df_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedR2Df = _treestnonusedR2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStR2Df {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut R2DfData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStR2Df {
-    pub rb: u32,
-    pub left: *mut NodeStR2Df,
-    pub right: *mut NodeStR2Df,
-    pub data: R2Df,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStR2Df {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStR2Df,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1827,39 +2234,53 @@ pub struct _arrstendR2Df_t {
 pub type arrstendR2Df = _arrstendR2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStR2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendR2Df_t {
     _unused: [u8; 0],
 }
 pub type setstendR2Df = _setstendR2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct R2DdData {
-    pub elem: [R2Dd; 1024usize],
+pub struct TreeStR2Df {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStR2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendR2Df_t {
+    _unused: [u8; 0],
+}
+pub type treestendR2Df = _treestendR2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedR2Dd_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedR2Dd = _arrstnonusedR2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedR2Dd_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedR2Dd = _setstnonusedR2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedR2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedR2Dd = _treestnonusedR2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStR2Dd {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut R2DdData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStR2Dd {
-    pub rb: u32,
-    pub left: *mut NodeStR2Dd,
-    pub right: *mut NodeStR2Dd,
-    pub data: R2Dd,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStR2Dd {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStR2Dd,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1869,39 +2290,53 @@ pub struct _arrstendR2Dd_t {
 pub type arrstendR2Dd = _arrstendR2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStR2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendR2Dd_t {
     _unused: [u8; 0],
 }
 pub type setstendR2Dd = _setstendR2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct T2DfData {
-    pub elem: [T2Df; 1024usize],
+pub struct TreeStR2Dd {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStR2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendR2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treestendR2Dd = _treestendR2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedT2Df_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedT2Df = _arrstnonusedT2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedT2Df_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedT2Df = _setstnonusedT2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedT2Df_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedT2Df = _treestnonusedT2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStT2Df {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut T2DfData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStT2Df {
-    pub rb: u32,
-    pub left: *mut NodeStT2Df,
-    pub right: *mut NodeStT2Df,
-    pub data: T2Df,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStT2Df {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStT2Df,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1911,39 +2346,53 @@ pub struct _arrstendT2Df_t {
 pub type arrstendT2Df = _arrstendT2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStT2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendT2Df_t {
     _unused: [u8; 0],
 }
 pub type setstendT2Df = _setstendT2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct T2DdData {
-    pub elem: [T2Dd; 1024usize],
+pub struct TreeStT2Df {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStT2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendT2Df_t {
+    _unused: [u8; 0],
+}
+pub type treestendT2Df = _treestendT2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedT2Dd_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedT2Dd = _arrstnonusedT2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedT2Dd_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedT2Dd = _setstnonusedT2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedT2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedT2Dd = _treestnonusedT2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStT2Dd {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut T2DdData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStT2Dd {
-    pub rb: u32,
-    pub left: *mut NodeStT2Dd,
-    pub right: *mut NodeStT2Dd,
-    pub data: T2Dd,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStT2Dd {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStT2Dd,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1953,39 +2402,53 @@ pub struct _arrstendT2Dd_t {
 pub type arrstendT2Dd = _arrstendT2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStT2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendT2Dd_t {
     _unused: [u8; 0],
 }
 pub type setstendT2Dd = _setstendT2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct Seg2DfData {
-    pub elem: [Seg2Df; 1024usize],
+pub struct TreeStT2Dd {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStT2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendT2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treestendT2Dd = _treestendT2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedSeg2Df_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedSeg2Df = _arrstnonusedSeg2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedSeg2Df_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedSeg2Df = _setstnonusedSeg2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedSeg2Df_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedSeg2Df = _treestnonusedSeg2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStSeg2Df {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut Seg2DfData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStSeg2Df {
-    pub rb: u32,
-    pub left: *mut NodeStSeg2Df,
-    pub right: *mut NodeStSeg2Df,
-    pub data: Seg2Df,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStSeg2Df {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStSeg2Df,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1995,39 +2458,53 @@ pub struct _arrstendSeg2Df_t {
 pub type arrstendSeg2Df = _arrstendSeg2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStSeg2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendSeg2Df_t {
     _unused: [u8; 0],
 }
 pub type setstendSeg2Df = _setstendSeg2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct Seg2DdData {
-    pub elem: [Seg2Dd; 1024usize],
+pub struct TreeStSeg2Df {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStSeg2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendSeg2Df_t {
+    _unused: [u8; 0],
+}
+pub type treestendSeg2Df = _treestendSeg2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedSeg2Dd_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedSeg2Dd = _arrstnonusedSeg2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedSeg2Dd_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedSeg2Dd = _setstnonusedSeg2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedSeg2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedSeg2Dd = _treestnonusedSeg2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStSeg2Dd {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut Seg2DdData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStSeg2Dd {
-    pub rb: u32,
-    pub left: *mut NodeStSeg2Dd,
-    pub right: *mut NodeStSeg2Dd,
-    pub data: Seg2Dd,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStSeg2Dd {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStSeg2Dd,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2037,39 +2514,53 @@ pub struct _arrstendSeg2Dd_t {
 pub type arrstendSeg2Dd = _arrstendSeg2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStSeg2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendSeg2Dd_t {
     _unused: [u8; 0],
 }
 pub type setstendSeg2Dd = _setstendSeg2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct Cir2DfData {
-    pub elem: [Cir2Df; 1024usize],
+pub struct TreeStSeg2Dd {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStSeg2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendSeg2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treestendSeg2Dd = _treestendSeg2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedCir2Df_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedCir2Df = _arrstnonusedCir2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedCir2Df_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedCir2Df = _setstnonusedCir2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedCir2Df_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedCir2Df = _treestnonusedCir2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStCir2Df {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut Cir2DfData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStCir2Df {
-    pub rb: u32,
-    pub left: *mut NodeStCir2Df,
-    pub right: *mut NodeStCir2Df,
-    pub data: Cir2Df,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStCir2Df {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStCir2Df,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2079,39 +2570,53 @@ pub struct _arrstendCir2Df_t {
 pub type arrstendCir2Df = _arrstendCir2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStCir2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendCir2Df_t {
     _unused: [u8; 0],
 }
 pub type setstendCir2Df = _setstendCir2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct Cir2DdData {
-    pub elem: [Cir2Dd; 1024usize],
+pub struct TreeStCir2Df {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStCir2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendCir2Df_t {
+    _unused: [u8; 0],
+}
+pub type treestendCir2Df = _treestendCir2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedCir2Dd_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedCir2Dd = _arrstnonusedCir2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedCir2Dd_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedCir2Dd = _setstnonusedCir2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedCir2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedCir2Dd = _treestnonusedCir2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStCir2Dd {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut Cir2DdData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStCir2Dd {
-    pub rb: u32,
-    pub left: *mut NodeStCir2Dd,
-    pub right: *mut NodeStCir2Dd,
-    pub data: Cir2Dd,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStCir2Dd {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStCir2Dd,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2121,39 +2626,53 @@ pub struct _arrstendCir2Dd_t {
 pub type arrstendCir2Dd = _arrstendCir2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStCir2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendCir2Dd_t {
     _unused: [u8; 0],
 }
 pub type setstendCir2Dd = _setstendCir2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct Box2DfData {
-    pub elem: [Box2Df; 1024usize],
+pub struct TreeStCir2Dd {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStCir2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendCir2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treestendCir2Dd = _treestendCir2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedBox2Df_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedBox2Df = _arrstnonusedBox2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedBox2Df_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedBox2Df = _setstnonusedBox2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedBox2Df_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedBox2Df = _treestnonusedBox2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStBox2Df {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut Box2DfData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStBox2Df {
-    pub rb: u32,
-    pub left: *mut NodeStBox2Df,
-    pub right: *mut NodeStBox2Df,
-    pub data: Box2Df,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStBox2Df {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStBox2Df,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2163,39 +2682,53 @@ pub struct _arrstendBox2Df_t {
 pub type arrstendBox2Df = _arrstendBox2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStBox2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendBox2Df_t {
     _unused: [u8; 0],
 }
 pub type setstendBox2Df = _setstendBox2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct Box2DdData {
-    pub elem: [Box2Dd; 1024usize],
+pub struct TreeStBox2Df {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStBox2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendBox2Df_t {
+    _unused: [u8; 0],
+}
+pub type treestendBox2Df = _treestendBox2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedBox2Dd_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedBox2Dd = _arrstnonusedBox2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedBox2Dd_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedBox2Dd = _setstnonusedBox2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedBox2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedBox2Dd = _treestnonusedBox2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStBox2Dd {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut Box2DdData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStBox2Dd {
-    pub rb: u32,
-    pub left: *mut NodeStBox2Dd,
-    pub right: *mut NodeStBox2Dd,
-    pub data: Box2Dd,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStBox2Dd {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStBox2Dd,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2205,39 +2738,53 @@ pub struct _arrstendBox2Dd_t {
 pub type arrstendBox2Dd = _arrstendBox2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStBox2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendBox2Dd_t {
     _unused: [u8; 0],
 }
 pub type setstendBox2Dd = _setstendBox2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct Tri2DfData {
-    pub elem: [Tri2Df; 1024usize],
+pub struct TreeStBox2Dd {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStBox2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendBox2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treestendBox2Dd = _treestendBox2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedTri2Df_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedTri2Df = _arrstnonusedTri2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedTri2Df_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedTri2Df = _setstnonusedTri2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedTri2Df_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedTri2Df = _treestnonusedTri2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStTri2Df {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut Tri2DfData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStTri2Df {
-    pub rb: u32,
-    pub left: *mut NodeStTri2Df,
-    pub right: *mut NodeStTri2Df,
-    pub data: Tri2Df,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStTri2Df {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStTri2Df,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2247,39 +2794,53 @@ pub struct _arrstendTri2Df_t {
 pub type arrstendTri2Df = _arrstendTri2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStTri2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendTri2Df_t {
     _unused: [u8; 0],
 }
 pub type setstendTri2Df = _setstendTri2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct Tri2DdData {
-    pub elem: [Tri2Dd; 1024usize],
+pub struct TreeStTri2Df {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStTri2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendTri2Df_t {
+    _unused: [u8; 0],
+}
+pub type treestendTri2Df = _treestendTri2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedTri2Dd_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedTri2Dd = _arrstnonusedTri2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedTri2Dd_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedTri2Dd = _setstnonusedTri2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedTri2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedTri2Dd = _treestnonusedTri2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStTri2Dd {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut Tri2DdData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStTri2Dd {
-    pub rb: u32,
-    pub left: *mut NodeStTri2Dd,
-    pub right: *mut NodeStTri2Dd,
-    pub data: Tri2Dd,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStTri2Dd {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStTri2Dd,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2289,39 +2850,53 @@ pub struct _arrstendTri2Dd_t {
 pub type arrstendTri2Dd = _arrstendTri2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStTri2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendTri2Dd_t {
     _unused: [u8; 0],
 }
 pub type setstendTri2Dd = _setstendTri2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct Pol2DfPtData {
-    pub elem: [*mut Pol2Df; 1024usize],
+pub struct TreeStTri2Dd {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStTri2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendTri2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treestendTri2Dd = _treestendTri2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrptnonusedPol2Df_t {
+    _unused: [u8; 0],
+}
+pub type arrptnonusedPol2Df = _arrptnonusedPol2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setptnonusedPol2Df_t {
+    _unused: [u8; 0],
+}
+pub type setptnonusedPol2Df = _setptnonusedPol2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treeptnonusedPol2Df_t {
+    _unused: [u8; 0],
+}
+pub type treeptnonusedPol2Df = _treeptnonusedPol2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrPtPol2Df {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut Pol2DfPtData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodePtPol2Df {
-    pub rb: u32,
-    pub left: *mut NodePtPol2Df,
-    pub right: *mut NodePtPol2Df,
-    pub data: *mut Pol2Df,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetPtPol2Df {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodePtPol2Df,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2331,39 +2906,53 @@ pub struct _arrptendPol2Df_t {
 pub type arrptendPol2Df = _arrptendPol2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetPtPol2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setptendPol2Df_t {
     _unused: [u8; 0],
 }
 pub type setptendPol2Df = _setptendPol2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct Pol2DdPtData {
-    pub elem: [*mut Pol2Dd; 1024usize],
+pub struct TreePtPol2Df {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodePtPol2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treeptendPol2Df_t {
+    _unused: [u8; 0],
+}
+pub type treeptendPol2Df = _treeptendPol2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrptnonusedPol2Dd_t {
+    _unused: [u8; 0],
+}
+pub type arrptnonusedPol2Dd = _arrptnonusedPol2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setptnonusedPol2Dd_t {
+    _unused: [u8; 0],
+}
+pub type setptnonusedPol2Dd = _setptnonusedPol2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treeptnonusedPol2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treeptnonusedPol2Dd = _treeptnonusedPol2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrPtPol2Dd {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut Pol2DdPtData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodePtPol2Dd {
-    pub rb: u32,
-    pub left: *mut NodePtPol2Dd,
-    pub right: *mut NodePtPol2Dd,
-    pub data: *mut Pol2Dd,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetPtPol2Dd {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodePtPol2Dd,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2373,39 +2962,53 @@ pub struct _arrptendPol2Dd_t {
 pub type arrptendPol2Dd = _arrptendPol2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetPtPol2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setptendPol2Dd_t {
     _unused: [u8; 0],
 }
 pub type setptendPol2Dd = _setptendPol2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct Col2DfData {
-    pub elem: [Col2Df; 1024usize],
+pub struct TreePtPol2Dd {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodePtPol2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treeptendPol2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treeptendPol2Dd = _treeptendPol2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedCol2Df_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedCol2Df = _arrstnonusedCol2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedCol2Df_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedCol2Df = _setstnonusedCol2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedCol2Df_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedCol2Df = _treestnonusedCol2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStCol2Df {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut Col2DfData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStCol2Df {
-    pub rb: u32,
-    pub left: *mut NodeStCol2Df,
-    pub right: *mut NodeStCol2Df,
-    pub data: Col2Df,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStCol2Df {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStCol2Df,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2415,39 +3018,53 @@ pub struct _arrstendCol2Df_t {
 pub type arrstendCol2Df = _arrstendCol2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStCol2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendCol2Df_t {
     _unused: [u8; 0],
 }
 pub type setstendCol2Df = _setstendCol2Df_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct Col2DdData {
-    pub elem: [Col2Dd; 1024usize],
+pub struct TreeStCol2Df {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStCol2Df {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendCol2Df_t {
+    _unused: [u8; 0],
+}
+pub type treestendCol2Df = _treestendCol2Df_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrstnonusedCol2Dd_t {
+    _unused: [u8; 0],
+}
+pub type arrstnonusedCol2Dd = _arrstnonusedCol2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedCol2Dd_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedCol2Dd = _setstnonusedCol2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedCol2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedCol2Dd = _treestnonusedCol2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStCol2Dd {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut Col2DdData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStCol2Dd {
-    pub rb: u32,
-    pub left: *mut NodeStCol2Dd,
-    pub right: *mut NodeStCol2Dd,
-    pub data: Col2Dd,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStCol2Dd {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStCol2Dd,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2457,10 +3074,31 @@ pub struct _arrstendCol2Dd_t {
 pub type arrstendCol2Dd = _arrstendCol2Dd_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStCol2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendCol2Dd_t {
     _unused: [u8; 0],
 }
 pub type setstendCol2Dd = _setstendCol2Dd_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct TreeStCol2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStCol2Dd {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendCol2Dd_t {
+    _unused: [u8; 0],
+}
+pub type treestendCol2Dd = _treestendCol2Dd_t;
 pub const _pixformat_t_ekINDEX1: _pixformat_t = 0;
 pub const _pixformat_t_ekINDEX2: _pixformat_t = 1;
 pub const _pixformat_t_ekINDEX4: _pixformat_t = 2;
@@ -2563,33 +3201,26 @@ pub struct _font_t {
 pub type Font = _font_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct color_tData {
-    pub elem: [color_t; 1024usize],
+pub struct _arrstnonusedcolor_t_t {
+    _unused: [u8; 0],
 }
+pub type arrstnonusedcolor_t = _arrstnonusedcolor_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedcolor_t_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedcolor_t = _setstnonusedcolor_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedcolor_t_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedcolor_t = _treestnonusedcolor_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStcolor_t {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut color_tData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStcolor_t {
-    pub rb: u32,
-    pub left: *mut NodeStcolor_t,
-    pub right: *mut NodeStcolor_t,
-    pub data: color_t,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStcolor_t {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStcolor_t,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2599,39 +3230,53 @@ pub struct _arrstendcolor_t_t {
 pub type arrstendcolor_t = _arrstendcolor_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStcolor_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendcolor_t_t {
     _unused: [u8; 0],
 }
 pub type setstendcolor_t = _setstendcolor_t_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct ImagePtData {
-    pub elem: [*mut Image; 1024usize],
+pub struct TreeStcolor_t {
+    _unused: [u8; 0],
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStcolor_t {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendcolor_t_t {
+    _unused: [u8; 0],
+}
+pub type treestendcolor_t = _treestendcolor_t_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _arrptnonusedImage_t {
+    _unused: [u8; 0],
+}
+pub type arrptnonusedImage = _arrptnonusedImage_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setptnonusedImage_t {
+    _unused: [u8; 0],
+}
+pub type setptnonusedImage = _setptnonusedImage_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treeptnonusedImage_t {
+    _unused: [u8; 0],
+}
+pub type treeptnonusedImage = _treeptnonusedImage_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrPtImage {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut ImagePtData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodePtImage {
-    pub rb: u32,
-    pub left: *mut NodePtImage,
-    pub right: *mut NodePtImage,
-    pub data: *mut Image,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetPtImage {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodePtImage,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -2641,14 +3286,42 @@ pub struct _arrptendImage_t {
 pub type arrptendImage = _arrptendImage_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetPtImage {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setptendImage_t {
     _unused: [u8; 0],
 }
 pub type setptendImage = _setptendImage_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct TreePtImage {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodePtImage {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treeptendImage_t {
+    _unused: [u8; 0],
+}
+pub type treeptendImage = _treeptendImage_t;
 pub const _gui_orient_t_ekGUI_HORIZONTAL: _gui_orient_t = 1;
 pub const _gui_orient_t_ekGUI_VERTICAL: _gui_orient_t = 2;
 pub type _gui_orient_t = ::libc::c_int;
 pub use self::_gui_orient_t as gui_orient_t;
+pub const _gui_pos_t_ekGUI_POS_NONE: _gui_pos_t = 1;
+pub const _gui_pos_t_ekGUI_POS_LEFT: _gui_pos_t = 2;
+pub const _gui_pos_t_ekGUI_POS_TOP: _gui_pos_t = 3;
+pub const _gui_pos_t_ekGUI_POS_RIGHT: _gui_pos_t = 4;
+pub const _gui_pos_t_ekGUI_POS_BOTTOM: _gui_pos_t = 5;
+pub type _gui_pos_t = ::libc::c_int;
+pub use self::_gui_pos_t as gui_pos_t;
 pub const _gui_state_t_ekGUI_OFF: _gui_state_t = 0;
 pub const _gui_state_t_ekGUI_ON: _gui_state_t = 1;
 pub const _gui_state_t_ekGUI_MIXED: _gui_state_t = 2;
@@ -2708,64 +3381,65 @@ pub use self::_gui_tab_t as gui_tab_t;
 pub const _gui_event_t_ekGUI_EVENT_LABEL: _gui_event_t = 1024;
 pub const _gui_event_t_ekGUI_EVENT_BUTTON: _gui_event_t = 1025;
 pub const _gui_event_t_ekGUI_EVENT_POPUP: _gui_event_t = 1026;
-pub const _gui_event_t_ekGUI_EVENT_LISTBOX: _gui_event_t = 1027;
-pub const _gui_event_t_ekGUI_EVENT_SLIDER: _gui_event_t = 1028;
-pub const _gui_event_t_ekGUI_EVENT_UPDOWN: _gui_event_t = 1029;
-pub const _gui_event_t_ekGUI_EVENT_TXTFILTER: _gui_event_t = 1030;
-pub const _gui_event_t_ekGUI_EVENT_TXTCHANGE: _gui_event_t = 1031;
-pub const _gui_event_t_ekGUI_EVENT_FOCUS_RESIGN: _gui_event_t = 1032;
-pub const _gui_event_t_ekGUI_EVENT_FOCUS_ACCEPT: _gui_event_t = 1033;
-pub const _gui_event_t_ekGUI_EVENT_FOCUS: _gui_event_t = 1034;
-pub const _gui_event_t_ekGUI_EVENT_MENU: _gui_event_t = 1035;
-pub const _gui_event_t_ekGUI_EVENT_DRAW: _gui_event_t = 1036;
-pub const _gui_event_t_ekGUI_EVENT_OVERLAY: _gui_event_t = 1037;
-pub const _gui_event_t_ekGUI_EVENT_RESIZE: _gui_event_t = 1038;
-pub const _gui_event_t_ekGUI_EVENT_ENTER: _gui_event_t = 1039;
-pub const _gui_event_t_ekGUI_EVENT_EXIT: _gui_event_t = 1040;
-pub const _gui_event_t_ekGUI_EVENT_MOVED: _gui_event_t = 1041;
-pub const _gui_event_t_ekGUI_EVENT_DOWN: _gui_event_t = 1042;
-pub const _gui_event_t_ekGUI_EVENT_UP: _gui_event_t = 1043;
-pub const _gui_event_t_ekGUI_EVENT_CLICK: _gui_event_t = 1044;
-pub const _gui_event_t_ekGUI_EVENT_DRAG: _gui_event_t = 1045;
-pub const _gui_event_t_ekGUI_EVENT_WHEEL: _gui_event_t = 1046;
-pub const _gui_event_t_ekGUI_EVENT_KEYDOWN: _gui_event_t = 1047;
-pub const _gui_event_t_ekGUI_EVENT_KEYUP: _gui_event_t = 1048;
-pub const _gui_event_t_ekGUI_EVENT_SCROLL: _gui_event_t = 1049;
-pub const _gui_event_t_ekGUI_EVENT_WND_MOVED: _gui_event_t = 1050;
-pub const _gui_event_t_ekGUI_EVENT_WND_SIZING: _gui_event_t = 1051;
-pub const _gui_event_t_ekGUI_EVENT_WND_SIZE: _gui_event_t = 1052;
-pub const _gui_event_t_ekGUI_EVENT_WND_CLOSE: _gui_event_t = 1053;
-pub const _gui_event_t_ekGUI_EVENT_COLOR: _gui_event_t = 1054;
-pub const _gui_event_t_ekGUI_EVENT_THEME: _gui_event_t = 1055;
-pub const _gui_event_t_ekGUI_EVENT_OBJCHANGE: _gui_event_t = 1056;
-pub const _gui_event_t_ekGUI_EVENT_TBL_NROWS: _gui_event_t = 1057;
-pub const _gui_event_t_ekGUI_EVENT_TBL_BEGIN: _gui_event_t = 1058;
-pub const _gui_event_t_ekGUI_EVENT_TBL_END: _gui_event_t = 1059;
-pub const _gui_event_t_ekGUI_EVENT_TBL_CELL: _gui_event_t = 1060;
-pub const _gui_event_t_ekGUI_EVENT_TBL_SEL: _gui_event_t = 1061;
-pub const _gui_event_t_ekGUI_EVENT_TBL_HEADCLICK: _gui_event_t = 1062;
-pub const _gui_event_t_ekGUI_EVENT_TBL_ROWCLICK: _gui_event_t = 1063;
-pub const _gui_event_t_ekGUI_EVENT_IDLE: _gui_event_t = 1064;
+pub const _gui_event_t_ekGUI_EVENT_TABS: _gui_event_t = 1027;
+pub const _gui_event_t_ekGUI_EVENT_LISTBOX: _gui_event_t = 1028;
+pub const _gui_event_t_ekGUI_EVENT_SLIDER: _gui_event_t = 1029;
+pub const _gui_event_t_ekGUI_EVENT_UPDOWN: _gui_event_t = 1030;
+pub const _gui_event_t_ekGUI_EVENT_TXTFILTER: _gui_event_t = 1031;
+pub const _gui_event_t_ekGUI_EVENT_TXTCHANGE: _gui_event_t = 1032;
+pub const _gui_event_t_ekGUI_EVENT_FOCUS_RESIGN: _gui_event_t = 1033;
+pub const _gui_event_t_ekGUI_EVENT_FOCUS_ACCEPT: _gui_event_t = 1034;
+pub const _gui_event_t_ekGUI_EVENT_FOCUS: _gui_event_t = 1035;
+pub const _gui_event_t_ekGUI_EVENT_MENU: _gui_event_t = 1036;
+pub const _gui_event_t_ekGUI_EVENT_DRAW: _gui_event_t = 1037;
+pub const _gui_event_t_ekGUI_EVENT_OVERLAY: _gui_event_t = 1038;
+pub const _gui_event_t_ekGUI_EVENT_RESIZE: _gui_event_t = 1039;
+pub const _gui_event_t_ekGUI_EVENT_ENTER: _gui_event_t = 1040;
+pub const _gui_event_t_ekGUI_EVENT_EXIT: _gui_event_t = 1041;
+pub const _gui_event_t_ekGUI_EVENT_MOVED: _gui_event_t = 1042;
+pub const _gui_event_t_ekGUI_EVENT_DOWN: _gui_event_t = 1043;
+pub const _gui_event_t_ekGUI_EVENT_UP: _gui_event_t = 1044;
+pub const _gui_event_t_ekGUI_EVENT_CLICK: _gui_event_t = 1045;
+pub const _gui_event_t_ekGUI_EVENT_DRAG: _gui_event_t = 1046;
+pub const _gui_event_t_ekGUI_EVENT_WHEEL: _gui_event_t = 1047;
+pub const _gui_event_t_ekGUI_EVENT_KEYDOWN: _gui_event_t = 1048;
+pub const _gui_event_t_ekGUI_EVENT_KEYUP: _gui_event_t = 1049;
+pub const _gui_event_t_ekGUI_EVENT_SCROLL: _gui_event_t = 1050;
+pub const _gui_event_t_ekGUI_EVENT_WND_MOVED: _gui_event_t = 1051;
+pub const _gui_event_t_ekGUI_EVENT_WND_SIZING: _gui_event_t = 1052;
+pub const _gui_event_t_ekGUI_EVENT_WND_SIZE: _gui_event_t = 1053;
+pub const _gui_event_t_ekGUI_EVENT_WND_CLOSE: _gui_event_t = 1054;
+pub const _gui_event_t_ekGUI_EVENT_COLOR: _gui_event_t = 1055;
+pub const _gui_event_t_ekGUI_EVENT_THEME: _gui_event_t = 1056;
+pub const _gui_event_t_ekGUI_EVENT_OBJCHANGE: _gui_event_t = 1057;
+pub const _gui_event_t_ekGUI_EVENT_TBL_NROWS: _gui_event_t = 1058;
+pub const _gui_event_t_ekGUI_EVENT_TBL_BEGIN: _gui_event_t = 1059;
+pub const _gui_event_t_ekGUI_EVENT_TBL_END: _gui_event_t = 1060;
+pub const _gui_event_t_ekGUI_EVENT_TBL_CELL: _gui_event_t = 1061;
+pub const _gui_event_t_ekGUI_EVENT_TBL_SEL: _gui_event_t = 1062;
+pub const _gui_event_t_ekGUI_EVENT_TBL_HEADCLICK: _gui_event_t = 1063;
+pub const _gui_event_t_ekGUI_EVENT_TBL_ROWCLICK: _gui_event_t = 1064;
+pub const _gui_event_t_ekGUI_EVENT_TBL_NCHILDREN: _gui_event_t = 1065;
+pub const _gui_event_t_ekGUI_EVENT_TBL_NODEINFO: _gui_event_t = 1066;
+pub const _gui_event_t_ekGUI_EVENT_TBL_EXPAND: _gui_event_t = 1067;
+pub const _gui_event_t_ekGUI_EVENT_IDLE: _gui_event_t = 1068;
 pub type _gui_event_t = ::libc::c_int;
 pub use self::_gui_event_t as gui_event_t;
 pub const _gui_type_t_ekGUI_TYPE_BUTTON: _gui_type_t = 0;
 pub const _gui_type_t_ekGUI_TYPE_POPUP: _gui_type_t = 1;
 pub const _gui_type_t_ekGUI_TYPE_EDITBOX: _gui_type_t = 2;
 pub const _gui_type_t_ekGUI_TYPE_COMBOBOX: _gui_type_t = 3;
-pub const _gui_type_t_ekGUI_TYPE_SLIDER: _gui_type_t = 4;
-pub const _gui_type_t_ekGUI_TYPE_UPDOWN: _gui_type_t = 5;
-pub const _gui_type_t_ekGUI_TYPE_PROGRESS: _gui_type_t = 6;
-pub const _gui_type_t_ekGUI_TYPE_TEXTVIEW: _gui_type_t = 7;
-pub const _gui_type_t_ekGUI_TYPE_WEBVIEW: _gui_type_t = 8;
-pub const _gui_type_t_ekGUI_TYPE_TREEVIEW: _gui_type_t = 9;
-pub const _gui_type_t_ekGUI_TYPE_BOXVIEW: _gui_type_t = 10;
-pub const _gui_type_t_ekGUI_TYPE_SPLITVIEW: _gui_type_t = 11;
-pub const _gui_type_t_ekGUI_TYPE_CUSTOMVIEW: _gui_type_t = 12;
-pub const _gui_type_t_ekGUI_TYPE_PANEL: _gui_type_t = 13;
-pub const _gui_type_t_ekGUI_TYPE_LINE: _gui_type_t = 14;
-pub const _gui_type_t_ekGUI_TYPE_HEADER: _gui_type_t = 15;
-pub const _gui_type_t_ekGUI_TYPE_WINDOW: _gui_type_t = 16;
-pub const _gui_type_t_ekGUI_TYPE_TOOLBAR: _gui_type_t = 17;
+pub const _gui_type_t_ekGUI_TYPE_TABLIST: _gui_type_t = 4;
+pub const _gui_type_t_ekGUI_TYPE_SLIDER: _gui_type_t = 5;
+pub const _gui_type_t_ekGUI_TYPE_UPDOWN: _gui_type_t = 6;
+pub const _gui_type_t_ekGUI_TYPE_PROGRESS: _gui_type_t = 7;
+pub const _gui_type_t_ekGUI_TYPE_TEXTVIEW: _gui_type_t = 8;
+pub const _gui_type_t_ekGUI_TYPE_WEBVIEW: _gui_type_t = 9;
+pub const _gui_type_t_ekGUI_TYPE_SPLITVIEW: _gui_type_t = 10;
+pub const _gui_type_t_ekGUI_TYPE_CUSTOMVIEW: _gui_type_t = 11;
+pub const _gui_type_t_ekGUI_TYPE_PANEL: _gui_type_t = 12;
+pub const _gui_type_t_ekGUI_TYPE_LINE: _gui_type_t = 13;
+pub const _gui_type_t_ekGUI_TYPE_WINDOW: _gui_type_t = 14;
 pub type _gui_type_t = ::libc::c_int;
 pub use self::_gui_type_t as gui_type_t;
 pub const _gui_size_t_ekGUI_SIZE_MINI: _gui_size_t = 1;
@@ -2841,6 +3515,14 @@ pub const _combo_flag_t_ekCOMBO_FLAG: _combo_flag_t = 0;
 pub const _combo_flag_t_ekCOMBO_AUTOSEL: _combo_flag_t = 4;
 pub type _combo_flag_t = ::libc::c_int;
 pub use self::_combo_flag_t as combo_flag_t;
+pub const _tabs_flag_t_ekTABS_FLAG: _tabs_flag_t = 0;
+pub const _tabs_flag_t_ekTABS_LEFT: _tabs_flag_t = 2;
+pub const _tabs_flag_t_ekTABS_TOP: _tabs_flag_t = 3;
+pub const _tabs_flag_t_ekTABS_RIGHT: _tabs_flag_t = 4;
+pub const _tabs_flag_t_ekTABS_BOTTOM: _tabs_flag_t = 5;
+pub const _tabs_flag_t_ekTABS_POS: _tabs_flag_t = 7;
+pub type _tabs_flag_t = ::libc::c_int;
+pub use self::_tabs_flag_t as tabs_flag_t;
 pub const _slider_flag_t_ekSLIDER_FLAG: _slider_flag_t = 0;
 pub const _slider_flag_t_ekSLIDER_HORZ: _slider_flag_t = 0;
 pub const _slider_flag_t_ekSLIDER_VERT: _slider_flag_t = 1;
@@ -2971,6 +3653,9 @@ pub type EvTbRow = _evtbrow_t;
 pub type EvTbRect = _evtbrect_t;
 pub type EvTbSel = _evtbsel_t;
 pub type EvTbCell = _evtbcell_t;
+pub type EvTbNode = _evtbnode_t;
+pub type EvTbNodeInfo = _evtbnodeinfo_t;
+pub type EvTbExpand = _evtbexpand_t;
 pub type FPtr_gctx_create = ::core::option::Option<unsafe extern "C" fn(flags: u32) -> *mut ::libc::c_void>;
 pub type FPtr_gctx_create2 =
     ::core::option::Option<unsafe extern "C" fn(arg1: *mut ::libc::c_void) -> *mut ::libc::c_void>;
@@ -3173,21 +3858,22 @@ pub type FPtr_gctx_command = ::core::option::Option<
 #[derive(Debug, Copy, Clone)]
 pub struct _guictx_t {
     pub retain_count: u32,
-    pub func_create: [FPtr_gctx_create; 16usize],
-    pub func_destroy: [FPtr_gctx_destroy; 16usize],
-    pub func_set_tooltip: [FPtr_gctx_set_text; 16usize],
-    pub func_attach_to_panel: [FPtr_gctx_set_ptr; 16usize],
-    pub func_detach_from_panel: [FPtr_gctx_set_ptr; 16usize],
-    pub func_set_visible: [FPtr_gctx_set_bool; 16usize],
-    pub func_set_enabled: [FPtr_gctx_set_bool; 16usize],
-    pub func_get_size: [FPtr_gctx_get2_real32; 16usize],
-    pub func_get_origin: [FPtr_gctx_get2_real32; 16usize],
-    pub func_set_frame: [FPtr_gctx_set4_real32; 16usize],
+    pub func_create: [FPtr_gctx_create; 14usize],
+    pub func_destroy: [FPtr_gctx_destroy; 14usize],
+    pub func_set_tooltip: [FPtr_gctx_set_text; 14usize],
+    pub func_attach_to_panel: [FPtr_gctx_set_ptr; 14usize],
+    pub func_detach_from_panel: [FPtr_gctx_set_ptr; 14usize],
+    pub func_set_visible: [FPtr_gctx_set_bool; 14usize],
+    pub func_set_enabled: [FPtr_gctx_set_bool; 14usize],
+    pub func_get_size: [FPtr_gctx_get2_real32; 14usize],
+    pub func_get_origin: [FPtr_gctx_get2_real32; 14usize],
+    pub func_set_frame: [FPtr_gctx_set4_real32; 14usize],
     pub func_button_OnClick: FPtr_gctx_set_listener,
     pub func_button_set_text: FPtr_gctx_set_text,
     pub func_button_set_font: FPtr_gctx_set_cptr,
     pub func_button_set_align: FPtr_gctx_set_enum,
     pub func_button_set_image: FPtr_gctx_set_cptr,
+    pub func_button_set_image_pos: FPtr_gctx_set_enum,
     pub func_button_set_state: FPtr_gctx_set_enum,
     pub func_button_get_state: FPtr_gctx_get_enum,
     pub func_button_set_hpadding: FPtr_gctx_set_real32,
@@ -3234,6 +3920,12 @@ pub struct _guictx_t {
     pub func_combo_get_selected: FPtr_gctx_get_uint32,
     pub func_combo_bounds: FPtr_gctx_bounds5,
     pub func_combo_clipboard: FPtr_gctx_clipboard,
+    pub func_tabs_OnSelect: FPtr_gctx_set_listener,
+    pub func_tabs_set_font: FPtr_gctx_set_cptr,
+    pub func_tabs_set_elem: FPtr_gctx_set_elem,
+    pub func_tabs_set_selected: FPtr_gctx_set_uint32,
+    pub func_tabs_get_selected: FPtr_gctx_get_uint32,
+    pub func_tabs_bounds: FPtr_gctx_bounds5,
     pub func_slider_OnMoved: FPtr_gctx_set_listener,
     pub func_slider_set_tickmarks: FPtr_gctx_tickmarks,
     pub func_slider_get_position: FPtr_gctx_get_real32,
@@ -3487,6 +4179,7 @@ pub struct _evscroll_t {
 pub struct _evtbpos_t {
     pub col: u32,
     pub row: u32,
+    pub node: *mut ::libc::c_void,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -3513,6 +4206,25 @@ pub struct _evtbcell_t {
     pub text: *const char_t,
     pub icon: *const Image,
     pub align: align_t,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _evtbnode_t {
+    pub parent: *mut ::libc::c_void,
+    pub ichild: u32,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _evtbnodeinfo_t {
+    pub node: *mut ::libc::c_void,
+    pub children: bool_t,
+    pub expanded: bool_t,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _evtbexpand_t {
+    pub node: *mut ::libc::c_void,
+    pub expanded: bool_t,
 }
 pub const _gui_notif_t_ekGUI_NOTIF_LANGUAGE: _gui_notif_t = 1;
 pub const _gui_notif_t_ekGUI_NOTIF_WIN_DESTROY: _gui_notif_t = 2;
@@ -3555,6 +4267,12 @@ pub struct _combo_t {
     _unused: [u8; 0],
 }
 pub type Combo = _combo_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _tabs_t {
+    _unused: [u8; 0],
+}
+pub type Tabs = _tabs_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _listbox_t {
@@ -3667,33 +4385,26 @@ pub struct _focus_info_t {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct FPtr_respackData {
-    pub elem: [FPtr_respack; 1024usize],
+pub struct _arrstnonusedFPtr_respack_t {
+    _unused: [u8; 0],
 }
+pub type arrstnonusedFPtr_respack = _arrstnonusedFPtr_respack_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _setstnonusedFPtr_respack_t {
+    _unused: [u8; 0],
+}
+pub type setstnonusedFPtr_respack = _setstnonusedFPtr_respack_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestnonusedFPtr_respack_t {
+    _unused: [u8; 0],
+}
+pub type treestnonusedFPtr_respack = _treestnonusedFPtr_respack_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ArrStFPtr_respack {
-    pub reserved: u32,
-    pub size: u32,
-    pub elem_sizeof: u16,
-    pub content: *mut FPtr_respackData,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct NodeStFPtr_respack {
-    pub rb: u32,
-    pub left: *mut NodeStFPtr_respack,
-    pub right: *mut NodeStFPtr_respack,
-    pub data: FPtr_respack,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SetStFPtr_respack {
-    pub elems: u32,
-    pub esize: u16,
-    pub ksize: u16,
-    pub root: *mut NodeStFPtr_respack,
-    pub func_compare: FPtr_compare,
+    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -3703,10 +4414,31 @@ pub struct _arrstendFPtr_respack_t {
 pub type arrstendFPtr_respack = _arrstendFPtr_respack_t;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SetStFPtr_respack {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct _setstendFPtr_respack_t {
     _unused: [u8; 0],
 }
 pub type setstendFPtr_respack = _setstendFPtr_respack_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct TreeStFPtr_respack {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct NodeStFPtr_respack {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _treestendFPtr_respack_t {
+    _unused: [u8; 0],
+}
+pub type treestendFPtr_respack = _treestendFPtr_respack_t;
 pub type FPtr_task_main = ::core::option::Option<unsafe extern "C" fn(data: *mut ::libc::c_void) -> u32>;
 pub type FPtr_task_update = ::core::option::Option<unsafe extern "C" fn(data: *mut ::libc::c_void)>;
 pub type FPtr_task_end = ::core::option::Option<unsafe extern "C" fn(data: *mut ::libc::c_void, rvalue: u32)>;
@@ -3777,6 +4509,9 @@ unsafe extern "C" {
     pub fn button_image_alt(button: *mut Button, image: *const Image);
 }
 unsafe extern "C" {
+    pub fn button_image_pos(button: *mut Button, pos: gui_pos_t);
+}
+unsafe extern "C" {
     pub fn button_state(button: *mut Button, state: gui_state_t);
 }
 unsafe extern "C" {
@@ -3829,6 +4564,9 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn cell_combo(cell: *mut Cell) -> *mut Combo;
+}
+unsafe extern "C" {
+    pub fn cell_tabs(cell: *mut Cell) -> *mut Tabs;
 }
 unsafe extern "C" {
     pub fn cell_listbox(cell: *mut Cell) -> *mut ListBox;
@@ -4229,6 +4967,9 @@ unsafe extern "C" {
     pub fn guicontrol_combo(control: *mut GuiControl) -> *mut Combo;
 }
 unsafe extern "C" {
+    pub fn guicontrol_tabs(control: *mut GuiControl) -> *mut Tabs;
+}
+unsafe extern "C" {
     pub fn guicontrol_listbox(control: *mut GuiControl) -> *mut ListBox;
 }
 unsafe extern "C" {
@@ -4367,6 +5108,9 @@ unsafe extern "C" {
     pub fn layout_combo(layout: *mut Layout, combo: *mut Combo, col: u32, row: u32);
 }
 unsafe extern "C" {
+    pub fn layout_tabs(layout: *mut Layout, tabs: *mut Tabs, col: u32, row: u32);
+}
+unsafe extern "C" {
     pub fn layout_listbox(layout: *mut Layout, list: *mut ListBox, col: u32, row: u32);
 }
 unsafe extern "C" {
@@ -4422,6 +5166,9 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn layout_get_combo(layout: *mut Layout, col: u32, row: u32) -> *mut Combo;
+}
+unsafe extern "C" {
+    pub fn layout_get_tabs(layout: *mut Layout, col: u32, row: u32) -> *mut Tabs;
 }
 unsafe extern "C" {
     pub fn layout_get_listbox(layout: *mut Layout, col: u32, row: u32) -> *mut ListBox;
@@ -4915,6 +5662,9 @@ unsafe extern "C" {
     pub fn tableview_add_column_text(view: *mut TableView) -> u32;
 }
 unsafe extern "C" {
+    pub fn tableview_tree(view: *mut TableView, column_id: u32);
+}
+unsafe extern "C" {
     pub fn tableview_del_column(view: *mut TableView, column_id: u32);
 }
 unsafe extern "C" {
@@ -4975,6 +5725,12 @@ unsafe extern "C" {
     pub fn tableview_update(view: *mut TableView);
 }
 unsafe extern "C" {
+    pub fn tableview_node_row(view: *const TableView, node: *mut ::libc::c_void) -> u32;
+}
+unsafe extern "C" {
+    pub fn tableview_row_node(view: *const TableView, row: u32) -> *mut ::libc::c_void;
+}
+unsafe extern "C" {
     pub fn tableview_select(view: *mut TableView, rows: *const u32, n: u32);
 }
 unsafe extern "C" {
@@ -4994,6 +5750,48 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn tableview_scroll_visible(view: *mut TableView, horizontal: bool_t, vertical: bool_t);
+}
+unsafe extern "C" {
+    pub fn tabs_create(pos: gui_pos_t) -> *mut Tabs;
+}
+unsafe extern "C" {
+    pub fn tabs_OnSelect(tabs: *mut Tabs, listener: *mut Listener);
+}
+unsafe extern "C" {
+    pub fn tabs_length(tabs: *mut Tabs, length: real32_t);
+}
+unsafe extern "C" {
+    pub fn tabs_tooltip(tabs: *mut Tabs, text: *const char_t);
+}
+unsafe extern "C" {
+    pub fn tabs_add_elem(tabs: *mut Tabs, text: *const char_t, image: *const Image);
+}
+unsafe extern "C" {
+    pub fn tabs_set_elem(tabs: *mut Tabs, index: u32, text: *const char_t, image: *const Image);
+}
+unsafe extern "C" {
+    pub fn tabs_ins_elem(tabs: *mut Tabs, index: u32, text: *const char_t, image: *const Image);
+}
+unsafe extern "C" {
+    pub fn tabs_del_elem(tabs: *mut Tabs, index: u32);
+}
+unsafe extern "C" {
+    pub fn tabs_clear(tabs: *mut Tabs);
+}
+unsafe extern "C" {
+    pub fn tabs_count(tabs: *const Tabs) -> u32;
+}
+unsafe extern "C" {
+    pub fn tabs_selected(tabs: *mut Tabs, index: u32);
+}
+unsafe extern "C" {
+    pub fn tabs_get_selected(tabs: *const Tabs) -> u32;
+}
+unsafe extern "C" {
+    pub fn tabs_get_text(tabs: *const Tabs, index: u32) -> *const char_t;
+}
+unsafe extern "C" {
+    pub fn tabs_get_image(tabs: *const Tabs, index: u32) -> *const Image;
 }
 unsafe extern "C" {
     pub fn textview_create() -> *mut TextView;
@@ -7264,6 +8062,9 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn stm_read_line(stm: *mut Stream) -> *const char_t;
+}
+unsafe extern "C" {
+    pub fn stm_read_to_char(stm: *mut Stream, endchar: u32) -> *const char_t;
 }
 unsafe extern "C" {
     pub fn stm_read_trim(stm: *mut Stream) -> *const char_t;

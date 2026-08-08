@@ -8,7 +8,7 @@ use nappgui_sys::{
 use crate::{
     core::{event::NappGUIEventResult, NappGUIEventParams},
     draw_2d::{DCtx, Image},
-    types::{Align, GuiClose, GuiMouse, GuiOrient, GuiScroll, GuiState, KeyCode},
+    types::{Align, GuiMouse, GuiOrient, GuiScroll, GuiState, KeyCode},
 };
 
 /// Parameters of the OnClick event of a button or OnSelect of a popup.
@@ -236,7 +236,7 @@ impl NappGUIEventParams for SizeEvent {
 /// Window closing Event Parameters.
 pub struct WindowCloseEvent {
     /// Origin of the close.
-    pub origin: GuiClose,
+    pub origin: i32,
 }
 
 impl NappGUIEventParams for WindowCloseEvent {
@@ -244,9 +244,7 @@ impl NappGUIEventParams for WindowCloseEvent {
     const TYPE: &'static CStr = c"EvWinClose";
 
     fn from(event: &Self::CType) -> WindowCloseEvent {
-        WindowCloseEvent {
-            origin: GuiClose::try_from(event.origin as u32).unwrap(),
-        }
+        WindowCloseEvent { origin: event.origin }
     }
 }
 
@@ -374,9 +372,17 @@ impl NappGUIEventParams for TableSelectEvent {
 
     fn from(event: &Self::CType) -> TableSelectEvent {
         fn array_usize(array: *mut nappgui_sys::ArrStuint32_t) -> Option<Vec<u32>> {
-            let array = unsafe { array.as_ref() }?;
-            let content = unsafe { array.content.as_ref() }?;
-            Some(content.elem[..array.size as usize].to_vec())
+            if array.is_null() {
+                return None;
+            }
+            let array = array as *mut nappgui_sys::Array;
+            let size = unsafe { nappgui_sys::array_size(array) };
+            let mut rows = Vec::new();
+            for i in 0..size {
+                let row = unsafe { nappgui_sys::array_get(array, i) } as *mut u32;
+                rows.push(unsafe { *row });
+            }
+            Some(rows)
         }
         TableSelectEvent {
             select: array_usize(event.sel).unwrap(),

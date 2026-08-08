@@ -6,7 +6,7 @@ use std::{
 use crate::{
     draw_2d::{Color, Font},
     gui::{define_object, event::MouseEvent, listener, Callback},
-    types::{Align, Ellipsis, IntoFontStyle},
+    types::{Align, Ellipsis, FontStyle},
 };
 
 use nappgui_sys::{
@@ -73,9 +73,9 @@ impl Label {
     }
 
     /// Set the font modifiers, when the mouse is over the control.
-    pub fn set_style_over<T>(&self, style: T) where T: IntoFontStyle {
+    pub fn set_style_over(&self, style: FontStyle) {
         unsafe {
-            label_style_over(self.as_ptr(), style.into_font_style());
+            label_style_over(self.as_ptr(), style.bits());
         }
     }
 

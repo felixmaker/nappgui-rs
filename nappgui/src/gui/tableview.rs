@@ -253,17 +253,16 @@ impl TableView {
             return None;
         }
 
-        let result = unsafe { *result };
+        let array = result as *mut nappgui_sys::Array;
+        let size = unsafe { nappgui_sys::array_size(array) };
+        let mut rows = Vec::new();
 
-        if result.size == 0 || result.content.is_null() {
-            return None;
+        for i in 0..size {
+            let row = unsafe { nappgui_sys::array_get(array, i) } as *mut u32;
+            rows.push(unsafe { *row });
         }
 
-        let content = unsafe { *result.content };
-
-        let elem = &content.elem;
-
-        Some(elem[..result.size as usize].to_vec())
+        Some(rows)
     }
 
     /// Set keyboard focus to a specific row.

@@ -7,7 +7,7 @@ use nappgui_sys::{
     font_with_style, font_with_width, font_with_xscale, font_xscale,
 };
 
-use crate::types::IntoFontStyle;
+use crate::types::FontStyle;
 
 /// Represents a typographic family, size and style with which the texts will be drawn.
 #[repr(transparent)]
@@ -31,39 +31,31 @@ impl Font {
     }
 
     /// Create a font.
-    pub fn new<T>(family: &str, size: f32, style: T) -> Self
-    where
-        T: IntoFontStyle,
+    pub fn new(family: &str, size: f32, style: FontStyle) -> Self
     {
         let family = CString::new(family).unwrap();
-        let font = unsafe { font_create(family.as_ptr(), size, style.into_font_style() as _) };
+        let font = unsafe { font_create(family.as_ptr(), size, style.bits()) };
         unsafe { Font::from_raw(font) }
     }
 
     /// Create a font, with the system's default family.
-    pub fn system<T>(size: f32, style: T) -> Self
-    where
-        T: IntoFontStyle,
+    pub fn system(size: f32, style: FontStyle) -> Self
     {
-        let font = unsafe { font_system(size, style.into_font_style() as _) };
+        let font = unsafe { font_system(size, style.bits() as _) };
         unsafe { Font::from_raw(font) }
     }
 
     /// Create a font, with the system's default monospace family.
-    pub fn monospace<T>(size: f32, style: T) -> Self
-    where
-        T: IntoFontStyle,
+    pub fn monospace(size: f32, style: FontStyle) -> Self
     {
-        let font = unsafe { font_monospace(size, style.into_font_style() as _) };
+        let font = unsafe { font_monospace(size, style.bits() as _) };
         unsafe { Font::from_raw(font) }
     }
 
     /// Create a copy of an existing font, changing the style.
-    pub fn with_style<T>(&self, style: T) -> Self
-    where
-        T: IntoFontStyle,
+    pub fn with_style(&self, style: FontStyle) -> Self
     {
-        let font = unsafe { font_with_style(self.as_ptr(), style.into_font_style() as _) };
+        let font = unsafe { font_with_style(self.as_ptr(), style.bits() as _) };
         unsafe { Font::from_raw(font) }
     }
 
@@ -170,56 +162,39 @@ impl Font {
         unsafe { font_exists_family(family.as_ptr()) != 0 }
     }
 
-    /// Gets a list of the names of all font families installed on the operating system
-    pub fn installed_families() -> Vec<String> {
-        let mut families = Vec::new();
+    /// Converts an array of pointers to strings to a vector of strings.
+    ///
+    /// # Remarks
+    ///
+    /// The function will free the memory of the strings in the array.
+    fn array_pointer_string_to_vec_string(ptr: *mut *mut nappgui_sys::ArrPtString) -> Vec<String> {
+        let ptr = ptr as *mut *mut nappgui_sys::Array; // Array of pointers to strings
+        let mut vec = Vec::new();
         unsafe {
-            let ptr = font_installed_families();
-            if ptr.is_null() {
-                return families;
-            }
-            let families_arr = *ptr;
-            let content = families_arr.content;
-            let elem = (*content).elem;
-            for i in 0..families_arr.size {
-                let family = *elem[i as usize];
-                let family = &family.data[0..family.size as usize];
-                let family = CStr::from_ptr(family.as_ptr());
-                families.push(family.to_string_lossy().to_string());
+            let size = nappgui_sys::array_size(*ptr);
+            for i in 0..size {
+                let str = nappgui_sys::array_get(*ptr, i as _) as *mut *mut nappgui_sys::String; // Pointer to item which is a pointer to string
+                let str = CStr::from_ptr(nappgui_sys::tc(*str));
+                vec.push(str.to_string_lossy().to_string());
             }
             unsafe extern "C" fn shim(ptr: *mut *mut std::ffi::c_void) {
-                nappgui_sys::str_destroy(std::mem::transmute(ptr));
+                nappgui_sys::str_destroy(ptr as *mut *mut nappgui_sys::String);
             }
-            nappgui_sys::array_destroy_ptr(std::mem::transmute(&ptr), Some(shim), c"String".as_ptr());
+            nappgui_sys::array_destroy_ptr(ptr, Some(shim), c"String".as_ptr());
         }
+        vec
+    }
 
-        families
+    /// Gets a list of the names of all font families installed on the operating system
+    pub fn installed_families() -> Vec<String> {
+        let mut ptr = unsafe { font_installed_families() };
+        Self::array_pointer_string_to_vec_string(&mut ptr)
     }
 
     /// Gets a list of the names of all monospaced families installed on the operating system.
     pub fn installed_monospace() -> Vec<String> {
-        let mut families = Vec::new();
-        unsafe {
-            let ptr = font_installed_monospace();
-            if ptr.is_null() {
-                return families;
-            }
-            let families_arr = *ptr;
-            let content = families_arr.content;
-            let elem = (*content).elem;
-            for i in 0..families_arr.size {
-                let family = *elem[i as usize];
-                let family = &family.data[0..family.size as usize];
-                let family = CStr::from_ptr(family.as_ptr());
-                families.push(family.to_string_lossy().to_string());
-            }
-            unsafe extern "C" fn shim(ptr: *mut *mut std::ffi::c_void) {
-                nappgui_sys::str_destroy(std::mem::transmute(ptr));
-            }
-            nappgui_sys::array_destroy_ptr(std::mem::transmute(&ptr), Some(shim), c"String".as_ptr());
-        }
-
-        families
+        let mut ptr = unsafe { font_installed_monospace() };
+        Self::array_pointer_string_to_vec_string(&mut ptr)
     }
 }
 

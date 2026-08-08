@@ -14,14 +14,14 @@ use std::rc::Rc;
 
 use crate::draw_2d::{Color, Image};
 use crate::gui::event::{PositionEvent, SizeEvent, WindowCloseEvent};
-use crate::gui::{AsObject, Button, Callback, Control, Menu, Panel, define_object, listener};
+use crate::gui::{define_object, listener, AsObject, Button, Callback, Control, Menu, Panel};
 use crate::types::{
-    Align, FocusInfo, GuiClose, GuiCursor, GuiFocus, GuiTab, IntoWindowFlag, KeyCode, ModifierKey, Point2D, Rect2D, Size2D, WindowFlag
+    Align, FocusInfo, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D, Size2D, WindowFlags,
 };
 
 struct HotkeyContext {
-    key: KeyCode,
-    modifiers: ModifierKey,
+    key: i32,
+    modifiers: u32,
     window: Window,
 }
 
@@ -33,7 +33,7 @@ pub(crate) struct WindowProps {
     on_close: Callback<WindowCloseEvent, bool>,
     on_moved: Callback<PositionEvent>,
     on_resize: Callback<SizeEvent>,
-    on_hotkey: RefCell<HashMap<(KeyCode, ModifierKey), Rc<dyn Fn() + 'static>>>,
+    on_hotkey: RefCell<HashMap<(i32, u32), Rc<dyn Fn() + 'static>>>,
     on_hotkey_context: RefCell<Vec<*mut HotkeyContext>>,
 }
 
@@ -62,15 +62,13 @@ impl Window {
 impl Window {
     /// Create a new window.
     pub fn new() -> Self {
-        Self::new_with_flag([WindowFlag::Title, WindowFlag::Close])
+        Self::new_with_flags(WindowFlags::Title | WindowFlags::Close)
     }
 
     /// Create a new window with a specific flag.
-    pub fn new_with_flag<T>(flag: T) -> Self
-    where
-        T: IntoWindowFlag,
+    pub fn new_with_flags(flags: WindowFlags) -> Self
     {
-        unsafe { Self::from_raw(window_create(flag.into_window_flag())) }
+        unsafe { Self::from_raw(window_create(flags.bits() as u32)) }
     }
 
     /// Set an event handler for the window closing.
@@ -111,7 +109,10 @@ impl Window {
     ///
     /// # Panics
     /// This method will panic if the panel has no layout in it.
-    pub fn set_panel<T>(&self, panel: T) where T: AsObject<Panel> {
+    pub fn set_panel<T>(&self, panel: T)
+    where
+        T: AsObject<Panel>,
+    {
         let panel = panel.as_object();
         assert!(panel.layout(0).is_some(), "Panel has no layout in it.");
 
@@ -154,13 +155,15 @@ impl Window {
     }
 
     /// Launch a window in modal mode.
-    pub fn modal(&self, parent: Self) -> GuiClose {
-        let value = unsafe { window_modal(self.as_ptr(), parent.as_ptr()) };
-        GuiClose::from(value)
+    pub fn modal(&self, parent: Self) -> u32 {
+        unsafe { window_modal(self.as_ptr(), parent.as_ptr()) }
     }
 
     /// Ends the modal cycle of a window.
-    pub fn stop_modal(&self, return_value: GuiClose) {
+    pub fn stop_modal<T>(&self, return_value: T)
+    where
+        T: Into<u32>,
+    {
         unsafe {
             window_stop_modal(self.as_ptr(), return_value.into());
         }
@@ -171,6 +174,8 @@ impl Window {
     where
         F: Fn() + 'static,
     {
+        let key = key.into();
+        let modifiers = modifiers.bits();
         let id = (key, modifiers);
         self.inner(|inner| inner.props.on_hotkey.borrow_mut().insert(id, Rc::new(handler)));
 
@@ -365,7 +370,10 @@ impl Window {
     ///
     /// This function disables the possible previous default button. For the new button to be set,
     /// it must exist in the active layout.
-    pub fn set_default_button<T>(&self, button: T) where T: AsObject<Button> {
+    pub fn set_default_button<T>(&self, button: T)
+    where
+        T: AsObject<Button>,
+    {
         let button = button.as_object();
         self.inner(|inner| *inner.props.default_button.borrow_mut() = Some(button));
         unsafe { window_defbutton(self.as_ptr(), button.as_ptr()) }

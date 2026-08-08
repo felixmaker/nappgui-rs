@@ -12,5 +12,6 @@ exclude = ["examples"]
 
 [dependencies]
 libc = "0.2"
+bitflags = "2.13"
 nappgui-sys = { path = "../nappgui-sys", version = "=0.3" }
 nappgui-macros = { path = "../nappgui-macros", version = "=0.2" }

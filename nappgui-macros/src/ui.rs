@@ -222,12 +222,12 @@ impl Generator {
 
                     if let Some(font_family) = font_family {
                         Some(quote! {
-                            let font = Font::new(#font_family, #font_size, [#(FontStyle::#font_style),*]);
+                            let font = Font::new(#font_family, #font_size, #(FontStyle::#font_style)|*);
                             obj.#name.set_font(&font);
                         })
                     } else {
                         Some(quote! {
-                            let font = Font::system(#font_size, [#(FontStyle::#font_style),*]);
+                            let font = Font::system(#font_size, #(FontStyle::#font_style)|*);
                             obj.#name.set_font(&font);
                         })
                     }

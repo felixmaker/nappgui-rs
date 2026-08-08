@@ -65,7 +65,7 @@ impl MenuItem {
 
     /// Set a keyboard shortcut to select the menu item.
     pub fn set_key(&self, key: KeyCode, modifiers: ModifierKey) {
-        unsafe { menuitem_key(self.as_ptr(), key as _, modifiers as _) };
+        unsafe { menuitem_key(self.as_ptr(), key.into(), modifiers.bits() as u32) };
     }
 
     /// Assign a drop-down submenu when selecting the item.

@@ -1,13 +1,9 @@
 use std::rc::Rc;
 
 use crate::{
-    draw_2d::Font,
-    gui::{
-        define_object,
-        event::{TableDataParams, TableDataResult},
-        listener, Callback, VoidCallback,
-    },
-    types::{Align, EventType, TablePositionEvent},
+    draw_2d::Font, gui::{
+        Callback, VoidCallback, define_object, event::{TableDataParams, TableDataResult, TablePositionEvent}, listener,
+    }, types::{Align, EventType},
 };
 
 use nappgui_sys::{

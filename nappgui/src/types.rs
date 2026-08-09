@@ -475,7 +475,6 @@ define_enum! {
     }
 }
 
-pub use crate::gui::event::*;
 use bitflags::bitflags;
 
 bitflags! {

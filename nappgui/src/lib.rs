@@ -27,6 +27,7 @@ pub mod prelude {
     pub use crate::draw_2d::*;
     pub use crate::error::*;
     pub use crate::gui::*;
+    pub use crate::gui::event::*;
     pub use crate::types::*;
     pub use nappgui_macros::include_resource;
     pub use nappgui_macros::ui as nappgui_ui;

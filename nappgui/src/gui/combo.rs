@@ -1,27 +1,21 @@
 use std::rc::Rc;
 
 use crate::{
-    draw_2d::{Color, Image},
-    gui::{
-        define_object,
-        event::{TextEvent, TextFilterEvent},
-        listener, Callback,
-    },
-    types::{Align, FontStyle},
+    draw_2d::{Color, Image}, gui::{
+        Callback, define_object, event::{ButtonEvent, TextEvent, TextFilterEvent}, listener,
+    }, types::{Align, FontStyle},
 };
 
 use nappgui_sys::{
-    combo_OnChange, combo_OnFilter, combo_add_elem, combo_align, combo_autoselect, combo_bgcolor, combo_bgcolor_focus,
-    combo_clear, combo_color, combo_color_focus, combo_copy, combo_count, combo_create, combo_cut, combo_del_elem,
-    combo_editable, combo_get_image, combo_get_selected, combo_get_text, combo_ins_elem, combo_list_height,
-    combo_passmode, combo_paste, combo_phcolor, combo_phstyle, combo_phtext, combo_select, combo_selected,
-    combo_set_elem, combo_text, combo_tooltip, combo_width,
+    combo_OnChange, combo_OnFilter, combo_OnFocus, combo_OnSelect, combo_add_elem, combo_align, combo_autoselect, combo_bgcolor, combo_bgcolor_focus, combo_clear, combo_color, combo_color_focus, combo_copy, combo_count, combo_create, combo_cut, combo_del_elem, combo_editable, combo_get_image, combo_get_selected, combo_get_text, combo_ins_elem, combo_list_height, combo_passmode, combo_paste, combo_phcolor, combo_phstyle, combo_phtext, combo_select, combo_selected, combo_set_elem, combo_text, combo_tooltip, combo_width,
 };
 
 #[derive(Default)]
 pub(crate) struct ComboProps {
     on_filter: Callback<TextEvent, TextFilterEvent>,
     on_change: Callback<TextEvent, bool>,
+    on_focus: Callback<bool>,
+    on_select: Callback<ButtonEvent>,
 }
 
 define_object!(Combo, ComboInner, Combo, ComboProps);
@@ -51,6 +45,26 @@ impl Combo {
         self.inner(|object| *object.props.on_change.borrow_mut() = Some(Rc::new(callback)));
         let listener = listener!(self.as_ptr(), ComboInner, on_change(TextEvent) -> bool);
         unsafe { combo_OnChange(self.as_ptr(), listener) };
+    }
+
+    /// Sets a handler for keyboard focus.
+    pub fn set_on_focus_handler<F>(&self, callback: F)
+    where
+        F: Fn(&bool) + 'static,
+    {
+        self.inner(|object| *object.props.on_focus.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), ComboInner, on_focus(bool));
+        unsafe { combo_OnFocus(self.as_ptr(), listener) };
+    }
+
+    /// Set an event handler for the selection of a new item.
+    pub fn set_on_select_handler<F>(&self, callback: F)
+    where
+        F: Fn(&ButtonEvent) + 'static,
+    {
+        self.inner(|object| *object.props.on_select.borrow_mut() = Some(Rc::new(callback)));
+        let listener = listener!(self.as_ptr(), ComboInner, on_select(ButtonEvent));
+        unsafe { combo_OnSelect(self.as_ptr(), listener) };
     }
 
     /// Set the default control width.

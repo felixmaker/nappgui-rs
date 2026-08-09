@@ -12,12 +12,10 @@ use std::collections::HashMap;
 use std::ffi::{CStr, CString};
 use std::rc::Rc;
 
-use crate::draw_2d::{Color, Image};
+use crate::draw_2d::{Color, Image, Point2D, Rect2D, Size2D};
 use crate::gui::event::{PositionEvent, SizeEvent, WindowCloseEvent};
-use crate::gui::{define_object, listener, AsObject, Button, Callback, Control, Menu, Panel};
-use crate::types::{
-    Align, FocusInfo, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, Point2D, Rect2D, Size2D, WindowFlags,
-};
+use crate::gui::{define_object, listener, AsObject, Button, Callback, Control, FocusInfo, Menu, Panel};
+use crate::types::{Align, GuiCursor, GuiFocus, GuiTab, KeyCode, ModifierKey, WindowFlags};
 
 struct HotkeyContext {
     key: i32,
@@ -66,8 +64,7 @@ impl Window {
     }
 
     /// Create a new window with a specific flag.
-    pub fn new_with_flags(flags: WindowFlags) -> Self
-    {
+    pub fn new_with_flags(flags: WindowFlags) -> Self {
         unsafe { Self::from_raw(window_create(flags.bits() as u32)) }
     }
 

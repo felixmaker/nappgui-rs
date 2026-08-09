@@ -459,7 +459,7 @@ define_enum! {
         Begin = nappgui_sys::_ellipsis_t_ekELLIPBEGIN,
         Middle = nappgui_sys::_ellipsis_t_ekELLIPMIDDLE,
         End = nappgui_sys::_ellipsis_t_ekELLIPEND,
-        Mline = nappgui_sys::_ellipsis_t_ekELLIPMLINE,
+        Multiline = nappgui_sys::_ellipsis_t_ekELLIPMLINE,
     }
 
     /// The close reason.
@@ -476,7 +476,6 @@ define_enum! {
 }
 
 pub use crate::gui::event::*;
-use crate::gui::Control;
 use bitflags::bitflags;
 
 bitflags! {
@@ -539,64 +538,4 @@ bitflags! {
         /// Font sizes will refer to cell height and not character height.
         const Cell = nappgui_sys::_fstyle_t_ekFCELL as u32;
     }
-}
-
-/// Information about changing the keyboard focus.
-pub struct FocusInfo {
-    /// Action that has motivated the change of keyboard focus.
-    pub action: GuiTab,
-    pub(crate) next: *mut nappgui_sys::GuiControl,
-}
-
-impl FocusInfo {
-    /// Control that has received the focus. TODO!
-    pub fn next(&self) -> Option<Control> {
-        if self.next.is_null() {
-            None
-        } else {
-            Some(Control::from_raw(self.next))
-        }
-    }
-}
-
-/// Represents a 2d vector or point.
-#[repr(C)]
-#[derive(Clone, Copy)]
-pub struct Point2D {
-    /// Coordinate x.
-    pub x: f32,
-    /// Coordinate y.
-    pub y: f32,
-}
-
-/// 2d affine transformation.
-#[repr(C)]
-#[derive(Clone, Copy)]
-pub struct Trans2D {
-    /// Component i of the linear transformation.
-    pub i: Point2D,
-    /// Component j of the linear transformation.
-    pub j: Point2D,
-    /// Position.
-    pub position: Point2D,
-}
-
-/// Represents a 2d size.
-#[repr(C)]
-#[derive(Clone, Copy)]
-pub struct Size2D {
-    /// Width.
-    pub width: f32,
-    /// Height.
-    pub height: f32,
-}
-
-/// 2d rectangle.
-#[repr(C)]
-#[derive(Clone, Copy)]
-pub struct Rect2D {
-    /// Position.
-    pub position: Point2D,
-    /// Size.
-    pub size: Size2D,
 }

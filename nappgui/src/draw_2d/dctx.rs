@@ -1,8 +1,8 @@
 use nappgui_sys::{dctx_bitmap, dctx_image, draw_antialias, draw_clear, draw_matrixf};
 
-use crate::types::{PixFormat, Trans2D};
+use crate::types::PixFormat;
 
-use super::{Color, Image};
+use super::{Color, Image, Transformation2D};
 
 /// Drawing context.
 pub struct DCtx {
@@ -41,14 +41,14 @@ impl DCtx {
     ///
     /// # Remark
     /// The origin of coordinates is in the upper left corner. The Y axis increases down.
-    pub fn matrix(&self, t2d: &[Trans2D]) {
+    pub fn matrix(&self, t2d: &[Transformation2D]) {
         unsafe {
             draw_matrixf(self.inner, t2d.as_ptr() as _);
         }
     }
 
     /// Set the reference system in Cartesian coordinates.
-    pub fn matrix_cartesian(&self, t2d: &[Trans2D]) {
+    pub fn matrix_cartesian(&self, t2d: &[Transformation2D]) {
         unsafe {
             draw_matrixf(self.inner, t2d.as_ptr() as _);
         }

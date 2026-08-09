@@ -473,6 +473,15 @@ define_enum! {
         /// The main window has been clicked (only received by overlay windows).
         Deactivate = nappgui_sys::_gui_close_t_ekGUI_CLOSE_DEACT,
     }
+
+    /// Relative position.
+    pub enum GuiPosition {
+        None = nappgui_sys::_gui_pos_t_ekGUI_POS_NONE,
+        Left = nappgui_sys::_gui_pos_t_ekGUI_POS_LEFT,
+        Top = nappgui_sys::_gui_pos_t_ekGUI_POS_TOP,
+        Right = nappgui_sys::_gui_pos_t_ekGUI_POS_RIGHT,
+        Bottom = nappgui_sys::_gui_pos_t_ekGUI_POS_BOTTOM
+    }
 }
 
 use bitflags::bitflags;

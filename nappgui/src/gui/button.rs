@@ -6,14 +6,14 @@ use std::{
 use crate::{
     draw_2d::{Font, Image},
     gui::{define_object, event::ButtonEvent, listener, Callback},
-    types::GuiState,
+    types::{GuiPosition, GuiState},
 };
 
 use nappgui_sys::{
     button_OnClick, button_check, button_check3, button_flat, button_flatgle, button_font, button_get_font,
     button_get_height, button_get_image, button_get_image_alt, button_get_state, button_get_text, button_hpadding,
-    button_image, button_image_alt, button_push, button_radio, button_state, button_text, button_text_alt,
-    button_tooltip, button_vpadding, button_width,
+    button_image, button_image_alt, button_image_pos, button_push, button_radio, button_state, button_text,
+    button_text_alt, button_tooltip, button_vpadding, button_width,
 };
 
 #[derive(Default)]
@@ -110,6 +110,14 @@ impl Button {
     /// Only applicable on flat buttons with status button_flatgle. It will be displayed when the button is in ekGUI_ON status.
     pub fn set_image_alt(&self, image: &Image) {
         unsafe { button_image_alt(self.as_ptr(), image.as_ptr()) };
+    }
+
+    /// Sets the relative position of the image with respect to the text.
+    ///
+    /// # Remarks
+    /// Only applicable on flat buttons created with button_flat or button_flatgle.
+    pub fn set_image_position(&self, position: GuiPosition) {
+        unsafe { button_image_pos(self.as_ptr(), position.into()) };
     }
 
     /// Set the button status.

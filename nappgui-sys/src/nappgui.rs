@@ -9288,4 +9288,245 @@ unsafe extern "C" {
 unsafe extern "C" {
     pub fn unicode_toupper(codepoint: u32) -> u32;
 }
+pub const _dtype_t_ekDTYPE_BOOL: _dtype_t = 0;
+pub const _dtype_t_ekDTYPE_INT: _dtype_t = 1;
+pub const _dtype_t_ekDTYPE_REAL: _dtype_t = 2;
+pub const _dtype_t_ekDTYPE_ENUM: _dtype_t = 3;
+pub const _dtype_t_ekDTYPE_STRING: _dtype_t = 4;
+pub const _dtype_t_ekDTYPE_STRUCT: _dtype_t = 5;
+pub const _dtype_t_ekDTYPE_BINARY: _dtype_t = 6;
+pub const _dtype_t_ekDTYPE_CONTAINER: _dtype_t = 7;
+pub const _dtype_t_ekDTYPE_UNKNOWN: _dtype_t = 8;
+pub type _dtype_t = ::libc::c_int;
+pub use self::_dtype_t as dtype_t;
+pub const _bindset_t_ekBINDSET_OK: _bindset_t = 0;
+pub const _bindset_t_ekBINDSET_UNCHANGED: _bindset_t = 1;
+pub const _bindset_t_ekBINDSET_NOT_ALLOWED: _bindset_t = 2;
+pub type _bindset_t = ::libc::c_int;
+pub use self::_bindset_t as bindset_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _dbind_t {
+    _unused: [u8; 0],
+}
+pub type DBind = _dbind_t;
+pub type FPtr_str_create = ::core::option::Option<unsafe extern "C" fn(str_: *const char_t) -> *mut ::libc::c_void>;
+pub type FPtr_str_get = ::core::option::Option<unsafe extern "C" fn(arg1: *const ::libc::c_void) -> *const char_t>;
+pub type FPtr_container_create =
+    ::core::option::Option<unsafe extern "C" fn(type_: *const char_t, esize: u16) -> *mut byte_t>;
+pub type FPtr_container_get = ::core::option::Option<
+    unsafe extern "C" fn(cont: *mut byte_t, pos: u32, type_: *const char_t, esize: u16) -> *mut byte_t,
+>;
+pub type FPtr_container_insert = ::core::option::Option<
+    unsafe extern "C" fn(cont: *mut byte_t, pos: u32, n: u32, type_: *const char_t, esize: u16) -> *mut byte_t,
+>;
+pub type FPtr_container_delete =
+    ::core::option::Option<unsafe extern "C" fn(cont: *mut byte_t, pos: u32, type_: *const char_t, esize: u16)>;
+pub type FPtr_container_destroy =
+    ::core::option::Option<unsafe extern "C" fn(cont: *mut *mut byte_t, type_: *const char_t)>;
+pub type FPtr_from_data =
+    ::core::option::Option<unsafe extern "C" fn(data: *const byte_t, size: u32) -> *mut ::libc::c_void>;
+unsafe extern "C" {
+    pub fn respack_embedded(name: *const char_t) -> *mut ResPack;
+}
+unsafe extern "C" {
+    pub fn respack_packed(name: *const char_t, locale: *const char_t) -> *mut ResPack;
+}
+unsafe extern "C" {
+    pub fn respack_add_msg(pack: *mut ResPack, msg: *const char_t);
+}
+unsafe extern "C" {
+    pub fn respack_add_cdata(pack: *mut ResPack, type_: u32, data: *const byte_t, data_size: u32);
+}
+unsafe extern "C" {
+    pub fn respack_object_imp(
+        pack: *const ResPack,
+        id: ResId,
+        func_create: FPtr_from_data,
+        func_destroy: FPtr_destroy,
+    ) -> *mut ::libc::c_void;
+}
+unsafe extern "C" {
+    pub fn respack_aobj_imp(
+        packs: *const ArrPtResPack,
+        id: ResId,
+        func_create: FPtr_from_data,
+        func_destroy: FPtr_destroy,
+        is_resid: *mut bool_t,
+    ) -> *mut ::libc::c_void;
+}
+unsafe extern "C" {
+    pub fn respack_atext(packs: *const ArrPtResPack, id: ResId, is_resid: *mut bool_t) -> *const char_t;
+}
+unsafe extern "C" {
+    pub fn respack_afile(packs: *const ArrPtResPack, id: ResId, size: *mut u32, is_resid: *mut bool_t)
+        -> *const byte_t;
+}
+pub type FPtr_app_create = ::core::option::Option<unsafe extern "C" fn() -> *mut ::libc::c_void>;
+pub type FPtr_app_update =
+    ::core::option::Option<unsafe extern "C" fn(app: *mut ::libc::c_void, prtime: real64_t, ctime: real64_t)>;
+unsafe extern "C" {
+    pub fn osmain_imp(
+        argc: u32,
+        argv: *mut *mut char_t,
+        instance: *mut ::libc::c_void,
+        lframe: real64_t,
+        func_create: FPtr_app_create,
+        func_update: FPtr_app_update,
+        func_destroy: FPtr_destroy,
+        options: *const char_t,
+    );
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _url_t {
+    _unused: [u8; 0],
+}
+pub type Url = _url_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _json_t {
+    _unused: [u8; 0],
+}
+pub type Json = _json_t;
+pub type JsonOpts = _jsonopts_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _jsonopts_t {
+    pub log: *mut ArrPtString,
+}
+pub const _ierror_t_ekINONET: _ierror_t = 1;
+pub const _ierror_t_ekINOHOST: _ierror_t = 2;
+pub const _ierror_t_ekITIMEOUT: _ierror_t = 3;
+pub const _ierror_t_ekISTREAM: _ierror_t = 4;
+pub const _ierror_t_ekISERVER: _ierror_t = 5;
+pub const _ierror_t_ekINOIMPL: _ierror_t = 6;
+pub const _ierror_t_ekIUNDEF: _ierror_t = 7;
+pub const _ierror_t_ekIOK: _ierror_t = 8;
+pub type _ierror_t = ::libc::c_int;
+pub use self::_ierror_t as ierror_t;
+pub const _cookies_t_ekCOOKIES_OFF: _cookies_t = 0;
+pub const _cookies_t_ekCOOKIES_ALL: _cookies_t = 1;
+pub type _cookies_t = ::libc::c_int;
+pub use self::_cookies_t as cookies_t;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct _http_t {
+    _unused: [u8; 0],
+}
+pub type Http = _http_t;
+unsafe extern "C" {
+    pub fn http_create(host: *const char_t, port: u16) -> *mut Http;
+}
+unsafe extern "C" {
+    pub fn http_secure(host: *const char_t, port: u16) -> *mut Http;
+}
+unsafe extern "C" {
+    pub fn http_destroy(http: *mut *mut Http);
+}
+unsafe extern "C" {
+    pub fn http_clear_headers(http: *mut Http);
+}
+unsafe extern "C" {
+    pub fn http_add_header(http: *mut Http, name: *const char_t, value: *const char_t) -> bool_t;
+}
+unsafe extern "C" {
+    pub fn http_cookies_policy(http: *mut Http, cookies: cookies_t);
+}
+unsafe extern "C" {
+    pub fn http_cookies_reload(http: *mut Http);
+}
+unsafe extern "C" {
+    pub fn http_cookies_size(http: *const Http) -> u32;
+}
+unsafe extern "C" {
+    pub fn http_cookie_name(http: *const Http, index: u32) -> *const char_t;
+}
+unsafe extern "C" {
+    pub fn http_cookie_value(http: *const Http, index: u32) -> *const char_t;
+}
+unsafe extern "C" {
+    pub fn http_cookie_search(http: *const Http, name: *const char_t) -> *const char_t;
+}
+unsafe extern "C" {
+    pub fn http_cookie_delete(http: *mut Http, name: *const char_t);
+}
+unsafe extern "C" {
+    pub fn http_cookie_delete_all(http: *mut Http);
+}
+unsafe extern "C" {
+    pub fn http_get(
+        http: *mut Http,
+        path: *const char_t,
+        data: *const byte_t,
+        size: u32,
+        error: *mut ierror_t,
+    ) -> bool_t;
+}
+unsafe extern "C" {
+    pub fn http_post(
+        http: *mut Http,
+        path: *const char_t,
+        data: *const byte_t,
+        size: u32,
+        error: *mut ierror_t,
+    ) -> bool_t;
+}
+unsafe extern "C" {
+    pub fn http_put(
+        http: *mut Http,
+        path: *const char_t,
+        data: *const byte_t,
+        size: u32,
+        error: *mut ierror_t,
+    ) -> bool_t;
+}
+unsafe extern "C" {
+    pub fn http_patch(
+        http: *mut Http,
+        path: *const char_t,
+        data: *const byte_t,
+        size: u32,
+        error: *mut ierror_t,
+    ) -> bool_t;
+}
+unsafe extern "C" {
+    pub fn http_delete(
+        http: *mut Http,
+        path: *const char_t,
+        data: *const byte_t,
+        size: u32,
+        error: *mut ierror_t,
+    ) -> bool_t;
+}
+unsafe extern "C" {
+    pub fn http_response_status(http: *const Http) -> u32;
+}
+unsafe extern "C" {
+    pub fn http_response_protocol(http: *const Http) -> *const char_t;
+}
+unsafe extern "C" {
+    pub fn http_response_message(http: *const Http) -> *const char_t;
+}
+unsafe extern "C" {
+    pub fn http_response_size(http: *const Http) -> u32;
+}
+unsafe extern "C" {
+    pub fn http_response_name(http: *const Http, index: u32) -> *const char_t;
+}
+unsafe extern "C" {
+    pub fn http_response_value(http: *const Http, index: u32) -> *const char_t;
+}
+unsafe extern "C" {
+    pub fn http_response_header(http: *const Http, name: *const char_t) -> *const char_t;
+}
+unsafe extern "C" {
+    pub fn http_response_body(http: *const Http, body: *mut Stream, error: *mut ierror_t) -> bool_t;
+}
+unsafe extern "C" {
+    pub fn http_dget(url: *const char_t, result: *mut u32, error: *mut ierror_t) -> *mut Stream;
+}
+unsafe extern "C" {
+    pub fn http_exists(url: *const char_t) -> bool_t;
+}
 pub type __builtin_va_list = *mut ::libc::c_char;

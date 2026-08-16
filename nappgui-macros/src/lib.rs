@@ -1,3 +1,5 @@
+#![allow(linker_messages)]
+
 use proc_macro::TokenStream;
 
 mod dbind;

@@ -482,6 +482,14 @@ define_enum! {
         Right = nappgui_sys::_gui_pos_t_ekGUI_POS_RIGHT,
         Bottom = nappgui_sys::_gui_pos_t_ekGUI_POS_BOTTOM
     }
+
+    /// Cookie Policy.
+    pub enum CookiePolicy {
+        /// Disables cookies, that is, it does not send cookies in the request or store possible cookies in the response.
+        Off = nappgui_sys::_cookies_t_ekCOOKIES_OFF,
+        /// Enables all cookies.
+        All = nappgui_sys::_cookies_t_ekCOOKIES_ALL,
+    }
 }
 
 use bitflags::bitflags;

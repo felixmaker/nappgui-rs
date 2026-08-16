@@ -98,6 +98,7 @@ fn link(out: &std::path::PathBuf) {
     println!("cargo:rustc-link-lib=static=osbs");
     println!("cargo:rustc-link-lib=static=osgui");
     println!("cargo:rustc-link-lib=static=sewer");
+    println!("cargo:rustc-link-lib=static=encode");
 
     if cfg!(target_os = "windows") {
         println!("cargo:rustc-link-lib=ws2_32");
@@ -116,6 +117,7 @@ fn link(out: &std::path::PathBuf) {
         println!("cargo:rustc-link-lib=gdiplus");
         println!("cargo:rustc-link-lib=UxTheme");
         println!("cargo:rustc-link-lib=Shlwapi");
+        println!("cargo:rustc-link-lib=wininet");
     }
 
     if cfg!(target_os = "macos") {

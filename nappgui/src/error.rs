@@ -61,6 +61,18 @@ pub enum NappguiErrorKind {
     UndefinedEnumTransmute,
     /// Wrong type transmute
     WrongTypeTransmute,
+    /// No network connection.
+    NoNetwork,
+    /// Host not found.
+    NoHost,
+    /// Connection timed out.
+    Timeout,
+    /// Stream error.
+    StreamError,
+    /// Server error.
+    ServerError,
+    /// Not implemented.
+    NotImplemented
 }
 
 impl NappguiError {
@@ -88,6 +100,19 @@ impl NappguiError {
             nappgui_sys::_dbindst_t_ekDBIND_TYPE_EXISTS => NappguiErrorKind::DbindTypeExists,
             nappgui_sys::_dbindst_t_ekDBIND_TYPE_USED => NappguiErrorKind::DbindTypeUsed,
             nappgui_sys::_dbindst_t_ekDBIND_ALIAS_SIZE => NappguiErrorKind::DbindAliasSize,
+            _ => NappguiErrorKind::UndefinedError,
+        };
+        NappguiError::Internal(err_kind)
+    }
+
+    pub(crate) fn from_ierror_t(err: i32) -> NappguiError {
+        let err_kind = match err {
+            nappgui_sys::_ierror_t_ekINONET => NappguiErrorKind::NoNetwork,
+            nappgui_sys::_ierror_t_ekINOHOST => NappguiErrorKind::NoHost,
+            nappgui_sys::_ierror_t_ekITIMEOUT => NappguiErrorKind::Timeout,
+            nappgui_sys::_ierror_t_ekISTREAM => NappguiErrorKind::StreamError,
+            nappgui_sys::_ierror_t_ekISERVER => NappguiErrorKind::ServerError,
+            nappgui_sys::_ierror_t_ekINOIMPL => NappguiErrorKind::NotImplemented,
             _ => NappguiErrorKind::UndefinedError,
         };
         NappguiError::Internal(err_kind)

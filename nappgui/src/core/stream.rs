@@ -1,6 +1,6 @@
 use std::ffi::CString;
 
-use nappgui_sys::{stm_from_block, stm_from_file, stm_memory, stm_to_file};
+use nappgui_sys::{stm_close, stm_from_block, stm_from_file, stm_memory, stm_to_file};
 
 use crate::error::NappguiError;
 
@@ -85,6 +85,14 @@ impl Stream {
             Ok(Self::new(ptr))
         } else {
             Err(NappguiError::from_ferror_t(error))
+        }
+    }
+}
+
+impl Drop for Stream {
+    fn drop(&mut self) {
+        if !self.inner.is_null() {
+            unsafe { stm_close(&mut self.inner) };
         }
     }
 }

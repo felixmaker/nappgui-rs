@@ -20,6 +20,8 @@ pub mod osapp;
 pub mod error;
 /// Wrapper inner types
 pub mod types;
+/// Wrapper to INet library. See https://nappgui.com/en/inet/inet.html
+pub mod inet;
 
 /// Enums and types
 pub mod prelude {
